@@ -6,7 +6,7 @@ const NAV = [
     { href: '/admin/dashboard', label: 'Overview', icon: 'fa-th-large', cap: 'overview' },
     { href: '/admin/dashboard/submissions', label: 'Verification desk', icon: 'fa-check-square-o', cap: 'submissions', badge: 'submissions' },
     { href: '/admin/dashboard/commissions', label: 'Commissions', icon: 'fa-paint-brush', cap: 'commissions', badge: 'commissions' },
-    { href: '/admin/dashboard/marketplace', label: 'Marketplace', icon: 'fa-tags', cap: 'marketplace' },
+    { href: '/admin/dashboard/marketplace', label: 'Marketplace', icon: 'fa-tags', cap: 'marketplace', badge: 'marketplace' },
     { href: '/admin/dashboard/people', label: 'People & roles', icon: 'fa-users', cap: 'people' },
     { section: 'Showcase' },
     { href: '/admin/dashboard/gallery', label: 'Gallery', icon: 'fa-picture-o', cap: 'gallery' },

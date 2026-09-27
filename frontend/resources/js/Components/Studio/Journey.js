@@ -5,7 +5,7 @@ export const JOURNEY = [
     { n: '03', key: 'CHOOSE_TRACK', title: 'Choose a track', text: 'Pick a live course or a weekend workshop in the medium you love.', href: '/courses?type=all', cta: 'Browse courses' },
     { n: '04', key: 'LEARN', title: 'Learn', text: 'Follow lessons in your classroom, practise and track your progress.', href: '/dashboard', cta: 'Open my studio' },
     { n: '05', key: 'SUBMIT', title: 'Submit', text: 'Upload your assignment milestone for a personal review from your instructor.', href: '/dashboard/submissions', cta: 'Submit work' },
-    { n: '06', key: 'EXHIBIT_SELL', title: 'Exhibit & sell', text: 'Approved pieces join your portfolio, and you choose which ones to sell.', href: '/dashboard/portfolio', cta: 'My portfolio' },
+    { n: '06', key: 'EXHIBIT_SELL', title: 'Exhibit & sell', text: 'Approved pieces join your portfolio. List any of them as a 1-of-1 original in the ArtistikCity Marketplace.', href: '/dashboard/portfolio', cta: 'My portfolio' },
     { n: '07', key: 'CERTIFY', title: 'Certify & showcase', text: 'Download your ArtistikCity certificate and a printable PDF portfolio with curriculum and instructor comments.', href: '/dashboard/certificates', cta: 'Certificates & reports' },
 ];
 

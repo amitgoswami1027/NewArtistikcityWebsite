@@ -46,8 +46,8 @@ export default function SiteFooter() {
                             <li><a href={route('artistikcity.vision')}>Our vision</a></li>
                             <li><a href={route('how.it.works')}>How it works</a></li>
                             <li><a href={route('instructor')}>Our instructor</a></li>
-                            <li><a href={route('student.feedback')}>Student gallery</a></li>
-                            <li><a href="/student-shop">Student shop</a></li>
+                            <li><a href="/marketplace">Art marketplace</a></li>
+                            <li><a href="/marketplace?source=student">Student originals</a></li>
                             <li><a href={route('studio.stories')}>Studio Stories</a></li>
                             <li><a href="https://studiovaishaliarts.com/" target="_blank" rel="noopener">Studio Vaishali Arts</a></li>
                         </ul>

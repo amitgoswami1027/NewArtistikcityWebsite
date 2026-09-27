@@ -29,20 +29,21 @@
 <header class="dm-header">
     <div class="ac-wide dm-header__row">
         <a href="/" class="ac-logo" aria-label="ArtistikCity home"><img src="/assets/images/logo.png" alt="ArtistikCity" /></a>
-        <div class="dm-explore"><a href="/courses?type=all" style="display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;font-weight:700;font-size:15px;border-radius:999px;">Courses <i class="fa fa-angle-down"></i></a></div>
+        <nav class="dm-links dm-links--main" aria-label="Main">
+            <a href="/how-it-works">How it works</a>
+            <div class="dm-explore"><a href="/courses?type=all" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;font-weight:600;font-size:15px;border-radius:999px;color:#111">Courses <i class="fa fa-angle-down"></i></a></div>
+            <a href="/commission/step-1">Commission art</a>
+            <a href="/marketplace">Marketplace</a>
+            <a href="/studio-stories" class="is-accent">Studio Stories</a>
+        </nav>
         <form class="dm-search" action="/courses" method="get" role="search">
             <i class="fa fa-search"></i>
             <input type="hidden" name="type" value="all">
-            <input type="search" name="q" placeholder="Search courses: watercolour, portraits, sketching…" aria-label="Search courses">
+            <input type="search" name="q" placeholder="Search courses…" aria-label="Search courses">
         </form>
-        <nav class="dm-links" aria-label="Main">
-            <a href="/commission/step-1">Commission art</a>
-            <a href="/studio-stories" class="is-accent">Studio Stories</a>
-            <a href="/student-feedback">Gallery</a>
-            <a href="/how-it-works">How it works</a>
-            <span class="dm-sep"></span>
+        <nav class="dm-links dm-links--account" aria-label="Account">
             {{#auth.check}}
-                <a href="/user/dashboard">My courses</a>
+                <a href="/dashboard">My studio</a>
                 <a href="javascript:void(0)" class="dm-btn dm-btn--line" onclick="document.getElementById('logout-form').submit();">Log out</a>
                 <form id="logout-form" action="/logout" method="POST" style="display: none;"><input type="hidden" name="_token" value="{{csrf}}"></form>
             {{/auth.check}}
@@ -55,13 +56,13 @@
     </div>
 </header>
 <div class="ac-drawer" id="ac-drawer" style="display:none;top:68px">
+    <a href="/how-it-works">How it works</a>
     <a href="/courses?type=all">All courses</a>
     <a href="/courses?type=workshop">Workshops</a>
-    <a href="/commission/step-1">Commission a painting</a>
+    <a href="/commission/step-1">Commission art</a>
+    <a href="/marketplace">Marketplace</a>
     <a href="/studio-stories">Studio Stories</a>
-    <a href="/student-feedback">Gallery</a>
-    <a href="/how-it-works">How it works</a>
-    {{#auth.check}}<a href="/user/dashboard" class="dm-btn dm-btn--line dm-btn--block">My courses</a>{{/auth.check}}
+    {{#auth.check}}<a href="/dashboard" class="dm-btn dm-btn--line dm-btn--block">My studio</a>{{/auth.check}}
     {{#auth.guest}}<a href="/join" class="dm-btn dm-btn--brand dm-btn--block">Join for free</a><a href="/login" class="dm-btn dm-btn--line dm-btn--block" style="margin-top:10px">Log in</a>{{/auth.guest}}
 </div>
 </div>
@@ -137,7 +138,7 @@
                 <li><a href="/artistikcity-vision">Our vision</a></li>
                 <li><a href="/how-it-works">How it works</a></li>
                 <li><a href="/instructor">Our instructor</a></li>
-                <li><a href="/student-feedback">Student gallery</a></li>
+                <li><a href="/marketplace">Art marketplace</a></li>
                 <li><a href="/studio-stories">Studio Stories</a></li>
                 <li><a href="https://studiovaishaliarts.com/" target="_blank" rel="noopener">Studio Vaishali Arts</a></li>
             </ul></div>

@@ -9,6 +9,10 @@
 -- =====================================================================
 
 DROP VIEW IF EXISTS courses_workshops;
+DROP TABLE IF EXISTS marketplace_orders;
+DROP TABLE IF EXISTS cart_reservations;
+DROP TABLE IF EXISTS painting_images;
+DROP TABLE IF EXISTS paintings;
 DROP TABLE IF EXISTS course_certificates;
 DROP TABLE IF EXISTS portfolio_marketplace;
 DROP TABLE IF EXISTS student_submissions;
@@ -702,6 +706,122 @@ CREATE TABLE course_certificates (
 );
 CREATE INDEX course_certificates_user_id_index ON course_certificates (user_id);
 CREATE INDEX course_certificates_course_id_index ON course_certificates (course_id);
+
+-- ---------------------------------------------------------------------
+-- 1-of-1 Original Art Marketplace (/marketplace)
+-- Every painting is unique: stock is a single state machine
+--   DRAFT -> PENDING_REVIEW -> AVAILABLE <-> RESERVED -> SOLD   (ARCHIVED = withdrawn)
+-- final_price is pinned to base_price/discount by a CHECK constraint, so no row can
+-- carry a price that disagrees with its own pricing inputs (works on SQL Server and H2).
+-- A painting can sit in at most one cart: cart_reservations.painting_id is UNIQUE.
+-- ---------------------------------------------------------------------
+CREATE TABLE paintings (
+    id                  BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    slug                NVARCHAR(191)  NOT NULL,
+    title               NVARCHAR(255)  NOT NULL,
+    description         NVARCHAR(MAX)  NOT NULL,
+    artist_notes        NVARCHAR(MAX)  NULL,
+    medium              NVARCHAR(100)  NOT NULL,
+    surface             NVARCHAR(100)  NOT NULL,
+    subject             NVARCHAR(100)  NULL,
+    style_tags          NVARCHAR(255)  NULL,
+    height_inches       DECIMAL(6, 2)  NOT NULL CHECK (height_inches > 0),
+    width_inches        DECIMAL(6, 2)  NOT NULL CHECK (width_inches > 0),
+    depth_inches        DECIMAL(6, 2)  NOT NULL DEFAULT 0,
+    weight_kg           DECIMAL(6, 2)  NULL,
+    year_created        INT            NOT NULL,
+    is_framed           BIT            NOT NULL DEFAULT 0,
+    frame_details       NVARCHAR(255)  NULL,
+    is_signed           BIT            NOT NULL DEFAULT 1,
+    has_certificate     BIT            NOT NULL DEFAULT 1,
+    base_price          DECIMAL(12, 2) NOT NULL CHECK (base_price > 0),
+    discount_percentage DECIMAL(5, 2)  NOT NULL DEFAULT 0 CHECK (discount_percentage >= 0 AND discount_percentage <= 90),
+    final_price         DECIMAL(12, 2) NOT NULL,
+    currency            NVARCHAR(3)    NOT NULL DEFAULT 'INR',
+    stock_status        NVARCHAR(30)   NOT NULL DEFAULT 'DRAFT' CHECK (stock_status IN ('DRAFT', 'PENDING_REVIEW', 'AVAILABLE', 'RESERVED', 'SOLD', 'ARCHIVED')),
+    version             INT            NOT NULL DEFAULT 0,
+    source              NVARCHAR(20)   NOT NULL DEFAULT 'STUDIO' CHECK (source IN ('STUDIO', 'STUDENT')),
+    artist_name         NVARCHAR(255)  NOT NULL,
+    artist_admin_id     BIGINT         NULL,
+    artist_user_id      BIGINT         NULL,
+    submission_id       BIGINT         NULL,
+    is_featured         BIT            NOT NULL DEFAULT 0,
+    review_notes        NVARCHAR(MAX)  NULL,
+    reviewed_by         BIGINT         NULL,
+    reviewed_at         DATETIME2      NULL,
+    published_at        DATETIME2      NULL,
+    sold_at             DATETIME2      NULL,
+    created_at          DATETIME2      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          DATETIME2      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT paintings_slug_unique UNIQUE (slug),
+    CONSTRAINT paintings_final_price_check CHECK (final_price = ROUND(base_price * (100 - discount_percentage) / 100, 2)),
+    CONSTRAINT paintings_artist_admin_id_foreign FOREIGN KEY (artist_admin_id) REFERENCES admins (id) ON DELETE NO ACTION,
+    CONSTRAINT paintings_artist_user_id_foreign FOREIGN KEY (artist_user_id) REFERENCES users (id) ON DELETE NO ACTION,
+    CONSTRAINT paintings_submission_id_foreign FOREIGN KEY (submission_id) REFERENCES student_submissions (id) ON DELETE NO ACTION,
+    CONSTRAINT paintings_reviewed_by_foreign FOREIGN KEY (reviewed_by) REFERENCES admins (id) ON DELETE NO ACTION
+);
+CREATE INDEX IX_Paintings_Status ON paintings (stock_status);
+CREATE INDEX paintings_artist_admin_id_index ON paintings (artist_admin_id);
+CREATE INDEX paintings_artist_user_id_index ON paintings (artist_user_id);
+CREATE INDEX paintings_submission_id_index ON paintings (submission_id);
+
+CREATE TABLE painting_images (
+    id          BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    painting_id BIGINT         NOT NULL,
+    image_url   NVARCHAR(2083) NOT NULL,
+    is_primary  BIT            NOT NULL DEFAULT 0,
+    sort_order  INT            NOT NULL DEFAULT 0,
+    alt_text    NVARCHAR(255)  NULL,
+    CONSTRAINT painting_images_painting_id_foreign FOREIGN KEY (painting_id) REFERENCES paintings (id) ON DELETE CASCADE
+);
+CREATE INDEX painting_images_painting_id_index ON painting_images (painting_id);
+
+CREATE TABLE cart_reservations (
+    id                 BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    session_or_user_id NVARCHAR(255) NOT NULL,
+    painting_id        BIGINT        NOT NULL,
+    user_id            BIGINT        NULL,
+    reserved_at        DATETIME2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at         DATETIME2     NOT NULL,
+    CONSTRAINT cart_reservations_painting_unique UNIQUE (painting_id),
+    CONSTRAINT cart_reservations_painting_id_foreign FOREIGN KEY (painting_id) REFERENCES paintings (id) ON DELETE CASCADE
+);
+CREATE INDEX IX_CartReservations_Expiry ON cart_reservations (expires_at);
+CREATE INDEX cart_reservations_holder_index ON cart_reservations (session_or_user_id);
+
+CREATE TABLE marketplace_orders (
+    order_id              NVARCHAR(50)   NOT NULL PRIMARY KEY,
+    painting_id           BIGINT         NOT NULL,
+    user_id               BIGINT         NULL,
+    holder_key            NVARCHAR(255)  NOT NULL,
+    buyer_name            NVARCHAR(255)  NOT NULL,
+    buyer_email           NVARCHAR(255)  NOT NULL,
+    buyer_phone           NVARCHAR(50)   NULL,
+    address_line1         NVARCHAR(255)  NOT NULL,
+    address_line2         NVARCHAR(255)  NULL,
+    city                  NVARCHAR(100)  NOT NULL,
+    state                 NVARCHAR(100)  NULL,
+    postal_code           NVARCHAR(20)   NOT NULL,
+    country               NVARCHAR(100)  NOT NULL,
+    gateway               NVARCHAR(20)   NOT NULL CHECK (gateway IN ('RAZORPAY', 'PAYPAL', 'TEST')),
+    currency              NVARCHAR(3)    NOT NULL,
+    amount                DECIMAL(12, 2) NOT NULL,
+    price_inr             DECIMAL(12, 2) NOT NULL,
+    provider_ref          NVARCHAR(255)  NULL,
+    transaction_id        NVARCHAR(255)  NULL,
+    status                NVARCHAR(30)   NOT NULL DEFAULT 'PAYMENT_PENDING' CHECK (status IN ('PAYMENT_PENDING', 'PAID', 'PACKED', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'EXPIRED', 'REFUND_REQUIRED', 'REFUNDED')),
+    courier               NVARCHAR(100)  NULL,
+    tracking_number       NVARCHAR(100)  NULL,
+    staff_notes           NVARCHAR(MAX)  NULL,
+    paid_at               DATETIME2      NULL,
+    created_at            DATETIME2      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at            DATETIME2      NULL,
+    CONSTRAINT marketplace_orders_painting_id_foreign FOREIGN KEY (painting_id) REFERENCES paintings (id) ON DELETE NO ACTION,
+    CONSTRAINT marketplace_orders_user_id_foreign FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE NO ACTION
+);
+CREATE INDEX marketplace_orders_painting_id_index ON marketplace_orders (painting_id);
+CREATE INDEX marketplace_orders_status_index ON marketplace_orders (status);
+CREATE INDEX marketplace_orders_provider_ref_index ON marketplace_orders (provider_ref);
 
 -- Catalogue view in the "Courses_Workshops" shape, built on the existing courses table.
 CREATE VIEW courses_workshops AS

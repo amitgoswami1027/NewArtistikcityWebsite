@@ -166,8 +166,9 @@ export default function CourseHome(props) {
                                                 </div>
                                             )}
                                             {coursesData.issue_certificate == 0 && (
-                                                <div className="course_actn">
-                                                    Certificate not issued yet!
+                                                <div className="course_actn" style={{ textAlign: 'right' }}>
+                                                    <a href="/dashboard/certificates" className="btn btn-primary">Check eligibility</a>
+                                                    <p style={{ marginTop: 8, fontSize: 13, color: 'var(--ac-muted)' }}>Finish every lesson and get one assignment approved to earn it.</p>
                                                 </div>
                                             )}
                                         </div>

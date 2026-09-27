@@ -133,7 +133,7 @@ export default function Welcome() {
             {testimonials.length > 0 && (
                 <section className="dm-section">
                     <div className="ac-wide">
-                        <div className="dm-head"><div><h2>What our students say</h2></div><a href={route('student.feedback')}>See student work</a></div>
+                        <div className="dm-head"><div><h2>What our students say</h2></div><a href="/marketplace?source=student">See student originals</a></div>
                         <div className="dm-reviews" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
                             {testimonials.map((t) => (
                                 <div className="dm-review" key={t.id}>
@@ -154,7 +154,7 @@ export default function Welcome() {
             {home_artworks.length > 0 && (
                 <section className="dm-section" style={{ paddingTop: 0 }}>
                     <div className="ac-wide">
-                        <div className="dm-head"><div><h2>Made by our students</h2><p>Real artwork from real ArtistikCity classes.</p></div><a href={route('student.feedback')}>Open the gallery</a></div>
+                        <div className="dm-head"><div><h2>Made by our students</h2><p>Real artwork from real ArtistikCity classes.</p></div><a href="/marketplace">Visit the marketplace</a></div>
                         <div className="dm-gallery">
                             {home_artworks.slice(0, 8).map((a) => {
                                 const src = `/storage/uploads/home-artworks/${a.id}/${a.photo_name}`;

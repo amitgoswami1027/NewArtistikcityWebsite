@@ -59,7 +59,7 @@ export default function HowItWorks() {
                                 ['fa-video-camera', 'Guided classroom', 'Structured units and lessons with progress tracking and study material.'],
                                 ['fa-comments-o', 'Milestone reviews', 'Every submission gets personal notes from a reviewer before it is approved.'],
                                 ['fa-picture-o', 'Curated portfolio', 'Approved pieces form a portfolio you can share with anyone.'],
-                                ['fa-inr', 'Sell your work', 'Set a price and stock for approved pieces and list them in the student shop.'],
+                                ['fa-inr', 'Sell your originals', 'List approved pieces as 1-of-1 originals in the ArtistikCity Marketplace after a quick moderator review.'],
                             ].map(([icon, t, d]) => (
                                 <div key={t} className="rounded-2xl bg-white border border-gray-200 p-6">
                                     <i className={`fa ${icon} text-2xl text-brand`} aria-hidden="true"></i>
@@ -112,8 +112,8 @@ export default function HowItWorks() {
 
                 <section className="ac-wide py-16 text-center">
                     <h2 className="text-3xl font-black tracking-tight text-ink">See what students are selling</h2>
-                    <p className="mt-2 text-lg text-gray-600">Original, reviewed artwork from ArtistikCity learners.</p>
-                    <a href="/student-shop" className="mt-6 inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800">Visit the student shop</a>
+                    <p className="mt-2 text-lg text-gray-600">Reviewed, 1-of-1 originals from ArtistikCity learners, sold beside studio work in the marketplace.</p>
+                    <a href="/marketplace?source=student" className="mt-6 inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800">Browse student originals</a>
                 </section>
             </div>
         </SiteLayout>

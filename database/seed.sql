@@ -179,3 +179,73 @@ INSERT INTO student_submissions (user_id, course_id, title, description, file_ur
 (1, 1, 'Evening Lake Study', 'Quick study of reflections at sunset.', '/storage/uploads/home-artworks/3/artwork.jpg', 'Pending Review', NULL, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO portfolio_marketplace (submission_id, user_id, is_listed_for_sale, sale_price, currency, inventory_count, created_at, updated_at) VALUES
 (1, 1, 1, 2500.00, 'INR', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- ---- 1-of-1 Original Art Marketplace demo data -------------------------
+-- final_price must equal ROUND(base_price * (100 - discount_percentage) / 100, 2)
+INSERT INTO paintings (slug, title, description, artist_notes, medium, surface, subject, style_tags, height_inches, width_inches, depth_inches, weight_kg, year_created,
+    is_framed, frame_details, is_signed, has_certificate, base_price, discount_percentage, final_price, currency, stock_status, version, source, artist_name,
+    artist_admin_id, artist_user_id, submission_id, is_featured, published_at, sold_at, created_at, updated_at) VALUES
+('scarlet-macaw-study', 'Scarlet Macaw Study', 'A close, feather-by-feather study of a macaw at rest, built up in soft graphite layers from 2H to 8B.',
+ 'I sketched this bird at a friend''s aviary over three mornings. What held me was the way the light slid across each feather, so I let the background stay quiet and spent the time on texture.',
+ 'Graphite', 'Archival 300gsm acid-free paper', 'Wildlife', 'Realism, Study', 16, 12, 0.10, 0.60, 2025, 1, 'Black oak float frame with museum glass', 1, 1, 18000.00, 15.00, 15300.00, 'INR', 'AVAILABLE', 0, 'STUDIO', 'Vaishali J Goswami',
+ 2, NULL, NULL, 1, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('the-old-mill-at-dawn', 'The Old Mill at Dawn', 'A forest mill beside a rushing stream, with moss-covered rocks and early light filtering through the pines.',
+ 'This painting began as a memory of a trek in the hills. I kept the water loose and fast and slowed down on the rocks, so your eye rests there before it follows the stream out of the frame.',
+ 'Acrylic', 'Gallery-wrapped cotton canvas', 'Landscape', 'Realism, Nature', 30, 30, 1.50, 3.20, 2024, 0, NULL, 1, 1, 65000.00, 10.00, 58500.00, 'INR', 'AVAILABLE', 0, 'STUDIO', 'Vaishali J Goswami',
+ 2, NULL, NULL, 1, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('lines-of-a-lifetime', 'Lines of a Lifetime', 'A charcoal portrait of an elder, every wrinkle mapped with compressed and vine charcoal.',
+ 'Faces like this one tell a whole story without a word. I worked from dark to light, lifting highlights with a kneaded eraser to keep the skin soft next to the deep shadows.',
+ 'Charcoal', 'Heavyweight cartridge paper', 'Portrait', 'Realism, Portrait', 28, 18, 0.10, 0.90, 2024, 0, NULL, 1, 1, 42000.00, 0.00, 42000.00, 'INR', 'AVAILABLE', 0, 'STUDIO', 'Vaishali J Goswami',
+ 2, NULL, NULL, 0, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('curls-in-charcoal', 'Curls in Charcoal', 'A portrait study focused on movement in the hair and a calm, direct gaze.',
+ 'I wanted the curls to feel like they were still moving, so I drew them fast and fixed the face slowly.',
+ 'Charcoal', 'Toned drawing paper', 'Portrait', 'Expressive, Portrait', 14, 20, 0.10, 0.50, 2023, 0, NULL, 1, 1, 24000.00, 20.00, 19200.00, 'INR', 'SOLD', 2, 'STUDIO', 'Vaishali J Goswami',
+ 2, NULL, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('flameback-woodpecker', 'Flameback Woodpecker', 'A golden-backed woodpecker clinging to rough bark, painted in transparent watercolour glazes.',
+ 'The bark took longer than the bird. I used salt and dry-brush to find the texture, then kept the bird crisp so it pops off the trunk.',
+ 'Watercolour', 'Cold-press 100% cotton paper', 'Wildlife', 'Realism, Nature', 20, 17.5, 0.10, 0.70, 2025, 1, 'White wood frame with mount', 1, 1, 36000.00, 0.00, 36000.00, 'INR', 'RESERVED', 1, 'STUDIO', 'Vaishali J Goswami',
+ 2, NULL, NULL, 1, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('copper-kettle-still-life', 'Copper Kettle Still Life', 'An antique kettle on its warmer, drawn with careful attention to reflections on metal.',
+ 'Reflective objects are my favourite puzzle. Everything you see on the kettle is the room around it, bent and squeezed.',
+ 'Graphite', 'Smooth bristol board', 'Still life', 'Realism, Study', 12, 16, 0.10, 0.40, 2024, 0, NULL, 1, 1, 9500.00, 5.00, 9025.00, 'INR', 'AVAILABLE', 0, 'STUDIO', 'Vaishali J Goswami',
+ 2, NULL, NULL, 0, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('monsoon-hills', 'Monsoon Hills', 'Wet-in-wet sky with layered hills, painted on 300gsm cold-press paper.',
+ 'Painted during my first ArtistikCity watercolour course. I let the sky bleed into the hills to catch that heavy monsoon feeling.',
+ 'Watercolour', 'Cold-press 300gsm paper', 'Landscape', 'Student original', 11, 15, 0.05, 0.30, 2026, 0, NULL, 1, 1, 2500.00, 0.00, 2500.00, 'INR', 'AVAILABLE', 0, 'STUDENT', 'Aarav Sharma',
+ NULL, 1, 1, 0, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('glass-marble-light', 'Glass Marble, Morning Light', 'A single glass marble and its long shadow, drawn to study refraction.',
+ 'A small object, a big lesson in light. Submitted for review before it goes live.',
+ 'Graphite', 'Smooth bristol board', 'Still life', 'Minimal, Study', 10, 14, 0.10, 0.30, 2026, 0, NULL, 1, 1, 7000.00, 0.00, 7000.00, 'INR', 'PENDING_REVIEW', 0, 'STUDIO', 'Vaishali J Goswami',
+ 2, NULL, NULL, 0, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('rose-in-monochrome', 'Rose in Monochrome', 'A single rose rendered in graphite with deep tonal contrast.',
+ NULL, 'Graphite', 'Archival drawing paper', 'Botanical', 'Realism', 16, 12, 0.10, 0.40, 2026, 0, NULL, 1, 1, 8000.00, 0.00, 8000.00, 'INR', 'DRAFT', 0, 'STUDIO', 'Vaishali J Goswami',
+ 2, NULL, NULL, 0, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('glass-jars-still-life', 'Glass Jars on the Sill', 'Two jars and a coin on a windowsill, a study of transparency and texture.',
+ 'Drawn on a slow afternoon; the coin in the jar was a last-minute idea that ended up being the focal point.',
+ 'Graphite', 'Textured drawing paper', 'Still life', 'Realism, Study', 12, 16, 0.10, 0.40, 2025, 0, NULL, 1, 1, 12000.00, 0.00, 12000.00, 'INR', 'SOLD', 2, 'STUDIO', 'Vaishali J Goswami',
+ 2, NULL, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO painting_images (painting_id, image_url, is_primary, sort_order, alt_text) VALUES
+(1, '/assets/images/portfolio-2.jpg', 1, 0, 'Scarlet Macaw Study, graphite drawing'),
+(2, '/assets/images/course1.jpg', 1, 0, 'The Old Mill at Dawn, acrylic landscape'),
+(2, '/assets/images/register-banner.jpg', 0, 1, 'The Old Mill at Dawn, detail'),
+(3, '/assets/images/course2.jpg', 1, 0, 'Lines of a Lifetime, charcoal portrait'),
+(4, '/assets/images/course3.jpg', 1, 0, 'Curls in Charcoal, portrait'),
+(5, '/assets/images/login-banner.jpg', 1, 0, 'Flameback Woodpecker, watercolour'),
+(6, '/assets/images/portfolio-5.jpg', 1, 0, 'Copper Kettle Still Life, graphite'),
+(7, '/storage/uploads/artworks/1/artwork.jpg', 1, 0, 'Monsoon Hills, student watercolour'),
+(8, '/assets/images/portfolio-8.jpg', 1, 0, 'Glass Marble, Morning Light'),
+(9, '/assets/images/portfolio-7.jpg', 1, 0, 'Rose in Monochrome'),
+(10, '/assets/images/portfolio-3.jpg', 1, 0, 'Glass Jars on the Sill');
+
+-- a live 15-minute hold by another collector, so the "on hold" state is visible after start-up
+INSERT INTO cart_reservations (session_or_user_id, painting_id, user_id, reserved_at, expires_at) VALUES
+('S:demo-collector', 5, NULL, CURRENT_TIMESTAMP, DATEADD(MINUTE, 15, CURRENT_TIMESTAMP));
+
+INSERT INTO marketplace_orders (order_id, painting_id, user_id, holder_key, buyer_name, buyer_email, buyer_phone, address_line1, address_line2, city, state, postal_code, country,
+    gateway, currency, amount, price_inr, provider_ref, transaction_id, status, courier, tracking_number, paid_at, created_at, updated_at) VALUES
+('AC-M-DEMO01', 4, NULL, 'S:demo', 'Meera Iyer', 'meera@example.com', '9000000001', '12 Lavelle Road', NULL, 'Bengaluru', 'Karnataka', '560001', 'India',
+ 'RAZORPAY', 'INR', 19200.00, 19200.00, 'order_demo01', 'pay_demo01', 'SHIPPED', 'Blue Dart', 'BD123456789IN', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('AC-M-DEMO02', 10, NULL, 'S:demo', 'James Carter', 'james@example.com', NULL, '221 Baker Street', NULL, 'London', NULL, 'NW1 6XE', 'United Kingdom',
+ 'PAYPAL', 'USD', 142.86, 12000.00, 'PAYPAL-DEMO02', 'CAPTURE-DEMO02', 'PAID', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+

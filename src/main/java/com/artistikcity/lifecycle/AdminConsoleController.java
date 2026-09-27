@@ -74,7 +74,8 @@ public class AdminConsoleController {
                 : repo.count("select count(*) from enrollments e join courses c on c.id = e.course_id where e.status = 'Active' and c.admin_id = ?", teacher));
         kpi.put("pendingReviews", teacher == null ? repo.count("select count(*) from student_submissions where admin_status = 'Pending Review'")
                 : repo.count("select count(*) from student_submissions s join courses c on c.id = s.course_id where s.admin_status = 'Pending Review' and c.admin_id = ?", teacher));
-        kpi.put("listedArtworks", repo.count("select count(*) from portfolio_marketplace where is_listed_for_sale = ?", true));
+        kpi.put("listedArtworks", teacher == null ? repo.count("select count(*) from paintings where stock_status in ('AVAILABLE', 'RESERVED')")
+                : repo.count("select count(*) from paintings where stock_status in ('AVAILABLE', 'RESERVED') and artist_admin_id = ?", teacher));
         kpi.put("openCommissions", repo.count("select count(*) from commission_orders where order_status in ('QUEUED','PROOF_SENT','IN_PRODUCTION')"));
         kpi.put("courses", teacher == null ? repo.count("select count(*) from courses where status = 1")
                 : repo.count("select count(*) from courses where status = 1 and admin_id = ?", teacher));
@@ -122,7 +123,8 @@ public class AdminConsoleController {
         return inertia.render(request, "Admin/Commissions", p);
     }
 
-    @GetMapping("/admin/dashboard/marketplace")
+    /** @deprecated replaced by the 1-of-1 marketplace console (MarketplaceAdminController). Kept unmapped during the transition. */
+    @Deprecated
     public ResponseEntity<String> marketplace(HttpServletRequest request) {
         Row admin = auth.admin(request);
         if (!Personas.can(admin, "marketplace")) return denied(request, admin);
@@ -350,10 +352,17 @@ public class AdminConsoleController {
     private Map<String, Object> base(Row admin) {
         Map<String, Object> p = new LinkedHashMap<>();
         p.put("admin", Personas.view(admin));
-        p.put("badges", Map.of(
-                "submissions", repo.count("select count(*) from student_submissions where admin_status = 'Pending Review'"),
-                "commissions", repo.count("select count(*) from commission_orders where order_status = 'QUEUED'")));
+        p.put("badges", badges(repo));
         return p;
+    }
+
+    /** Sidebar counters shared by every console page (also used by the marketplace console). */
+    public static Map<String, Object> badges(LifecycleRepository repo) {
+        return Map.of(
+                "submissions", repo.count("select count(*) from student_submissions where admin_status = 'Pending Review'"),
+                "commissions", repo.count("select count(*) from commission_orders where order_status = 'QUEUED'"),
+                "marketplace", repo.count("select (select count(*) from paintings where stock_status = 'PENDING_REVIEW')"
+                        + " + (select count(*) from marketplace_orders where status in ('PAID', 'REFUND_REQUIRED'))"));
     }
 
     /** Instructors only see their own courses; other personas see everything (null). */
@@ -409,7 +418,7 @@ public class AdminConsoleController {
                 : repo.count("select count(distinct s.user_id) from student_submissions s join courses c on c.id = s.course_id where c.admin_id = ?", teacher));
         m.put("approved", teacher == null ? repo.count("select count(distinct user_id) from student_submissions where admin_status = 'Approved'")
                 : repo.count("select count(distinct s.user_id) from student_submissions s join courses c on c.id = s.course_id where s.admin_status = 'Approved' and c.admin_id = ?", teacher));
-        m.put("selling", repo.count("select count(distinct user_id) from portfolio_marketplace where is_listed_for_sale = ?", true));
+        m.put("selling", repo.count("select count(distinct artist_user_id) from paintings where source = 'STUDENT' and stock_status in ('AVAILABLE', 'RESERVED', 'SOLD')"));
         return m;
     }
 

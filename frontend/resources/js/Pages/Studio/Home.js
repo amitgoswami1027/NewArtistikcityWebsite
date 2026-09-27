@@ -65,18 +65,24 @@ export default function Home() {
                             const pct = Number(e.progress_percentage || 0);
                             return (
                                 <article key={e.id} className="rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg transition">
-                                    <div className="h-40 bg-gray-100 bg-cover bg-center" style={{ backgroundImage: e.photo ? `url(/storage/uploads/courses/${e.course_id}/${e.photo})` : undefined }}></div>
+                                    <div className="relative h-40 overflow-hidden" style={{ background: 'linear-gradient(135deg,#111,#3b0a24 60%,#e5156b)' }}>
+                                        {e.photo && <img src={`/storage/uploads/courses/${e.course_id}/${e.photo}`} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(ev) => { ev.currentTarget.style.display = 'none'; }} />}
+                                        <span className={`absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-bold ${pct >= 100 ? 'bg-green-600 text-white' : pct > 0 ? 'bg-white text-ink' : 'bg-brand text-white'}`}>{pct >= 100 ? 'Completed' : pct > 0 ? 'In progress' : 'Not started'}</span>
+                                    </div>
                                     <div className="p-5">
-                                        <p className="font-mono text-xs uppercase tracking-widest text-gray-500">{String(e.course_type_id) === '2' ? 'Workshop' : 'Course'} · {e.status}</p>
+                                        <p className="font-mono text-xs uppercase tracking-widest text-gray-500">{String(e.course_type_id) === '2' ? 'Workshop' : 'Course'}{Number(e.submissions) > 0 ? ` · ${e.submissions} submission${Number(e.submissions) === 1 ? '' : 's'}` : ''}</p>
                                         <h3 className="mt-1 text-lg font-extrabold text-ink">{e.title}</h3>
                                         <div className="mt-4" aria-label={`Progress ${pct}%`}>
                                             <div className="flex justify-between text-sm"><span className="text-gray-600">{e.completed_lessons}/{e.total_lessons} lessons</span><span className="font-bold text-ink">{pct}%</span></div>
                                             <div className="mt-1.5 h-2 rounded-full bg-gray-100 overflow-hidden"><div className="h-full bg-brand" style={{ width: `${pct}%` }}></div></div>
                                         </div>
-                                        <div className="mt-5 flex gap-2">
-                                            <a href={`/dashboard/classroom/${e.course_id}`} className="flex-1 inline-flex justify-center items-center h-11 rounded-full bg-ink text-white font-bold hover:bg-gray-800">{pct > 0 ? 'Continue' : 'Start learning'}</a>
-                                            <a href={`/dashboard/submissions?course=${e.course_id}`} className="inline-flex items-center h-11 px-4 rounded-full border border-gray-300 font-bold hover:border-ink" title="Submit assignment"><i className="fa fa-upload" aria-hidden="true"></i></a>
+                                        <div className="mt-5 grid grid-cols-2 gap-2">
+                                            <a href={`/dashboard/classroom/${e.course_id}`} className="inline-flex justify-center items-center h-11 rounded-full bg-ink text-white text-sm font-bold hover:bg-gray-800">{pct >= 100 ? 'Revisit lessons' : pct > 0 ? 'Continue' : 'Start learning'}</a>
+                                            {pct >= 100 && Number(certificatesReady) > 0
+                                                ? <a href="/dashboard/certificates" className="inline-flex justify-center items-center h-11 rounded-full bg-brand text-white text-sm font-bold hover:bg-brand-dark"><i className="fa fa-certificate mr-2" aria-hidden="true"></i>Certificate</a>
+                                                : <a href={`/dashboard/submissions?course=${e.course_id}`} className="inline-flex justify-center items-center h-11 rounded-full border border-gray-300 text-sm font-bold hover:border-ink"><i className="fa fa-upload mr-2" aria-hidden="true"></i>Submit work</a>}
                                         </div>
+                                        <a href="/user/my-courses" className="mt-3 block text-center text-sm font-semibold text-gray-500 hover:text-ink">Schedule, modules & tasks</a>
                                     </div>
                                 </article>
                             );

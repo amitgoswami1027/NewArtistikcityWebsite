@@ -43,7 +43,11 @@ public class ProfilesController {
         return inertia.render(request, "Student", props);
     }
 
-    @GetMapping("/student-feedback")
+    /**
+     * @deprecated Legacy placeholder page. /student-feedback now 301-redirects to the 1-of-1 marketplace
+     * (see MarketplaceController#legacyStudentFeedback). Kept, unmapped, until the marketplace is verified in production.
+     */
+    @Deprecated
     public ResponseEntity<String> studentFeedback(HttpServletRequest request) {
         return inertia.render(request, "StudentFeedback", Map.of("studentFeedback", ""));
     }

@@ -808,3 +808,140 @@
   .dm-teacher { grid-template-columns: 1fr; }
   .dm-count { margin-left: 0; width: 100%; }
 }
+
+/* ---------- 1-of-1 art marketplace ---------- */
+.mk-masonry { column-count: 1; column-gap: 24px; }
+@media (min-width: 640px) { .mk-masonry { column-count: 2; } }
+@media (min-width: 1024px) { .mk-masonry { column-count: 3; } }
+@media (min-width: 1440px) { .mk-masonry { column-count: 4; } }
+.mk-masonry > * { break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; margin-bottom: 28px; display: block; }
+.mk-card { transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s cubic-bezier(.2,.8,.2,1); }
+.mk-card:hover, .mk-card:focus-within { transform: translateY(-6px); box-shadow: 0 24px 48px rgba(17,17,17,.18); }
+.mk-card .mk-overlay { opacity: 0; transition: opacity .3s ease; }
+.mk-card:hover .mk-overlay, .mk-card:focus-within .mk-overlay { opacity: 1; }
+@media (hover: none) { .mk-card .mk-overlay { display: none; } }
+.mk-art { box-shadow: 0 2px 4px rgba(0,0,0,.08), 0 12px 28px rgba(0,0,0,.14); }
+.mk-zoom { cursor: zoom-in; touch-action: pan-y; }
+.mk-zoom.is-zoomed { cursor: zoom-out; }
+.mk-range { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 999px; outline: none; }
+.mk-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 3px solid #e5156b; box-shadow: 0 2px 8px rgba(0,0,0,.2); cursor: pointer; }
+.mk-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid #e5156b; cursor: pointer; }
+.mk-drop.is-over { border-color: #e5156b; background: #fde7f0; }
+@keyframes mk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+.mk-pulse { animation: mk-pulse 1.6s ease-in-out infinite; }
+
+/* ---------- header order: How it works · Courses · Commission art · Marketplace · Studio Stories · search · account ---------- */
+.dm-links--main { margin-left: 8px; gap: 0; }
+.dm-links--main .dm-explore > button { font-size: 15px; font-weight: 600; padding: 8px 12px; height: auto; }
+.dm-links > a[aria-current="page"] { background: var(--dm-soft); }
+.dm-links--main + .dm-search { flex: 1 1 200px; min-width: 150px; max-width: 320px; margin-left: auto; }
+.dm-links--account { margin-left: 0; }
+@media (max-width: 1200px) { .dm-links--main + .dm-search { display: none; } .dm-links--account { margin-left: auto; } }
+
+/* ---------- classic student pages (/user/*) inside the site shell ---------- */
+.ac-student { background: #fff; color: var(--ac-ink); }
+.ac-student__body { padding-top: 32px; padding-bottom: 72px; }
+.ac-student .container-fluid { padding: 0; max-width: none; }
+.ac-student .container-fluid > .row { display: flex; flex-wrap: nowrap; align-items: flex-start; gap: 32px; margin: 0; }
+.ac-student .container-fluid > .row > * { padding: 0; }
+.ac-student .rightsidebar { flex: 1 1 auto; min-width: 0; max-width: none; width: auto; margin: 0 !important; background: transparent; }
+.ac-student .p30 { padding: 0 !important; }
+.ac-student .homepage, .ac-student .todoSctn { background: transparent; }
+.ac-student .sidebar, .ac-student .ac-sidenav { position: sticky; top: 96px; flex: 0 0 250px; max-width: 250px; width: 250px; padding: 0; background: #fff; border: 1px solid var(--ac-line); border-radius: 16px; overflow: hidden; z-index: 1; }
+.ac-student .sidebar .menuBtn { display: none; }
+.ac-student .sidebar .courseTitle { background: #111; color: #fff; font-size: 17px; line-height: 1.35; padding: 18px 20px; font-weight: 800; }
+.ac-student ul.coursenav li a, .ac-student ul.coursenav li .accordion-button { background: #fff; color: var(--ac-ink); text-transform: none; font-size: 15px; font-weight: 700; padding: 12px 20px; border-bottom: 1px solid var(--ac-line); }
+.ac-student ul.coursenav li a:hover, .ac-student ul.coursenav li .accordion-button:hover { background: #f5f5f7; color: var(--ac-ink); }
+.ac-student ul.coursenav li a.active { color: var(--ac-brand); }
+.ac-student ul.coursenav li a.active:after { display: none; }
+.ac-student ul.coursenav ul li a { font-weight: 500; font-size: 14px; padding: 10px 20px 10px 28px; background: #fafafa; }
+.ac-student ul.coursenav li .accordion-button:after { filter: invert(1); }
+.ac-sidenav nav { display: flex; flex-direction: column; padding: 8px; }
+.ac-sidenav nav a, .ac-sidenav__logout { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; font-weight: 700; font-size: 15px; color: var(--ac-ink); background: none; border: 0; text-align: left; cursor: pointer; width: 100%; }
+.ac-sidenav nav a .fa, .ac-sidenav__logout .fa { width: 18px; text-align: center; color: #6b7280; }
+.ac-sidenav nav a:hover, .ac-sidenav__logout:hover { background: #f5f5f7; color: var(--ac-ink); }
+.ac-sidenav nav a.is-active { background: #111; color: #fff; }
+.ac-sidenav nav a.is-active .fa { color: #fff; }
+.ac-sidenav__logout { margin-top: 6px; border-top: 1px solid var(--ac-line) !important; border-radius: 0 0 10px 10px; color: #6b7280; }
+.ac-student .siteBreadcrumb { background: none; border: 0; padding: 0 0 12px; }
+.ac-student .breadcrumb { background: none; padding: 0; margin: 0; font-family: var(--ac-font); font-size: 13px; }
+.ac-student .breadcrumb li a { color: var(--ac-muted); }
+.ac-student .aboutCourse { background: #f7f7fb; border: 1px solid var(--ac-line); border-radius: 16px; }
+.ac-student .aboutCourse h2 { font-size: 30px; font-weight: 800; letter-spacing: -.02em; color: var(--ac-ink); }
+.ac-student .totalLesson { background: #f7f7fb; border: 1px solid var(--ac-line); border-radius: 12px; margin-bottom: 16px; }
+.ac-student .sectionTitle { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; letter-spacing: .12em; color: #6b7280; font-weight: 600; margin: 32px 0 12px; }
+.ac-student .courseInfo { border: 1px solid var(--ac-line); border-radius: 16px; padding: 22px 24px; margin-top: 14px; transition: box-shadow .2s, border-color .2s; }
+.ac-student .courseInfo:hover { border-color: #111; box-shadow: 0 10px 30px rgba(17,17,17,.08); }
+.ac-student .courseInfo .course_img img { border-radius: 10px; }
+.ac-student .course_info h3 { font-size: 19px; font-weight: 800; color: var(--ac-ink); letter-spacing: -.01em; }
+.ac-student .course_info h6 { color: var(--ac-brand); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 12px; }
+.ac-student .course_info p { color: var(--ac-muted); }
+.ac-student .categorybtn { border-radius: 999px; font-family: var(--ac-font); font-weight: 700; font-size: 12px; padding: 4px 10px; }
+.ac-student .btn-primary, .ac-student .accountActn button { background: var(--ac-brand); border: 0; border-radius: 999px; color: #fff; text-transform: none; font-weight: 700; font-size: 15px; padding: 11px 22px; box-shadow: none; }
+.ac-student .btn-primary:hover, .ac-student .accountActn button:hover { background: var(--ac-brand-dark); color: #fff; }
+.ac-student .accountActn .btn-secondary { background: #fff; color: var(--ac-ink); border: 1px solid #d1d5db; border-radius: 999px; }
+.ac-student .accountMenu { border: 1px solid var(--ac-line); border-radius: 16px; padding: 18px 12px 24px; width: 260px; }
+.ac-student .accountMenu h5 { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; letter-spacing: .12em; color: #6b7280; text-transform: uppercase; padding: 0 10px 8px; }
+.ac-student .accountMenu ul li a { border-radius: 10px; font-weight: 700; color: var(--ac-ink); padding: 10px 12px; display: block; }
+.ac-student .accountMenu ul li a:hover { background: #f5f5f7; }
+.ac-student .accountMenu ul li.active a { background: #111; color: #fff; }
+.ac-student .accountDtl, .ac-student .accountEdit { border-radius: 16px; }
+.ac-student .form-group .form-control, .ac-student .form-control { border: 1px solid #d1d5db; border-radius: 12px; }
+.ac-student .form-group .form-control:focus, .ac-student .form-control:focus { border-color: var(--ac-brand); box-shadow: 0 0 0 3px rgba(229,21,107,.12) !important; }
+.ac-student .helpBotm { background: #f7f7fb; border: 1px solid var(--ac-line); border-radius: 16px; margin-top: 40px; }
+.ac-student .helpBotm a { color: var(--ac-brand); font-weight: 700; }
+.ac-student .detailContent, .ac-student .taskLists, .ac-student .uploadedmedia { border-radius: 16px; }
+@media (max-width: 900px) {
+  .ac-student .container-fluid > .row { flex-wrap: wrap; gap: 20px; }
+  .ac-student .sidebar, .ac-student .ac-sidenav { position: static; flex: 1 1 100%; max-width: none; width: 100%; }
+  .ac-student .ac-sidenav nav { flex-direction: row; overflow-x: auto; }
+  .ac-student .ac-sidenav nav a, .ac-student .ac-sidenav__logout { width: auto; white-space: nowrap; }
+  .ac-student .accountPage { flex-wrap: wrap; gap: 20px; }
+  .ac-student .accountMenu { width: 100%; padding-bottom: 12px; }
+}
+.ac-student, .ac-student p, .ac-student li, .ac-student a, .ac-student label, .ac-student span, .ac-student button, .ac-student input, .ac-student textarea, .ac-student select, .ac-student td, .ac-student th { font-family: var(--ac-font); }
+.ac-student .fa { font-family: FontAwesome !important; }
+.ac-student .aboutCourse { padding: 24px 28px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.ac-student .aboutCourse h2 { margin: 0; }
+.ac-student .aboutCourse p { margin-top: 6px; color: var(--ac-muted); }
+.ac-student .detailContent { border: 1px solid var(--ac-line); padding: 24px 28px; margin-top: 16px; }
+.ac-student .prev_next button, .ac-student .moduleActn .actnbtn { background: #fff; border: 1px solid #d1d5db; border-radius: 999px; width: 44px; height: 44px; }
+.ac-student .prev_next button:hover { border-color: #111; background: #fff; }
+.ac-student .prev_next button img { filter: invert(1); }
+.ac-student .verfied_phone .btnb { background: #16a34a; border-radius: 12px; }
+.ac-student .taskLists, .ac-student .uploadedmedia { border: 1px solid var(--ac-line); padding: 24px; }
+.ac-student table { width: 100%; border-collapse: collapse; }
+.ac-student .rdt_Table, .ac-student .rdt_TableHeadRow { font-family: var(--ac-font); }
+
+/* ---------- classic content pages (FAQ, contact, policies, vision, support, course checkout) in the site look ---------- */
+.breadCrumb { background: #fff !important; padding: 14px 0 0 !important; float: none !important; }
+.breadCrumb ul li, .breadCrumb ul li a { font-family: var(--ac-font); font-size: 13px; color: #6b7280; }
+.breadCrumb li + li:before { color: #9ca3af; }
+.inrbanrtxt { background: #fff !important; background-image: none !important; color: #111 !important; min-height: 0 !important; text-align: left !important; padding: 12px 0 28px !important; float: none !important; display: block !important; border-bottom: 1px solid var(--ac-line, #e5e7eb); }
+.inrbanrtxt h1 { font-family: var(--ac-font) !important; color: #111 !important; font-size: 52px !important; line-height: 1.08 !important; font-weight: 800 !important; letter-spacing: -.02em; }
+.inrbanrtxt p { font-family: var(--ac-font); color: #5b6478 !important; font-size: 18px !important; margin-top: 10px !important; }
+.inrbanrtxt h1:before { content: 'ArtistikCity'; display: block; font-size: 13px; line-height: 1; letter-spacing: .12em; text-transform: uppercase; color: #e5156b; font-weight: 800; margin-bottom: 14px; }
+.faqpage { background: #fff !important; padding: 40px 0 72px !important; }
+.faqList { padding: 0 !important; max-width: 900px; }
+.faqList h3 { font-family: var(--ac-font) !important; font-size: 18px !important; font-weight: 700 !important; border: 1px solid #e5e7eb !important; border-radius: 14px !important; margin-top: 12px !important; background-color: #fff !important; color: #111 !important; }
+.faqList h3.active { border-radius: 14px 14px 0 0 !important; color: #e5156b !important; background-color: #fafafa !important; }
+.faqList .answer { background: #fff !important; border-color: #e5e7eb !important; border-radius: 0 0 14px 14px !important; }
+.faqList .answer p { font-family: var(--ac-font); font-size: 16px !important; line-height: 1.7 !important; color: #374151 !important; }
+.newsLtr { background: #fff !important; background-image: none !important; padding: 24px 0 72px !important; float: none !important; }
+.newsLtr > .container { background: linear-gradient(120deg, #e5156b, #b80f55 55%, #111); border-radius: 24px; padding: 40px 32px !important; text-align: left; }
+.newsLtr h2 { font-family: var(--ac-font) !important; color: #fff !important; font-size: 30px !important; font-weight: 800 !important; }
+.newsLtr h2:after { display: none !important; }
+.newsLtr p { font-family: var(--ac-font); color: #fde7f0 !important; }
+.newsLtr .btn, .ctForm .btn, .checkoutwrap .btn, .thankBox .btn { background: #111 !important; border-radius: 999px !important; font-family: var(--ac-font); font-weight: 700 !important; text-transform: none !important; }
+.ctForm .btn, .checkoutwrap .btn, .thankBox .btn { background: #e5156b !important; }
+.newsLtr input, .ctForm input, .ctForm textarea, .checkoutwrap input { border-radius: 12px !important; font-family: var(--ac-font); }
+.contactbanr + * { background: #fff; }
+.contactbanr { padding-bottom: 28px !important; padding-top: 12px !important; }
+.contactpage { margin: 40px 0 72px !important; float: none !important; border: 1px solid #e5e7eb !important; border-radius: 20px !important; padding: 48px 56px !important; font-family: var(--ac-font); }
+.contactpage h3 { font-family: var(--ac-font); font-weight: 800; color: #111; }
+.contactwrap { overflow: hidden; }
+.dm-footer { clear: both; }
+.newsLtr > .container { max-width: 1376px; margin: 0 auto; }
+@media (max-width: 800px) { .contactpage { flex-direction: column; padding: 28px 20px !important; } .contactpage .col5 { width: 100% !important; } .inrbanrtxt h1 { font-size: 36px !important; } }
+.breadCrumb > .container, .inrbanrtxt > .container, .faqpage > .container, .contactwrap, .breadCrumb + .inrbanrtxt + .container { max-width: 1440px !important; width: 100% !important; padding-left: 32px !important; padding-right: 32px !important; }
+@media (max-width: 800px) { .breadCrumb > .container, .inrbanrtxt > .container, .faqpage > .container { padding-left: 16px !important; padding-right: 16px !important; } }

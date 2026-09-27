@@ -39,7 +39,11 @@ public class Routes {
         get("welcome", "/");
         post("getfreecourses", "get-free-courses");
         get("student.profile", "student/{slug}");
-        get("student.feedback", "student-feedback");
+        get("student.feedback", "student-feedback"); // legacy: 301 -> /marketplace
+        get("marketplace", "marketplace");
+        get("marketplace.show", "marketplace/{slug}");
+        get("marketplace.checkout", "marketplace/{slug}/checkout");
+        get("marketplace.order", "marketplace/orders/{orderId}");
         get("teacher.profile", "teacher/{slug}");
         get("instructor", "instructor");
         get("home", "home");
@@ -56,6 +60,7 @@ public class Routes {
         get("studio.classroom", "dashboard/classroom/{id}");
         get("studio.submissions", "dashboard/submissions");
         get("studio.portfolio", "dashboard/portfolio");
+        get("studio.portfolio.sell", "dashboard/portfolio/sell/{submissionId}");
         get("student.shop", "student-shop");
         get("studio.certificates", "dashboard/certificates");
         get("studio.portfolio.report", "dashboard/portfolio/report");
@@ -64,6 +69,8 @@ public class Routes {
         get("admin.console.submissions", "admin/dashboard/submissions");
         get("admin.console.commissions", "admin/dashboard/commissions");
         get("admin.console.marketplace", "admin/dashboard/marketplace");
+        get("admin.console.marketplace.new", "admin/dashboard/marketplace/new");
+        get("admin.console.marketplace.edit", "admin/dashboard/marketplace/{id}/edit");
         get("admin.console.people", "admin/dashboard/people");
         get("admin.console.testimonials", "admin/dashboard/testimonials");
         get("admin.console.gallery", "admin/dashboard/gallery");

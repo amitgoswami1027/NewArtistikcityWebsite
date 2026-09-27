@@ -1,124 +1,45 @@
-import React, { useState } from 'react';
-import ApplicationLogo from '@/Components/ApplicationLogo';
-import Dropdown from '@/Components/Dropdown';
-import NavLink from '@/Components/NavLink';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link } from '@inertiajs/inertia-react';
-import StudentHeader from "@/Components/Students/StudentHeader";
+import React from 'react';
+import { usePage } from '@inertiajs/inertia-react';
+import SiteHeader from '@/Components/Site/SiteHeader';
+import SiteFooter from '@/Components/Site/SiteFooter';
+import { StudioTabs } from '@/Components/Studio/StudioLayout';
 
-export default function Authenticated({ auth, header, children }) {
-    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+/*
+ * Shell for the classic student pages under /user (course home, modules, lessons, account, orders, help).
+ * They now share the site header, the "My studio" tab bar and the footer with the rest of ArtistikCity,
+ * so moving between the studio and a course never feels like leaving the website.
+ */
+const SECTIONS = [
+    { test: /^\/user\/(my-courses|my-workshop|course|workshop|free-course)/, tab: '/user/my-courses', title: 'My courses', crumb: 'My courses',
+        subtitle: 'Your live courses and workshops: schedules, modules, lessons and tasks.' },
+    { test: /^\/user\/(my-account|my-address|change-password|order-history|notifications|linked-accounts|language)/, tab: '/user/my-account', title: 'Account', crumb: 'Account',
+        subtitle: 'Your personal details, address, password, orders and notifications.' },
+    { test: /^\/user\/help/, tab: '/user/my-account', title: 'Help', crumb: 'Help', subtitle: 'Answers to common questions and ways to reach the studio.' },
+    { test: /.*/, tab: '/dashboard', title: 'My studio', crumb: null, subtitle: null },
+];
 
+export default function Authenticated({ children }) {
+    const { url } = usePage();
+    const path = String(url || '').split('?')[0];
+    const sec = SECTIONS.find((s) => s.test.test(path));
     return (
-        <div className="min-h-screen bg-gray-100">
-            {/* <nav className="bg-white border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex">
-                            <div className="flex-shrink-0 flex items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto text-gray-500" />
-                                </Link>
-                            </div>
-
-                            <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink href={route('user.dashboard')} active={route().current('user.dashboard')}>
-                                    Dashboard
-                                </NavLink>
-                            </div>
-                        </div>
-
-                        <div className="hidden sm:flex sm:items-center sm:ml-6">
-                            <div className="ml-3 relative">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
-                                            >
-                                                {auth.user.name}
-
-                                                <svg
-                                                    className="ml-2 -mr-0.5 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
-
-                                    <Dropdown.Content>
-                                        <Dropdown.Link href={route('logout')} method="post" as="button">
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <div className="-mr-2 flex items-center sm:hidden">
-                            <button
-                                onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
-                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
-                            >
-                                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                    <path
-                                        className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+        <div className="ac ac-student">
+            <SiteHeader />
+            <div className="ac-wide">
+                <ul className="dm-crumbs">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/dashboard">My studio</a></li>
+                    {sec.crumb && <li>{sec.crumb}</li>}
+                </ul>
+                <div className="dm-listhead" style={{ paddingTop: 8 }}>
+                    <span className="ac-eyebrow">Student studio</span>
+                    <h1>{sec.title}</h1>
+                    {sec.subtitle && <p>{sec.subtitle}</p>}
                 </div>
-
-                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
-                    <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href={route('user.dashboard')} active={route().current('user.dashboard')}>
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <div className="pt-4 pb-1 border-t border-gray-200">
-                        <div className="px-4">
-                            <div className="font-medium text-base text-gray-800">{auth.user.name}</div>
-                            <div className="font-medium text-sm text-gray-500">{auth.user.email}</div>
-                        </div>
-
-                        <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button">
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
-                </div>
-            </nav> */}
-
-            {/* {header && (
-                <header className="bg-white shadow">
-                    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">{header}</div>
-                </header>
-            )} */}
-
-            <main>{children}</main>
+            </div>
+            <div className="tw"><div className="ac-wide"><StudioTabs active={sec.tab} /></div></div>
+            <main className="ac-wide ac-student__body">{children}</main>
+            <SiteFooter />
         </div>
     );
 }

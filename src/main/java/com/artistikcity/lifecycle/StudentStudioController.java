@@ -46,8 +46,11 @@ public class StudentStudioController {
     private final Storage storage;
     private final LifecycleRepository repo;
     private final CredentialsService credentials;
+    private final com.artistikcity.marketplace.MarketplaceRepository market;
 
-    public StudentStudioController(Inertia inertia, Auth auth, Json json, Storage storage, LifecycleRepository repo, CredentialsService credentials) {
+    public StudentStudioController(Inertia inertia, Auth auth, Json json, Storage storage, LifecycleRepository repo, CredentialsService credentials,
+                                   com.artistikcity.marketplace.MarketplaceRepository market) {
+        this.market = market;
         this.inertia = inertia;
         this.auth = auth;
         this.json = json;
@@ -120,10 +123,25 @@ public class StudentStudioController {
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("submissions", repo.submissionsForUser(userId));
         props.put("profileSlug", user == null ? null : user.get("slug"));
+        // 1-of-1 marketplace listings made from this student's approved work, keyed by submission
+        List<Map<String, Object>> listings = new ArrayList<>();
+        for (Map<String, Object> l : market.studentListings(userId)) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            for (String k : List.of("id", "slug", "title", "stock_status", "final_price", "base_price", "discount_percentage", "submission_id", "review_notes", "version")) {
+                m.put(k, l.get(k));
+            }
+            m.put("held", "RESERVED".equals(l.get("stock_status")) && l.get("reserved_until") != null);
+            listings.add(m);
+        }
+        props.put("listings", listings);
         return inertia.render(request, "Studio/Portfolio", props);
     }
 
-    @GetMapping("/student-shop")
+    /**
+     * @deprecated The student shop became the "Student originals" filter of /marketplace; /student-shop now
+     * 301-redirects there (MarketplaceController#legacyStudentShop). Kept, unmapped, during the transition.
+     */
+    @Deprecated
     public ResponseEntity<String> shop(HttpServletRequest request) {
         return inertia.render(request, "Studio/Shop", Map.of("listings", repo.publicListings()));
     }
@@ -156,11 +174,19 @@ public class StudentStudioController {
         return ok(new LifecycleDtos.SubmissionCreated(id, url, "Pending Review"));
     }
 
-    /** JSON: { submissionId, isListedForSale, salePrice, inventoryCount } - only for Approved work. */
+    /**
+     * JSON: { submissionId, isListedForSale, salePrice, inventoryCount } - only for Approved work.
+     * @deprecated Multi-stock student shop listings were replaced by 1-of-1 originals that go through
+     * moderator review (StudentListingController). The endpoint now answers 410 Gone.
+     */
+    @Deprecated
     @PutMapping("/api/portfolio/marketplace/toggle")
     public ResponseEntity<String> toggle(HttpServletRequest request) throws IOException {
         Long userId = guard(request);
         if (userId == null) return error(HttpStatus.UNAUTHORIZED, "Please log in again.");
+        if (true) {
+            return error(HttpStatus.GONE, "The student shop moved to the ArtistikCity Marketplace. Use \"Sell as an original\" on the artwork instead.");
+        }
         Map<String, Object> body = json.decodeMap(new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8));
         if (body == null) return error(HttpStatus.BAD_REQUEST, "Invalid request.");
         LifecycleDtos.MarketplaceToggleRequest req = LifecycleDtos.MarketplaceToggleRequest.from(body);

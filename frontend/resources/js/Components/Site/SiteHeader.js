@@ -43,6 +43,7 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
     }, []);
 
     const search = (e) => { e.preventDefault(); window.location.href = catalogUrl({ q: query }); };
+    const here = typeof window !== 'undefined' ? window.location.pathname : '';
     const initials = user && user.name ? user.name.trim().charAt(0).toUpperCase() : 'A';
 
     return (
@@ -53,44 +54,46 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                         <img src="/assets/images/logo.png" alt="ArtistikCity" />
                     </a>
 
-                    <div className="dm-explore" ref={exploreRef}>
-                        <button type="button" className={open ? 'is-open' : ''} aria-expanded={open} onClick={() => setOpen(!open)}>
-                            Courses <i className={`fa fa-angle-${open ? 'up' : 'down'}`}></i>
-                        </button>
-                        {open && (
-                            <div className="dm-dropdown">
-                                <div>
-                                    <h6>By medium</h6>
-                                    {mediums.map((m) => (
-                                        <a key={m.id} href={catalogUrl({ medium: m.id })}>
-                                            <span className="ac-mega__thumb" style={{ backgroundImage: `url(/storage/uploads/mediums/${m.id}/${m.photo})` }}></span>
-                                            {m.name}
-                                        </a>
-                                    ))}
+                    <nav className="dm-links dm-links--main" aria-label="Main">
+                        <a href={route('how.it.works')} aria-current={here.startsWith('/how-it-works') ? 'page' : undefined}>How it works</a>
+                        <div className="dm-explore" ref={exploreRef}>
+                            <button type="button" className={open ? 'is-open' : ''} aria-expanded={open} onClick={() => setOpen(!open)}>
+                                Courses <i className={`fa fa-angle-${open ? 'up' : 'down'}`}></i>
+                            </button>
+                            {open && (
+                                <div className="dm-dropdown">
+                                    <div>
+                                        <h6>By medium</h6>
+                                        {mediums.map((m) => (
+                                            <a key={m.id} href={catalogUrl({ medium: m.id })}>
+                                                <span className="ac-mega__thumb" style={{ backgroundImage: `url(/storage/uploads/mediums/${m.id}/${m.photo})` }}></span>
+                                                {m.name}
+                                            </a>
+                                        ))}
+                                    </div>
+                                    <div>
+                                        <h6>Format</h6>
+                                        <a href={catalogUrl({ type: 'course' })}><i className="fa fa-graduation-cap"></i> Live courses</a>
+                                        <a href={catalogUrl({ type: 'workshop' })}><i className="fa fa-paint-brush"></i> Workshops</a>
+                                        <h6 style={{ marginTop: 16 }}>By age</h6>
+                                        {AGE_GROUPS.map((a) => <a key={a} href={catalogUrl({ age: a })}><i className="fa fa-user-o"></i> {a}</a>)}
+                                    </div>
+                                    <div className="dm-all"><a href={catalogUrl({})}>Browse all courses <i className="fa fa-arrow-right"></i></a></div>
                                 </div>
-                                <div>
-                                    <h6>Format</h6>
-                                    <a href={catalogUrl({ type: 'course' })}><i className="fa fa-graduation-cap"></i> Live courses</a>
-                                    <a href={catalogUrl({ type: 'workshop' })}><i className="fa fa-paint-brush"></i> Workshops</a>
-                                    <h6 style={{ marginTop: 16 }}>By age</h6>
-                                    {AGE_GROUPS.map((a) => <a key={a} href={catalogUrl({ age: a })}><i className="fa fa-user-o"></i> {a}</a>)}
-                                </div>
-                                <div className="dm-all"><a href={catalogUrl({})}>Browse all courses <i className="fa fa-arrow-right"></i></a></div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+
+                        <a href={route('commission.step1')} aria-current={here.startsWith('/commission') ? 'page' : undefined}>Commission art</a>
+                        <a href="/marketplace" aria-current={here.startsWith('/marketplace') ? 'page' : undefined}>Marketplace</a>
+                        <a href={route('studio.stories')} className="is-accent" aria-current={here.startsWith('/studio-stories') ? 'page' : undefined}>Studio Stories</a>
+                    </nav>
 
                     <form className="dm-search" onSubmit={search} role="search">
                         <i className="fa fa-search"></i>
-                        <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search courses: watercolour, portraits, sketching…" aria-label="Search courses" />
+                        <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search courses…" aria-label="Search courses" />
                     </form>
 
-                    <nav className="dm-links" aria-label="Main">
-                        <a href={route('commission.step1')}>Commission art</a>
-                        <a href={route('studio.stories')} className="is-accent">Studio Stories</a>
-                        <a href={route('student.feedback')}>Gallery</a>
-                        <a href={route('how.it.works')}>How it works</a>
-                        <span className="dm-sep"></span>
+                    <nav className="dm-links dm-links--account" aria-label="Account">
                         {user ? (
                             <>
                                 <a href="/dashboard">My studio</a>
@@ -131,16 +134,16 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                         <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search courses" />
                         <button className="dm-btn dm-btn--ink" type="submit"><i className="fa fa-search"></i></button>
                     </form>
+                    <a href={route('how.it.works')} style={{ fontWeight: 700 }}>How it works</a>
                     <h6>Courses</h6>
                     <a href={catalogUrl({})}>All courses</a>
                     {mediums.map((m) => <a key={m.id} href={catalogUrl({ medium: m.id })}>{m.name}</a>)}
                     <a href={catalogUrl({ type: 'workshop' })}>Workshops</a>
                     <h6>ArtistikCity</h6>
-                    <a href={route('commission.step1')}>Commission a painting</a>
+                    <a href={route('commission.step1')}>Commission art</a>
+                    <a href="/marketplace">Marketplace</a>
+                    <a href="/marketplace?source=student">Student originals</a>
                     <a href={route('studio.stories')}>Studio Stories</a>
-                    <a href={route('student.feedback')}>Gallery</a>
-                    <a href="/student-shop">Student shop</a>
-                    <a href={route('how.it.works')}>How it works</a>
                     {user ? (
                         <>
                             <a href="/dashboard" className="dm-btn dm-btn--line dm-btn--block">My studio</a>

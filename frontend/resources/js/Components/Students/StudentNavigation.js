@@ -1,32 +1,31 @@
 import React from 'react';
-import ReactDOM from "react-dom";
-import {Link, usePage, InertiaLink} from "@inertiajs/inertia-react";
-import Example from "@/Components/Example";
+import { usePage, InertiaLink } from '@inertiajs/inertia-react';
 
-export default function StudentNavigation({ auth, header, children }){
-    const {url, component}  = usePage()
+const LINKS = [
+    { href: '/dashboard', label: 'My studio', icon: 'fa-th-large', match: /^\/(dashboard|user\/dashboard)$/ },
+    { href: '/user/my-courses', label: 'My courses', icon: 'fa-graduation-cap', match: /^\/user\/(my-courses|course)/ },
+    { href: '/user/my-workshop', label: 'My workshops', icon: 'fa-calendar', match: /^\/user\/(my-workshop|workshop)/ },
+    { href: '/dashboard/certificates', label: 'Certificates', icon: 'fa-certificate', match: /^$/ },
+    { href: '/user/my-account', label: 'Account', icon: 'fa-user', match: /^\/user\/(my-account|my-address|change-password|order-history|notifications)/ },
+    { href: '/user/help', label: 'Help', icon: 'fa-question-circle-o', match: /^\/user\/help/ },
+];
+
+/** Left navigation for the classic student pages, in the site's look. */
+export default function StudentNavigation() {
+    const { url } = usePage();
+    const path = String(url || '').split('?')[0];
     return (
-        <>
-            <div className="col-md-2 px-0 sidebar">
-                <div className="menuBtn">MENU <button className="navbar-toggler d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle Navigation"> <span className="navbar-toggler-icon"></span> </button></div>
-                <nav id="sidebarMenu" className="w-100 d-md-block collapse">
-                    <div className=" position-sticky">
-                        <ul className="sidebarnav">
-                            <li> <a className={url === '/user/dashboard' ? 'active' : ''} href={route('user.dashboard')}><span className="icon"><img src="/assets/user/images/dashboard-icon.svg" alt="" /></span> Home </a> </li>
-                            {/*<li> <a className={url === '/user/free-courses' ? 'active' : ''} href={route('user.free.courses')}><span className="icon"><img src="/assets/user/images/courses-icon.svg" alt="" /></span> Free Courses </a> </li>*/}
-                            <li> <a className={url === '/user/my-courses' ? 'active' : ''} href={route('user.courses')}><span className="icon"><img src="/assets/user/images/courses-icon.svg" alt="" /></span> My Courses </a> </li>
-                            <li> <a className={url === '/user/my-workshop' ? 'active' : ''} href={route('user.workshop')}><span className="icon"><img src="/assets/user/images/workshop-icon.svg" alt="" /></span> My Workshop </a> </li>
-                            <li> <a className={url === '/user/my-account' ? 'active' : ''} href={route('user.account')}><span className="icon"><img src="/assets/user/images/account-icon.svg" alt="" /></span> My Account </a> </li>
-                            <li> <a className={url === '/user/help' ? 'active' : ''} href={route('user.help')}><span className="icon"><img src="/assets/user/images/help-icon.svg" alt="" /></span> Help </a> </li>
-                            <li>
-                                <InertiaLink href={route('logout')} method="post">
-                                    <span className="icon"><img src="/assets/user/images/logout-white.svg" alt="" /></span> Logout
-                                </InertiaLink>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-            </div>
-        </>
+        <aside className="col-md-3 col-lg-2 px-0 ac-sidenav" aria-label="My courses and account">
+            <nav>
+                {LINKS.map((l) => (
+                    <a key={l.href} href={l.href} className={l.match.test(path) ? 'is-active' : ''} aria-current={l.match.test(path) ? 'page' : undefined}>
+                        <i className={`fa ${l.icon}`} aria-hidden="true"></i>{l.label}
+                    </a>
+                ))}
+                <InertiaLink href={route('logout')} method="post" as="button" className="ac-sidenav__logout">
+                    <i className="fa fa-sign-out" aria-hidden="true"></i>Log out
+                </InertiaLink>
+            </nav>
+        </aside>
     );
 }

@@ -63,12 +63,17 @@ public class CommissionPayments {
 
     /** POST /v1/orders - amount in paise. Returns the Razorpay order id. */
     public String razorpayCreateOrder(String receipt, BigDecimal amountInr) throws IOException, InterruptedException {
+        return razorpayCreateOrder(receipt, amountInr, Map.of("commission_order_id", receipt));
+    }
+
+    /** Same as above with caller-supplied notes (the marketplace passes painting and order ids for reconciliation). */
+    public String razorpayCreateOrder(String receipt, BigDecimal amountInr, Map<String, ?> notes) throws IOException, InterruptedException {
         long paise = amountInr.movePointRight(2).longValueExact();
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("amount", paise);
         body.put("currency", "INR");
         body.put("receipt", receipt);
-        body.put("notes", Map.of("commission_order_id", receipt));
+        body.put("notes", notes);
         String auth = Base64.getEncoder().encodeToString((prop("razorpay.key") + ":" + prop("razorpay.secret")).getBytes(StandardCharsets.UTF_8));
         HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create("https://api.razorpay.com/v1/orders"))
                 .timeout(Duration.ofSeconds(20)).header("Authorization", "Basic " + auth).header("Content-Type", "application/json")
