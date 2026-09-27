@@ -1,0 +1,779 @@
+*{ margin:0px; padding:0px; outline:0px; box-sizing: border-box;}
+*, *:before, *:after { box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box;}
+a{text-decoration:none; color:#141518; transition:all 0.4s linear 0s;}
+a:hover{transition:all 0.4s linear 0s; color:#e43e2b;}
+a img, img{border:0px; outline:none;}
+img{max-width:100%; height:auto;}
+a, input[type="submit"], button{outline:none;  }
+.clear{clear:both;}
+::-moz-placeholder{ opacity:1; }
+input[type=submit], button, select{ -moz-appearance: none;-webkit-appearance: none;}
+input, select, button, textarea{font-family:'AvenirNextLTPro';}
+input[type=submit], button{ cursor:pointer;transition:all 0.4s linear 0s;}
+input[type="submit"], input[type="text"], input[type="search"], button, input[type="email"], input[type="tel"], textarea, select{-webkit-appearance:none; -moz-appearance:none; appearance:none; border-radius:0; border:0;}
+h1, h2, h3, h4, h5, h6, p, ul, li, label, input, textarea, img, submit, button, a{ margin: 0px; padding: 0px; outline: none; list-style: none;}
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, ins, kbd, q, s, samp, small, strike, strong, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {border: 0;font-size: 100%;font-style: inherit;font-weight: inherit;margin: 0;outline: 0;padding: 0;vertical-align:baseline;}
+html {-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-size: 62.5%;overflow-y: scroll;-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;scroll-behavior: smooth;}
+q {-webkit-hyphens: none;-moz-hyphens: none;-ms-hyphens: none;hyphens: none;quotes: none;}
+a:focus {outline:0;outline: 0;}
+a:hover,
+a:active {outline: 0;}
+a img {border: 0;}
+body{color:#141518; font-weight:normal; font-size:20px; line-height:32px; font-family:'AvenirNextLTPro' , sans-serif;  font-weight:normal;}
+.container{ width:1170px; margin:0 auto;}
+.btn{ display:inline-block; min-width:174px; line-height:32px ; background-color:#e43e2b; color:#fff; font-family:'AvenirNextLTProDemi'; border:1px solid #e43e2b; font-size:17px; text-align:center;  border-radius:5px; padding:12px 25px;}
+.btn:hover{ color:#fff; background:#d32d1a; border-color:#d32d1a;}
+h1, h2, h3, h4, h5, h6{font-family:'AvenirNextLTProDemi';}
+h1{font-size:70px; line-height:70px; margin:0 0 15px;}
+h2{ font-size:45px; line-height:52px; margin:0 0 20px; position:relative; padding:0 0 20px;}
+h2:after{content:''; width:50px; height:4px; background:#2058b7; position:absolute; left:0; right:0; margin:0 auto; bottom:0; border-radius:10px;}
+h3{ font-size:32px; line-height:38px; margin:0 0 15px;}
+h4{font-size:24px; margin:0 0 10px;}
+h6{font-size:20px; line-height:28px; margin:0 0 10px;}
+
+/*h5{ font-size:22px; line-height:26px;margin:0 0 15px;}*/
+p{ margin:0 0 20px;}
+p:last-child{ margin-bottom:0px;}
+
+/* Header Section Start */
+.header{width:100%; float:left; position:relative; border-bottom:1px solid #e5e5e5; z-index: 99;}
+.header .container{display:flex; align-items:center; justify-content:space-between;}
+.hdLeft{float:left;}
+.logo{ float:left; display:flex; height:90px; align-items:center;}
+.logo a, .logo img{ display:block;}
+.navigation{float:left; border-left:1px solid #e5e5e5; border-right:1px solid #e5e5e5; display:flex; height:90px; align-items:center; margin-left:35px;}
+.navigation ul{ float:left;}
+.navigation ul li{float:left; position:relative; padding:0 20px;}
+.navigation ul li a{display:block; padding:0 5px; position:relative; font-size: 18px;}
+.navigation ul li.coursedropdown > a::after, .navigation ul li.menu-item-has-children > a::after {content: "\f107"; font-family: "FontAwesome";font-size:22px; margin-top:1px; float:right; margin-left:7px;}
+.navigation ul li.active>a:after{ opacity:1;}
+.navigation ul li.active a{ color:#e43e2b;}
+.navigation ul li.active a:after{ color:#e43e2b;}
+.hdRit{float:right;}
+.menuRit{float:left; margin-right:17px;}
+.menuRit li a{display:inline-block; padding:6px 22px; border:1px solid #49453b; border-radius:5px; font-size:16px; position:relative;}
+.menuRit li > a::after {content: "\f107"; font-family: "FontAwesome";font-size:20px;
+margin-top:1px; float:right; margin-left:10px;}
+.menuRit li a:hover{background:#e43e2b; color:#fff; border-color:#e43e2b;}
+.hdRit .btn{min-width:initial; font-family:'AvenirNextLTPro'; padding:6px 22px;}
+.btn2{background:#49453b; border-color:#49453b;}
+.btn2:hover{background:#595449; border-color:#595449;  }
+.menudropdown{ width:100%; float:left; background:#fff; border-bottom:1px solid #e5e5e5; border-top:1px solid #e5e5e5; box-shadow:0 15px 20px rgba(0,0,0,0.05); padding:40px 0; position:absolute; top:100%; display:none;}
+.menudropdown .container{ display:block;}
+.menudropdown h6{padding:0 0 5px; position:relative; font-size:16px;}
+.menudropdown h6:after{content:''; width:30px; height:2px; background:#e43e2b; position:absolute; left:0; bottom:0;}
+.menudropdown .byMedium{ width:235px; margin-left:280px; float:left;}
+.byMedium ul{ width:100%; float:left;}
+.byMedium ul li{ width:100%; float:left; margin:8px 0 0; font-size:14px; line-height:25px;}
+.byMedium ul li a{ border:1px solid #e5e5e5; border-radius:4px; background:#fff; display:block; padding:4px; color:#141518;}
+.byMedium ul li a:hover{ background:#e43e2b; border-color:#e43e2b; color:#fff;}
+.byMedium ul li a img{ float:left; margin-right:10px; width:35px; height:25px; border-radius:4px; object-fit:cover; object-position:center;}
+
+.menudropdown .handPicked{ width:550px; float:right; padding-right:80px;}
+.handPicked ul{ width:50%; float:left;}
+.handPicked ul li{width:100%; margin:10px 0 0; font-size:14px; line-height:24px;}
+.handPicked ul li a{color:#797a7b;}
+.handPicked ul li a:hover{ color:#e43e2b}
+.handPicked ul li a:before{ content:'\f105'; font-family:'FontAwesome'; margin-right:10px;}
+/* Header Section End */
+
+
+/* Banner Section start */
+.homebanner{ width:100%; float:left; position:relative;}
+.homebanner img{ display:block; width:50%; float:right; margin-top:70px;}
+.homebanner .container{ position:absolute; top:0; left:0; right:0; height:100%; display:flex; align-items:center;}
+.homebanner .col50{ width:55%;}
+.homebanner h1 strong{ color:#e43e2b}
+.homebanner p{ margin:20px 0 40px;}
+.btn.blue{ background:#2058b7; border-color:#2058b7;}
+.btn.blue:hover{ background:#0944a7;  border-color:#0944a7;}
+.btn .fa{ display:inline-block; margin-left:10px; border-radius:50%; background:#fff; width:20px; height:20px; text-align:center; color:#e43e2b}
+.btn.blue .fa{ color:#2058b7}
+.homebanner .btn.blue{ margin-left:20px;}
+/* Banner Section End */
+
+/*Middle Section start*/
+.section {width:100%; float:left; padding:100px 0;}
+
+.homesection1{ width:100%; float:left; padding:50px 0; background:#f9f9f9; }
+
+.homecourse{ width:calc(100% + 20px); display:flex; flex-wrap:wrap; margin:0 -10px;}
+.homecourse .column{ width:calc(100% / 6 - 20px); margin:0 10px; text-align:center;}
+.homecourse .column a{ display:block; background:#fff; border:1px solid #ececec; border-radius:6px; overflow:hidden; color:#141518; }
+.homecourse .column a span{ width:100%; display:block; background-repeat:no-repeat; background-size:cover; background-position:center; height:140px;}
+.homecourse .column label{ display:block; padding:10px; font-size:17px; cursor: pointer;}
+.homecourse .column a:hover{ color:#e43e2b;}
+
+
+.homeSocl{width:100%; display:flex; justify-content:space-between; margin-top:70px;}
+.homeSocl .joinfb{ width:354px;}
+.joinfb a{ display:flex; align-items:center; background:#2058b7; color:#fff; border-radius:6px; padding:30px 10px 30px 25px; text-transform:uppercase;}
+.joinfb img{ display:block; margin-right:15px;}
+.joinfb h3{ font-size:22px; line-height:32px; margin:0;}
+.joinfb h3 strong{ font-size:29px; font-weight:bold;}
+.joinfb a:hover{ background:#0944a7}
+.subscribe1{ width:795px; background:#e43e2b; color:#fff; padding:25px; border-radius:6px; display:flex;}
+.subscribe1 img{ max-width:86px; margin-right:25px; margin-top:16px;}
+.subscribe1 h4{ text-transform:uppercase; font-size:22px; line-height:28px; margin:0 0 20px;}
+.subscribe1 form{ width:100%; position:relative;}
+.subscribe1 input[type=email]{ width:100%; float:left; height:54px; padding:0 25px; color:#a6a6a7; font-size:16px; border-radius:4px;}
+.subscribe1 .btn{ position:absolute; top:1px; right:1px; height:52px; padding:0; min-width:148px;}
+
+
+
+
+.homesection2{ width:100%; float:left; padding:80px 0;}
+.homesection2 h2{ text-align:center; padding-left:100px; padding-right:100px;}
+.homesection2 h2 strong{ color:#e43e2b}
+.steprow{ width:calc(100% + 24px); float:left; margin:0 -12px; display:flex; flex-wrap:wrap; padding:40px 45% 0 0; background-image:url(../images/bgimage1.png); background-repeat:no-repeat; background-position:center right;}
+.stepcol{ width:calc(33.33% - 24px); margin:12px; background:#f7f7f7; border-radius:4px; text-align:center; padding:30px 20px;}
+.stepcol .icon{ width:98px; height:98px; display:flex; align-items:center; border-radius:50%; margin:0 auto; background:#fff;}
+.stepcol .icon img{ display:block; margin:0 auto;}
+.stepcol p{ font-size:16px; line-height:28px; margin:15px 0 0;}
+.stepcol h4{ font-size:17px; line-height:26px; margin:15px 0 0;}
+.stepcol:hover{ background:#e43e2b; color:#fff;}
+.homesection3{ background:#f9f9f9;}
+.homesection3 h2{ text-align:center;}
+.courseWrap{ width:calc(100% + 30px); margin:0 -15px; float:left; position:relative;}
+.courseslider{ width:100%; float:left; position:relative;}
+.courseslider .item{ width:100%; padding:15px;}
+.courseslider .box{ width:100%; float:left; position:relative; background:#fff; border-radius:6px;}
+.courseslider .img{ position:relative;}
+.courseslider .date{ position:absolute; top:10px; left:0; background:#f0b501; color:#fff; padding:0 10px; font-size:14px; text-transform:uppercase; line-height:30px;}
+.courseslider .date:before{ content:''; position:absolute; top:0; right:-12px; width:14px; height:30px; background:url(../images/ds.png) no-repeat; background-size:100%;}
+.courseslider .img img{ width:100%; display:block; height:200px; object-fit:cover; object-position:center;}
+.courseslider .info{ width:100%; float:left; position:relative; padding:20px;}
+.courseslider h3{ font-size:24px; line-height:32px; color:#141518; font-family:'AvenirNextLTPro'; font-weight:700; margin:10px 0 15px;}
+.courseslider ul{ width:100%; float:left;}
+.courseslider ul li{ width:100%; float:left; background:#f9f9f9; border-radius:4px; padding:10px 12px; color:#141518; font-size:17px; line-height:24px; display:flex; align-items:center; margin:3px 0;}
+.courseslider ul li img{ max-width:24px; max-height:18px; display:block; margin:0 auto;}
+.courseslider ul li .icon{ width:24px; text-align:center; margin-right:10px;}
+.courseslider .btn{ width:100%; margin-top:20px;}
+.courseslider .owl-prev, .courseslider .owl-next{ font-size:0; position:absolute; top:50%; left:-50px; margin-top:-22px; width:44px; height:44px;}
+.courseslider .owl-next{ left:auto; right:-50px;}
+.courseslider .owl-prev:before, .courseslider .owl-next:before{ content:'\f104'; font-family:'FontAwesome'; width:44px; height:44px; background:#e7e7e6; display:flex; align-items:center; justify-content:center; font-size:24px; color:#49453b; border-radius:50%;}
+.courseslider .owl-next:before{ content:'\f105';}
+.courseslider .owl-prev:hover:before, .courseslider .owl-next:hover:before{ background:#49453b; color:#fff;}
+.homesection4{ background:#2058b7;}
+.homesection4 h2{ text-align:center; color:#fff;}
+.reviewSlider{ width:100%; float:left; margin:30px 0 0; position:relative;}
+.reviewSlider .item{ width:100%; float:left; position:relative; display:flex; justify-content:space-between;}
+.reviewSlider .img{ width:47%;}
+.reviewSlider .img img{ display:block; border-radius:6px; width:100%;}
+.reviewSlider .txt{ width:47%; color:#fff; padding-right:100px;}
+.reviewSlider h4{ font-size:30px; line-height:45px; margin:10px 0 15px; min-height:150px;}
+.reviewSlider h5{ font-size:24px; line-height:30px; margin:0;}
+.reviewSlider h6{ font-size:17px; line-height:28px;font-family:'AvenirNextLTPro'; font-weight:400; margin:0; opacity:0.6;}
+.reviewSlider .owl-nav{ position:absolute; bottom:0; right:0; width:47%; height: 44px;}
+.reviewSlider .owl-prev, .reviewSlider .owl-next{ font-size:0; display:inline-block; margin-right:10px; width:44px; height:44px;}
+.reviewSlider .owl-prev:before, .reviewSlider .owl-next:before{ content:'\f104'; font-family:'FontAwesome'; width:44px; height:44px; background:rgba(255,255,255,0.5); display:flex; align-items:center; justify-content:center; font-size:24px; color:#fff; border-radius:50%;}
+.reviewSlider .owl-next:before{ content:'\f105';}
+.reviewSlider .owl-prev:hover:before, .reviewSlider .owl-next:hover:before{ background:#fff; color:#2058b7;}
+.homesection5 h2{ text-align:center; padding-left:100px; padding-right:100px;}
+h2 .red{ color:#e43e2b}
+h2 .blue{ color:#2058b7}
+.btncntr{ width:100%; float:left; margin:50px 0 0; text-align:center;}
+.brdr-btn{ background:transparent; color:#e43e2b;}
+.brdr-btn .fa{ background:#e43e2b; color:#fff;}
+.brdr-btn:hover .fa{background:#fff; color:#e43e2b;}
+.homesection6{ background:#f9f9f9;}
+.homesection6 h2{ text-align:center;}
+.insrow{ width:100%; float:left; display:flex; margin-top:40px; flex-wrap:wrap; justify-content:space-between;}
+.insrow img{ display:block; border-radius:6px;}
+.insrow .img{ width:48%;}
+.insrow .txt{ width:48%;}
+.insrow h3{ color:#e43e2b; font-size:30px; line-height:38px; margin:0 0 10px;}
+.insrow h4{ font-size:20px; line-height:28px; margin:10px 0 0; opacity:0.5; color:#141518;font-family:'AvenirNextLTPro'; font-weight:400;}
+.insrow p{ margin:30px 0 0; font-size:18px; line-height:32px;}
+
+.homesection6.bgwhite{ background:#fff;}
+.homesection6.bgwhite h2{ text-align:left; padding-bottom:0;}
+.homesection6.bgwhite h2:after{ display:none;}
+.homesection6.bgwhite .insrow{margin:0;}
+
+
+
+.homesection7{ background:#e43e2b;}
+.homesection7 .container{ display:flex; align-items:center; position:relative;}
+.homesection7 .container:before{ content:''; position:absolute; top:0; left:0; width:70%; height:100%; border-radius:6px; background:#e85b4b;}
+.homesection7 .txt{ position:relative; padding:55px; color:#fff; width:50%;}
+.homesection7 h2{ padding:0;}
+.homesection7 h2:after{ display:none;}
+.homesection7 p{ margin:20px 0 0;}
+.homesection7 .btn{ border-color:#fff; color:#fff; margin:20px 0 0;}
+.homesection7 .btn .fa{ background:#fff; color:#e43e2b;}
+.homesection7 .btn:hover{ background:#fff; color:#e43e2b;}
+.homesection7 .btn:hover .fa{background:#e43e2b; color:#fff;}
+.homesection7 .img{ margin:50px 0; width:50%; position:relative;}
+.homesection7 .img img{ display:block; width:100%; border-radius:6px;}
+
+
+.latestBlogs{ background:#f9f9f9;}
+.latestBlogs h2{ text-align:center;}
+.ltstBlogs{ width:calc(100% + 30px); float:left; margin:15px -15px 0; display:flex; flex-wrap:wrap;}
+.ltstBlogs .postcolm{ width:calc(33.33% - 30px); margin:15px 15px 0;}
+.ltstBlogs .postcolm a{ width:100%; display:block; border-radius:6px; background:#fff; padding-bottom:30px; height:100%; position:relative;}
+.ltstBlogs .postcolm img{ width:100%; display:block; height:244px; border-radius:6px 6px 0 0; object-fit:cover; object-position:center;}
+.ltstBlogs h6{ padding:30px 30px 0; margin:0; font-size:14px; color:#e43e2b; font-weight:400; font-family:'AvenirNextLTPro';}
+.ltstBlogs h4{ font-size:20px; line-height:30px; margin:10px 0 0; color:#141518; padding:0 30px;}
+.ltstBlogs .postcolm a:hover h4{ color:#e43e2b}
+
+.newsLtr{width:100%; float:left; background-size:cover; color:#fff; text-align:center;}
+.newsLtr h2:after{background:#fff;}
+.sgForm {width:756px; background:#fff; border:1px solid #fff;  border-radius:5px; margin:30px  auto 0; height:64px;}
+.sgForm input[type="email"] { font-size:20px;float:left; width:calc(100% - 163px); padding:0 30px; height:62px;}
+.sgForm .btn {float:right; min-width:163px; height:62px; color:#fff; border-radius:5px; font-size:17px; font-family:'AvenirNextLTProDemi'; position:relative; background:url(../images/subIcon.png) #e43e2b; background-repeat:no-repeat; background-position: right 16px center; padding:0;}
+.sgForm .btn:hover{background-color:#ed4c3a;}
+.sgForm input[type="email"]::-webkit-input-placeholder{color:#141518;}
+/*Middle Section End*/
+
+/* Footer Section Start */
+.footer{ width:100%; float:left; color:#fff;}
+.ftrSctn{width:100%; float:left; position:relative; background:#141518;  padding:65px 0 0;}
+.footer h6{padding:0 0 15px; position:relative;}
+.footer h6:after{content:''; width:48px; height:2px; background:#e43e2b; position:absolute; left:0; bottom:0;}
+.fttTop{width:100%; float:left; display:flex; justify-content:space-between; align-items:center;  padding:0 0 30px;}
+.ftrlogo{float:left;}
+.fttTop img{ display:block;}
+.ftrRit{display:flex; align-items:center;}
+.cnBtn{margin-right:20px;}
+.cnBtn .btn{min-width:217px; background:#222326; border-color:#222326; font-size:20px; position:relative;}
+.cnBtn .btn:after {content: ''; position:absolute; top:40%; right:-7px; margin:0 auto; width:14px; height:14px; background:#222326; z-index:1; transform:rotate( 45deg );}
+.cnBtn .btn:hover, .cnBtn .btn:hover::after{background:#e43e2b;}
+.fttBtm{width:100%; float:left; padding:55px 0; border-top: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1);}
+.fcol{width:25%; float:left; padding-left:55px;}
+.fcol:first-child{padding-left:0;}
+.fcol ul{width:100%; float:left; padding:10px 0 0;}
+.fcol ul li{width:100%; margin:0;}
+.fcol ul li a{color:#fff; font-size:14px;}
+.fcol ul li a:before{ content:'\f105'; font-family:'FontAwesome'; margin-right:10px;}
+.soclIcn{margin:15px 0 0;}
+.soclIcn a{display:inline-block; margin-left:60px;}
+.soclIcn a:hover{opacity:0.6;}
+.copyRight{width:100%; float:left; text-align:center; padding:20px 0; display:flex; justify-content:space-between;}
+.copyRight p{font-size:14px; margin:0px;}
+.copyRight p a{ color:#fff; display:inline-block; margin-left:20px;}
+.fcol ul li a:hover, .copyRight p a:hover{color:#e43e2b;}
+/* Footer Section End */
+
+/* Login-Resister Section Start */
+.breadCrumb {width:100%; float:left; background:#f9f9f9; padding:10px 0;}
+.breadCrumb ul {width:100%; float:left;}
+.breadCrumb ul li {position:relative; display: inline-block; font-size:14px;}
+.breadCrumb li+li:before {padding:6px; content: "\f105"; font-family: "FontAwesome"; color: #141518;}
+.loginSc{width:100%; float:left; padding:80px 0;}
+.loginSc .container{border:1px solid #e5e5e5; display:flex; border-radius:4px; align-items:center;}
+.colLft{width:50%;}
+.colLft img{display:block;}
+.colRit{width:50%; padding:40px 90px 25px;}
+.colRit h4{text-align:center;}
+.formSc{width:100%; float:left; margin:15px 0 0;}
+.formSc ul{width:100%; float:left;}
+.formSc li{width:100%; float:left; margin:0 0 15px; position:relative;}
+.formSc .field{width:100%; float:left; height:50px; border:1px solid #e5e5e5; padding:0 20px; color:#767676; font-size:16px;  border-radius:4px;}
+.formSc a{font-size:16px;}
+.formSc .btn{min-width:100%; width:100%; border-radius:5px; font-size:18px; padding:10px 25px;}
+.loginSc h6 {font-size:16px; text-align: center; font-family:'AvenirNextLTPro'; }
+.loginSc h6 a {color:#e43e2b;}
+.formSc i{position:absolute; top:30%; left:18px;}
+.loginSc .lgnBtn{min-width:100%; width: 100%; border-radius: 5px; padding:10px 25px;
+line-height: 32px; font-size:16px; border:1px solid #e5e5e5; background:#fff;}
+.loginSc .lgnBtn:hover{
+background: #e5e5e5;
+border-color: #e5e5e5; color: #141518;}
+.loginSc .fbBtn{background:#1877f2; color:#fff; border:1px solid #1877f2;}
+.field::-webkit-input-placeholder{color:#767676;}
+.loginSc p.or, .loginSc h6 a{font-family:'AvenirNextLTProDemi';}
+.loginSc p{text-align:center;}
+.loginSc h6 a:hover{text-decoration:underline; color: #141518;}
+.loginSc li.full{margin:0 0 10px;}
+.formSc label {font-size:16px; line-height:24px; display:block; margin:0 0 10px;}
+.formSc input[type="checkbox"] {position:absolute; top:0; left:0;opacity:0;} 
+.formSc input[type="checkbox"] + span {font-size:16px; color:#141518; width:100%; display:flex; cursor:pointer;
+padding-left:32px; position: relative;}
+.formSc  input[type="checkbox"] + span::before {content: ''; width:20px; height:20px; border-radius:4px; border:1px solid #e5e5e5;
+position:absolute; left:0px; top:3px; background: #fff;}
+.formSc input[type="checkbox"]:checked + span::after {display:inline-block; font-style:normal; font-variant:normal;
+text-rendering:auto; line-height:1; font-family: "FontAwesome"; content: "\f00c"; color: #e43e2b; position:absolute;
+font-size:12px; left:5px; top:7px;}
+.formSc  input[type="checkbox"]:checked + span::before {border-color:#e43e2b;}
+/*Login-Resister Section End */
+
+
+/*Listing section Start*/
+.listngSc{width:100%; float:left; padding:60px 0 100px;}
+.listngSc .container{display:flex; justify-content:space-between;}
+.sidebarLft{width:25%;}
+.sideBlock{width:100%; border:1px solid #e5e5e5; margin:0 0 20px;}
+.sideBlock h6{font-size:15px; background:#f9f9f9; padding:9px 20px; margin:0;}
+.sideBlock .navList{width:100%; padding:10px 0 15px;}
+.sideBlock .navList li{line-height:20px; position:relative; padding:8px 20px; }
+.sideBlock .navList li a{font-size:15px; position:relative;display:block;}
+.sideBlock .navList a::before {content: '\f105'; font-family: 'FontAwesome'; display: inline-block; margin-right:10px;}
+
+.sideBlock .navList li input[type=checkbox]{ position:absolute; top:0; left:0; opacity:0;}
+.sideBlock .navList li input + label{ display:block; position:relative; padding-left:25px; cursor:pointer;font-size:15px; color:#141518;}
+.sideBlock .navList li input + label:before{ content:''; position:absolute; top:0; left:0; width:16px; height:16px; border:1px solid #e43e2b;}
+.sideBlock .navList li input + label:after{ content:'\f00c'; font-family:'FontAwesome'; position:absolute; top:0; left:0; width:16px; height:16px; text-align:center; line-height:16px;font-size: 11px;font-weight: 300; color:#e43e2b; opacity:0;}
+.sideBlock .navList li input:checked + label:after{ opacity:1;}
+
+.sidebarRit{width:72%;}
+.progrmHd{width:100%; display:flex; justify-content:space-between; border:1px solid #e5e5e5; padding:20px;}
+.progrmHd h3{margin:0 0 5px; font-size:24px; line-height:30px;}
+.progrmHd p{ font-size:15px; line-height:1.4; color:#141518; opacity:0.8;}
+.sortby{ float:right;}
+.sortby select{float:right; width:150px; height:44px; border:1px solid #e5e5e5; border-radius:4px;  background:#fff url(../images/arw.png) no-repeat right 15px center; font-size: 16px; color:#141518; padding:0 15px; -moz-appearance:none;-webkit-appearance:none;}
+.sortby select option{font-family:'AvenirNextLTPro' , sans-serif;}
+.courselist{width:100%; float:left; padding:35px 0 0;}
+.categorybtn{ display:inline-block; color:#fff; border-radius:4px; font-size:13px; line-height:16px;font-family:'AvenirNextLTProDemi'; padding:2px 8px;}
+.charcol{ background:#f10066;}
+.pastel{ background:#fdaa2a;}
+.courserow{width:100%; float:left; border:1px solid #e5e5e5; margin:0 0 20px; display:flex; padding:20px;}
+.coursethumb{width:260px; min-width:260px; float:left; height:230px; margin-right:30px;}
+.coursethumb img{width:100%; height:100%; display:block; object-fit:cover; object-position:center;}
+.courseContent{float:left; background:#fff; font-size:16px; line-height:26px;}
+.courseContent h3{ font-size:20px; line-height:1.5; padding-top:5px;}
+.courseContent p{margin:0 0 15px;}
+.courseContent ul{ display:flex; margin:0 0 15px;}
+.courseContent li{color:#8e8c88; font-size:15px; display:flex; align-items:center; background:#f7f7f7; border-radius:6px; margin-right:10px; font-size:15px; color:#8e8c88; line-height:20px; padding:5px 8px;}
+.courseContent li i{margin-right:9px; max-width:18px;}
+.courseContent li img{ max-height:16px; display:block;}
+.courseContent h5{ color:#8e8c88; font-size:15px; line-height:24px; margin:0 0 10px; font-weight:400; font-family:'AvenirNextLTPro';}
+.courseContent h5 a{font-family:'AvenirNextLTProDemi'; color:#e43e2b;}
+.courseContent h5 a:hover{ text-decoration:underline;}
+.courseprice{width:100%;float:left; background:#f7f7f7; border-radius:4px; display:flex; justify-content:space-between; align-items:center;}
+.courseprice .date img{ max-width:15px; max-height:15px; display:flex; margin-right:10px;}
+.courseprice .date{ color:#141518; font-size:15px; display:flex; align-items:center; padding:0 10px;}
+.price{display:block; color:#2058b7; font-size:24px; font-family:'AvenirNextLTProDemi'; margin-left:auto; margin-right:25px;}
+.courseprice .btn{min-width:130px; padding:6px 15px; font-size:17px;}
+.loadmore{width:100%; float:left; margin:30px 0 0;}
+.loadmore i{width:20px; border-radius:100%; color:#fff; line-height:20px; background:#e43e2b; margin-left:10px;}
+.loadmore .btn{min-width:156px; padding:8px 20px; background:none; color:#e43e2b;}
+.loadmore .btn:hover{color:#fff; background:#49453b; border-color:#49453b;}
+.loadmore .btn:hover i{color:#e43e2b; background:#fff;}
+
+/*Listing section End*/
+
+
+/* Course Detail Page */
+.course_detail{ width:100%; float:left; padding:60px 0;}
+.courseleft{ width:780px; float:left;}
+.courseright{ width:330px; float:right;}
+.courseright .widget{ width:100%; float:left; margin:0 0 20px; border:1px solid #ccc; border-radius:10px; overflow:hidden;}
+.courseright h3{ width:100%; text-align:center; background:#f9f9f9; font-size:15px; color:#141518; line-height:25px; padding:10px; border-bottom:1px solid #e5e5e5; margin:0;}
+.courseright .pd30{ width:100%; float:left; padding:30px;}
+.courseright .buyCourse{ text-align:center;}
+.courseright .buyCourse p{ font-size:15px; line-height:22px; color:#141518; margin:0 0 15px;}
+.courseright .buyCourse h2{ color:#2058b7; margin:0 0 30px; font-size:44px; line-height:1.2; padding:0;}
+.courseright .buyCourse h2:after{ display:none;}
+.courseright .buyCourse .btn{ display:block;}
+.courseInc ul{ width:100%; float:left;}
+.courseInc ul li{ width:100%; float:left; display:flex; align-items:center; font-size:16px; line-height:24px; color:#797a7b; margin:0 0 10px;}
+.courseInc ul li .icon{ width:20px; text-align:center; margin-right:10px; min-width:10px;}
+.courseInc ul li .icon img{ display:block; max-width:18px; max-height:18px; margin:0 auto;}
+.courseInc ul li:last-child{ margin:0;}
+.courseInstructor img{ float:left; width:80px; height:80px; border-radius:50%; object-fit:cover; object-position:center; margin-right:20px;}
+.courseInstructor h5{ font-size:16px; color:#777778; margin:10px 0 0; line-height:1.2;}
+.courseInstructor h4{ margin:0; font-size:17px; color:#e43e2b;}
+.courseInstructor a{ color:#e43e2b}
+.courseInstructor a:hover{ text-decoration:underline;}
+.course-head{ width:100%; float:left; margin:0 0 60px;}
+.course-head h1{ font-size:44px; line-height:54px; color:#141518; font-weight:400; margin:10px 0 15px; font-family:'AvenirNextLTPro';	}
+.course-head h6{ font-size:16px; line-height:24px; color:#141518; margin:10px 0; font-family:'AvenirNextLTPro';	}
+.course-head h6 a{ color:#e43e2b}
+.course-head h6 a:hover{ text-decoration:underline;}
+.course-head p{ font-size:18px; line-height:32px; margin:10px 0 0;}
+.dtlimage{ width:100%; margin:40px 0 0;}
+.dtlimage img{ display:block; border-radius:6px;}
+.couserating{ width:100%; display:flex; margin:20px 0 0; align-items:center;}
+.couserating .ratingStar{ margin-right:20px;}
+.couserating .ratingStar .fa{ color:#e43e2b; display:inline-block; font-size:16px; margin-left:1px;}
+.couserating .ratingStar label{ font-size:20px;  font-family:'AvenirNextLTProDemi';}
+.couserating a{ display:inline-block; border:1px solid #e43e2b; color:#e43e2b; font-size:14px; line-height:28px; padding:0 10px; border-radius:6px; margin-left:10px;}
+.couserating a .fa{ margin-right:5px;}
+.couserating a:hover{ background:#e43e2b; color:#fff;}
+.courseleft ul.tabs{ background:none;}
+.courseleft ul.tabs li{ margin-right:10px; border:0;}
+.courseleft ul.tabs li.tab-active a::after{ display:none;}
+.introtext hr{ background:none; border:0; border-top:1px solid #e5e5e5; margin:40px 0 0}
+.introtext h3{ font-size:20px; line-height:1.4; margin:50px 0 20px; color:#141518;}
+.introtext ul{ margin:20px 0;}
+.introtext ul li{ margin:15px 0; font-size:18px; line-height:28px; padding-left:30px; background-image:url(../images/arw1.png); background-repeat:no-repeat; background-position:0 4px;}
+.introtext table{ margin:20px 0; width:100%;}
+.introtext table th{ text-align:left; font-size:17px; line-height:26px; font-family:'AvenirNextLTProDemi'; padding:8px 20px 8px 0; position:relative;}
+.introtext table th:after{ content:':'; position:absolute; right:0;}
+.introtext table td{ font-size:17px; line-height:26px; padding:8px 20px;}
+.introtext strong{font-family:'AvenirNextLTProDemi';}
+.intorschedule ul li{ border:1px solid #e5e5e5; border-radius:6px; margin:12px 0; padding:15px 20px 15px 50px; background-image:url(../images/arw2.png); background-position:20px 20px;}
+.intorschedule h3{ margin-bottom:5px;}
+.intorschedule .note{ padding-top:15px;}
+.intorschedule .note strong{ color:#e43e2b}
+/* Course Detail Page */
+
+/* Student Profile */
+.studentbanner{ width:100%; float:left; position:relative; background:url(../images/profile-banner.jpg) no-repeat; background-size:cover; padding:60px 0; color:#fff;}
+.studentbanner .container{ display:flex;}
+.studentbanner .img{ margin-right:45px;}
+.studentbanner .img img{ width:200px; height:200px; border-radius:50%; display:block; object-fit:cover; object-position:center;}
+.stinfo h1{ font-size:45px; line-height:55px; margin:0 0 5px;}
+.stinfo p{ font-size:16px; line-height:24px; margin:0 0 5px;}
+.stinfo p img{ max-width:16px; max-height:16px; display:inline-block; vertical-align:middle; margin-right:5px; margin-top: -5px;} 
+.stinfo .action{ margin-top:20px; width:100%; display:flex;}
+.stinfo .btn{ background:#fff; color:#e43e2b; min-width:140px; padding: 8px 25px; border:0; margin-right:14px;}
+.stinfo .btn:hover{ opacity:0.8;}
+.stinfo .msgicon{ display:inline-block; width:20px; height:15px; background:url(../images/msg-icon.png) no-repeat; vertical-align:middle; margin-right:8px; margin-top: -6px;}
+.stinfo .shareicon{ display:inline-block; width:16px; height:18px; background:url(../images/share-icon.png) no-repeat; vertical-align:middle; margin-right:8px; margin-top: -6px; background-size:100%;}
+.studentInfo{ width:100%; float:left; padding:50px 0 100px;}
+.tabswrap{ width:100%; float:left;}
+
+ul.tabs{ width:100%; display:flex; border-radius:4px; margin-bottom:70px;}
+ul.notabs{ width:100%; display:flex; border-radius:4px;}
+ul.tabs li, ul.notabs li{ margin-right:10px;}
+ul.tabs li a, ul.notabs li a{ color:#141518; font-size:18px; padding:15px; min-width:150px; display:inline-block; text-align:center; border-radius:4px; position:relative; transition:all 0.1s ease-in-out;  background:#f9f9f9;}
+ul.tabs li.tab-active a, ul.notabs li.tab-active a{ background:#e43e2b; color:#fff;}
+ul.tabs li a:hover, ul.notabs li a:hover{ background:#e43e2b; color:#fff;}
+
+.tabcontent2{ width:100%; float:left; padding-top:70px;}
+.tabcontent{ width:100%; float:left;}
+.tabcontent h2{ font-size:32px; padding-bottom:10px; line-height:42px;}
+.tabcontent h2:after, .tabcontent2 h2:after{ margin:0;}
+.tabcontent .profile p{ padding-top:5px;}
+.enrolledCourse{ width:calc(100% + 40px); float:left; display:flex; flex-wrap:wrap; margin:0 -20px;}
+.enrolledCourse .column{width:calc(33.33% - 40px); margin:30px 20px 0; border:1px solid #e5e5e5; border-radius:0 0 6px 6px; overflow:hidden;}
+.enrolledCourse  .coursethumb{ width:100%; margin:0; height:210px;}
+.enrolledCourse .courseContent{ width:100%; float:left; padding:20px; margin:0;}
+.enrolledCourse .courseContent h3{ margin:0;}
+.enrolledCourse .courseContent ul{ display:block; background:none; margin:0; }
+.enrolledCourse .courseContent ul li{padding:0; background:none; margin:10px 0 0; border:0;}
+.glryImgs{ width:100%; float:left; margin:20px 0 0;}
+.glryImgs ul{ width:calc(100% + 20px); float:left; display:flex; flex-wrap:wrap; margin:0 -10px;}
+.glryImgs li{width:calc(25% - 20px); margin:10px;}
+.glryImgs li a{ display:block; position:relative; height:100%; border-radius:8px;}
+.glryImgs li span{ width:100%; display:block; height:277px; background-repeat:no-repeat; background-size:cover; background-position:center; border-radius:8px; transition:all 0.3s ease-in-out;}
+.glryImgs li a:hover span{ opacity:0.8;}
+/* Student Profile */
+
+
+
+/* FAQ Page  */
+.inrbanrtxt{width:100%; float:left; min-height:250px; display:flex; text-align:center; align-items:center; color:#fff; padding:50px 0; background-repeat:repeat;}
+.inrbanrtxt h1{color:#fff; font-size:45px; line-height:52px; margin:0;}
+.inrbanrtxt p{ color:#fff; font-size:20px; line-height:32px; margin:5px 0 0;}
+.faqpage{ width:100%; float:left; padding:80px 0;}
+.faqList{ width:100%; float:left; padding:0 60px;}
+.faqList h3{ width:100%; position:relative; float:left; border:1px solid #cccccc; font-size:22px; line-height:28px; padding:20px 60px 20px 30px; color:#000; border-radius:6px; margin:30px 0 0; cursor:pointer; background-image:url(../images/plus.png); background-repeat:no-repeat; background-position:calc(100% - 20px) 50%;}
+.faqList h3:nth-child(1){ margin-top:0;}
+.faqList h3.active{ border-radius:6px 6px 0 0; background-color:#f9f9f9; color:#e43e2b; background-image:url(../images/minus.png);}
+.faqList .answer{ width:100%; display:none; float:left; padding:30px; border:1px solid #cccccc; border-top:0; border-radius:0 0 6px 6px;}
+.faqList .answer p{ font-size:18px; line-height:32px; margin:15px 0 0;}
+.faqList .answer p:nth-child(1){ margin-top:0;}
+/* FAQ Page  */
+
+
+/* Contact Page  */
+.contactbanr{ padding-bottom:270px; padding-top:110px; }
+.contactwrap{ width:100%; padding:0 100px 100px; float:left; position:relative; }
+.contactpage{ width:100%; float:left; position:relative; padding:80px 100px 45px; background:#fff; position:relative; z-index:1; border:1px solid #ccc; border-radius:8px; display:flex; justify-content:space-between; margin-top:-200px;}
+.contactpage .col5{ width:48%;}
+.contactpage h3{ margin:0 0 10px; font-size:24px; line-height:32px;}
+.contactpage .col5 p{ font-size:16px; line-height:26px;}
+
+.ctForm{ width:100%; float:left;}
+.ctForm .btn{ border-radius:6px;}
+.ctForm ul{ width:100%; float:left;}
+.ctForm ul li{ width:100%; float:left; margin:10px 0;}
+.ctForm .field{ width:100%; float:left; background:#fff; border:1px solid #ccc; border-radius:6px; padding:20px; font-size:16px; height:68px; color:#767676;}
+.ctForm textarea.field{ resize:none; height:160px;}
+
+.contactpage .addressCol{ width:38%;}
+.addressCol .widget{ width:100%; padding:30px 0; border-top:1px solid #ccc;}
+.addressCol .widget:first-child{ padding-top:0; border-top:0;}
+.addressCol .widget:last-child{ padding-bottom:0;}
+ul.followus{ display:flex; padding:15px 0 0;}
+ul.followus li{ margin-right:30px;}
+ul.followus li img{ display:block; max-height:28px; max-width:26px;}
+ul.followus li a:hover{ opacity:0.8;}
+
+.addressCol .office p{ font-size:17px; line-height:30px; margin:16px 0;}
+.addressCol .office h6 a{ font-size:17px; color:#e43e2b;}
+.addressCol .office h6 a:hover{ text-decoration:underline;}
+.addressCol .office h3{ display:flex; align-items:center;}
+.addressCol .office h3 img{ display:block; margin-right:10px; max-width:30px;}
+
+ul.connect li{ width:100%; padding:14px 0 0;}
+ul.connect li a{ display:flex; align-items:center; color:#141518; font-size:18px; line-height:26px;}
+ul.connect li img{ display:block; margin-right:25px;}
+
+
+
+
+/* Contact Page  */
+
+/* Student Feedback Page  */
+.feedbacktpage{ width:100%; float:left; padding:60px;}
+
+.fdrow{ width:100%; float:left; border:1px solid #e5e5e5; border-radius:6px; padding:35px; margin:20px 0; display:flex; flex-wrap:wrap; justify-content:space-between;}
+.fdrow .poster{ width:48%;}
+.fdrow img{ display:block; border-radius:6px; width:100%;}
+.fdrow .text{ width:48%;}
+.fdrow .rating .fa{ display:inline-block; font-size:24px; color:#f0b501; margin-right:3px;}
+.fdrow h4{ margin:30px 0 20px; font-size:24px; line-height:32px;}
+.fdrow p{ font-size:16px; line-height:24px; margin:20px 0 0;}
+.fdrow a{ color:#e43e2b; text-decoration:underline;} 
+.fdrow a:hover{ text-decoration:none;}
+
+.fdrow h5{ font-size:24px; margin:30px 0 0; line-height:32px; color:#000;}
+.fdrow h6{ font-size:16px; line-height:22px; color:#000; opacity:0.6; margin:0; font-family:'AvenirNextLTPro';}
+
+
+
+/* Student Feedback Page  */
+
+
+
+
+
+/* Blog Page  */
+.blogpage{ width:100%; float:left; padding:60px 0;}
+.blogleftbar{ float:left; width:800px;}
+
+.blogarticles{ float:left; width:100%;}
+.blogarticles article{ width:100%; float:left; border:1px solid #c6c6c6; border-radius:8px; margin:0 0 25px; padding:60px 100px 30px;}
+.postmeta{ width:100%; display:flex; align-items:center; justify-content:center; margin:25px 0; font-size:15px; color:#8e8c88; line-height:24px;}
+.postmeta span{ padding:0 5px;}
+.postmeta a{color:#8e8c88;}
+.postmeta a:hover{color:#333;}
+
+.postmeta .date:before{ content:''; display:inline-block; background:url(../images/calendar-icon.png) no-repeat; background-size:100%; width:14px; height:14px; margin-right:8px;}
+.postmeta .postcatgry:before{ content:''; display:inline-block; background:url(../images/tag-icon.png) no-repeat; background-size:100%; width:14px; height:14px; margin-right:8px;}
+
+.postthumb{ width:100%; display:inline-block;}
+.postthumb img{ width:100%; display:block; border-radius:6px;}
+.postText{ text-align:center; padding:25px 30px 0;}
+.blogarticles h3{ font-size:24px; line-height:32px; color:#141518; margin:0 0 25px;}
+.blogarticles h3 a{color:#141518;}
+.blogarticles h3 a:hover{ color:#e43e2b;}
+.blogarticles p{ font-size:18px; line-height:32px; margin:0 0 20px;}
+.blogarticles .author{ text-align:center; display:inline-block;}
+.blogarticles .author a{ display:flex; align-items:center; font-size:17px; color:#e43e2b; line-height:24px;}
+.blogarticles .author img{ width:38px; height:38px; object-fit:cover; object-position:center; border-radius:50%; margin-right:10px;}
+
+
+
+.pagination{ width:100%; float:left; margin:15px 0 0; text-align:center;}
+.pagination li{ margin:2px; display:inline-block;}
+.pagination li a{ display:flex; width:50px; height:50px; border:1px solid transparent; border-radius:6px; background:#f9f9f9; color:#333; font-size:18px; align-items:center; justify-content:center; line-height:24px;}
+
+.pagination li.prev a, .pagination li.next a{ margin:0 15px; border-color:#c6c6c6}
+.pagination li a:hover, .pagination li.current a{ background:#e43e2b; color:#fff; border-color:#e43e2b;}
+
+
+
+
+.blogsidebar{ width:330px; float:right;}
+.blogsidebar .widget{ width:100%; float:left; margin:0 0 30px; border:1px solid #ccc; border-radius:10px; overflow:hidden;}
+.blogsidebar h3{ width:100%; background:#f9f9f9; font-size:15px; color:#141518; line-height:25px; padding:10px 30px; border-bottom:1px solid #e5e5e5; margin:0;}
+.blogsidebar .pd30{ width:100%; float:left; padding:20px 30px;}
+.topcategories ul li{ font-size:15px; line-height:24px; margin:10px 0; position:relative; padding-left:18px;}
+.ftrdpost ul li{ font-size:16px; line-height:28px; margin:10px 0; font-family:'AvenirNextLTProDemi'; position:relative; padding-left:18px;}
+.topcategories ul li a:before, .ftrdpost ul li a:before{ content:'\f105'; font-family:'FontAwesome'; width:16px;  position:absolute; top:0; left:0;}
+
+.sidebarSignup{ width:100%; float:left; border-radius:10px; background-color:#4864fd; background-image:url(../images/sidebar-bg1.png); background-repeat:no-repeat; background-position:center bottom; padding:30px; color:#fff;}
+.sidebarSignup h4{ color:#fff; font-size:20px; line-height:28px; margin:0 0 10px;}
+.sidebarSignup p{ margin:10px 0 0; font-size:16px; line-height:28px;}
+.sidebarSignup .signupForm{ width:100%; float:left; margin:20px 0 0;}
+.sidebarSignup input[type=email]{ width:100%; background-color:#fff; height:54px; border-radius:6px; font-size:16px; color:#a6a6a7; padding:0 15px;}
+.sidebarSignup .btn{ width:auto; margin:20px 0 0; border-radius:6px;}
+
+.blogmain{ width:100%; float:left; border:1px solid #c6c6c6; border-radius:8px; margin:0 0 25px; padding:60px 100px 50px; color:#141518;}
+.blogmain .author{ width:100%;text-align:center; display:inline-block;}
+.blogmain .author a{ display:flex; align-items:center; font-size:17px; color:#e43e2b; line-height:24px;}
+.blogmain .author img{ width:38px; height:38px; object-fit:cover; object-position:center; border-radius:50%; margin-right:10px;}
+.blogmain .postmeta{justify-content:initial;}
+.blogmain h1{ font-size:44px; line-height:60px; margin:30px 0; color:#141518;}
+
+.blogmain hr{ margin:40px 0 0; background:none; border:0; border-top:2px solid #e5e5e5;}
+.blogcontent h2{ margin:60px 0 0; font-size:32px; line-height:42px; padding:0; }
+.blogcontent h2:after{ display:none;}
+.blogcontent p{ margin:30px 0 0; font-size:18px; line-height:30px;}
+.blogcontent h3{ margin:40px 0 0; color:#556ef5; font-size:20px; line-height:28px;}
+.blogcontent h4{ margin:30px 0 0; color:#141518; font-size:20px; line-height:28px;}
+.blogcontent h5{ margin:30px 0 0; color:#141518; font-size:18px; line-height:26px;}
+.blogcontent h6{ margin:30px 0 0; color:#141518; font-size:16px; line-height:24px;}
+
+.blogcontent ul, .blogcontent ol{ margin:30px 0 0;}
+.blogcontent ul ol, .blogcontent ul ul, .blogcontent ol ul, .blogcontent ol ol{ margin:0;}
+.blogcontent p img{ display:block; border-radius:6px;}
+
+.blogcontent li{ margin:15px 0; font-size:18px; line-height:30px; padding-left:30px; background-image:url(../images/arw1.png); background-repeat:no-repeat; background-position:0 5px;}
+
+
+.shareArticle{ width:100%; margin:40px 0 0; background:#f1f1f1; border-radius:4px; padding:15px; display:flex; align-items:center; justify-content:center;}
+.shareArticle label{ font-size:16px; color:#010101; padding-right:20px;}
+.shareArticle a{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; font-size:20px; border:1px solid #39579d; color:#39579d; margin:0 5px;}
+.shareArticle a.fa-twitter{ border-color:#60a9de; color:#60a9de;}
+.shareArticle a.fa-linkedin{ border-color:#0e77b8; color:#0e77b8;}
+.shareArticle a:hover{ background:#39579d; color:#fff;}
+.shareArticle a.fa-twitter:hover{ background:#60a9de; color:#fff;}
+.shareArticle a.fa-linkedin:hover{ background:#0e77b8; color:#fff;}
+
+
+.blogcomments{ width:100%; float:left; border:1px solid #ccc; background:#f7f7f7; padding:40px 100px; border-radius: 8px;}
+.commentsCount{ width:100%; display:flex; align-items:center; justify-content:space-between;}
+.commentsCount h3{ font-size:16px; line-height:24px; color:#040404;}
+.commentsCount a{ color:#e43e2b; font-size:16px; line-height:24px; display:inline-block;}
+.commentsCount a:hover{ text-decoration:underline;}
+
+
+.commentbox{ width:100%; display:flex; background:#fff; border:1px solid #c6c6c6; border-radius:8px; padding:25px; margin:30px 0 0;}
+.commentbox .col4{ text-align:center; width:25%;}
+.commentbox .col4 img{ display:block; margin:5px auto; border-radius:50%; width:50px; height:50px; object-fit:cover; object-position:center;}
+.commentbox h4{ font-size:15px; line-height:24px; color:#141518; margin:5px 0 0;}
+.commentbox h6{ font-size:14px; line-height:20px; color:#767676; margin:0; font-family:'AvenirNextLTPro'; font-weight:400;}
+.commentbox .col8{ width:75%; padding-left:5%;}
+.commentbox .col8 p{ font-size:15px; line-height:26px; color:#141518; font-style:italic;}
+
+
+/* Blog Page  */
+
+/* Checkout Page  */
+.checkoutHead{ width:100%; float:left; padding:30px 0;}
+.checkoutHead h1{ font-size:15px; color:#141518; border:1px solid #e5e5e5; border-radius:6px; padding:10px 30px; line-height:30px;}
+
+.checkoutwrap{ width:100%; display:flex; float:left; margin:0 0 90px; flex-wrap:wrap; justify-content:space-between;}
+.checkoutsteps{ width:800px; background:#f7f7f7; border-radius:6px; padding:30px;}
+.stepbox{ width:100%; float:left; margin:0 0 20px; background:#fff; border:1px solid #c6c6c6; border-radius:8px; overflow:hidden;}
+.stephead{ width:100%; float:left; padding:15px 25px; display:flex; align-items:center; justify-content:space-between;}
+.stepname{display:flex; align-items:center; font-size:18px; line-height:28px; color:#141518; font-family:'AvenirNextLTProDemi'; white-space: nowrap;margin-right:25px;}
+.stepname img{ display:block; margin-right:15px;}
+
+
+.stepcontent{ width:100%; float:left; padding:30px; border-top:1px solid #e5e5e5}
+.stepcontent .formSc{ margin:0; padding:0 140px;}
+
+.stepcompleted{ display:none;}
+
+.billingform ul{width:100%; float:left;  display:flex;  flex-wrap:wrap; justify-content:space-between;}
+.billingform li{width:48%; float:left; margin:0 0 15px; position:relative;}
+.billingform li.w100{ width:100%;}
+.billingform .field{width:100%; float:left; height:50px; background-color:#fff; border:1px solid #e5e5e5; padding:0 20px; color:#767676; font-size:16px;  border-radius:4px;}
+.billingform select.field{ background-image:url(../images/arw3.png); background-repeat:no-repeat; background-position:calc(100% - 15px) 50%;}
+.billingform  .btn{ float:right; border-radius:6px; margin-top:15px;}
+
+.loginas{ margin-right:auto; display:flex; align-items:center; font-size:16px; color:#141518;}
+.loginas img{ display:block; width:28px; height:28px; border-radius:50%; object-fit:cover; margin-right:10px;}
+.userlogout{ margin-left:20px;}
+.userlogout button{display:flex; align-items:center; height:40px; background:#f7f7f7; border-radius:4px; padding:0 15px; color:#e43e2b; font-size:16px;}
+.userlogout button img{ display:block; margin-right:5px;}
+.userlogout button:hover{ background:#f1f1f1;}
+
+.blngAdrs{ margin-right:auto;}
+.blngAdrs p{ font-size:16px; line-height:24px; white-space: nowrap; overflow: hidden;text-overflow: ellipsis;}
+
+.paymentoption .btn{ margin:15px 0 0;}
+.paymentoption p{ font-size:16px; line-height:24px; margin:0 0 5px;}
+
+.checkoutsidebar{ width:330px;}
+.checkoutsidebar .widget{ width:100%; float:left; margin:0 0 30px; border:1px solid #ccc; border-radius:10px; overflow:hidden;}
+.checkoutsidebar h3{ width:100%; background:#f9f9f9; font-size:15px; color:#141518; line-height:25px; padding:10px 30px; border-bottom:1px solid #e5e5e5; margin:0; text-align:center;}
+.checkoutsidebar .pd30{ width:100%; float:left; padding:30px; text-align:center;}
+.checkoutsidebar h4{ font-size:16px; line-height:26px;}
+.checkoutsidebar img{ display:block; border-radius:4px; margin-bottom:15px;}
+.checkoutsidebar p{ font-size:16px; line-height:24px; margin:10px 0;}
+.checkoutsidebar h6{ font-size:14px; line-height:24px; opacity:0.7; margin:5px 0 0; font-family:'AvenirNextLTPro'; font-weight:400;}
+.checkoutsidebar .price{ font-size:44px; line-height:50px; color:#2058b7;}
+
+
+.thankBox{width:100%; float:left; background:#fff; border:1px solid #c6c6c6; border-radius:8px; overflow:hidden; padding:30px;}
+.thankBox h2:after{ display:none;}
+.thankBox h2{ font-size:36px; line-height:46px;font-family:'AvenirNextLTPro'; font-weight:400;}
+
+.thankBox p{ font-size:16px; line-height:28px;}
+.thankBox p a{ color:#e43e2b; text-decoration:underline;}
+.thankBox p a:hover{ text-decoration:none;}
+
+.thankCourse{ width:100%; display:flex; border-top:1px solid #e5e5e5; border-bottom:1px solid #e5e5e5; padding:30px 0; align-items:center; margin-bottom:20px;}
+.thankCourse img{ width:130px; height:88px; border-radius:6px; object-fit:cover; object-position:center; margin-right:28px;}
+.thankCourse h4{ font-size:16px; line-height:24px; margin:0 0 5px;}
+.thankCourse h6{font-family:'AvenirNextLTPro'; font-weight:400; font-size:16px; line-height:24px;}
+
+
+/* Checkout Page  */
+
+
+/* Instructorstpage Page  */
+.instructorstpage{ margin:70px 0;  width:100%; float:left; padding:0 50px;}
+.instructorstpage .fdrow .poster{width: 36%;}
+.instructorstpage .fdrow .text{width: 60%;}
+.instructorstpage h6{ margin-bottom:18px;}
+.soclShare{ width:100%; display:flex; margin-top:45px;}
+.soclShare a{ display:flex; align-items:center; justify-content:center; border-radius:4px; color:#fff; text-decoration:none; font-size:18px; width:50px; height:50px; margin-right:10px;}
+.soclShare a.fa-facebook{ background-color:#39579d}
+.soclShare a.fa-instagram{ background-color:#d62977}
+.soclShare a.fa-twitter{ background-color:#60a9de}
+.soclShare a.fa-linkedin{ background-color:#0e77b8}
+.soclShare a:hover{ opacity:0.8;}
+/* Instructorstpage Page  */
+
+
+
+/* Free Resources Page  */
+.freeResources .courseContent h3{ font-size:28px; line-height:1.4; padding-top:0; margin-bottom:10px;}
+.freeResources .courseContent h5{ display:flex; align-items:center; }
+.freeResources .courseContent h5 img{ width:38px; height:38px; border-radius:50%; object-fit:cover; display:block; margin-right:10px;}
+.freeResources .courseContent p a:not(.btn){ color:#e43e2b; text-decoration:underline;}
+.freeResources .courseContent p a:not(.btn):hover{ text-decoration:none;}
+.freeResources .courseContent a.btn{padding: 6px 20px; margin-top:10px;}
+.sideBlock .navList li.active a{color:#e43e2b;}
+
+.resourcesDtl{ width:100%; float:left; margin:80px 0;}
+.backbtn .btn{ background:#fff; color:#e43e2b; border:1px solid #e43e2b; padding:8px 16px;}
+.backbtn .btn .fa {margin-left:0px;margin-right: 10px; background: #e43e2b;color: #fff;}
+.backbtn .btn:hover{ background:#e43e2b; color:#fff;}
+.backbtn .btn:hover .fa{background: #fff;color: #e43e2b;}
+
+.resourcesMain{ width:100%; float:left; border:1px solid #d9d9d9; border-radius:8px; overflow:hidden;}
+.resourcesDtl .container {display: flex;justify-content: space-between;}
+.rsdtlSctn1{ width:100%; float:left; padding:55px; border-bottom:1px solid #d9d9d9}
+.rsdtlSctn1 h1{ font-size:44px; line-height:1.4; margin:0 0 15px;}
+.rsdtlSctn1 h5 a {color: #e43e2b;}
+.rsdtlSctn1 h5{ margin:0 0 30px; display:flex; align-items:center; font-size:17px; }
+.rsdtlSctn1 h5 img{ width:38px; height:38px; border-radius:50%; object-fit:cover; display:block; margin-right:10px;}
+.rsdtlSctn1 p{ margin:40px 0 0;}
+.rsdtlSctn1 img{ display:block; border-radius:8px; width:100%;}
+
+.rsdtlSctn2{ width:100%; float:left; padding:55px; border-bottom:1px solid #d9d9d9}
+.rsdtlSctn2 p{ font-size:18px; line-height:30px; margin:30px 0;}
+.rsdtlSctn2 h3{ font-size:28px; line-height:44px; margin-bottom:30px;}
+.rsdtlSctn2 h4{ margin-bottom:30px;}
+.getActn{ width:100%; display:inline-block; margin-top:40px;}
+
+.allTutorials{ width:100%; display:flex; flex-direction:column;}
+.allTutorials .row{width:100%; display:flex; flex-wrap:wrap; justify-content:space-between; border:1px solid #d9d9d9; border-radius:6px; background:#f9f9f9; padding:30px; margin:40px 0 0;}
+.allTutorials .thumb{ width:200px;}
+.allTutorials .tutorialInfo{ width:calc(100% - 250px); margin-top:-5px;}
+.rsdtlSctn2 .tutorialInfo h4{ margin:0;}
+.rsdtlSctn2 .tutorialInfo p{ margin:15px 0 0; color:#141518;}
+.tutorialInfo label{display: inline-block;color: #fff;border-radius: 4px;font-size: 13px;line-height: 16px;padding: 3px 10px; background:#e43e2b; margin:0 0 8px;}
+
+
+
+
+.rsdtlSctn3{ width:100%; float:left; padding:55px;}
+.rsdtlSctn3 p{ font-size:18px; line-height:30px; margin:0 0 30px;}
+.sharePost{ display:flex; align-items:center; flex-wrap:wrap;}
+.sharePost label{font-size:18px; line-height:30px; margin-right:15px;}
+.sharePost a{ display:flex; align-items:center; color:#fff; background:#39579d; text-align:center; padding:5px 20px; border-radius:6px; margin-right:10px; font-size:14px; line-height:24px; }
+.sharePost a .fa{ font-size:18px; margin-right:10px;}
+.sharePost a.tw{ background-color:#60a9de}
+.sharePost a.in{ background-color:#0e77b8}
+.sharePost a:hover{ opacity:0.8;}
+
+
+
+
+
+/* Free Resources Page  */
+
+
+

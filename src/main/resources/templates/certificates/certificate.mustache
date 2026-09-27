@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Artisticity Certificate</title>
+    <meta name="robots" content="noindex">
+    <meta name="csrf-token" content="{{csrf}}">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <style>
+        .center {
+            margin: auto;
+            width: 60%;
+            padding: 10px;
+        }
+
+        .cursive {
+            font-family: 'Pinyon Script', cursive;
+        }
+
+        .sans {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .block {
+            display: block;
+        }
+
+        .underline {
+            border-bottom: 1px solid #777;
+            padding: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .margin-0 {
+            margin: 0;
+        }
+
+        .padding-0 {
+            padding: 0;
+        }
+
+        .pm-empty-space {
+            height: 40px;
+            width: 100%;
+        }
+
+        body {
+            padding: 20px 0;
+            background: #ccc;
+        }
+
+        .pm-certificate-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background-color: #b63222;
+            padding: 1px;
+            color: #333;
+            font-family: 'Open Sans', sans-serif;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            /*background: -webkit-repeating-linear-gradient(
+                45deg,
+                #618597,
+                #618597 1px,
+                #b2cad6 1px,
+                #b2cad6 2px
+            );
+            background: repeating-linear-gradient(
+                90deg,
+                #618597,
+                #618597 1px,
+                #b2cad6 1px,
+                #b2cad6 2px
+            );*/
+        }
+
+        .pm-certificate-container .outer-border {
+            width: 794px;
+            height: 594px;
+            position: absolute;
+            left: 50%;
+            margin-left: -397px;
+            top: 50%;
+            margin-top: -297px;
+            border: 2px solid #fff;
+        }
+
+        .pm-certificate-container .inner-border {
+            width: 730px;
+            height: 530px;
+            position: absolute;
+            left: 50%;
+            margin-left: -365px;
+            top: 50%;
+            margin-top: -265px;
+            border: 2px solid #fff;
+        }
+
+        .pm-certificate-container .pm-certificate-border {
+            position: relative;
+            width: 720px;
+            height: 520px;
+            padding: 0;
+            border: 1px solid #E1E5F0;
+            background-color: #ffffff;
+            background-image: none;
+            left: 50%;
+            margin-left: -360px;
+            top: 50%;
+            margin-top: -260px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-certificate-block {
+            width: 80%;
+            height: 150px;
+            margin-left: 10%;
+            margin-top: 20px;
+            /* position: relative; */
+            /* left: 65%; */
+            /* margin-left: 135px; */
+            /* top: 70px; */
+            /* margin-top: 20px; */
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-certificate-header {
+            margin-bottom: 10px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-certificate-title {
+            position: relative;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-certificate-title h2 {
+            font-size: 34px !important;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-certificate-body {
+            padding: 20px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-certificate-body .pm-name-text {
+            font-size: 20px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-earned {
+            margin: 15px 0 20px;
+            text-align: center;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-earned .pm-earned-text {
+            font-size: 20px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-earned .pm-credits-text {
+            font-size: 15px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-course-title {
+            text-align: center;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-course-title .pm-earned-text {
+            font-size: 20px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-course-title .pm-credits-text {
+            font-size: 15px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-certified {
+            font-size: 12px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-certified .underline {
+            margin-bottom: 5px;
+        }
+
+        .pm-certificate-container .pm-certificate-border .pm-certificate-footer {
+            width: 650px;
+            height: 50px;
+            position: relative;
+            left: 50%;
+            margin-left: -325px;
+            bottom: -105px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container pm-certificate-container center" id="certImg">
+        <div class="outer-border"></div>
+        <div class="inner-border"></div>
+
+        <div class="pm-certificate-border col-xs-12">
+            <div class="row pm-certificate-header">
+                <div class="pm-certificate-title cursive">
+                    <h2 class="cursive">ArtistikCity Certificate of Completion</h2>
+                </div>
+            </div>
+
+            <div class="row pm-certificate-body ">
+
+                <div class="pm-certificate-block ">
+                    <div class="" style="width: 100%;">
+                        <div class="" style="margin-right: -15px; margin-left: -15px;">
+                            <div class="" style="width: 16.66666667%;">
+                                <!-- LEAVE EMPTY -->
+                            </div>
+                            <div class="pm-certificate-name underline">
+                                <span class="pm-name-text bold">{{name}}</span>
+                            </div>
+                            <div class="" style="width: 16.66666667%;">
+                                <!-- LEAVE EMPTY -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12">
+                        <div class="row">
+                            <div class="" style="width: 16.66666667%;">
+                                <!-- LEAVE EMPTY -->
+                            </div>
+                            <div class="pm-earned">
+                                <span class="pm-earned-text padding-0 cursive">has earned</span>
+                                <span class="pm-credits-text block bold sans">Certificate of complition of his
+                                    course</span>
+                            </div>
+                            <div class="" style="width: 16.66666667%;">
+                                <!-- LEAVE EMPTY -->
+                            </div>
+                            <div class="" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="" style="width: 100%;">
+                        <div class="" style="margin-right: -15px; margin-left: -15px;">
+                            <div class="" style="width: 16.66666667%;">
+                                <!-- LEAVE EMPTY -->
+                            </div>
+                            <div class="pm-course-title">
+                                <span class="pm-earned-text cursive">while completing the training course
+                                    entitled</span>
+                            </div>
+                            <div class="" style="width: 16.66666667%;">
+                                <!-- LEAVE EMPTY -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="" style="width: 100%;">
+                        <div class="" style="margin-right: -15px; margin-left: -15px;">
+                            <div class="" style="width: 16.66666667%;">
+                                <!-- LEAVE EMPTY -->
+                            </div>
+                            <div class="pm-course-title underline text-center">
+                                <span class="pm-credits-text block bold sans">{{course_title}}</span>
+                            </div>
+                            <div class="" style="width: 16.66666667%;">
+                                <!-- LEAVE EMPTY -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-12">
+                    <div class="row">
+                        <div class="pm-certificate-footer">
+                            <div class="pm-certified" style="width: 33.33333333%; text-align: center; float: left;">
+                                <span class="pm-credits-text block sans"><strong>ArtistikCity</strong></span>
+                                <span class="pm-empty-space block underline">{{signature}}</span>
+                                <span class="bold block">Art Learning for Anyone, Anywhere</span>
+                            </div>
+
+                            <div class="pm-certified" style="width: 33.33333333%; text-align: center; float: right;">
+                                <span class="pm-credits-text block sans"><strong>Completed Date</strong></span>
+                                <span class="pm-empty-space block underline">{{certificate_date}}</span>
+                                <span class="bold block">Certificate # {{certificate_number}}</span>
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <button id="download" style="display: none;">Download</button>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous">
+    </script>
+    <script>
+        // $(document).ready(function() {
+        //     function certImg() {
+        //         html2canvas($("#certImg"), {
+        //             onrendered: function(canvas) {
+        //                 var imgsrc = canvas.toDataURL("image/png");
+        //                 console.log(imgsrc);
+        //                 $("#newimg").attr('src', imgsrc);
+        //                 $("#img").show();
+        //                 var dataURL = canvas.toDataURL();
+        //                 $.ajax({
+        //                     type: "POST",
+        //                     url: '/api/save_cert_img',
+        //                     data: {
+        //                         imgBase64: dataURL
+        //                     }
+        //                 }).done(function(o) {
+        //                     console.log('saved');
+        //                 });
+        //             }
+        //         });
+        //     }
+        //     console.log('page loaded');
+        //     certImg();
+        // });
+
+        jQuery(document).ready(function() {
+            jQuery("#download").click(function() {
+                screenshot();
+            });
+
+            setTimeout(function() {
+                $("#download").trigger('click');
+            },10);
+        });
+
+        function screenshot() {
+            html2canvas(document.getElementById("certImg")).then(function(canvas) {
+                // downloadImage(canvas.toDataURL(), "{{certificate_name_img}}");
+                saveImage(canvas, "{{certificate_name_img}}");
+            });
+        }
+
+        function saveImage(canvas, filename){
+            var imgsrc = canvas.toDataURL("image/png");
+            console.log(imgsrc);
+            $("#newimg").attr('src', imgsrc);
+            $("#img").show();
+            console.log($('meta[name="csrf-token"]').attr('content'));
+            var dataURL = canvas.toDataURL();
+            $.ajax({
+                type: "POST",
+                url: '/api/save_cert_img',
+                headers: {
+			    	'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			    },
+                data: {
+                    imgBase64: dataURL,
+                    imgName: filename
+                }
+            }).done(function(o) {
+                console.log('saved');
+            });
+        }
+
+        function downloadImage(uri, filename) {
+            var link = document.createElement('a');
+            if (typeof link.download !== 'string') {
+                window.open(uri);
+            } else {
+                link.href = uri;
+                link.download = filename;
+                accountForFirefox(clickLink, link);
+            }
+        }
+
+        function clickLink(link) {
+            link.click();
+        }
+
+        function accountForFirefox(click) {
+            var link = arguments[1];
+            document.body.appendChild(link);
+            click(link);
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+
+</html>

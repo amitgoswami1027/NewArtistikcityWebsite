@@ -1,0 +1,19 @@
+target/
+frontend/node_modules/
+*.log
+.idea/
+*.iml
+.vscode/
+.DS_Store
+# user uploads (keep the demo images under storage/uploads in version control if you like)
+storage/certificates/
+.tools/
+.env
+# transfer / download leftovers
+*.tgz
+*.tar.gz
+logs/
+# local backups made during the redesign
+redesign-backup*/
+build-frontend.log
+tools/redesign_patch_mustache.py

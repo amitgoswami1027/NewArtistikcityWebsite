@@ -1,0 +1,11 @@
+target/
+.tools/
+frontend/node_modules/
+*.tgz
+*.tar.gz
+*.log
+.git/
+.idea/
+.vscode/
+*.bat
+*.ps1

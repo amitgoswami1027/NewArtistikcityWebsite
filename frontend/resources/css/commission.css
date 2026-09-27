@@ -1,0 +1,26 @@
+/*
+ * Scoped Tailwind utilities for the Artist Commission Portal.
+ * Only `@tailwind utilities` is emitted (no preflight), and every utility is prefixed with `.tw`
+ * (see tailwind.config.js `important`), so the rest of the site is unaffected.
+ * The few preflight defaults the utilities rely on are recreated below for `.tw` descendants.
+ */
+.tw, .tw *, .tw ::before, .tw ::after {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+    border-color: #e5e7eb;
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-color: rgba(229, 21, 107, 0.45);
+    --tw-ring-offset-shadow: 0 0 #0000;
+    --tw-ring-shadow: 0 0 #0000;
+    --tw-shadow: 0 0 #0000;
+}
+.tw button { cursor: pointer; background-color: transparent; font: inherit; color: inherit; }
+.tw button:disabled { cursor: not-allowed; }
+.tw img, .tw svg, .tw canvas { display: block; max-width: 100%; }
+.tw h1, .tw h2, .tw h3, .tw h4, .tw p, .tw ul, .tw ol, .tw figure { margin: 0; }
+.tw h2:after { display: none; }
+.tw input, .tw textarea, .tw select { font: inherit; color: inherit; }
+
+@tailwind utilities;

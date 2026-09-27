@@ -1,0 +1,15 @@
+ArtistikCity redesign: new layout, commission portal, student lifecycle and admin console
+
+- Editorial marketplace layout (header, catalog, course landing page, footer)
+- Centred log in / Join for free screens with Google and Facebook sign-in (OAuth state check, return-to)
+- Studio Stories page fed from the studiovaishaliarts.com blog
+- Artist Commission Portal: 6-step wizard, texture simulator, room scale and framing previews,
+  Razorpay / PayPal checkout with signature-verified webhooks
+- Student Creative Lifecycle: studio, classroom with progress, submissions, portfolio and marketplace,
+  public student shop
+- New admin console with personas (super admin, instructor, moderator): overview, verification desk,
+  commissions board, marketplace, people and roles, testimonials, gallery
+- SQL Server migrations in database/migrations; schema and seed updated for the dev database
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01QU3vkYxbQEKTiiYdCEhZ7r

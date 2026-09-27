@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="19.745" height="19.748" viewBox="0 0 19.745 19.748">
+  <g id="layout-dashboard" transform="translate(0.6 0.6)">
+    <path id="Path" d="M7.6,9.18a.763.763,0,0,1-.76.764H.76A.762.762,0,0,1,0,9.18V.764A.763.763,0,0,1,.761,0L6.845.01A.763.763,0,0,1,7.6.774Z" transform="translate(0 0)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.2"/>
+    <path id="Path-2" data-name="Path" d="M7.6,4.514a.756.756,0,0,1-.76.75H.76A.755.755,0,0,1,0,4.514V.76A.755.755,0,0,1,.759.01L6.842,0A.757.757,0,0,1,7.6.75Z" transform="translate(10.941)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.2"/>
+    <path id="Path-3" data-name="Path" d="M7.6,4.512a.757.757,0,0,1-.762.753L.759,5.254A.756.756,0,0,1,0,4.5V.752A.756.756,0,0,1,.76,0H6.844A.757.757,0,0,1,7.6.752Z" transform="translate(0 13.284)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.2"/>
+    <path id="Path-4" data-name="Path" d="M.761,9.944A.763.763,0,0,1,0,9.179V.765A.763.763,0,0,1,.76,0H6.844A.763.763,0,0,1,7.6.765v8.4a.764.764,0,0,1-.76.765Z" transform="translate(10.941 8.604)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.2"/>
+  </g>
+</svg>

@@ -1,0 +1,85 @@
+# =====================================================================
+#  ArtistikCity - full stack in Docker
+#    docker compose up -d --build        start everything
+#    http://localhost:8080               website   (admin: /admin/login)
+#    localhost,1433  sa / see .env       SQL Server (SSMS / Azure Data Studio)
+#    docker compose down                 stop (data is kept in volumes)
+#    docker compose down -v              stop and delete the database + uploads
+# =====================================================================
+name: artistikcity
+
+services:
+  # ---- Module 1: database (Microsoft SQL Server 2022) ----------------
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: artistikcity-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:-Artistik#2026Pass}
+    ports:
+      - "${SQL_PORT:-1433}:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    restart: unless-stopped
+
+  # ---- Module 2: database initialisation (runs once, then exits) -----
+  db-init:
+    build:
+      context: .
+      dockerfile: docker/db-init.Dockerfile
+    image: artistikcity/db-init:latest
+    container_name: artistikcity-db-init
+    environment:
+      DB_HOST: db
+      DB_NAME: artistikcity
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:-Artistik#2026Pass}
+      RESET_DB: ${RESET_DB:-false}
+    depends_on:
+      - db
+    restart: "no"
+
+  # ---- Module 3: web application (Spring Boot backend + React UI) ----
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: artistikcity/app:latest
+    container_name: artistikcity-app
+    environment:
+      DB_URL: jdbc:sqlserver://db:1433;databaseName=artistikcity;encrypt=true;trustServerCertificate=true
+      DB_USERNAME: sa
+      DB_PASSWORD: ${SA_PASSWORD:-Artistik#2026Pass}
+      DB_INIT: never
+      PAYMENT_TEST_MODE: ${PAYMENT_TEST_MODE:-true}
+      RAZORPAY_KEY: ${RAZORPAY_KEY:-}
+      RAZORPAY_SECRET: ${RAZORPAY_SECRET:-}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_SECRET: ${PAYPAL_SECRET:-}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      - app-storage:/app/storage
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # ---- Optional module 4: rebuild the React bundle -------------------
+  #   docker compose --profile frontend run --rm frontend
+  #   then: docker compose up -d --build app
+  frontend:
+    image: node:18-bullseye
+    profiles: ["frontend"]
+    working_dir: /work/frontend
+    command: sh -c "npm install --no-audit --no-fund && npm run prod"
+    volumes:
+      - ./:/work
+
+volumes:
+  mssql-data:
+  app-storage:

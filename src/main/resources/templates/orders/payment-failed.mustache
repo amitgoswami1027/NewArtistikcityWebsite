@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{csrf}}">
+
+        <title inertia>{{appName}}</title>
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+
+        <!-- Styles -->
+        <link rel="stylesheet" href="/css/app.css">
+        <link rel="stylesheet" href="/css/style.css">
+        <link href="/css/font-awesome.css" rel="stylesheet" type="text/css">
+        <link href="/fonts/stylesheet.css" rel="stylesheet" type="text/css">
+        <link href="/css/owl.carousel.css" rel="stylesheet" type="text/css">
+        
+        <!-- Scripts -->
+
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="/css/ac-theme.css">
+    </head>
+    <body class="font-sans antialiased">
+        <!-- ac:header -->
+<div class="ac">
+<header class="dm-header">
+    <div class="ac-wide dm-header__row">
+        <a href="/" class="ac-logo" aria-label="ArtistikCity home"><img src="/assets/images/logo.png" alt="ArtistikCity" /></a>
+        <div class="dm-explore"><a href="/courses?type=all" style="display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;font-weight:700;font-size:15px;border-radius:999px;">Courses <i class="fa fa-angle-down"></i></a></div>
+        <form class="dm-search" action="/courses" method="get" role="search">
+            <i class="fa fa-search"></i>
+            <input type="hidden" name="type" value="all">
+            <input type="search" name="q" placeholder="Search courses: watercolour, portraits, sketching…" aria-label="Search courses">
+        </form>
+        <nav class="dm-links" aria-label="Main">
+            <a href="/commission/step-1">Commission art</a>
+            <a href="/studio-stories" class="is-accent">Studio Stories</a>
+            <a href="/student-feedback">Gallery</a>
+            <a href="/how-it-works">How it works</a>
+            <span class="dm-sep"></span>
+            {{#auth.check}}
+                <a href="/user/dashboard">My courses</a>
+                <a href="javascript:void(0)" class="dm-btn dm-btn--line" onclick="document.getElementById('logout-form').submit();">Log out</a>
+                <form id="logout-form" action="/logout" method="POST" style="display: none;"><input type="hidden" name="_token" value="{{csrf}}"></form>
+            {{/auth.check}}
+            {{#auth.guest}}
+                <a href="/login">Log in</a>
+                <a href="/join" class="dm-btn dm-btn--brand" style="margin-left:6px">Join for free</a>
+            {{/auth.guest}}
+        </nav>
+        <button type="button" class="ac-burger" aria-label="Menu" onclick="var d=document.getElementById('ac-drawer');d.style.display=d.style.display==='block'?'none':'block';"><i class="fa fa-bars"></i></button>
+    </div>
+</header>
+<div class="ac-drawer" id="ac-drawer" style="display:none;top:68px">
+    <a href="/courses?type=all">All courses</a>
+    <a href="/courses?type=workshop">Workshops</a>
+    <a href="/commission/step-1">Commission a painting</a>
+    <a href="/studio-stories">Studio Stories</a>
+    <a href="/student-feedback">Gallery</a>
+    <a href="/how-it-works">How it works</a>
+    {{#auth.check}}<a href="/user/dashboard" class="dm-btn dm-btn--line dm-btn--block">My courses</a>{{/auth.check}}
+    {{#auth.guest}}<a href="/join" class="dm-btn dm-btn--brand dm-btn--block">Join for free</a><a href="/login" class="dm-btn dm-btn--line dm-btn--block" style="margin-top:10px">Log in</a>{{/auth.guest}}
+</div>
+</div>
+<!-- /ac:header -->
+
+        
+<div class="breadCrumb">
+    <div class="container">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li>Checkout</li>
+        </ul>
+    </div>
+</div>
+<div class="checkoutHead">
+    <div class="container">
+        <h1>Sorry Something went wrong, your transaction failed!</h1>
+    </div>
+</div>
+<div class="container">
+    <div class="checkoutwrap">
+        <div class="checkoutsteps">
+
+            <div class="thankBox">
+                <h2>Please try again.</h2>
+                <div class="thankCourse">
+                    <img src="{{orderDetails.course.photo_url}}">
+                    <div>
+                        <h4>{{orderDetails.course.title}}</h4>
+                        <h6>{{orderDetails.course.duration}} / {{orderDetails.course.time_required}}</h6>
+                    </div>
+                </div>
+                <p>Please go to your <a href="/user/dashboard">dashboard</a> to access your course</p>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="section newsLtr" style="background-image:url(/assets/images/newsletter-Bg.jpg);">
+    <div class="container">
+        <h2>Sign Up Our Newsletter</h2>
+        <p>Subscribe our newsletter to receive the latest news and exclusive offers every week.</p>
+        <div class="sgForm">
+            <form>
+                <input type="email"  placeholder="Email Address">
+                <input type="submit" class="btn" value="Subscribe" name="submit">
+            </form>
+        </div>
+    </div>
+</section>
+
+
+
+        <!-- Footer Section Start -->
+<!-- ac:footer -->
+<div class="ac">
+<footer class="dm-footer">
+    <div class="ac-wide">
+        <div class="dm-footer__grid">
+            <div class="dm-footer__brand">
+                <a href="/"><img src="/assets/images/footerlogo.png" alt="ArtistikCity" /></a>
+                <p style="max-width:320px">Online art courses taught live by a working artist. Learn to draw and paint at your own pace, in any medium, at any age.</p>
+                <div class="ac-social">
+                    <a href="https://www.facebook.com/StudioVaishaliArts/" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/artistikcity/" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@artistikcityYT" target="_blank" rel="noopener" aria-label="YouTube"><i class="fa fa-youtube-play"></i></a>
+                    <a href="https://in.linkedin.com/in/vaishali-jetly-goswami-4b5874233" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div><h6>Courses</h6><ul id="latestCourses"><li></li></ul><ul><li><a href="/courses?type=course">All courses</a></li></ul></div>
+            <div><h6>Workshops</h6><ul id="latestWorkshop"><li></li></ul><ul><li><a href="/courses?type=workshop">All workshops</a></li></ul></div>
+            <div><h6>ArtistikCity</h6><ul>
+                <li><a href="/commission/step-1">Artist Commission Portal</a></li>
+                <li><a href="/artistikcity-vision">Our vision</a></li>
+                <li><a href="/how-it-works">How it works</a></li>
+                <li><a href="/instructor">Our instructor</a></li>
+                <li><a href="/student-feedback">Student gallery</a></li>
+                <li><a href="/studio-stories">Studio Stories</a></li>
+                <li><a href="https://studiovaishaliarts.com/" target="_blank" rel="noopener">Studio Vaishali Arts</a></li>
+            </ul></div>
+            <div><h6>Support</h6><ul>
+                <li><a href="/faq">FAQ</a></li>
+                <li><a href="/customer-support">Help centre</a></li>
+                <li><a href="/contact">Contact us</a></li>
+                <li><a href="/join">Join for free</a></li>
+            </ul></div>
+        </div>
+        <div class="dm-footer__bottom">
+            <span>&copy; {{year}} ArtistikCity. All rights reserved.</span>
+            <nav><a href="/terms-conditions">Terms of use</a><a href="/privacy-policy">Privacy policy</a><a href="/contact">Contact</a></nav>
+        </div>
+    </div>
+</footer>
+</div>
+<!-- /ac:footer -->
+<!-- Footer Section End -->
+
+
+        <script src="/js/jquery.min.js" type="text/javascript"></script>
+        <script src="/js/owl.carousel.js" type="text/javascript"></script>
+        <script src="/js/custom.js" type="text/javascript"></script>
+
+        
+<script>
+$(document).ready(function() { 
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url : "/api/get_footer_data",
+        type : 'GET',
+        dataType : 'json',
+        success : function(result){
+            let latestCourses = result.latestCourses;
+            let latestWorkshop = result.latestWorkshop;
+            var latestCoursesHtml = '';
+            var latestWorkshopHtml = '';
+            $.each( latestCourses, function( i, val ) {
+                latestCoursesHtml += '<li><a href="/course/'+val.slug+'">'+val.title+'</a></li>';
+            });
+            $.each( latestWorkshop, function( i, value ) {
+                latestWorkshopHtml += '<li><a href="/course/'+value.slug+'">'+value.title+'</a></li>';
+            });
+            // console.log(latestCoursesHtml);
+            $('#latestCourses').html(latestCoursesHtml);
+            $('#latestWorkshop').html(latestWorkshopHtml);
+            // console.log("===== " + result + " =====");
+
+        }
+    });
+});
+</script>
+
+    </body>
+</html>
