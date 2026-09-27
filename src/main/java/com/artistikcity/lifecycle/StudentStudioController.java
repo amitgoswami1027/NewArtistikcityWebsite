@@ -45,13 +45,15 @@ public class StudentStudioController {
     private final Json json;
     private final Storage storage;
     private final LifecycleRepository repo;
+    private final CredentialsService credentials;
 
-    public StudentStudioController(Inertia inertia, Auth auth, Json json, Storage storage, LifecycleRepository repo) {
+    public StudentStudioController(Inertia inertia, Auth auth, Json json, Storage storage, LifecycleRepository repo, CredentialsService credentials) {
         this.inertia = inertia;
         this.auth = auth;
         this.json = json;
         this.storage = storage;
         this.repo = repo;
+        this.credentials = credentials;
     }
 
     // ================================================================ pages
@@ -64,7 +66,9 @@ public class StudentStudioController {
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("enrollments", repo.enrollments(userId));
         props.put("submissions", subs);
-        props.put("stage", stage(repo.enrollments(userId), subs));
+        List<Map<String, Object>> creds = credentials.credentials(userId);
+        props.put("stage", stage(repo.enrollments(userId), subs, creds));
+        props.put("certificatesReady", creds.stream().filter(c -> Boolean.TRUE.equals(c.get("eligible")) || c.get("certificate") != null).count());
         return inertia.render(request, "Studio/Home", props);
     }
 
@@ -202,6 +206,12 @@ public class StudentStudioController {
 
     /** Where the student is in the 6-stage lifecycle (1 discover ... 6 exhibit & sell). */
     static int stage(List<Map<String, Object>> enrollments, List<Map<String, Object>> subs) {
+        return stage(enrollments, subs, List.of());
+    }
+
+    /** Stage 7 (certify & showcase) once any course certificate is earned or issued. */
+    static int stage(List<Map<String, Object>> enrollments, List<Map<String, Object>> subs, List<Map<String, Object>> credentials) {
+        if (credentials.stream().anyMatch(c -> Boolean.TRUE.equals(c.get("eligible")) || c.get("certificate") != null)) return 7;
         if (subs.stream().anyMatch(s -> Boolean.TRUE.equals(s.get("is_listed_for_sale")))) return 6;
         if (subs.stream().anyMatch(s -> "Approved".equals(s.get("admin_status")))) return 6;
         if (!subs.isEmpty()) return 5;

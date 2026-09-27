@@ -168,3 +168,14 @@ INSERT INTO admins (name, slug, email, password, admin_type, location, profile_p
 
 INSERT INTO enrollments (user_id, course_id, progress_percentage, status, created_at, updated_at) VALUES
 (1, 1, 0, 'Active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- demo progress for the student: course 1 completed with one approved and one pending artwork
+INSERT INTO lesson_completions (enrollment_id, lesson_id, completed_at) VALUES
+(1, 1, CURRENT_TIMESTAMP), (1, 2, CURRENT_TIMESTAMP), (1, 3, CURRENT_TIMESTAMP);
+UPDATE enrollments SET progress_percentage = 100, status = 'Completed', updated_at = CURRENT_TIMESTAMP WHERE id = 1;
+INSERT INTO student_submissions (user_id, course_id, title, description, file_url, admin_status, reviewer_feedback, reviewed_by, reviewed_at, created_at, updated_at) VALUES
+(1, 1, 'Monsoon Hills', 'Wet-in-wet sky with layered hills, painted on 300gsm cold-press paper.', '/storage/uploads/artworks/1/artwork.jpg', 'Approved',
+ 'Beautiful control of the washes and a clear sense of depth. Next time, leave a little more white paper for the highlights on the water.', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(1, 1, 'Evening Lake Study', 'Quick study of reflections at sunset.', '/storage/uploads/home-artworks/3/artwork.jpg', 'Pending Review', NULL, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO portfolio_marketplace (submission_id, user_id, is_listed_for_sale, sale_price, currency, inventory_count, created_at, updated_at) VALUES
+(1, 1, 1, 2500.00, 'INR', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

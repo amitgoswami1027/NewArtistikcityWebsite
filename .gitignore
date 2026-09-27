@@ -17,3 +17,5 @@ logs/
 redesign-backup*/
 build-frontend.log
 tools/redesign_patch_mustache.py
+test-output/
+TEST-CERTIFICATES.bat

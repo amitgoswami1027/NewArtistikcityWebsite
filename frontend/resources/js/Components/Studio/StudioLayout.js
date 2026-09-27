@@ -6,6 +6,7 @@ const TABS = [
     { href: '/dashboard', label: 'My studio', icon: 'fa-th-large' },
     { href: '/dashboard/submissions', label: 'Submissions', icon: 'fa-upload' },
     { href: '/dashboard/portfolio', label: 'Portfolio & shop', icon: 'fa-picture-o' },
+    { href: '/dashboard/certificates', label: 'Certificates & reports', icon: 'fa-certificate' },
     { href: '/user/my-account', label: 'Account', icon: 'fa-user-o' },
 ];
 

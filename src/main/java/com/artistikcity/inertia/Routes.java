@@ -57,6 +57,9 @@ public class Routes {
         get("studio.submissions", "dashboard/submissions");
         get("studio.portfolio", "dashboard/portfolio");
         get("student.shop", "student-shop");
+        get("studio.certificates", "dashboard/certificates");
+        get("studio.portfolio.report", "dashboard/portfolio/report");
+        get("certificate.verify", "certificates/verify/{number}");
         get("admin.console", "admin/dashboard");
         get("admin.console.submissions", "admin/dashboard/submissions");
         get("admin.console.commissions", "admin/dashboard/commissions");

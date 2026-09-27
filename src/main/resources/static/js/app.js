@@ -7562,6 +7562,13 @@ var JOURNEY = [{
   text: 'Approved pieces join your portfolio, and you choose which ones to sell.',
   href: '/dashboard/portfolio',
   cta: 'My portfolio'
+}, {
+  n: '07',
+  key: 'CERTIFY',
+  title: 'Certify & showcase',
+  text: 'Download your ArtistikCity certificate and a printable PDF portfolio with curriculum and instructor comments.',
+  href: '/dashboard/certificates',
+  cta: 'Certificates & reports'
 }];
 var statusStyle = function statusStyle(status) {
   return {
@@ -7635,6 +7642,10 @@ var TABS = [{
   href: '/dashboard/portfolio',
   label: 'Portfolio & shop',
   icon: 'fa-picture-o'
+}, {
+  href: '/dashboard/certificates',
+  label: 'Certificates & reports',
+  icon: 'fa-certificate'
 }, {
   href: '/user/my-account',
   label: 'Account',
@@ -14725,7 +14736,7 @@ function HowItWorks() {
             })]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
             className: "mt-6 max-w-2xl text-xl text-gray-300",
-            children: "From your first guided lesson to a finished piece in your public portfolio, with the option to sell it. Six clear steps, one studio."
+            children: "From your first guided lesson to a finished piece in your public portfolio, with the option to sell it and a certificate at the end. Seven clear steps, one studio."
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
             className: "mt-8 flex flex-wrap gap-3",
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
@@ -14748,7 +14759,7 @@ function HowItWorks() {
             children: "Roadmap"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
             className: "mt-2 text-4xl font-black tracking-tight text-ink",
-            children: "Six steps from curious to exhibited"
+            children: "Seven steps from curious to certified"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
             className: "mt-3 text-lg text-gray-600",
             children: "Each step unlocks the next. Your studio shows exactly where you are."
@@ -14814,6 +14825,132 @@ function HowItWorks() {
                 })]
               }, t);
             })
+          })]
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("section", {
+        className: "ac-wide py-20",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+              className: "font-mono text-xs tracking-widest uppercase text-brand",
+              children: "Step 07 \xB7 Certify & showcase"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
+              className: "mt-2 text-4xl font-black tracking-tight text-ink",
+              children: "Your work, on paper"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+              className: "mt-3 text-lg text-gray-600",
+              children: "Finish every lesson and get one assignment approved to earn a verifiable ArtistikCity certificate for that course. Then generate a detailed, print-ready PDF portfolio of everything you've made."
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
+              className: "mt-6 space-y-3 text-base text-gray-700",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("li", {
+                className: "flex gap-3",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+                  className: "fa fa-certificate text-brand mt-1",
+                  "aria-hidden": "true"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("strong", {
+                    className: "text-ink",
+                    children: "Course certificates"
+                  }), " with a unique number anyone can verify online"]
+                })]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("li", {
+                className: "flex gap-3",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+                  className: "fa fa-file-pdf-o text-brand mt-1",
+                  "aria-hidden": "true"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("strong", {
+                    className: "text-ink",
+                    children: "Portfolio PDF"
+                  }), " with every course, its full curriculum and your progress"]
+                })]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("li", {
+                className: "flex gap-3",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+                  className: "fa fa-comments-o text-brand mt-1",
+                  "aria-hidden": "true"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("strong", {
+                    className: "text-ink",
+                    children: "Instructor comments"
+                  }), " printed beside each approved artwork"]
+                })]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("li", {
+                className: "flex gap-3",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+                  className: "fa fa-print text-brand mt-1",
+                  "aria-hidden": "true"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("strong", {
+                    className: "text-ink",
+                    children: "Print or share any time"
+                  }), " for applications, exhibitions or school"]
+                })]
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
+              href: signedIn ? '/dashboard/certificates' : '/join',
+              className: "mt-8 inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800",
+              children: signedIn ? 'Open certificates & reports' : 'Join and start earning'
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+            className: "relative h-96",
+            "aria-hidden": "true",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+              className: "absolute left-0 top-6 w-3/4 rounded-lg bg-white shadow-2xl border border-gray-200 p-6 transform -rotate-3",
+              style: {
+                aspectRatio: '297 / 210'
+              },
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                className: "h-full border-4 border-ink p-4 relative",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+                  className: "absolute inset-y-0 left-0 w-3 bg-brand"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "pl-5 font-mono text-xs tracking-widest uppercase text-brand",
+                  children: "Certificate of completion"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "pl-5 mt-2 text-2xl font-black text-ink",
+                  children: "Course Certificate"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "pl-5 mt-3 text-xs text-gray-500",
+                  children: "This certifies that"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "pl-5 text-lg font-bold text-ink border-b border-ink inline-block",
+                  children: "Your name"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "pl-5 mt-3 font-mono text-xs text-gray-500",
+                  children: "AC-2026-XXXXXXXX"
+                })]
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+              className: "absolute right-0 bottom-0 w-1/2 rounded-lg bg-ink shadow-2xl p-5 text-white transform rotate-2",
+              style: {
+                aspectRatio: '210 / 297'
+              },
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                className: "h-full border-l-4 border-brand pl-4 flex flex-col",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "font-mono text-xs tracking-widest uppercase text-pink-300 mt-8",
+                  children: "Artist portfolio"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "mt-2 text-2xl font-black leading-tight",
+                  children: "Your name"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                  className: "mt-auto grid grid-cols-2 gap-2 text-xs text-gray-300",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("b", {
+                      className: "block text-xl text-white",
+                      children: "3"
+                    }), "Courses"]
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("b", {
+                      className: "block text-xl text-white",
+                      children: "12"
+                    }), "Artworks"]
+                  })]
+                })]
+              })
+            })]
           })]
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("section", {
@@ -18928,6 +19065,428 @@ function StudioStories() {
 
 /***/ }),
 
+/***/ "./resources/js/Pages/Studio/Certificates.js":
+/*!***************************************************!*\
+  !*** ./resources/js/Pages/Studio/Certificates.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Certificates)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "./node_modules/@inertiajs/inertia-react/dist/index.js");
+/* harmony import */ var _Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Studio/StudioLayout */ "./resources/js/Components/Studio/StudioLayout.js");
+/* harmony import */ var _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Studio/Journey */ "./resources/js/Components/Studio/Journey.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+function Requirement(_ref) {
+  var ok = _ref.ok,
+    label = _ref.label,
+    detail = _ref.detail,
+    action = _ref.action;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("li", {
+    className: "flex items-start gap-3 py-2",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+      className: "mt-0.5 flex-none w-6 h-6 rounded-full flex items-center justify-center text-xs ".concat(ok ? 'bg-green-600 text-white' : 'border-2 border-gray-300 text-gray-400'),
+      children: ok ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+        className: "fa fa-check",
+        "aria-hidden": "true"
+      }) : null
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+      className: "flex-1",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+        className: "block font-bold ".concat(ok ? 'text-ink' : 'text-gray-800'),
+        children: label
+      }), detail && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+        className: "block text-sm text-gray-500",
+        children: detail
+      })]
+    }), !ok && action]
+  });
+}
+function CertificateCard(_ref2) {
+  var c = _ref2.c,
+    verifyBase = _ref2.verifyBase;
+  var total = Number(c.total_lessons || 0);
+  var done = Number(c.completed_lessons || 0);
+  var pct = total === 0 ? 100 : Math.round(done / total * 100);
+  var cert = c.certificate;
+  var earned = c.eligible || cert;
+  var download = "/dashboard/certificates/".concat(c.course_id, "/download");
+  var issued = cert ? new Date(String(cert.issued_at).replace(' ', 'T')) : new Date();
+  var linkedIn = cert ? 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME' + "&name=".concat(encodeURIComponent(c.title), "&organizationName=ArtistikCity&issueYear=").concat(issued.getFullYear(), "&issueMonth=").concat(issued.getMonth() + 1) + "&certUrl=".concat(encodeURIComponent(verifyBase + cert.certificate_no), "&certId=").concat(encodeURIComponent(cert.certificate_no)) : null;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("article", {
+    className: "rounded-2xl border bg-white overflow-hidden ".concat(earned ? 'border-ink' : 'border-gray-200'),
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+      className: "flex flex-col sm:flex-row",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+        className: "sm:w-48 h-36 sm:h-auto bg-gray-100 bg-cover bg-center flex-none",
+        style: {
+          backgroundImage: c.photo ? "url(/storage/uploads/courses/".concat(c.course_id, "/").concat(c.photo, ")") : undefined
+        }
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+        className: "flex-1 p-6",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "flex flex-wrap items-start justify-between gap-3",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+              className: "font-mono text-xs uppercase tracking-widest text-gray-500",
+              children: String(c.course_type_id) === '2' ? 'Workshop' : 'Course'
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
+              className: "text-xl font-black tracking-tight text-ink",
+              children: c.title
+            })]
+          }), cert ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+            className: "rounded-full bg-ink text-white px-3 py-1 text-xs font-bold",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+              className: "fa fa-certificate mr-1",
+              "aria-hidden": "true"
+            }), "Certified"]
+          }) : earned ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+            className: "rounded-full bg-green-100 text-green-800 px-3 py-1 text-xs font-bold",
+            children: "Ready to claim"
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+            className: "rounded-full bg-gray-100 text-gray-700 px-3 py-1 text-xs font-bold",
+            children: "In progress"
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
+          className: "mt-3 divide-y divide-gray-100",
+          "aria-label": "Certificate requirements",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Requirement, {
+            ok: c.lessons_ok,
+            label: total === 0 ? 'Lessons' : "Complete all lessons (".concat(done, "/").concat(total, ")"),
+            detail: total === 0 ? 'No lessons published for this course' : null,
+            action: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
+              href: "/dashboard/classroom/".concat(c.course_id),
+              className: "text-sm font-bold underline whitespace-nowrap",
+              children: "Continue"
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Requirement, {
+            ok: c.milestone_ok,
+            label: "Get one assignment approved",
+            detail: c.milestone_ok ? "".concat(c.approved_works, " approved") : Number(c.pending_works) > 0 ? "".concat(c.pending_works, " waiting for review") : 'No approved work yet',
+            action: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
+              href: "/dashboard/submissions?course=".concat(c.course_id),
+              className: "text-sm font-bold underline whitespace-nowrap",
+              children: "Submit"
+            })
+          })]
+        }), total > 0 && !c.lessons_ok && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+          className: "mt-2 h-1.5 rounded-full bg-gray-100 overflow-hidden",
+          "aria-hidden": "true",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+            className: "h-full bg-brand",
+            style: {
+              width: "".concat(pct, "%")
+            }
+          })
+        }), earned ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "mt-5 flex flex-wrap items-center gap-2",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
+            href: download,
+            className: "inline-flex items-center h-11 px-5 rounded-full bg-brand text-white font-bold hover:bg-brand-dark",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+              className: "fa fa-download mr-2",
+              "aria-hidden": "true"
+            }), cert ? 'Download certificate' : 'Claim & download certificate']
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
+            href: "".concat(download, "?inline=1"),
+            target: "_blank",
+            rel: "noopener",
+            className: "inline-flex items-center h-11 px-5 rounded-full border border-gray-300 font-bold hover:border-ink",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+              className: "fa fa-print mr-2",
+              "aria-hidden": "true"
+            }), "View & print"]
+          }), cert && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
+            href: "/certificates/verify/".concat(cert.certificate_no),
+            target: "_blank",
+            rel: "noopener",
+            className: "inline-flex items-center h-11 px-4 rounded-full font-bold text-gray-700 hover:text-ink",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+              className: "fa fa-shield mr-2",
+              "aria-hidden": "true"
+            }), "Verify"]
+          }), linkedIn && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
+            href: linkedIn,
+            target: "_blank",
+            rel: "noopener",
+            className: "inline-flex items-center h-11 px-4 rounded-full font-bold text-gray-700 hover:text-ink",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+              className: "fa fa-linkedin-square mr-2",
+              "aria-hidden": "true"
+            }), "Add to LinkedIn"]
+          }), cert && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
+            className: "w-full mt-1 font-mono text-xs text-gray-500",
+            children: ["No. ", cert.certificate_no, " \xB7 issued ", (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__.shortDate)(cert.issued_at)]
+          })]
+        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
+          className: "mt-4 text-sm text-gray-500",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+            className: "fa fa-lock mr-2",
+            "aria-hidden": "true"
+          }), "Your certificate unlocks when both steps are done."]
+        })]
+      })]
+    })
+  });
+}
+function PortfolioBuilder(_ref3) {
+  var credentials = _ref3.credentials,
+    stats = _ref3.stats;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
+    _useState2 = _slicedToArray(_useState, 2),
+    approvedOnly = _useState2[0],
+    setApprovedOnly = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
+    _useState4 = _slicedToArray(_useState3, 2),
+    curriculum = _useState4[0],
+    setCurriculum = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
+    _useState6 = _slicedToArray(_useState5, 2),
+    comments = _useState6[0],
+    setComments = _useState6[1];
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(credentials.map(function (c) {
+      return String(c.course_id);
+    })),
+    _useState8 = _slicedToArray(_useState7, 2),
+    courses = _useState8[0],
+    setCourses = _useState8[1];
+  var toggleCourse = function toggleCourse(id) {
+    return setCourses(function (list) {
+      return list.includes(id) ? list.filter(function (x) {
+        return x !== id;
+      }) : [].concat(_toConsumableArray(list), [id]);
+    });
+  };
+  var qs = new URLSearchParams({
+    approvedOnly: approvedOnly ? '1' : '0',
+    curriculum: curriculum ? '1' : '0',
+    comments: comments ? '1' : '0',
+    courses: courses.join(',')
+  }).toString();
+  var href = "/dashboard/portfolio/report?".concat(qs);
+  var none = credentials.length > 0 && courses.length === 0;
+  var Toggle = function Toggle(_ref4) {
+    var checked = _ref4.checked,
+      _onChange = _ref4.onChange,
+      label = _ref4.label,
+      hint = _ref4.hint;
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("label", {
+      className: "flex items-start gap-3 py-2 cursor-pointer",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
+        type: "checkbox",
+        checked: checked,
+        onChange: function onChange(e) {
+          return _onChange(e.target.checked);
+        },
+        className: "mt-1 h-5 w-5 rounded text-brand border-gray-300 focus:ring-brand"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+          className: "block font-bold text-ink",
+          children: label
+        }), hint && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+          className: "block text-sm text-gray-500",
+          children: hint
+        })]
+      })]
+    });
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("section", {
+    className: "rounded-2xl border border-gray-200 bg-white overflow-hidden",
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+      className: "grid grid-cols-1 lg:grid-cols-5",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+        className: "lg:col-span-2 bg-ink text-white p-8 relative overflow-hidden",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+          className: "absolute inset-0 opacity-40",
+          style: {
+            background: 'radial-gradient(circle at 90% 10%, #e5156b 0, transparent 55%)'
+          },
+          "aria-hidden": "true"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "relative",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+            className: "font-mono text-xs tracking-widest uppercase text-pink-300",
+            children: "PDF report"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
+            className: "mt-2 text-3xl font-black tracking-tight text-white",
+            children: "Portfolio report"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+            className: "mt-2 text-gray-300",
+            children: "A detailed, print-ready portfolio: cover page, every course with its curriculum and your progress, each artwork with instructor comments, and your certificate numbers."
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+            className: "mt-6 grid grid-cols-3 gap-3",
+            children: [[credentials.length, 'Courses'], [stats.lessons, 'Lessons'], [approvedOnly ? stats.approved : stats.total, 'Artworks']].map(function (_ref5) {
+              var _ref6 = _slicedToArray(_ref5, 2),
+                v = _ref6[0],
+                l = _ref6[1];
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                className: "border-t border-gray-600 pt-2",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "text-2xl font-black",
+                  children: v
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "font-mono text-xs uppercase tracking-widest text-gray-400",
+                  children: l
+                })]
+              }, l);
+            })
+          })]
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+        className: "lg:col-span-3 p-8",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
+          className: "text-lg font-black tracking-tight text-ink",
+          children: "What to include"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Toggle, {
+            checked: curriculum,
+            onChange: setCurriculum,
+            label: "Course curriculum",
+            hint: "Units and lessons, with the ones you completed ticked"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Toggle, {
+            checked: comments,
+            onChange: setComments,
+            label: "Instructor comments",
+            hint: "Reviewer notes printed under each artwork"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Toggle, {
+            checked: approvedOnly,
+            onChange: setApprovedOnly,
+            label: "Approved artworks only",
+            hint: "Untick to include work in review or needing changes"
+          })]
+        }), credentials.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("fieldset", {
+          className: "mt-4",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("legend", {
+            className: "font-bold text-ink",
+            children: "Courses"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+            className: "mt-2 flex flex-wrap gap-2",
+            children: credentials.map(function (c) {
+              var on = courses.includes(String(c.course_id));
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("button", {
+                type: "button",
+                "aria-pressed": on,
+                onClick: function onClick() {
+                  return toggleCourse(String(c.course_id));
+                },
+                className: "h-9 px-4 rounded-full text-sm font-bold border ".concat(on ? 'bg-ink text-white border-ink' : 'bg-white text-gray-600 border-gray-300'),
+                children: [on && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+                  className: "fa fa-check mr-1",
+                  "aria-hidden": "true"
+                }), c.title]
+              }, c.course_id);
+            })
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "mt-6 flex flex-wrap gap-3",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
+            href: none ? undefined : href,
+            "aria-disabled": none,
+            className: "inline-flex items-center h-12 px-6 rounded-full font-bold ".concat(none ? 'bg-gray-300 text-white pointer-events-none' : 'bg-brand text-white hover:bg-brand-dark'),
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+              className: "fa fa-file-pdf-o mr-2",
+              "aria-hidden": "true"
+            }), "Download portfolio PDF"]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
+            href: none ? undefined : "".concat(href, "&inline=1"),
+            target: "_blank",
+            rel: "noopener",
+            className: "inline-flex items-center h-12 px-6 rounded-full border font-bold ".concat(none ? 'border-gray-200 text-gray-300 pointer-events-none' : 'border-gray-300 hover:border-ink'),
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+              className: "fa fa-print mr-2",
+              "aria-hidden": "true"
+            }), "Open to print"]
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+          className: "mt-3 text-xs text-gray-500",
+          children: "Generated fresh each time, so it always reflects your latest reviews and certificates."
+        })]
+      })]
+    })
+  });
+}
+function Certificates() {
+  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
+    _usePage$props$creden = _usePage$props.credentials,
+    credentials = _usePage$props$creden === void 0 ? [] : _usePage$props$creden,
+    _usePage$props$stats = _usePage$props.stats,
+    stats = _usePage$props$stats === void 0 ? {} : _usePage$props$stats,
+    _usePage$props$stage = _usePage$props.stage,
+    stage = _usePage$props$stage === void 0 ? 4 : _usePage$props$stage,
+    _usePage$props$verify = _usePage$props.verifyBase,
+    verifyBase = _usePage$props$verify === void 0 ? '' : _usePage$props$verify;
+  var earned = credentials.filter(function (c) {
+    return c.eligible || c.certificate;
+  }).length;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(_Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    title: "Certificates & reports",
+    subtitle: "Earn a verifiable certificate for each course and download a printable portfolio of your work.",
+    active: "/dashboard/certificates",
+    stage: stage,
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(PortfolioBuilder, {
+      credentials: credentials,
+      stats: stats
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("section", {
+      className: "mt-12",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+        className: "flex flex-wrap items-end justify-between gap-4",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
+            className: "text-2xl font-black tracking-tight text-ink",
+            children: "Course certificates"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
+            className: "text-gray-600",
+            children: [earned, " of ", credentials.length, " earned \xB7 complete all lessons and get one assignment approved to unlock each one."]
+          })]
+        })
+      }), credentials.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+        className: "mt-6 rounded-2xl border-2 border-dashed border-gray-300 p-10 text-center",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+          className: "text-xl font-extrabold text-ink",
+          children: "No courses yet"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+          className: "mt-2 text-gray-600",
+          children: "Choose a track to start working towards your first certificate."
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
+          href: "/courses?type=all",
+          className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold",
+          children: "Browse courses"
+        })]
+      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+        className: "mt-6 space-y-5",
+        children: credentials.map(function (c) {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(CertificateCard, {
+            c: c,
+            verifyBase: verifyBase
+          }, c.id);
+        })
+      })]
+    })]
+  });
+}
+
+/***/ }),
+
 /***/ "./resources/js/Pages/Studio/Classroom.js":
 /*!************************************************!*\
   !*** ./resources/js/Pages/Studio/Classroom.js ***!
@@ -19296,7 +19855,9 @@ function Home() {
     submissions = _usePage$props$submis === void 0 ? [] : _usePage$props$submis,
     _usePage$props$stage = _usePage$props.stage,
     stage = _usePage$props$stage === void 0 ? 3 : _usePage$props$stage,
-    auth = _usePage$props.auth;
+    auth = _usePage$props.auth,
+    _usePage$props$certif = _usePage$props.certificatesReady,
+    certificatesReady = _usePage$props$certif === void 0 ? 0 : _usePage$props$certif;
   var name = auth && auth.user ? auth.user.name.split(' ')[0] : 'artist';
   var next = _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__.JOURNEY[Math.min(stage, _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__.JOURNEY.length) - 1];
   var approved = submissions.filter(function (s) {
@@ -19364,6 +19925,28 @@ function Home() {
             })]
           }, label);
         })
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("section", {
+      className: "mt-6 rounded-2xl border border-gray-200 bg-white p-5 flex flex-col md:flex-row md:items-center gap-4",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+        className: "w-12 h-12 flex-none rounded-full bg-brand-soft text-brand flex items-center justify-center text-xl",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
+          className: "fa fa-certificate",
+          "aria-hidden": "true"
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+        className: "flex-1",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+          className: "font-extrabold text-ink",
+          children: certificatesReady > 0 ? "".concat(certificatesReady, " certificate").concat(certificatesReady > 1 ? 's' : '', " ready to download") : 'Certificates & portfolio report'
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+          className: "text-sm text-gray-600",
+          children: certificatesReady > 0 ? 'Download your ArtistikCity certificates and a printable PDF portfolio of your work.' : "Track what\u2019s left to earn each course certificate, and download your PDF portfolio any time."
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
+        href: "/dashboard/certificates",
+        className: "inline-flex items-center justify-center h-11 px-5 rounded-full bg-ink text-white font-bold hover:bg-gray-800",
+        children: "Open certificates & reports"
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("section", {
       className: "mt-12",
@@ -20331,6 +20914,149 @@ function Submissions() {
         })]
       })]
     })
+  });
+}
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Studio/VerifyCertificate.js":
+/*!********************************************************!*\
+  !*** ./resources/js/Pages/Studio/VerifyCertificate.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ VerifyCertificate)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "./node_modules/@inertiajs/inertia-react/dist/index.js");
+/* harmony import */ var _Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Site/SiteLayout */ "./resources/js/Components/Site/SiteLayout.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+
+
+
+
+function VerifyCertificate() {
+  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
+    certificate = _usePage$props.certificate,
+    number = _usePage$props.number;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    title: "Verify a certificate",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+      className: "ac-wide",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("ul", {
+        className: "dm-crumbs",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("li", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("a", {
+            href: "/",
+            children: "Home"
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("li", {
+          children: "Certificate verification"
+        })]
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+      className: "tw",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        className: "ac-wide py-10",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+          className: "max-w-2xl mx-auto",
+          children: [certificate ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+            className: "rounded-2xl border-2 border-green-600 bg-white overflow-hidden",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+              className: "bg-green-600 text-white px-6 py-4 flex items-center gap-3",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("i", {
+                className: "fa fa-check-circle text-2xl",
+                "aria-hidden": "true"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("p", {
+                className: "text-lg font-black",
+                children: "Valid ArtistikCity certificate"
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("dl", {
+              className: "p-6 grid grid-cols-3 gap-y-3 text-base",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dt", {
+                className: "text-gray-500",
+                children: "Awarded to"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dd", {
+                className: "col-span-2 text-xl font-black text-ink",
+                children: certificate.student_name
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dt", {
+                className: "text-gray-500",
+                children: String(certificate.course_type_id) === '2' ? 'Workshop' : 'Course'
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dd", {
+                className: "col-span-2 font-bold text-ink",
+                children: certificate.course_title
+              }), certificate.medium_name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dt", {
+                  className: "text-gray-500",
+                  children: "Medium"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("dd", {
+                  className: "col-span-2",
+                  children: [certificate.medium_name, certificate.skill_name ? " \xB7 ".concat(certificate.skill_name) : '']
+                })]
+              }), certificate.instructor_name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dt", {
+                  className: "text-gray-500",
+                  children: "Instructor"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dd", {
+                  className: "col-span-2",
+                  children: certificate.instructor_name
+                })]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dt", {
+                className: "text-gray-500",
+                children: "Issued"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dd", {
+                className: "col-span-2",
+                children: certificate.issued_on
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dt", {
+                className: "text-gray-500",
+                children: "Certificate no."
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("dd", {
+                className: "col-span-2 font-mono",
+                children: certificate.certificate_no
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("p", {
+              className: "px-6 pb-6 text-sm text-gray-500",
+              children: "Awarded after completing every lesson and having an assignment approved by an ArtistikCity instructor."
+            })]
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+            className: "rounded-2xl border-2 border-red-300 bg-white p-8 text-center",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("i", {
+              className: "fa fa-times-circle text-4xl text-red-500",
+              "aria-hidden": "true"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("p", {
+              className: "mt-3 text-2xl font-black text-ink",
+              children: "Certificate not found"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("p", {
+              className: "mt-2 text-gray-600",
+              children: ["We couldn't find a certificate with number ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+                className: "font-mono",
+                children: number
+              }), ". Check the number printed on the certificate and try again."]
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("form", {
+            className: "mt-8 flex gap-2",
+            onSubmit: function onSubmit(e) {
+              e.preventDefault();
+              var v = e.target.elements.no.value.trim();
+              if (v) window.location.href = "/certificates/verify/".concat(encodeURIComponent(v.toUpperCase()));
+            },
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
+              name: "no",
+              defaultValue: certificate ? '' : number,
+              placeholder: "Certificate number, e.g. AC-2026-ABCD2345",
+              className: "flex-1 h-12 rounded-full border-gray-300 px-5 font-mono focus:border-brand focus:ring-brand",
+              "aria-label": "Certificate number"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+              className: "h-12 px-6 rounded-full bg-ink text-white font-bold",
+              children: "Verify"
+            })]
+          })]
+        })
+      })
+    })]
   });
 }
 
@@ -94927,6 +95653,8 @@ var map = {
 	"./Students/OrderHistory.js": "./resources/js/Pages/Students/OrderHistory.js",
 	"./Students/Workshop": "./resources/js/Pages/Students/Workshop.js",
 	"./Students/Workshop.js": "./resources/js/Pages/Students/Workshop.js",
+	"./Studio/Certificates": "./resources/js/Pages/Studio/Certificates.js",
+	"./Studio/Certificates.js": "./resources/js/Pages/Studio/Certificates.js",
 	"./Studio/Classroom": "./resources/js/Pages/Studio/Classroom.js",
 	"./Studio/Classroom.js": "./resources/js/Pages/Studio/Classroom.js",
 	"./Studio/Home": "./resources/js/Pages/Studio/Home.js",
@@ -94937,6 +95665,8 @@ var map = {
 	"./Studio/Shop.js": "./resources/js/Pages/Studio/Shop.js",
 	"./Studio/Submissions": "./resources/js/Pages/Studio/Submissions.js",
 	"./Studio/Submissions.js": "./resources/js/Pages/Studio/Submissions.js",
+	"./Studio/VerifyCertificate": "./resources/js/Pages/Studio/VerifyCertificate.js",
+	"./Studio/VerifyCertificate.js": "./resources/js/Pages/Studio/VerifyCertificate.js",
 	"./StudioStories": "./resources/js/Pages/StudioStories.js",
 	"./StudioStories.js": "./resources/js/Pages/StudioStories.js",
 	"./Teacher": "./resources/js/Pages/Teacher.js",

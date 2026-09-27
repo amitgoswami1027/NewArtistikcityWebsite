@@ -9,6 +9,7 @@
 -- =====================================================================
 
 DROP VIEW IF EXISTS courses_workshops;
+DROP TABLE IF EXISTS course_certificates;
 DROP TABLE IF EXISTS portfolio_marketplace;
 DROP TABLE IF EXISTS student_submissions;
 DROP TABLE IF EXISTS lesson_completions;
@@ -684,6 +685,23 @@ CREATE TABLE portfolio_marketplace (
 CREATE INDEX portfolio_marketplace_submission_id_index ON portfolio_marketplace (submission_id);
 CREATE INDEX portfolio_marketplace_user_id_index ON portfolio_marketplace (user_id);
 CREATE INDEX portfolio_marketplace_listed_index ON portfolio_marketplace (is_listed_for_sale);
+
+-- Course completion certificates issued through the student studio (verifiable by number).
+CREATE TABLE course_certificates (
+    id             BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    enrollment_id  BIGINT       NOT NULL,
+    user_id        BIGINT       NOT NULL,
+    course_id      BIGINT       NOT NULL,
+    certificate_no NVARCHAR(40) NOT NULL,
+    issued_at      DATETIME2    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT course_certificates_enrollment_unique UNIQUE (enrollment_id),
+    CONSTRAINT course_certificates_number_unique UNIQUE (certificate_no),
+    CONSTRAINT course_certificates_enrollment_id_foreign FOREIGN KEY (enrollment_id) REFERENCES enrollments (id) ON DELETE NO ACTION,
+    CONSTRAINT course_certificates_user_id_foreign FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE NO ACTION,
+    CONSTRAINT course_certificates_course_id_foreign FOREIGN KEY (course_id) REFERENCES courses (id) ON DELETE NO ACTION
+);
+CREATE INDEX course_certificates_user_id_index ON course_certificates (user_id);
+CREATE INDEX course_certificates_course_id_index ON course_certificates (course_id);
 
 -- Catalogue view in the "Courses_Workshops" shape, built on the existing courses table.
 CREATE VIEW courses_workshops AS
