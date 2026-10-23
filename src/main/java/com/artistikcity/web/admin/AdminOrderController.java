@@ -65,7 +65,7 @@ public class AdminOrderController {
         int perPage = 10;
         int page = Paginator.page(pageParam);
         long total = db.count("select count(*) from orders");
-        List<Row> orders = db.select("select * from orders order by id desc offset " + ((page - 1) * perPage) + " rows fetch next " + perPage + " rows only");
+        List<Row> orders = db.select("select * from orders order by id desc limit " + perPage + " offset " + ((page - 1) * perPage));
         for (Row o : orders) {
             withCourseAndUser(o, false);
         }

@@ -33,17 +33,28 @@ export function Field({ label, name, type = 'text', value, onChange, error, auto
     );
 }
 
-function withReturnTo(href) {
+function withReturnTo(href, extra) {
     if (typeof window === 'undefined') return href;
+    const params = new URLSearchParams();
     const rt = new URLSearchParams(window.location.search).get('return_to');
-    return rt ? `${href}?return_to=${encodeURIComponent(rt)}` : href;
+    if (rt) params.set('return_to', rt);
+    Object.keys(extra || {}).forEach((k) => params.set(k, extra[k]));
+    const q = params.toString();
+    return q ? `${href}?${q}` : href;
 }
 
-export function SocialButtons({ verb = 'Continue' }) {
+/**
+ * Google / Facebook buttons. Only providers configured on the server are shown
+ * ({@code providers} = { google: bool, facebook: bool }); missing prop = show both (older pages).
+ */
+export function SocialButtons({ verb = 'Continue', providers, remember = true }) {
+    const show = (p) => !providers || providers[p];
+    if (providers && !providers.google && !providers.facebook) return null;
+    const extra = remember ? {} : { remember: '0' };
     return (
         <div className="dm-social">
-            <a href={withReturnTo('/social-login/google')}><img src="/assets/images/google-icon.png" alt="" /> {verb} with Google</a>
-            <a href={withReturnTo('/social-login/facebook')} className="is-fb"><i className="fa fa-facebook-official"></i> {verb} with Facebook</a>
+            {show('google') && <a href={withReturnTo('/social-login/google', extra)}><img src="/assets/images/google-icon.png" alt="" /> {verb} with Google</a>}
+            {show('facebook') && <a href={withReturnTo('/social-login/facebook', extra)} className="is-fb"><i className="fa fa-facebook-official"></i> {verb} with Facebook</a>}
         </div>
     );
 }

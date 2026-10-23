@@ -1,10 +1,9 @@
 @echo off
 REM ============================================================
 REM  ArtistikCity - run the whole stack in Docker Desktop:
-REM    db       Microsoft SQL Server 2022
-REM    db-init  creates the database + demo data (first run only)
+REM    db       MySQL 8.4 (creates the database + demo data on the first run)
 REM    app      Spring Boot backend + React UI on http://localhost:8080
-REM  First run downloads ~2 GB of images and builds the app (5-15 min).
+REM  First run downloads ~1 GB of images and builds the app (5-15 min).
 REM ============================================================
 cd /d "%~dp0"
 where docker >nul 2>nul
@@ -19,7 +18,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo ==^> Building and starting containers (db, db-init, app)...
+echo ==^> Building and starting containers (db, app)...
 docker compose up -d --build
 if errorlevel 1 (
   echo.
@@ -34,7 +33,7 @@ if errorlevel 1 (
   echo.
   echo The app did not answer within 5 minutes. Recent logs:
   docker compose ps -a
-  docker compose logs --tail 60 db-init app
+  docker compose logs --tail 60 db app
   pause & exit /b 1
 )
 
@@ -44,7 +43,8 @@ echo   ArtistikCity is running in Docker
 echo     Website      : http://localhost:8080/
 echo     Student login: http://localhost:8080/login        student@artistikcity.com / password
 echo     Admin panel  : http://localhost:8080/admin/login  admin@artistikcity.com / password
-echo     SQL Server   : localhost,1433   user sa   password Artistik#2026Pass
+echo     MySQL        : localhost:3306   database artistikcity   user artistik   password Artistik@2026
+echo                    root password ArtistikRoot@2026
 echo.
 echo   Logs: docker compose logs -f app      Stop: DOCKER-STOP.bat
 start "" http://localhost:8080/

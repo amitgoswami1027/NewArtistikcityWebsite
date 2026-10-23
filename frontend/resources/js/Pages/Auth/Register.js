@@ -2,33 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/inertia-react';
 import AuthLayout from '@/Layouts/AuthLayout';
 import { Field, SocialButtons, StrengthMeter } from '@/Components/Auth/AuthFields';
+import { MagicLinkForm, MethodTabs, PhoneOtpForm } from '@/Components/Auth/SignInMethods';
 
-export default function Register() {
+/** Join: Google / Facebook, phone (SMS code), or e-mail (password or passwordless link). */
+export default function Register({ providers, defaultCountryCode, otpDevMode }) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-        newsletter_signup: true,
+        name: '', email: '', password: '', password_confirmation: '', newsletter_signup: true, remember: true,
     });
-    const [withEmail, setWithEmail] = useState(false);
+    const [tab, setTab] = useState('email');
+    const [passwordless, setPasswordless] = useState(false);
 
     useEffect(() => () => reset('password', 'password_confirmation'), []);
-    useEffect(() => { if (Object.keys(errors).length) setWithEmail(true); }, [errors]);
 
     const change = (e) => {
         const { name, type, checked, value } = e.target;
-        if (name === 'password') {
-            setData({ ...data, password: value, password_confirmation: value });
-        } else {
-            setData(name, type === 'checkbox' ? checked : value);
-        }
+        if (name === 'password') setData({ ...data, password: value, password_confirmation: value });
+        else setData(name, type === 'checkbox' ? checked : value);
     };
-    const submit = (e) => {
-        e.preventDefault();
-        post(route('register'), { preserveScroll: true });
-    };
-    const loginHref = typeof window !== 'undefined' && window.location.search.includes('return_to') ? route('login') + window.location.search : route('login');
+    const submit = (e) => { e.preventDefault(); post(route('register'), { preserveScroll: true, preserveState: true }); };
+    const query = typeof window !== 'undefined' ? window.location.search : '';
+    const loginHref = query.includes('return_to') ? route('login') + query : route('login');
 
     return (
         <AuthLayout title="Join for free">
@@ -40,17 +33,28 @@ export default function Register() {
                 <span><i className="fa fa-check"></i>Artist profile</span>
             </div>
 
-            <SocialButtons verb="Sign up" />
+            <SocialButtons verb="Sign up" providers={providers} />
             <div className="dm-or">or</div>
+            <MethodTabs value={tab} onChange={setTab} tabs={[
+                { id: 'email', label: 'Email', icon: 'fa-envelope-o' },
+                { id: 'phone', label: 'Phone', icon: 'fa-mobile' },
+            ]} />
 
-            {!withEmail ? (
-                <button type="button" className="dm-btn dm-btn--line dm-btn--block dm-btn--lg" onClick={() => setWithEmail(true)}>
-                    <i className="fa fa-envelope-o"></i> Sign up with email
-                </button>
-            ) : (
+            {tab === 'phone' && <PhoneOtpForm defaultCountryCode={defaultCountryCode} devMode={otpDevMode} />}
+
+            {tab === 'email' && passwordless && (
+                <>
+                    <MagicLinkForm buttonLabel="Email me a link to join" />
+                    <p className="dm-center dm-muted" style={{ marginTop: 14 }}>
+                        <button type="button" className="dm-linkbtn" onClick={() => setPasswordless(false)}>Choose a password instead</button>
+                    </p>
+                </>
+            )}
+
+            {tab === 'email' && !passwordless && (
                 <form onSubmit={submit} noValidate>
                     <Field label="Full name" name="name" value={data.name} onChange={change} error={errors.name}
-                           autoComplete="name" placeholder="How should we call you?" autoFocus />
+                           autoComplete="name" placeholder="How should we call you?" />
                     <Field label="Email" name="email" type="email" value={data.email} onChange={change}
                            error={errors.email} autoComplete="email" placeholder="you@example.com" />
                     <Field label="Password" name="password" type="password" value={data.password} onChange={change}
@@ -64,6 +68,9 @@ export default function Register() {
                     <button type="submit" className="dm-btn dm-btn--brand dm-btn--block dm-btn--lg" disabled={processing}>
                         {processing ? 'Creating your account…' : 'Join for free'}
                     </button>
+                    <p className="dm-center dm-muted" style={{ marginTop: 14 }}>
+                        <button type="button" className="dm-linkbtn" onClick={() => setPasswordless(true)}>Join without a password (we'll e-mail you a link)</button>
+                    </p>
                 </form>
             )}
 

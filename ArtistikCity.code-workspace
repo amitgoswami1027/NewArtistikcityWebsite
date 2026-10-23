@@ -50,14 +50,27 @@
     "files.readonlyInclude": {
       "src/main/resources/static/js/app.js": true,
       "src/main/resources/static/js/admin/app.js": true
-    }
+    },
+    "sqltools.connections": [
+      {
+        "name": "ArtistikCity (MySQL)",
+        "driver": "MySQL",
+        "server": "127.0.0.1",
+        "port": 3306,
+        "database": "artistikcity",
+        "username": "artistik",
+        "password": "Artistik@2026",
+        "previewLimit": 50
+      }
+    ],
+    "sqltools.useNodeRuntime": false
   },
   "launch": {
     "version": "0.2.0",
     "configurations": [
       {
         "type": "java",
-        "name": "ArtistikCity (demo DB)",
+        "name": "ArtistikCity (MySQL)",
         "request": "launch",
         "mainClass": "com.artistikcity.ArtistikCityApplication",
         "projectName": "artistikcity",
@@ -66,20 +79,22 @@
         "env": {
           "PAYMENT_TEST_MODE": "true"
         },
+        "preLaunchTask": "Start MySQL",
         "shortenCommandLine": "jarmanifest",
         "javaExec": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe"
       },
       {
         "type": "java",
-        "name": "ArtistikCity (local SQL Server)",
+        "name": "ArtistikCity (other MySQL server)",
         "request": "launch",
         "mainClass": "com.artistikcity.ArtistikCityApplication",
         "projectName": "artistikcity",
         "cwd": "${workspaceFolder:ArtistikCity}",
+        "args": "--spring.profiles.active=dev",
         "env": {
-          "DB_URL": "jdbc:sqlserver://localhost:1433;databaseName=artistikcity;encrypt=true;trustServerCertificate=true",
-          "DB_USERNAME": "sa",
-          "DB_PASSWORD": "${input:sqlPassword}",
+          "DB_URL": "${input:dbUrl}",
+          "DB_USERNAME": "${input:dbUser}",
+          "DB_PASSWORD": "${input:dbPassword}",
           "PAYMENT_TEST_MODE": "true"
         },
         "shortenCommandLine": "jarmanifest",
@@ -88,9 +103,21 @@
     ],
     "inputs": [
       {
-        "id": "sqlPassword",
+        "id": "dbUrl",
         "type": "promptString",
-        "description": "SQL Server password for 'sa'",
+        "description": "JDBC URL",
+        "default": "jdbc:mysql://127.0.0.1:3306/artistikcity?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+      },
+      {
+        "id": "dbUser",
+        "type": "promptString",
+        "description": "MySQL user",
+        "default": "artistik"
+      },
+      {
+        "id": "dbPassword",
+        "type": "promptString",
+        "description": "MySQL password",
         "password": true
       }
     ]
@@ -103,6 +130,53 @@
       }
     },
     "tasks": [
+      {
+        "label": "Start MySQL",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder:ArtistikCity}\\setup-and-run.ps1",
+          "-DatabaseOnly"
+        ],
+        "problemMatcher": [],
+        "presentation": {
+          "reveal": "silent",
+          "panel": "dedicated"
+        }
+      },
+      {
+        "label": "Stop MySQL",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder:ArtistikCity}\\setup-and-run.ps1",
+          "-StopDatabase"
+        ],
+        "problemMatcher": []
+      },
+      {
+        "label": "Reset demo database",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder:ArtistikCity}\\setup-and-run.ps1",
+          "-DatabaseOnly",
+          "-ResetDatabase"
+        ],
+        "problemMatcher": []
+      },
       {
         "label": "Build (mvn package)",
         "type": "shell",
@@ -119,7 +193,7 @@
         "problemMatcher": []
       },
       {
-        "label": "Run site (demo DB)",
+        "label": "Run site (MySQL)",
         "type": "shell",
         "command": "${workspaceFolder:ArtistikCity}\\.tools\\apache-maven-3.9.9\\bin\\mvn.cmd",
         "args": [
@@ -127,7 +201,8 @@
           "-Dspring-boot.run.profiles=dev"
         ],
         "isBackground": true,
-        "problemMatcher": []
+        "problemMatcher": [],
+        "dependsOn": "Start MySQL"
       },
       {
         "label": "Build React bundle",
@@ -170,9 +245,9 @@
       "dbaeumer.vscode-eslint",
       "bradlc.vscode-tailwindcss",
       "dawhitfield.vscode-mustache-syntax",
-      "ms-mssql.mssql",
       "ms-azuretools.vscode-docker",
-      "editorconfig.editorconfig"
+      "mtxr.sqltools",
+      "mtxr.sqltools-driver-mysql"
     ]
   }
 }

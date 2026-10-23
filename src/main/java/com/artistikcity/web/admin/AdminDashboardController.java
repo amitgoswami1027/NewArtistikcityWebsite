@@ -33,11 +33,11 @@ public class AdminDashboardController {
         m.put("bookedCourseCount", db.count("select count(*) from orders where payment_status = 1"));
         m.put("totalRevenueINR", sum("inr"));
         m.put("totalRevenueUSD", sum("usd"));
-        m.put("bookedCourses", db.select("select top 5 c.title, c.course_start_date, o.id, o.order_number, o.created_at, o.price, o.price_type,"
+        m.put("bookedCourses", db.select("select c.title, c.course_start_date, o.id, o.order_number, o.created_at, o.price, o.price_type,"
                 + " c.id as course_id, u.id as user_id, u.name, u.email, " + CourseService.photoSubquery("o.course_id")
                 + " from orders o join courses c on c.id = o.course_id join users u on u.id = o.user_id"
-                + " where o.payment_status = 1 and o.payment_id <> '' order by o.id desc"));
-        m.put("freeCourseSubscription", db.select("select top 5 * from users where status = 1 and free_courses = 1 order by id desc"));
+                + " where o.payment_status = 1 and o.payment_id <> '' order by o.id desc limit 5"));
+        m.put("freeCourseSubscription", db.select("select * from users where status = 1 and free_courses = 1 order by id desc limit 5"));
         m.put("getMessages", taskList());
         return views.page(request, "admin/dashboard", m);
     }
@@ -56,9 +56,9 @@ public class AdminDashboardController {
 
     /** Latest student submissions (from_type = Student). */
     List<Row> taskList() {
-        return db.select("select top 10 st.id, st.task_id, st.student_teacher_connect_id, st.reply, st.review_status, st.created_at,"
+        return db.select("select st.id, st.task_id, st.student_teacher_connect_id, st.reply, st.review_status, st.created_at,"
                 + " u.id as user_id, u.name, u.email, u.profile_photo from student_tasks st join users u on u.id = st.from_id"
-                + " where st.from_type = 'Student' order by st.id desc");
+                + " where st.from_type = 'Student' order by st.id desc limit 10");
     }
 
     @GetMapping("/admin/tasks")

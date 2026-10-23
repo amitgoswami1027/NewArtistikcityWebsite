@@ -945,3 +945,57 @@
 @media (max-width: 800px) { .contactpage { flex-direction: column; padding: 28px 20px !important; } .contactpage .col5 { width: 100% !important; } .inrbanrtxt h1 { font-size: 36px !important; } }
 .breadCrumb > .container, .inrbanrtxt > .container, .faqpage > .container, .contactwrap, .breadCrumb + .inrbanrtxt + .container { max-width: 1440px !important; width: 100% !important; padding-left: 32px !important; padding-right: 32px !important; }
 @media (max-width: 800px) { .breadCrumb > .container, .inrbanrtxt > .container, .faqpage > .container { padding-left: 16px !important; padding-right: 16px !important; } }
+
+/* ---------- sign-in methods (login / join) ---------- */
+.dm-mtabs { display: flex; gap: 4px; padding: 4px; background: #f2f0f3; border-radius: 12px; margin: 0 0 20px; }
+.dm-mtabs button { flex: 1; border: 0; background: transparent; padding: 10px 6px; border-radius: 9px; font-weight: 700; font-size: 13px; color: var(--dm-grey); cursor: pointer; white-space: nowrap; }
+.dm-mtabs button .fa { margin-right: 4px; }
+.dm-mtabs button.is-active { background: #fff; color: var(--dm-ink); box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+.dm-mtabs button:focus-visible, .dm-linkbtn:focus-visible { outline: 2px solid var(--dm-ink); outline-offset: 2px; }
+.dm-passkey { margin-bottom: 4px; }
+.dm-passkey .fa { font-size: 17px; }
+.dm-sent { text-align: center; padding: 8px 0; }
+.dm-sent__icon { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; background: #ecfdf3; color: #067647; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.dm-sent p { color: var(--dm-grey); font-size: 15px; }
+.dm-sent__actions { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 16px; }
+.dm-linkbtn { background: none; border: 0; padding: 0; color: var(--ac-brand); font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; font-size: inherit; }
+.dm-linkbtn:disabled { opacity: .5; cursor: default; }
+.dm-muted { color: var(--dm-grey); }
+.dm-center { text-align: center; }
+.dm-otp { letter-spacing: .5em; text-align: center; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dm-phone { display: flex; gap: 8px; }
+.dm-phone select.ac-input { width: 118px; flex: 0 0 118px; padding: 0 8px; }
+.dm-devcode { font-weight: 500; }
+.dm-remember { margin: 4px 0 16px; }
+
+/* ---------- Login & security (student account) ---------- */
+.sec h3 { margin-bottom: 4px; }
+.sec-lede { color: var(--dm-grey, #667085); margin-bottom: 20px; }
+.sec-card { background: #fff; border: 1px solid var(--ac-line, #e4e7ec); border-radius: 14px; padding: 20px 22px; margin-bottom: 20px; }
+.sec-card h4 { font-size: 17px; margin: 0 0 8px; }
+.sec-row { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-top: 1px solid #f0f1f4; }
+.sec-card h4 + .sec-row, .sec-card p + .sec-row { border-top: 0; }
+.sec-row__icon { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 10px; background: #f4f1f4; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.sec-row__icon img { width: 20px; height: 20px; }
+.sec-row__body { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.sec-row__body b { display: block; margin-bottom: 2px; }
+.sec-row__actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.sec-small { font-size: 13px; margin: 2px 0 0; }
+.sec-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #fef0c7; color: #93370d; vertical-align: middle; }
+.sec-badge--ok { background: #ecfdf3; color: #067647; }
+.sec-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; }
+.sec-inline .ac-input { flex: 1 1 220px; height: 42px; width: auto; }
+.sec-inline .dm-otp { flex: 0 1 180px; }
+.sec-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; max-width: 420px; }
+.sec-stack .ac-input { height: 42px; }
+.sec-events { list-style: none; padding: 0; margin: 0; }
+.sec-events li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid #f0f1f4; font-size: 14px; flex-wrap: wrap; }
+.sec-events li:first-child { border-top: 0; }
+.sec-events li.is-bad span:first-child { color: #b42318; }
+@media (max-width: 600px) {
+  .sec-card { padding: 16px; }
+  .sec-row { flex-wrap: wrap; }
+  .sec-row__actions { width: 100%; justify-content: flex-start; padding-left: 54px; }
+  .dm-mtabs button { font-size: 12px; }
+  .dm-mtabs button .fa { display: none; }
+}

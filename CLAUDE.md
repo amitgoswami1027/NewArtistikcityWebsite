@@ -5,31 +5,38 @@ This is a Java port of a Laravel 8 + Inertia + React app. The React pages were k
 speaks the Inertia protocol to them.
 
 - **Backend:** Java 17, Spring Boot 3.3, plain JDBC through the `Db` helper. There is no JPA/Hibernate.
-- **Database:** Microsoft SQL Server. Locally, H2 in `MODE=MSSQLServer`.
+- **Database:** MySQL 8.4 LTS. On Windows the launcher runs a portable copy from `.tools\` (no install needed).
 - **UI:** React 17 + Inertia (`frontend/`), plus Mustache server-side templates for checkout, static pages, the admin console and e-mails.
 - **Platform:** the developer works on Windows. The `.bat` and `.ps1` launchers are the user-facing entry points.
 
 ## Commands
 
 ```bash
-# Run locally on the in-memory demo DB (schema.sql + seed.sql reloaded every start, test payments on)
-mvn spring-boot:run -Dspring-boot.run.profiles=dev        # http://localhost:8080
-# Windows one-click equivalent (downloads JDK 17 + Maven into .tools\ if missing)
-START-ArtistikCity.bat
+# Windows one-click: downloads JDK 17 / Maven / MySQL 8.4 into .tools\ if missing, sets up the DB
+# (first run loads schema.sql + seed.sql; later runs keep the data), starts MySQL + the site
+START-ArtistikCity.bat                                    # http://localhost:8080
+START-ArtistikCity.bat -ResetDatabase                     # drop all tables, reload demo data
+START-MySQL.bat / STOP-MySQL.bat                          # only the database (setup-and-run.ps1 -DatabaseOnly / -StopDatabase)
+
+# With MySQL running (defaults: 127.0.0.1:3306 / artistikcity / artistik / Artistik@2026)
+mvn spring-boot:run -Dspring-boot.run.profiles=dev        # dev = no template cache + test payments
 
 mvn -B package -DskipTests                                # -> target/artistikcity-1.0.0.jar
 java -jar target/artistikcity-1.0.0.jar --spring.profiles.active=dev   # run from the repo root
 
-# Full stack (SQL Server 2022 + app) in Docker
+# Full stack (MySQL 8.4 + app) in Docker; first start loads schema + seed into the empty volume
 docker compose up -d --build
-docker compose run --rm -e RESET_DB=true db-init          # reload demo data
+docker compose down -v && docker compose up -d            # wipe and reload demo data
 
 # Rebuild the React bundle -> src/main/resources/static/js/app.js
 cd frontend && npm install && npm run dev                 # or: npm run prod / npm run watch
 ```
 
-There are no automated tests (`src/test` does not exist). To verify a change, run the dev profile and check the pages
-by hand. Use the demo logins below.
+Unit tests cover the auth crypto only (`src/test/java/com/artistikcity/auth`: tokens, password policy, JWT/JWKS, WebAuthn): `mvn test`.
+For everything else, run the app against MySQL and check the pages by hand. Use the demo logins below.
+
+**Local database access:** `127.0.0.1:3306`, database `artistikcity`, app user `artistik` / `Artistik@2026`,
+root `root` / `ArtistikRoot@2026`. Client: `.tools\mysql-8.4.13-winx64\bin\mysql.exe -h 127.0.0.1 -u artistik -p artistikcity`.
 
 **Demo logins** (password `password`): student `student@artistikcity.com` at `/login`, admin `admin@artistikcity.com`
 at `/admin/login`, teacher `vaishali@artistikcity.com` at `/admin/login`.
@@ -41,6 +48,8 @@ src/main/java/com/artistikcity/
   config/       WebConfig (interceptors, /storage/** mapping), MustacheConfig
   inertia/      Inertia (server adapter) and Routes (named-route table, published to the browser as Ziggy)
   http/         Auth (web + admin guards), SessionInterceptor, Csrf, GuardInterceptors, Flash, Redirects, exceptions
+  auth/         student sign-in: SessionService (DB sessions + refresh tokens), AccountService (one user, many providers),
+                OtpService + sms/, EmailTokenService (magic links, verify, reset), JwtVerifier, webauthn/ (passkeys), RateLimiter
   support/      Db, Row, Input, Validator, Paginator, Storage, Json, Slugs, Str
   view/         Views (Mustache rendering) and ViewHelpers
   service/      CourseService, PostService, CertificateService, PaymentGateways (Razorpay/PayPal), Mailer
@@ -53,19 +62,22 @@ src/main/resources/
   static/       compiled assets. static/js/app.js is BUILD OUTPUT, so do not edit it by hand
   ziggy/        route.js used by the React route() helper
 frontend/resources/js/   React source: Pages/, Components/, Layouts/, Interface/
-database/       schema.sql (drops + recreates everything), seed.sql (demo data), migrations/ (idempotent, dated)
+database/       schema.sql (drops + recreates everything), seed.sql (demo data), migrations/ (future dated MySQL scripts)
 storage/        uploaded files, served at /storage/**  (storage/certificates is git-ignored)
 ```
 
 ## Conventions and gotchas
 
-- **SQL must run on both SQL Server and H2 (MSSQLServer mode).** Use `TOP n` / `OFFSET … FETCH`, put reserved words
-  in `[brackets]`, and avoid vendor-specific functions. Always pass parameters through `db.select/first/update(sql, params…)`,
+- **SQL is MySQL 8.** Page with `LIMIT n OFFSET m` at the end of the statement. Quote reserved words
+  (`primary`, `like`, `order`, `key`, …) in backticks, and use MySQL functions (`DATE_ADD`, `CONCAT`, …). Backslashes in
+  string literals are escape characters. Always pass parameters through `db.select/first/update(sql, params…)`,
   and never concatenate input into SQL.
 - `Db` returns `Row` maps with **lower-case column names**. Dates are serialized as Laravel strings
   (`yyyy-MM-dd HH:mm:ss`), and the React pages depend on that exact JSON shape.
-- **Schema changes go in three places:** add a dated, idempotent script to `database/migrations/` (for existing SQL
-  Server databases), and also update `database/schema.sql` (fresh installs and the dev profile). Update `seed.sql` if demo data needs it.
+- **Schema changes:** update `database/schema.sql` (fresh installs) **and** add a dated, re-runnable MySQL script to
+  `database/migrations/` for databases that already hold data (see its README; MySQL has no `ADD COLUMN IF NOT EXISTS`).
+  Update `seed.sql` if demo data needs it. Types: `BIGINT AUTO_INCREMENT` keys, `VARCHAR(n)` / `LONGTEXT`, `DATETIME`,
+  `TINYINT(1)` for booleans (read back as Java `Boolean`), `DOUBLE`/`DECIMAL` for money.
 - **New routes:** add the Spring mapping **and** register the name/URI in `inertia/Routes.java`, so that React's
   `route('name')` and the Java `routes.path("name", params…)` both work. Route names match the old Laravel names.
 - **Rendering:** for React pages, use `inertia.render(request, "Folder/Page", props)`. The page lives at
@@ -73,7 +85,16 @@ storage/        uploaded files, served at /storage/**  (storage/certificates is 
   For server-rendered pages, use `views.page(request, "admin/…", model)` with a `.mustache` file under `templates/`.
 - Forms using PATCH or DELETE send `_method` (the hidden-method filter is on). Every POST needs the CSRF token: `_token`
   field or `X-XSRF-TOKEN`/`X-CSRF-TOKEN` header.
-- Auth has two session guards, `web` (students) and `admin` (admins/teachers). Passwords are bcrypt and compatible with Laravel `$2y$`.
+- Auth has two guards. `web` (students) uses DB sessions in `auth_sessions` via the `ac_session`/`ac_refresh` cookies
+  (`auth/SessionService`, resolved by `AuthSessionFilter`). `admin` (admins/teachers) uses the HttpSession. Passwords are bcrypt
+  in `users.password_hash` (nullable: passwordless accounts exist) and compatible with Laravel `$2y$`. Read the user with
+  `auth.user(request)`, which never contains secrets. Start a login only through `auth.login(request, userId, method, remember)`.
+- Users are unique by e-mail **and** by verified phone (`phone_number`, E.164 via `PhoneNumbers.normalize`). Google/Facebook
+  identities live in `linked_accounts`. Merge accounts only through `AccountService`, which applies the verified-e-mail rules.
+- Auth JSON endpoints (`web/AuthApiController`, `/auth/**`) return `{message, errors, retryAfter, reauth}` on failure. Changing
+  sign-in methods needs a login younger than 30 minutes (403 `reauth`).
+- Use Java time (`LocalDateTime.now()`) for every timestamp, and pass `created_at` explicitly. Don't rely on MySQL `NOW()` or
+  column defaults, because the DB server may run in a different time zone than the app.
 - Payments only mark an order paid after a **verified gateway response**. The dev profile / `PAYMENT_TEST_MODE=true`
   enables simulated payments when no keys are set.
 - Configuration comes from environment variables (see README §4 and `.env.example`). Never commit `.env` or real keys.

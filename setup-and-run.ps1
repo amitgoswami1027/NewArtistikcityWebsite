@@ -1,38 +1,44 @@
 <#
 .SYNOPSIS
-    One-step setup and start for ArtistikCity (Spring Boot + React + SQL Server) on Windows.
+    One-step setup and start for ArtistikCity (Spring Boot + React + MySQL) on Windows.
 
 .DESCRIPTION
     1. Uses Java 17+ if installed, otherwise downloads a portable JDK 17 into .tools\ (no admin rights needed).
     2. Uses Maven if installed, otherwise downloads a portable Maven into .tools\.
     3. Builds the application (target\artistikcity-1.0.0.jar). The first build downloads the libraries (~150 MB).
-    4. Prepares the database:
-         -Db dev        in-memory database in SQL Server mode, created fresh on every start (nothing to install)
-         -Db docker     starts Microsoft SQL Server 2022 in Docker Desktop (container "artistikcity-sql")
-         -Db sqlserver  uses your own SQL Server / SQL Server Express
-       For docker/sqlserver the database is created if missing and the tables + demo data are loaded on first run.
+    4. Prepares the MySQL database:
+         -Db portable  (default) MySQL 8.4 LTS in .tools\ - downloaded once (~270 MB), no installer, no admin rights.
+                       Data is kept in .tools\mysql-data between runs.
+         -Db mysql     your own MySQL 8 server (-DbHost / -DbPort / -DbUser / -DbPassword).
+         -Db docker    MySQL 8.4 in Docker Desktop (container "artistikcity-mysql").
+       The database and user are created if missing; tables + demo data are loaded on the first run.
     5. Starts the site on http://localhost:<Port> and opens your browser. Press Ctrl+C to stop.
 
 .EXAMPLE
-    .\setup-and-run.ps1                                   # demo mode, no database install needed
+    .\setup-and-run.ps1                                   # portable MySQL, nothing to install
 .EXAMPLE
-    .\setup-and-run.ps1 -Db docker                        # SQL Server 2022 in Docker
+    .\setup-and-run.ps1 -DatabaseOnly                     # only start MySQL (e.g. to run the app from VS Code)
 .EXAMPLE
-    .\setup-and-run.ps1 -Db sqlserver -SqlUser sa -SqlPassword "YourPassword"
+    .\setup-and-run.ps1 -ResetDatabase                    # drop all tables and reload the demo data
 .EXAMPLE
-    .\setup-and-run.ps1 -Db sqlserver -SqlInstance SQLEXPRESS -Trusted     # Windows authentication
+    .\setup-and-run.ps1 -Db mysql -DbUser root -DbPassword "YourPassword"
+.EXAMPLE
+    .\setup-and-run.ps1 -Db docker
 #>
 param(
-    [ValidateSet('dev', 'docker', 'sqlserver')]
-    [string]$Db = 'dev',
-    [string]$SqlHost = 'localhost',
-    [int]$SqlPort = 1433,
-    [string]$SqlInstance = '',
-    [string]$SqlUser = 'sa',
-    [string]$SqlPassword = '',
-    [switch]$Trusted,
+    [ValidateSet('portable', 'mysql', 'docker')]
+    [string]$Db = 'portable',
+    [string]$DbHost = '127.0.0.1',
+    [int]$DbPort = 3306,
+    [string]$DbUser = 'root',
+    [string]$DbPassword = '',
     [string]$Database = 'artistikcity',
+    [string]$AppUser = 'artistik',
+    [string]$AppPassword = 'Artistik@2026',
+    [string]$RootPassword = 'ArtistikRoot@2026',
     [switch]$ResetDatabase,
+    [switch]$DatabaseOnly,
+    [switch]$StopDatabase,
     [int]$Port = 8080,
     [switch]$SkipBuild,
     [switch]$NoBrowser
@@ -64,10 +70,15 @@ $JdkUrl        = 'https://github.com/adoptium/temurin17-binaries/releases/downlo
 $MavenVersion  = '3.9.9'
 $MavenUrls     = @("https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/$MavenVersion/apache-maven-$MavenVersion-bin.zip",
                    "https://archive.apache.org/dist/maven/maven-3/$MavenVersion/binaries/apache-maven-$MavenVersion-bin.zip")
-$MssqlVersion  = '12.8.1'
+# MySQL 8.4 LTS for Windows (ZIP archive). The pinned release is checked against its published MD5. Only the newest
+# 8.4 release stays on cdn.mysql.com; older ones move to the archive, and newer 8.4 releases are tried as a fallback.
+$MysqlVersion  = '8.4.13'
+$MysqlMd5      = '7b94489d5524dea9b27097068bea25a8'
+$MysqlHome     = Join-Path $Tools "mysql-$MysqlVersion-winx64"
+$MysqlData     = Join-Path $Tools 'mysql-data'
+$MysqlIni      = Join-Path $Tools 'mysql.ini'
 $Jar           = Join-Path $Root 'target\artistikcity-1.0.0.jar'
-$DockerName    = 'artistikcity-sql'
-$DockerDefaultPassword = 'Artistik#2026Pass'
+$DockerName    = 'artistikcity-mysql'
 
 function Step($msg) { Write-Host ''; Write-Host "==> $msg" -ForegroundColor Cyan }
 function Ok($msg)   { Write-Host "    $msg" -ForegroundColor Green }
@@ -88,17 +99,22 @@ function Unzip($zip, $dest) {
     Expand-Archive -Path $zip -DestinationPath $dest -Force
 }
 
-function Download($urls, $target) {
+$BrowserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
+function TryDownload($urls, $target) {
     foreach ($u in @($urls)) {
         try {
             Info "Downloading $u"
-            Invoke-WebRequest -Uri $u -OutFile $target -UseBasicParsing
-            return
+            Invoke-WebRequest -Uri $u -OutFile $target -UseBasicParsing -UserAgent $BrowserAgent
+            return $true
         } catch {
             Info "  failed: $($_.Exception.Message)"
+            Remove-Item $target -ErrorAction SilentlyContinue
         }
     }
-    Fail "Could not download $target. Check your internet connection / proxy."
+    return $false
+}
+function Download($urls, $target) {
+    if (-not (TryDownload $urls $target)) { Fail "Could not download $target. Check your internet connection / proxy." }
 }
 
 function Get-JavaMajor($javaExe) {
@@ -122,6 +138,8 @@ function Get-JavaHome($javaExe) {
     return $null
 }
 
+$DbOnlyMode = $DatabaseOnly -or $StopDatabase
+if (-not $DbOnlyMode) {
 # ----------------------------------------------------------------------------------------------- Java
 Step 'Checking Java (JDK 17 or newer)'
 $JdkHome = $null
@@ -201,88 +219,280 @@ if ($SkipBuild -and (Test-Path $Jar)) {
     Ok "Built $Jar"
 }
 
+}   # end of: if (-not $DbOnlyMode)
+
 # ------------------------------------------------------------------------------------------- Database
-$JavaArgs = @()
+# MySQL helper: runs mysql.exe / mysqladmin.exe with a private option file, so passwords never appear
+# on the command line (and MySQL does not print "using a password on the command line" warnings).
+function Write-ClientCnf($user, $password, $hostName, $port) {
+    $cnf = Join-Path $Tools "mysql-client-$user.cnf"
+    $lines = @('[client]', "user=$user", "host=$hostName", "port=$port", 'protocol=TCP', 'default-character-set=utf8mb4')
+    if ($password) { $lines += "password=`"$password`"" }
+    [IO.File]::WriteAllLines($cnf, $lines)
+    return $cnf
+}
+function Invoke-MysqlClient($exe, $cnf, $arguments, $inputFile) {
+    if ($cnf -eq 'docker') {
+        $cmdLine = "docker exec -i $DockerName $exe --protocol=TCP -h127.0.0.1 -uroot `"-p$RootPassword`" --default-character-set=utf8mb4 $arguments"
+    } else {
+        $cmdLine = "`"$exe`" --defaults-extra-file=`"$cnf`" $arguments"
+    }
+    if ($inputFile) { $cmdLine += " < `"$inputFile`"" }
+    $out = cmd /c "$cmdLine 2>&1" | Out-String
+    return @{ Code = $LASTEXITCODE; Output = $out.Trim() }
+}
+function Test-Ping($mysqladmin, $cnf) {
+    $r = Invoke-MysqlClient $mysqladmin $cnf 'ping --connect-timeout=3' $null
+    return ($r.Code -eq 0 -and $r.Output -match 'alive')
+}
+function Get-PortableMysqld {
+    @(Get-CimInstance Win32_Process -Filter "Name='mysqld.exe'" -ErrorAction SilentlyContinue |
+      Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($MysqlHome, [StringComparison]::OrdinalIgnoreCase) })
+}
+
+$MysqlExe = $null; $MysqladminExe = $null; $StartedMysqld = $null
 $env:PAYMENT_TEST_MODE = 'true'      # local setup: allow simulated payments when no Razorpay keys are configured
 Remove-Item Env:SPRING_PROFILES_ACTIVE -ErrorAction SilentlyContinue
+Remove-Item Env:DB_INIT -ErrorAction SilentlyContinue
 
-if ($Db -eq 'dev') {
-    Step 'Database: in-memory (SQL Server compatibility mode) - demo data is loaded on every start'
-    $env:SPRING_PROFILES_ACTIVE = 'dev'
-} else {
-    if ($Db -eq 'docker') {
-        Step 'Database: SQL Server 2022 in Docker'
-        if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-            Fail 'Docker is not installed. Install Docker Desktop (https://www.docker.com/products/docker-desktop/) or use -Db dev / -Db sqlserver.'
+if ($Db -eq 'portable') {
+    # reuse an 8.4 already unpacked in .tools (any release), newest first
+    $have = Get-ChildItem -Path $Tools -Directory -Filter 'mysql-8.4.*-winx64' -ErrorAction SilentlyContinue |
+            Where-Object { Test-Path (Join-Path $_.FullName 'bin\mysqld.exe') } |
+            Sort-Object { [version]($_.Name -replace '^mysql-([0-9.]+)-winx64$', '$1') } -Descending | Select-Object -First 1
+    if ($have) { $MysqlHome = $have.FullName; $MysqlVersion = $have.Name -replace '^mysql-([0-9.]+)-winx64$', '$1' }
+    $MysqlExe = Join-Path $MysqlHome 'bin\mysql.exe'
+    $MysqladminExe = Join-Path $MysqlHome 'bin\mysqladmin.exe'
+    $Mysqld = Join-Path $MysqlHome 'bin\mysqld.exe'
+    $DbHost = '127.0.0.1'
+
+    if ($StopDatabase) {
+        Step 'Stopping the portable MySQL'
+        $running = Get-PortableMysqld
+        if ($running.Count -eq 0) { Ok 'MySQL is not running.'; exit 0 }
+        $rootCnf = Write-ClientCnf 'root' $RootPassword $DbHost $DbPort
+        $r = Invoke-MysqlClient $MysqladminExe $rootCnf 'shutdown' $null
+        Start-Sleep -Seconds 3
+        if ((Get-PortableMysqld).Count -gt 0) { $running | ForEach-Object { Stop-Process -Id $_.ProcessId -Force } }
+        Ok 'MySQL stopped.'
+        exit 0
+    }
+
+    Step "Database: portable MySQL 8.4 LTS (.tools\)"
+    if (-not (Test-Path $Mysqld)) {
+        # mysqld.exe needs the Microsoft Visual C++ 2015-2022 runtime, which most PCs already have
+        $vc = Join-Path $env:SystemRoot 'System32\vcruntime140_1.dll'
+        if (-not (Test-Path $vc)) {
+            Fail ('MySQL needs the Microsoft Visual C++ Redistributable (x64). Install it from ' +
+                  'https://aka.ms/vs/17/release/vc_redist.x64.exe and run this again.')
         }
-        if (-not $SqlPassword) { $SqlPassword = $DockerDefaultPassword }
-        $SqlUser = 'sa'; $SqlHost = 'localhost'; $SqlInstance = ''; $Trusted = $false
-        $ErrorActionPreference = 'Continue'   # docker writes progress to stderr
-        $existing = cmd /c "docker ps -a --filter name=^$DockerName$ --format {{.Names}} 2>nul" | Out-String
-        $existing = $existing.Trim()
-        if ($existing -eq $DockerName) {
-            Info "Starting existing container $DockerName"
-            docker start $DockerName | Out-Null
+        Info "MySQL not found in .tools - downloading MySQL $MysqlVersion (about 270 MB, one time only)"
+        $zip = Join-Path $Tools 'mysql.zip'
+        $got = TryDownload @("https://cdn.mysql.com/Downloads/MySQL-8.4/mysql-$MysqlVersion-winx64.zip",
+                             "https://downloads.mysql.com/archives/get/p/23/file/mysql-$MysqlVersion-winx64.zip") $zip
+        if ($got) {
+            $md5 = (Get-FileHash -Path $zip -Algorithm MD5).Hash.ToLower()
+            if ($md5 -ne $MysqlMd5) { Remove-Item $zip; Fail "The MySQL download is damaged (MD5 $md5, expected $MysqlMd5). Run again." }
+            Ok 'Download verified (MD5)'
         } else {
-            Info "Creating container $DockerName (downloads the SQL Server image the first time, ~1.5 GB)"
-            docker run -d --name $DockerName -e 'ACCEPT_EULA=Y' -e "MSSQL_SA_PASSWORD=$SqlPassword" -p "${SqlPort}:1433" mcr.microsoft.com/mssql/server:2022-latest | Out-Null
-            if ($LASTEXITCODE -ne 0) { Fail 'docker run failed. Is Docker Desktop running?' }
+            # the pinned release was retired - take the current 8.4 release from the CDN
+            foreach ($n in 14..30) {
+                $v = "8.4.$n"
+                if (TryDownload @("https://cdn.mysql.com/Downloads/MySQL-8.4/mysql-$v-winx64.zip") $zip) { $got = $true; $MysqlVersion = $v; break }
+            }
+            if (-not $got) { Fail 'Could not download MySQL 8.4. Check your internet connection / proxy, or install MySQL yourself and use -Db mysql.' }
         }
-        $ErrorActionPreference = 'Stop'
+        $MysqlHome = Join-Path $Tools "mysql-$MysqlVersion-winx64"
+        $MysqlExe = Join-Path $MysqlHome 'bin\mysql.exe'
+        $MysqladminExe = Join-Path $MysqlHome 'bin\mysqladmin.exe'
+        $Mysqld = Join-Path $MysqlHome 'bin\mysqld.exe'
+        Info 'Unpacking MySQL (this takes a minute)'
+        Unzip $zip $Tools
+        Remove-Item $zip
+        if (-not (Test-Path $Mysqld)) { Fail "Unpacking MySQL failed: $Mysqld not found." }
+        Ok "MySQL $MysqlVersion unpacked to $MysqlHome"
+    }
+
+    # configuration: local connections only, UTF-8, data kept in .tools\mysql-data
+    $fwd = { param($x) $x.Replace('\', '/') }
+    $ini = @('[mysqld]',
+             "basedir=`"$(& $fwd $MysqlHome)`"",
+             "datadir=`"$(& $fwd $MysqlData)`"",
+             "port=$DbPort",
+             'bind-address=127.0.0.1',
+             'mysqlx=OFF',
+             'character-set-server=utf8mb4',
+             'collation-server=utf8mb4_0900_ai_ci',
+             'max_allowed_packet=64M',
+             'innodb_buffer_pool_size=256M',
+             "log-error=`"$(& $fwd (Join-Path $LogDir 'mysql-error.log'))`"",
+             '', '[client]', "port=$DbPort", 'default-character-set=utf8mb4')
+    [IO.File]::WriteAllLines($MysqlIni, $ini)
+
+    $freshData = $false
+    if (-not (Test-Path (Join-Path $MysqlData 'mysql'))) {
+        Info 'Initialising a new MySQL data folder (.tools\mysql-data)'
+        if (Test-Path $MysqlData) { Remove-Item -Recurse -Force $MysqlData }
+        $out = cmd /c "`"$Mysqld`" --defaults-file=`"$MysqlIni`" --initialize-insecure --console 2>&1" | Out-String
+        if ($LASTEXITCODE -ne 0) { Write-Host $out; Fail 'MySQL could not initialise its data folder - see the messages above.' }
+        $freshData = $true
+    }
+
+    $rootCnf = Write-ClientCnf 'root' $RootPassword $DbHost $DbPort
+    $noPwCnf = Write-ClientCnf 'root-initial' '' $DbHost $DbPort
+    (Get-Content $noPwCnf) -replace '^user=root-initial$', 'user=root' | Set-Content $noPwCnf
+
+    if ((Get-PortableMysqld).Count -gt 0) {
+        Ok 'MySQL is already running'
     } else {
-        Step 'Database: your SQL Server'
-    }
-
-    # JDBC URLs
-    $server = if ($SqlInstance) { "$SqlHost\$SqlInstance" } else { "${SqlHost}:$SqlPort" }
-    $common = 'encrypt=true;trustServerCertificate=true;loginTimeout=15'
-    if ($Trusted) {
-        $common += ';integratedSecurity=true'
-        $authDir = Join-Path $Tools 'sqlauth'
-        $dll = Join-Path $authDir "mssql-jdbc_auth-$MssqlVersion.x64.dll"
-        if (-not (Test-Path $dll)) {
-            Info 'Downloading the SQL Server Windows-authentication library (mssql-jdbc_auth)'
-            New-Item -ItemType Directory -Force -Path $authDir | Out-Null
-            & $Mvn -B -q dependency:copy "-Dartifact=com.microsoft.sqlserver:mssql-jdbc_auth:$MssqlVersion.x64:dll" "-DoutputDirectory=$authDir"
-            if ($LASTEXITCODE -ne 0 -or -not (Test-Path $dll)) { Fail 'Could not download mssql-jdbc_auth. Use SQL authentication (-SqlUser/-SqlPassword) instead.' }
+        $busy = Get-NetTCPConnection -LocalPort $DbPort -State Listen -ErrorAction SilentlyContinue
+        if ($busy) {
+            $owner = Get-Process -Id $busy[0].OwningProcess -ErrorAction SilentlyContinue
+            Fail ("Port $DbPort is already used by '$($owner.ProcessName)' (another MySQL?). Stop it, or run with " +
+                  "-DbPort 3307, or use that server with -Db mysql -DbUser root -DbPassword ...")
         }
-        $JavaArgs += "-Djava.library.path=$authDir"
-    } elseif (-not $SqlPassword) {
-        $sec = Read-Host "Password for SQL Server login '$SqlUser'" -AsSecureString
-        $SqlPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec))
+        Info "Starting MySQL on 127.0.0.1:$DbPort"
+        # own hidden window: MySQL keeps running cleanly even if this console is closed
+        $StartedMysqld = Start-Process -FilePath $Mysqld -ArgumentList "--defaults-file=`"$MysqlIni`"" -WindowStyle Hidden -PassThru
     }
-    $masterUrl = "jdbc:sqlserver://$server;databaseName=master;$common"
-    $appUrl    = "jdbc:sqlserver://$server;databaseName=$Database;$common"
+    $ready = $false
+    for ($i = 1; $i -le 60; $i++) {
+        if ((Test-Ping $MysqladminExe $rootCnf) -or (Test-Ping $MysqladminExe $noPwCnf)) { $ready = $true; break }
+        if ($StartedMysqld -and $StartedMysqld.HasExited) { break }
+        Start-Sleep -Seconds 1
+    }
+    if (-not $ready) { Fail "MySQL did not start - see $LogDir\mysql-error.log" }
+    Ok 'MySQL is running'
 
-    # create the database if needed (uses the SQL Server JDBC driver downloaded by the build)
-    $driverJar = Join-Path $env:USERPROFILE ".m2\repository\com\microsoft\sqlserver\mssql-jdbc\$MssqlVersion.jre11\mssql-jdbc-$MssqlVersion.jre11.jar"
-    if (-not (Test-Path $driverJar)) { Fail "SQL Server JDBC driver not found at $driverJar (run without -SkipBuild once)." }
-    $u = if ($Trusted) { '-' } else { $SqlUser }
-    $p = if ($Trusted) { '-' } else { $SqlPassword }
-    $state = $null
-    $attempts = if ($Db -eq 'docker') { 40 } else { 1 }
-    for ($i = 1; $i -le $attempts; $i++) {
-        $out = cmd /c "call `"$JavaExe`" $($JavaArgs -join ' ') -cp `"$driverJar`" tools\CreateDatabase.java `"$masterUrl`" `"$u`" `"$p`" $Database 2>&1" | Out-String
-        if ($out -match '(CREATED|EMPTY|READY)') { $state = $Matches[1]; break }
-        if ($i -lt $attempts) { Info "Waiting for SQL Server to accept connections ($i/$attempts)..."; Start-Sleep -Seconds 3 }
+    # first start: give root a password; every start: make sure the database + app user exist
+    $probe = Invoke-MysqlClient $MysqlExe $rootCnf '-N -e "SELECT 1"' $null
+    if ($probe.Code -ne 0) {
+        $set = Invoke-MysqlClient $MysqlExe $noPwCnf ("-e `"ALTER USER 'root'@'localhost' IDENTIFIED BY '$RootPassword'`"") $null
+        if ($set.Code -ne 0) { Write-Host $set.Output; Fail 'Could not log in to MySQL as root (wrong -RootPassword?).' }
+        Ok 'Set the MySQL root password'
     }
-    if (-not $state) {
-        Write-Host $out
-        Fail ("Could not connect to SQL Server at $server. Check that the service is running, TCP/IP is enabled " +
-              "(SQL Server Configuration Manager > Protocols > TCP/IP) and the login/password are correct.")
+    Remove-Item $noPwCnf -ErrorAction SilentlyContinue
+    $AdminCnf = $rootCnf
+} elseif ($Db -eq 'docker') {
+    Step 'Database: MySQL 8.4 in Docker'
+    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+        Fail 'Docker is not installed. Install Docker Desktop (https://www.docker.com/products/docker-desktop/) or use the portable MySQL (default).'
     }
-    Ok "Database '$Database' state: $state"
+    $DbHost = '127.0.0.1'
+    $ErrorActionPreference = 'Continue'   # docker writes progress to stderr
+    $existing = (cmd /c "docker ps -a --filter name=^$DockerName$ --format {{.Names}} 2>nul" | Out-String).Trim()
+    if ($existing -eq $DockerName) {
+        Info "Starting existing container $DockerName"
+        docker start $DockerName | Out-Null
+    } else {
+        Info "Creating container $DockerName (downloads the MySQL image the first time, ~600 MB)"
+        docker run -d --name $DockerName -e "MYSQL_ROOT_PASSWORD=$RootPassword" -p "${DbPort}:3306" mysql:8.4 `
+            --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci --mysqlx=OFF | Out-Null
+        if ($LASTEXITCODE -ne 0) { Fail 'docker run failed. Is Docker Desktop running?' }
+    }
+    if ($StopDatabase) { docker stop $DockerName | Out-Null; Ok 'Container stopped.'; exit 0 }
+    # the first start initialises MySQL inside the container (about 30 s) before it accepts TCP connections
+    $MysqlExe = 'mysql'
+    $ready = $false
+    for ($i = 1; $i -le 60; $i++) {
+        if ((Invoke-MysqlClient $MysqlExe 'docker' '-N -e "SELECT 1"' $null).Code -eq 0) { $ready = $true; break }
+        Start-Sleep -Seconds 2
+    }
+    $ErrorActionPreference = 'Stop'
+    if (-not $ready) { Fail "MySQL in container $DockerName did not become ready - check: docker logs $DockerName" }
+    Ok 'MySQL is running in Docker'
+    $AdminCnf = 'docker'
+} else {
+    Step "Database: your MySQL server at ${DbHost}:$DbPort"
+    if ($StopDatabase) { Fail '-StopDatabase only applies to the portable MySQL or Docker.' }
+    # use a mysql.exe from a local MySQL installation when there is one
+    $found = @(Get-Command mysql.exe -ErrorAction SilentlyContinue | ForEach-Object { $_.Source })
+    $found += @(Get-ChildItem "$env:ProgramFiles\MySQL\MySQL Server *\bin\mysql.exe" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
+    if ($found.Count -gt 0) {
+        $MysqlExe = $found[0]
+        if (-not $DbPassword) {
+            $sec = Read-Host "Password for MySQL user '$DbUser'" -AsSecureString
+            $DbPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec))
+        }
+        $AdminCnf = Write-ClientCnf 'admin' $DbPassword $DbHost $DbPort
+        (Get-Content $AdminCnf) -replace '^user=admin$', "user=$DbUser" | Set-Content $AdminCnf
+        $ok = $false
+        for ($i = 1; $i -le 3 -and -not $ok; $i++) {
+            $ok = (Invoke-MysqlClient $MysqlExe $AdminCnf '-N -e "SELECT 1"' $null).Code -eq 0
+            if (-not $ok) { Start-Sleep -Seconds 2 }
+        }
+        if (-not $ok) { Fail "Could not log in to MySQL at ${DbHost}:$DbPort as '$DbUser'. Check that the server runs and the password is right." }
+    } else {
+        Info 'mysql.exe not found - the application will connect with your login and create the tables itself.'
+        $AdminCnf = $null
+    }
+}
 
-    $env:DB_URL = $appUrl
-    $env:DB_USERNAME = if ($Trusted) { '' } else { $SqlUser }
-    $env:DB_PASSWORD = if ($Trusted) { '' } else { $SqlPassword }
-    if ($state -ne 'READY' -or $ResetDatabase) {
+$AppUrl = "jdbc:mysql://${DbHost}:$DbPort/$Database" + '?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false'
+if ($AdminCnf) {
+    # database + application user (idempotent)
+    $setup = "CREATE DATABASE IF NOT EXISTS ``$Database`` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci; " +
+             "CREATE USER IF NOT EXISTS '$AppUser'@'%' IDENTIFIED BY '$AppPassword'; " +
+             "ALTER USER '$AppUser'@'%' IDENTIFIED BY '$AppPassword'; " +
+             "GRANT ALL PRIVILEGES ON ``$Database``.* TO '$AppUser'@'%';"
+    $r = Invoke-MysqlClient $MysqlExe $AdminCnf ("-e `"$setup`"") $null
+    if ($r.Code -ne 0) { Write-Host $r.Output; Fail 'Could not create the database / application user.' }
+    $t = Invoke-MysqlClient $MysqlExe $AdminCnf ("-N -e `"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$Database' AND table_name='users'`"") $null
+    $hasTables = ($t.Output -match '(^|\s)1(\s|$)')
+    if (-not $hasTables -or $ResetDatabase) {
         Info 'Creating tables and loading demo data (database\schema.sql + database\seed.sql)'
-        $env:DB_INIT = 'always'
+        foreach ($f in @('database\schema.sql', 'database\seed.sql')) {
+            $r = Invoke-MysqlClient $MysqlExe $AdminCnf $Database (Join-Path $Root $f)
+            if ($r.Code -eq 0 -and $r.Output -match 'ERROR \d+') { $r.Code = 1 }
+            if ($r.Code -ne 0) { Write-Host $r.Output; Fail "Loading $f failed - see the message above." }
+        }
+        Ok 'Database ready with demo data'
     } else {
-        Info 'Tables already exist - keeping your data (use -ResetDatabase to recreate them)'
-        $env:DB_INIT = 'never'
+        Ok "Database '$Database' already has tables - keeping your data (use -ResetDatabase to reload the demo data)"
     }
+
+    # database\migrations\*.sql: schema changes for databases that already hold data. A fresh schema.sql
+    # already contains all of them, so they are only recorded; existing databases run the pending ones in order.
+    $mk = 'CREATE TABLE IF NOT EXISTS schema_migrations (filename VARCHAR(191) NOT NULL PRIMARY KEY, applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+    $r = Invoke-MysqlClient $MysqlExe $AdminCnf ("$Database -e `"$mk`"") $null
+    if ($r.Code -ne 0) { Write-Host $r.Output; Fail 'Could not create the schema_migrations table.' }
+    $done = (Invoke-MysqlClient $MysqlExe $AdminCnf ("$Database -N -e `"SELECT filename FROM schema_migrations`"") $null).Output -split "`r?`n" |
+            ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -notmatch '^mysql: \[Warning\]' }
+    $files = Get-ChildItem -Path (Join-Path $Root 'database\migrations') -Filter '*.sql' -ErrorAction SilentlyContinue | Sort-Object Name
+    $fresh = (-not $hasTables -or $ResetDatabase)
+    foreach ($m in $files) {
+        if ($done -contains $m.Name) { continue }
+        if (-not $fresh) {
+            Info "Applying database migration $($m.Name)"
+            $r = Invoke-MysqlClient $MysqlExe $AdminCnf $Database $m.FullName
+            if ($r.Code -eq 0 -and $r.Output -match 'ERROR \d+') { $r.Code = 1 }
+            if ($r.Code -ne 0) { Write-Host $r.Output; Fail "Migration $($m.Name) failed - see the message above. Your data was not deleted." }
+        }
+        $r = Invoke-MysqlClient $MysqlExe $AdminCnf ("$Database -e `"INSERT IGNORE INTO schema_migrations (filename) VALUES ('$($m.Name)')`"") $null
+    }
+    $env:DB_USERNAME = $AppUser; $env:DB_PASSWORD = $AppPassword; $env:DB_INIT = 'never'
+} else {
+    # no mysql.exe on this PC (remote server): the application connects with your login and,
+    # on an empty database, creates the tables itself
+    $env:DB_USERNAME = $DbUser; $env:DB_PASSWORD = $DbPassword
+    $AppUrl += '&createDatabaseIfNotExist=true'
+    $env:DB_INIT = if ($ResetDatabase) { 'always' } else { 'never' }
+    if (-not $ResetDatabase) { Info 'First run on an empty database? Run once with -ResetDatabase to create the tables and demo data.' }
+}
+$env:DB_URL = $AppUrl
+
+if ($DatabaseOnly) {
+    Write-Host ''
+    Write-Host '  MySQL is ready' -ForegroundColor Green
+    Write-Host "    Server   : ${DbHost}:$DbPort"
+    Write-Host "    Database : $Database"
+    if ($AdminCnf) { Write-Host "    App user : $AppUser / $AppPassword" }
+    if ($Db -eq 'portable') {
+        Write-Host "    Root     : root / $RootPassword"
+        Write-Host '    It keeps running in the background. Stop it with STOP-MySQL.bat.'
+    }
+    try { Stop-Transcript | Out-Null } catch { }
+    exit 0
 }
 
 # -------------------------------------------------------------------------------------------- Run it
@@ -295,6 +505,7 @@ $RunDir = Join-Path $Tools 'run'
 New-Item -ItemType Directory -Force -Path $RunDir | Out-Null
 $RunJar = Join-Path $RunDir 'artistikcity-run.jar'
 Copy-Item -Path $Jar -Destination $RunJar -Force
+$JavaArgs = @()
 $argList = @($JavaArgs + @('-jar', "`"$RunJar`"", "--server.port=$Port", '--logging.file.name=logs/app.log'))
 Info "Application log: $LogDir\app.log"
 $proc = Start-Process -FilePath $JavaExe -ArgumentList $argList -WorkingDirectory $Root -NoNewWindow -PassThru
@@ -311,6 +522,7 @@ if ($up) {
     Write-Host "    Website      : $url"
     Write-Host "    Student login: ${url}login        student@artistikcity.com / password"
     Write-Host "    Admin panel  : ${url}admin/login  admin@artistikcity.com / password"
+    Write-Host "    MySQL        : ${DbHost}:$DbPort  database $Database  user $($env:DB_USERNAME)"
     Write-Host ''
     if (-not $NoBrowser) { Start-Process $url }
 } elseif ($proc.HasExited) {
@@ -318,4 +530,13 @@ if ($up) {
 } else {
     Write-Host 'The site did not answer within 3 minutes - still waiting; see logs\app.log.' -ForegroundColor Yellow
 }
-try { Wait-Process -Id $proc.Id } finally { if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force } }
+try {
+    Wait-Process -Id $proc.Id
+} finally {
+    if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
+    # the portable MySQL is stopped again when this script started it
+    if ($StartedMysqld -and -not $StartedMysqld.HasExited) {
+        Write-Host 'Stopping MySQL...'
+        Invoke-MysqlClient $MysqladminExe $rootCnf 'shutdown' $null | Out-Null
+    }
+}

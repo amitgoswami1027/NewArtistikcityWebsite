@@ -24,7 +24,7 @@ import java.util.Map;
 @Repository
 public class LifecycleRepository {
 
-    private static final String PHOTO = "(select top 1 p.photo_name from course_photos p where p.course_id = c.id order by p.id)";
+    private static final String PHOTO = "(select p.photo_name from course_photos p where p.course_id = c.id order by p.id limit 1)";
 
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;

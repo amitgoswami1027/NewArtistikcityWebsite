@@ -43,8 +43,7 @@ public class BlogController {
         Object[] params = cat == null ? new Object[0] : new Object[]{cat};
         long total = db.count("select count(*) from posts p" + where, params);
         int page = Paginator.page(pageParam);
-        List<Row> rows = db.select("select p.* from posts p" + where + " order by p.created_at desc, p.id desc offset "
-                + ((page - 1) * PER_PAGE) + " rows fetch next " + PER_PAGE + " rows only", params);
+        List<Row> rows = db.select("select p.* from posts p" + where + " order by p.created_at desc, p.id desc limit " + PER_PAGE + " offset " + ((page - 1) * PER_PAGE), params);
         posts.present(rows, true);
         String path = Inertia.baseUrl(request) + request.getRequestURI() + (cat == null ? "" : "?id=" + cat);
         Map<String, Object> props = new LinkedHashMap<>();

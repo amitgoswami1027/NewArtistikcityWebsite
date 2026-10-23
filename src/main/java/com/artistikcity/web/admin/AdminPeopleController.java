@@ -41,8 +41,11 @@ public class AdminPeopleController {
     private final Storage storage;
     private final Slugs slugs;
     private final Redirects redirect;
+    private final com.artistikcity.auth.SessionService sessions;
 
-    public AdminPeopleController(Views views, Db db, Json json, Auth auth, Validator validator, Storage storage, Slugs slugs, Redirects redirect) {
+    public AdminPeopleController(Views views, Db db, Json json, Auth auth, Validator validator, Storage storage, Slugs slugs, Redirects redirect,
+                                 com.artistikcity.auth.SessionService sessions) {
+        this.sessions = sessions;
         this.views = views;
         this.db = db;
         this.json = json;
@@ -124,7 +127,7 @@ public class AdminPeopleController {
         int perPage = 10;
         int page = Paginator.page(pageParam);
         long total = db.count("select count(*) from users");
-        List<Row> list = db.select("select * from users order by id offset " + ((page - 1) * perPage) + " rows fetch next " + perPage + " rows only");
+        List<Row> list = db.select("select * from users order by id limit " + perPage + " offset " + ((page - 1) * perPage));
         return views.page(request, "admin/students/list", Map.of("students", list,
                 "pagination", Paginator.links(total, perPage, page, request.getRequestURI())));
     }
@@ -134,8 +137,15 @@ public class AdminPeopleController {
         return views.page(request, "admin/students/add", Map.of());
     }
 
+    /** Phone numbers are unique across accounts. */
+    private void phoneFree(Row v, long userId) {
+        if (v.get("phone_number") != null && db.count("select count(*) from users where phone_number = ? and id <> ?", v.get("phone_number"), userId) > 0) {
+            throw com.artistikcity.support.ValidationException.withMessage("phone", "This phone number already belongs to another student.");
+        }
+    }
+
     private Row studentFields(Input in) {
-        return Row.of("name", in.get("name"), "phone", in.get("phone"),
+        return Row.of("name", in.get("name"), "phone_number", com.artistikcity.auth.PhoneNumbers.normalize(in.get("phone"), "91"),
                 "notifications", in.lng("notification") != null ? in.lng("notification") : in.lng("notifications"),
                 "language_preference", in.get("language_preference"), "location", in.get("location"),
                 "profile_title", in.get("profile_title"), "profile_description", in.get("profile_description"));
@@ -146,9 +156,10 @@ public class AdminPeopleController {
         Input in = Input.of(request, json);
         validator.validate(in, "name", "required", "email", "required|email|unique:users,email", "password", "required|confirmed");
         Row v = studentFields(in);
+        phoneFree(v, 0L);
         v.put("slug", slugs.unique("users", "slug", in.get("name"), null));
-        v.put("email", in.get("email"));
-        v.put("password", auth.hash(in.get("password")));
+        v.put("email", com.artistikcity.auth.AccountService.normalizeEmail(in.get("email")));
+        v.put("password_hash", auth.hash(in.get("password")));
         v.put("status", 1);
         long id = db.insert("users", v);
         photo(in, "profile_photo", "users", "uploads/students", id, "profile_photo");
@@ -157,7 +168,8 @@ public class AdminPeopleController {
 
     @GetMapping("/admin/students/edit/{student_id}")
     public ResponseEntity<String> editStudent(HttpServletRequest request, @PathVariable("student_id") Long id) {
-        Row s = NotFoundException.orFail(db.find("users", id)).without("password", "remember_token");
+        Row s = NotFoundException.orFail(db.find("users", id)).without("password_hash", "remember_token", "webauthn_user_handle");
+        s.put("phone", s.get("phone_number"));
         s.put("notification", s.get("notifications"));
         return views.page(request, "admin/students/edit", Map.of("student", s));
     }
@@ -168,8 +180,14 @@ public class AdminPeopleController {
         validator.validate(in, "name", "required", "password", "confirmed");
         NotFoundException.orFail(db.find("users", id));
         Row v = studentFields(in);
+        phoneFree(v, id);
+        Row before = db.find("users", id);
+        if (before.get("phone_number") != null && !before.str("phone_number").equals(v.get("phone_number"))) {
+            v.put("phone_verified_at", null); // a number typed by staff is not verified
+        }
         if (in.get("password") != null) {
-            v.put("password", auth.hash(in.get("password")));
+            v.put("password_hash", auth.hash(in.get("password")));
+            sessions.revokeAll(id, null, "password_changed_by_admin");
         }
         db.updateById("users", id, v);
         photo(in, "profile_photo", "users", "uploads/students", id, "profile_photo");

@@ -64,6 +64,13 @@ public class GlobalExceptionHandler {
                         + "text-align:center;padding:60px\"><h1>404 | Not Found</h1><p><a href=\"/\">Back to home</a></p></body></html>");
     }
 
+    /** Auth API called without a login: 401 JSON. */
+    @ExceptionHandler(com.artistikcity.web.AuthApiController.UnauthorizedException.class)
+    public ResponseEntity<String> unauthorized(RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).contentType(MediaType.APPLICATION_JSON)
+                .body(json.encode(Map.of("message", "Please sign in again.", "reauth", true)));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> error(Exception e, HttpServletRequest request) {
         if (e instanceof org.springframework.web.ErrorResponse er) {

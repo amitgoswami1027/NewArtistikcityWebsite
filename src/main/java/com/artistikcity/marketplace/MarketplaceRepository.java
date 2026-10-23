@@ -27,7 +27,7 @@ public class MarketplaceRepository {
     /** A listing can be edited only while no collector is holding or has bought it. */
     public static final List<String> EDITABLE = List.of("DRAFT", "PENDING_REVIEW", "AVAILABLE", "ARCHIVED");
 
-    static final String PRIMARY_IMAGE = "(select top 1 i.image_url from painting_images i where i.painting_id = p.id order by i.is_primary desc, i.sort_order, i.id)";
+    static final String PRIMARY_IMAGE = "(select i.image_url from painting_images i where i.painting_id = p.id order by i.is_primary desc, i.sort_order, i.id limit 1)";
     static final String CARD_COLUMNS = "p.id, p.slug, p.title, p.medium, p.surface, p.subject, p.style_tags, p.height_inches, p.width_inches, p.depth_inches,"
             + " p.year_created, p.is_framed, p.is_signed, p.has_certificate, p.base_price, p.discount_percentage, p.final_price, p.currency,"
             + " p.stock_status, p.source, p.artist_name, p.is_featured, p.published_at, p.sold_at, p.created_at, p.updated_at, p.version,"
@@ -71,10 +71,10 @@ public class MarketplaceRepository {
     }
 
     public List<Map<String, Object>> related(long paintingId, String artistName, int limit) {
-        return jdbc.queryForList("select top " + Math.max(1, Math.min(limit, 12)) + " " + CARD_COLUMNS
+        return jdbc.queryForList("select " + CARD_COLUMNS
                 + " from paintings p left join cart_reservations r on r.painting_id = p.id"
                 + " where p.id <> ? and p.stock_status in ('AVAILABLE', 'RESERVED')"
-                + " order by case when p.artist_name = ? then 0 else 1 end, p.is_featured desc, p.published_at desc", paintingId, artistName);
+                + " order by case when p.artist_name = ? then 0 else 1 end, p.is_featured desc, p.published_at desc limit " + Math.max(1, Math.min(limit, 12)), paintingId, artistName);
     }
 
     // ================================================================ listing writes
@@ -219,7 +219,7 @@ public class MarketplaceRepository {
     /** All listings (or only an instructor's own when {@code artistAdminId} is set), with the latest order. */
     public List<Map<String, Object>> adminListings(Long artistAdminId) {
         String sql = "select " + CARD_COLUMNS + ", p.review_notes, p.reviewed_at, r.session_or_user_id as holder_key,"
-                + " (select top 1 o.order_id from marketplace_orders o where o.painting_id = p.id and o.status not in ('CANCELLED', 'EXPIRED', 'PAYMENT_PENDING') order by o.created_at desc) as order_id,"
+                + " (select o.order_id from marketplace_orders o where o.painting_id = p.id and o.status not in ('CANCELLED', 'EXPIRED', 'PAYMENT_PENDING') order by o.created_at desc limit 1) as order_id,"
                 + " (select count(*) from painting_images i where i.painting_id = p.id) as image_count"
                 + " from paintings p left join cart_reservations r on r.painting_id = p.id";
         return artistAdminId == null

@@ -104,12 +104,12 @@
         <tr>
             <td style="padding: 35px 35px 20px 35px; background-color: #ffffff;" bgcolor="#ffffff">
                 <h1>Dear, {{userData.name}}</h1>
-                <p>Thank you for sign up for free courses, please find the login details:</p>
+                <p>Thank you for signing up for our free courses!</p>
                 <p>
-                    Username: {{userData.email}}<br>
-                    Password: {{userData.password}}
+                    Your account: {{userData.email}}
                 </p>
-                <p>Click <a href="{{loginUrl}}">here</a> to login!</p>
+                <p><a href="{{loginUrl}}" style="display:inline-block;padding:12px 24px;background:#e8412c;color:#ffffff;text-decoration:none;border-radius:4px;">Open my free courses</a></p>
+                <p>This sign-in link works once and expires in {{expire}} minutes. Later you can sign in any time with your e-mail, Google, Facebook or your phone.</p>
                 <p>Thank you</p>
             </td>
         </tr>

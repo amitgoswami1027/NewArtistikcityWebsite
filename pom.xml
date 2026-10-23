@@ -15,12 +15,10 @@
     <artifactId>artistikcity</artifactId>
     <version>1.0.0</version>
     <name>ArtistikCity</name>
-    <description>ArtistikCity online art school - Java/Spring Boot + React (Inertia) + SQL Server</description>
+    <description>ArtistikCity online art school - Java/Spring Boot + React (Inertia) + MySQL</description>
 
     <properties>
         <java.version>17</java.version>
-        <!-- pinned so the matching Windows-authentication DLL (mssql-jdbc_auth) can be used -->
-        <mssql-jdbc.version>12.8.1.jre11</mssql-jdbc.version>
     </properties>
 
     <dependencies>
@@ -50,16 +48,10 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
-        <!-- Microsoft SQL Server JDBC driver -->
+        <!-- MySQL JDBC driver (version managed by Spring Boot) -->
         <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <!-- In-memory database in SQL Server compatibility mode for the "dev" profile -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
 

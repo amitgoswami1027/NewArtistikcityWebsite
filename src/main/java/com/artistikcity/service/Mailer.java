@@ -40,7 +40,19 @@ public class Mailer {
         String html = views.render(template, model);
         JavaMailSender mailSender = enabled ? sender.getIfAvailable() : null;
         if (mailSender == null) {
-            log.info("Mail disabled (MAIL_HOST not set) - would send '{}' to {}", subject, to);
+            // development: keep a copy of the message so links (sign-in, verification, reset) can be opened
+            try {
+                java.nio.file.Path dir = java.nio.file.Paths.get("logs", "mail-outbox");
+                java.nio.file.Files.createDirectories(dir);
+                String file = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS"))
+                        + "-" + subject.replaceAll("[^A-Za-z0-9]+", "-").toLowerCase() + ".html";
+                java.nio.file.Files.writeString(dir.resolve(file), html);
+                Object url = model == null ? null : model.get("url");
+                log.info("Mail disabled (MAIL_HOST not set) - '{}' to {} saved as logs/mail-outbox/{}{}", subject, to, file,
+                        url == null ? "" : " - link: " + url);
+            } catch (Exception e) {
+                log.info("Mail disabled (MAIL_HOST not set) - would send '{}' to {}", subject, to);
+            }
             return true;
         }
         try {

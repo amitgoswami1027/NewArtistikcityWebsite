@@ -1,10 +1,6 @@
 @echo off
 REM ============================================================
-REM  ArtistikCity - start against your own Microsoft SQL Server
-REM  Default: localhost:1433 with Windows login. Examples:
-REM    START-with-SQLServer.bat -SqlUser sa -SqlPassword "YourPass"
-REM    START-with-SQLServer.bat -SqlInstance SQLEXPRESS -Trusted
-REM    START-with-SQLServer.bat -Trusted -ResetDatabase
+REM  ArtistikCity - stop the portable MySQL database (your data is kept)
 REM ============================================================
 REM ---- keep this window open whatever happens (re-runs itself inside "cmd /k") ----
 if not defined ARTISTIK_KEEP_OPEN (
@@ -21,11 +17,7 @@ if errorlevel 1 (
   echo ERROR: powershell not found >> "logs\launcher.log"
   goto :eof
 )
-if "%~1"=="" (
-  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup-and-run.ps1" -Db sqlserver -Trusted
-) else (
-  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup-and-run.ps1" -Db sqlserver %*
-)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup-and-run.ps1" -StopDatabase %*
 echo [%date% %time%] setup-and-run.ps1 exited with code %errorlevel% >> "logs\launcher.log"
 echo.
 echo ---------------------------------------------------------------

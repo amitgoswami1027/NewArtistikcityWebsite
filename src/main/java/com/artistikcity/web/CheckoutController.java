@@ -132,7 +132,7 @@ public class CheckoutController {
         Row address = null;
         Long uid = auth.userId(request);
         if (uid != null) {
-            address = db.first("select top 1 * from user_addresses where [primary] = 1 and user_id = ? order by id", uid);
+            address = db.first("select * from user_addresses where `primary` = 1 and user_id = ? order by id limit 1", uid);
         }
         Map<String, Object> model = new LinkedHashMap<>();
         model.put("course", course);
@@ -168,7 +168,7 @@ public class CheckoutController {
                 params.add(e.getValue());
             }
         }
-        Row order = db.first("select top 1 * from orders where " + where + " order by id desc", params.toArray());
+        Row order = db.first("select * from orders where " + where + " order by id desc limit 1", params.toArray());
         long orderId;
         if (order == null) {
             Row values = new Row(billing);
@@ -331,7 +331,7 @@ public class CheckoutController {
     @GetMapping("/payment/ordermail")
     public ResponseEntity<String> orderMail(HttpServletRequest request) {
         Long uid = auth.userId(request);
-        Row o = uid == null ? null : db.first("select top 1 id from orders where user_id = ? order by id desc", uid);
+        Row o = uid == null ? null : db.first("select id from orders where user_id = ? order by id desc limit 1", uid);
         if (o == null) {
             throw new NotFoundException();
         }

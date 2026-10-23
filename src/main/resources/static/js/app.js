@@ -3446,129 +3446,113 @@ function ApplicationLogo(_ref) {
 /***/ }),
 
 /***/ "./resources/js/Components/Auth/AuthFields.js":
-/*!****************************************************!*\
-  !*** ./resources/js/Components/Auth/AuthFields.js ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Field: () => (/* binding */ Field),
-/* harmony export */   FormErrors: () => (/* binding */ FormErrors),
-/* harmony export */   SocialButtons: () => (/* binding */ SocialButtons),
-/* harmony export */   StrengthMeter: () => (/* binding */ StrengthMeter),
-/* harmony export */   passwordScore: () => (/* binding */ passwordScore)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-function Field(_ref) {
-  var label = _ref.label,
-    name = _ref.name,
-    _ref$type = _ref.type,
-    type = _ref$type === void 0 ? 'text' : _ref$type,
-    value = _ref.value,
-    onChange = _ref.onChange,
-    error = _ref.error,
-    autoComplete = _ref.autoComplete,
-    placeholder = _ref.placeholder,
-    autoFocus = _ref.autoFocus,
-    hint = _ref.hint,
-    _ref$required = _ref.required,
-    required = _ref$required === void 0 ? true : _ref$required,
-    children = _ref.children;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState2 = _slicedToArray(_useState, 2),
-    show = _useState2[0],
-    setShow = _useState2[1];
-  var isPassword = type === 'password';
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-    className: "ac-field",
-    children: [label && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("label", {
-      htmlFor: "f-".concat(name),
-      children: label
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "ac-field__wrap",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
-        id: "f-".concat(name),
-        name: name,
-        type: isPassword && show ? 'text' : type,
-        value: value,
-        onChange: onChange,
-        autoComplete: autoComplete,
-        placeholder: placeholder,
-        autoFocus: autoFocus,
-        required: required,
-        className: "ac-input ".concat(error ? 'is-invalid' : ''),
-        "aria-invalid": !!error,
-        "aria-describedby": error ? "e-".concat(name) : undefined,
-        style: isPassword ? {
-          paddingRight: 64
-        } : undefined
-      }), isPassword && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
-        type: "button",
-        className: "ac-field__toggle",
-        onClick: function onClick() {
-          return setShow(!show);
-        },
-        "aria-label": show ? 'Hide password' : 'Show password',
-        children: show ? 'Hide' : 'Show'
-      })]
-    }), children, error && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-      className: "ac-field__error",
-      id: "e-".concat(name),
-      children: error
-    }), !error && hint && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-      className: "ac-field__hint",
-      children: hint
-    })]
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var AuthFields_exports = {};
+__export(AuthFields_exports, {
+  Field: () => Field,
+  FormErrors: () => FormErrors,
+  SocialButtons: () => SocialButtons,
+  StrengthMeter: () => StrengthMeter,
+  passwordScore: () => passwordScore
+});
+module.exports = __toCommonJS(AuthFields_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+function Field({ label, name, type = "text", value, onChange, error, autoComplete, placeholder, autoFocus, hint, required = true, children }) {
+  const [show, setShow] = (0, import_react.useState)(false);
+  const isPassword = type === "password";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-field", children: [
+    label && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: `f-${name}`, children: label }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-field__wrap", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        {
+          id: `f-${name}`,
+          name,
+          type: isPassword && show ? "text" : type,
+          value,
+          onChange,
+          autoComplete,
+          placeholder,
+          autoFocus,
+          required,
+          className: `ac-input ${error ? "is-invalid" : ""}`,
+          "aria-invalid": !!error,
+          "aria-describedby": error ? `e-${name}` : void 0,
+          style: isPassword ? { paddingRight: 64 } : void 0
+        }
+      ),
+      isPassword && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "ac-field__toggle", onClick: () => setShow(!show), "aria-label": show ? "Hide password" : "Show password", children: show ? "Hide" : "Show" })
+    ] }),
+    children,
+    error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-field__error", id: `e-${name}`, children: error }),
+    !error && hint && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-field__hint", children: hint })
+  ] });
 }
-function withReturnTo(href) {
-  if (typeof window === 'undefined') return href;
-  var rt = new URLSearchParams(window.location.search).get('return_to');
-  return rt ? "".concat(href, "?return_to=").concat(encodeURIComponent(rt)) : href;
+function withReturnTo(href, extra) {
+  if (typeof window === "undefined") return href;
+  const params = new URLSearchParams();
+  const rt = new URLSearchParams(window.location.search).get("return_to");
+  if (rt) params.set("return_to", rt);
+  Object.keys(extra || {}).forEach((k) => params.set(k, extra[k]));
+  const q = params.toString();
+  return q ? `${href}?${q}` : href;
 }
-function SocialButtons(_ref2) {
-  var _ref2$verb = _ref2.verb,
-    verb = _ref2$verb === void 0 ? 'Continue' : _ref2$verb;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-    className: "dm-social",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
-      href: withReturnTo('/social-login/google'),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("img", {
-        src: "/assets/images/google-icon.png",
-        alt: ""
-      }), " ", verb, " with Google"]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
-      href: withReturnTo('/social-login/facebook'),
-      className: "is-fb",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("i", {
-        className: "fa fa-facebook-official"
-      }), " ", verb, " with Facebook"]
-    })]
-  });
+function SocialButtons({ verb = "Continue", providers, remember = true }) {
+  const show = (p) => !providers || providers[p];
+  if (providers && !providers.google && !providers.facebook) return null;
+  const extra = remember ? {} : { remember: "0" };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-social", children: [
+    show("google") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: withReturnTo("/social-login/google", extra), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/google-icon.png", alt: "" }),
+      " ",
+      verb,
+      " with Google"
+    ] }),
+    show("facebook") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: withReturnTo("/social-login/facebook", extra), className: "is-fb", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-facebook-official" }),
+      " ",
+      verb,
+      " with Facebook"
+    ] })
+  ] });
 }
-function FormErrors(_ref3) {
-  var errors = _ref3.errors;
-  var keys = Object.keys(errors || {});
+function FormErrors({ errors }) {
+  const keys = Object.keys(errors || {});
   if (!keys.length) return null;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-    className: "ac-alert ac-alert--error",
-    role: "alert",
-    children: errors[keys[0]]
-  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--error", role: "alert", children: errors[keys[0]] });
 }
 function passwordScore(pw) {
-  var s = 0;
+  let s = 0;
   if (!pw) return 0;
   if (pw.length >= 8) s++;
   if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
@@ -3576,25 +3560,18 @@ function passwordScore(pw) {
   if (/[^A-Za-z0-9]/.test(pw) || pw.length >= 12) s++;
   return s;
 }
-function StrengthMeter(_ref4) {
-  var password = _ref4.password;
-  var score = passwordScore(password);
-  var labels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-      className: "ac-strength",
-      "aria-hidden": "true",
-      children: [0, 1, 2, 3].map(function (i) {
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
-          className: i < score ? 'on' : ''
-        }, i);
-      })
-    }), password && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "ac-field__hint",
-      children: ["Password strength: ", labels[score]]
-    })]
-  });
+function StrengthMeter({ password }) {
+  const score = passwordScore(password);
+  const labels = ["Too short", "Weak", "Fair", "Good", "Strong"];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-strength", "aria-hidden": "true", children: [0, 1, 2, 3].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: i < score ? "on" : "" }, i)) }),
+    password && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-field__hint", children: [
+      "Password strength: ",
+      labels[score]
+    ] })
+  ] });
 }
+
 
 /***/ }),
 
@@ -9468,74 +9445,61 @@ function CourseNavigation(_ref) {
 /***/ }),
 
 /***/ "./resources/js/Components/Students/MyAccountNavigation.js":
-/*!*****************************************************************!*\
-  !*** ./resources/js/Components/Students/MyAccountNavigation.js ***!
-  \*****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ MyAccountNavigation)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "../../febuild/node_modules/react-dom/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Example__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Example */ "./resources/js/Components/Example.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-function MyAccountNavigation(_ref) {
-  var auth = _ref.auth,
-    header = _ref.header,
-    children = _ref.children;
-  var _usePage = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.usePage)(),
-    url = _usePage.url,
-    component = _usePage.component;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "accountMenu",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h5", {
-        children: "MY Account"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-          className: url === '/user/my-account' ? 'active' : '',
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.Link, {
-            href: route('user.account'),
-            children: "Personal Information"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-          className: url === '/user/my-address' ? 'active' : '',
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.Link, {
-            href: route('user.my.address'),
-            children: "My Address"
-          })
-        }), auth.user.provider_id === null && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-          className: url === '/user/change-password' ? 'active' : '',
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.Link, {
-            href: route('user.change.password'),
-            children: "Change Password"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-          className: url === '/user/order-history' ? 'active' : '',
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.Link, {
-            href: route('user.order.history'),
-            children: "Order History"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-          className: url === '/user/notifications' ? 'active' : '',
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.Link, {
-            href: route('user.notifications'),
-            children: "Notifications"
-          })
-        })]
-      })]
-    })
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var MyAccountNavigation_exports = {};
+__export(MyAccountNavigation_exports, {
+  default: () => MyAccountNavigation
+});
+module.exports = __toCommonJS(MyAccountNavigation_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_react_dom = __toESM(__webpack_require__("../../febuild/node_modules/react-dom/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_Example = __toESM(__webpack_require__("./resources/js/Components/Example.js"));
+function MyAccountNavigation({ auth, header, children }) {
+  const { url, component } = (0, import_inertia_react.usePage)();
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "accountMenu", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h5", { children: "MY Account" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/my-account" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.account"), children: "Personal Information" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/my-address" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.my.address"), children: "My Address" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/linked-accounts" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: "/user/linked-accounts", children: "Login & Security" }) }),
+      auth.user.has_password && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/change-password" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.change.password"), children: "Change Password" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/order-history" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.order.history"), children: "Order History" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/notifications" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.notifications"), children: "Notifications" }) })
+    ] })
+  ] }) });
 }
+
 
 /***/ }),
 
@@ -9558,86 +9522,67 @@ function StudentHeader() {
 /***/ }),
 
 /***/ "./resources/js/Components/Students/StudentNavigation.js":
-/*!***************************************************************!*\
-  !*** ./resources/js/Components/Students/StudentNavigation.js ***!
-  \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ StudentNavigation)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-var LINKS = [{
-  href: '/dashboard',
-  label: 'My studio',
-  icon: 'fa-th-large',
-  match: /^\/(dashboard|user\/dashboard)$/
-}, {
-  href: '/user/my-courses',
-  label: 'My courses',
-  icon: 'fa-graduation-cap',
-  match: /^\/user\/(my-courses|course)/
-}, {
-  href: '/user/my-workshop',
-  label: 'My workshops',
-  icon: 'fa-calendar',
-  match: /^\/user\/(my-workshop|workshop)/
-}, {
-  href: '/dashboard/certificates',
-  label: 'Certificates',
-  icon: 'fa-certificate',
-  match: /^$/
-}, {
-  href: '/user/my-account',
-  label: 'Account',
-  icon: 'fa-user',
-  match: /^\/user\/(my-account|my-address|change-password|order-history|notifications)/
-}, {
-  href: '/user/help',
-  label: 'Help',
-  icon: 'fa-question-circle-o',
-  match: /^\/user\/help/
-}];
-
-/** Left navigation for the classic student pages, in the site's look. */
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var StudentNavigation_exports = {};
+__export(StudentNavigation_exports, {
+  default: () => StudentNavigation
+});
+module.exports = __toCommonJS(StudentNavigation_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+const LINKS = [
+  { href: "/dashboard", label: "My studio", icon: "fa-th-large", match: /^\/(dashboard|user\/dashboard)$/ },
+  { href: "/user/my-courses", label: "My courses", icon: "fa-graduation-cap", match: /^\/user\/(my-courses|course)/ },
+  { href: "/user/my-workshop", label: "My workshops", icon: "fa-calendar", match: /^\/user\/(my-workshop|workshop)/ },
+  { href: "/dashboard/certificates", label: "Certificates", icon: "fa-certificate", match: /^$/ },
+  { href: "/user/my-account", label: "Account", icon: "fa-user", match: /^\/user\/(my-account|my-address|change-password|order-history|notifications|linked-accounts)/ },
+  { href: "/user/help", label: "Help", icon: "fa-question-circle-o", match: /^\/user\/help/ }
+];
 function StudentNavigation() {
-  var _usePage = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)(),
-    url = _usePage.url;
-  var path = String(url || '').split('?')[0];
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("aside", {
-    className: "col-md-3 col-lg-2 px-0 ac-sidenav",
-    "aria-label": "My courses and account",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("nav", {
-      children: [LINKS.map(function (l) {
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("a", {
-          href: l.href,
-          className: l.match.test(path) ? 'is-active' : '',
-          "aria-current": l.match.test(path) ? 'page' : undefined,
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("i", {
-            className: "fa ".concat(l.icon),
-            "aria-hidden": "true"
-          }), l.label]
-        }, l.href);
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.InertiaLink, {
-        href: route('logout'),
-        method: "post",
-        as: "button",
-        className: "ac-sidenav__logout",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("i", {
-          className: "fa fa-sign-out",
-          "aria-hidden": "true"
-        }), "Log out"]
-      })]
-    })
-  });
+  const { url } = (0, import_inertia_react.usePage)();
+  const path = String(url || "").split("?")[0];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "col-md-3 col-lg-2 px-0 ac-sidenav", "aria-label": "My courses and account", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { children: [
+    LINKS.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: l.href, className: l.match.test(path) ? "is-active" : "", "aria-current": l.match.test(path) ? "page" : void 0, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${l.icon}`, "aria-hidden": "true" }),
+      l.label
+    ] }, l.href)),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_inertia_react.InertiaLink, { href: route("logout"), method: "post", as: "button", className: "ac-sidenav__logout", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-sign-out", "aria-hidden": "true" }),
+      "Log out"
+    ] })
+  ] }) });
 }
+
 
 /***/ }),
 
@@ -13544,491 +13489,1114 @@ function ConfirmPassword() {
 /***/ }),
 
 /***/ "./resources/js/Pages/Auth/ForgotPassword.js":
-/*!***************************************************!*\
-  !*** ./resources/js/Pages/Auth/ForgotPassword.js ***!
-  \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ ForgotPassword)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Layouts_AuthLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Layouts/AuthLayout */ "./resources/js/Layouts/AuthLayout.js");
-/* harmony import */ var _Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Auth/AuthFields */ "./resources/js/Components/Auth/AuthFields.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-function ForgotPassword(_ref) {
-  var status = _ref.status;
-  var _useForm = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.useForm)({
-      email: ''
-    }),
-    data = _useForm.data,
-    setData = _useForm.setData,
-    post = _useForm.post,
-    processing = _useForm.processing,
-    errors = _useForm.errors;
-  var submit = function submit(e) {
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var ForgotPassword_exports = {};
+__export(ForgotPassword_exports, {
+  default: () => ForgotPassword
+});
+module.exports = __toCommonJS(ForgotPassword_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/AuthLayout.js"));
+var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
+function ForgotPassword({ status }) {
+  const { data, setData, post, processing, errors } = (0, import_inertia_react.useForm)({ email: "" });
+  const submit = (e) => {
     e.preventDefault();
-    post(route('password.email'));
+    post(route("password.email"), { preserveState: true });
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(_Layouts_AuthLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: "Reset your password",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h1", {
-      children: "Forgot your password?"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-      className: "dm-lede",
-      children: "Enter the email you joined with and we'll send you a link to choose a new one."
-    }), status && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-      className: "ac-alert ac-alert--ok",
-      children: status
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("form", {
-      onSubmit: submit,
-      noValidate: true,
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.Field, {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AuthLayout.default, { title: "Reset your password", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Forgot your password?" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Enter the email you joined with and we'll send you a link to choose a new one. Tip: you can also log in with an e-mail link, no password needed." }),
+    status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--ok", children: status }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: submit, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_AuthFields.Field,
+        {
+          label: "Email",
+          name: "email",
+          type: "email",
+          value: data.email,
+          onChange: (e) => setData("email", e.target.value),
+          error: errors.email,
+          autoComplete: "email",
+          placeholder: "you@example.com",
+          autoFocus: true
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: processing, children: processing ? "Sending\u2026" : "Send reset link" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-auth__switch", children: [
+      "Remembered it? ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("login"), children: "Back to log in" })
+    ] })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Auth/api.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var api_exports = {};
+__export(api_exports, {
+  authDelete: () => authDelete,
+  authPost: () => authPost,
+  goTo: () => goTo
+});
+module.exports = __toCommonJS(api_exports);
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+async function authPost(url, body = {}) {
+  try {
+    const res = await import_axios.default.post(url, body, { headers: { Accept: "application/json" } });
+    return res.data;
+  } catch (e) {
+    throw normalise(e);
+  }
+}
+async function authDelete(url) {
+  try {
+    const res = await import_axios.default.delete(url, { headers: { Accept: "application/json" } });
+    return res.data;
+  } catch (e) {
+    throw normalise(e);
+  }
+}
+function normalise(e) {
+  const status = e.response ? e.response.status : 0;
+  const data = e.response && e.response.data || {};
+  const fieldErrors = {};
+  if (data.errors) {
+    Object.keys(data.errors).forEach((k) => {
+      const v = data.errors[k];
+      fieldErrors[k] = Array.isArray(v) ? v[0] : v;
+    });
+  }
+  let message = data.message;
+  if (!message) {
+    message = status === 0 ? "No connection. Check your internet and try again." : status === 419 ? "Your session expired. Refresh the page and try again." : "Something went wrong. Please try again.";
+  }
+  if (status === 422 && Object.keys(fieldErrors).length) {
+    message = fieldErrors[Object.keys(fieldErrors)[0]];
+  }
+  return { status, message, fieldErrors, retryAfter: data.retryAfter, reauth: !!data.reauth, data };
+}
+function goTo(url) {
+  window.location.assign(url || "/dashboard");
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Auth/webauthn.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var webauthn_exports = {};
+__export(webauthn_exports, {
+  passkeysSupported: () => passkeysSupported,
+  registerPasskey: () => registerPasskey,
+  signInWithPasskey: () => signInWithPasskey
+});
+module.exports = __toCommonJS(webauthn_exports);
+var import_api = __webpack_require__("./resources/js/Components/Auth/api.js");
+function passkeysSupported() {
+  return typeof window !== "undefined" && !!window.PublicKeyCredential && !!navigator.credentials;
+}
+function toBuffer(b64url) {
+  const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((b64url.length + 3) % 4);
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out.buffer;
+}
+function toB64url(buf) {
+  const bytes = new Uint8Array(buf);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function explain(e) {
+  if (!e) return "Something went wrong.";
+  if (e.name === "NotAllowedError") return "The passkey request was cancelled or timed out.";
+  if (e.name === "InvalidStateError") return "This device already has a passkey for your account.";
+  if (e.name === "SecurityError") return "Passkeys need a secure connection (https) on this website address.";
+  if (e.name === "NotSupportedError") return "This device doesn't support passkeys.";
+  return e.message || "Something went wrong.";
+}
+async function signInWithPasskey(remember = true) {
+  const options = await (0, import_api.authPost)("/auth/passkey/options");
+  let cred;
+  try {
+    cred = await navigator.credentials.get({
+      publicKey: {
+        challenge: toBuffer(options.challenge),
+        rpId: options.rpId,
+        timeout: options.timeout,
+        userVerification: options.userVerification,
+        allowCredentials: []
+      }
+    });
+  } catch (e) {
+    throw { message: explain(e), cancelled: e && e.name === "NotAllowedError" };
+  }
+  const r = cred.response;
+  return (0, import_api.authPost)("/auth/passkey/verify", {
+    remember,
+    credential: {
+      id: cred.id,
+      rawId: toB64url(cred.rawId),
+      type: cred.type,
+      response: {
+        clientDataJSON: toB64url(r.clientDataJSON),
+        authenticatorData: toB64url(r.authenticatorData),
+        signature: toB64url(r.signature),
+        userHandle: r.userHandle ? toB64url(r.userHandle) : null
+      }
+    }
+  });
+}
+async function registerPasskey(name) {
+  const o = await (0, import_api.authPost)("/auth/passkey/register/options");
+  let cred;
+  try {
+    cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: toBuffer(o.challenge),
+        rp: o.rp,
+        user: { id: toBuffer(o.user.id), name: o.user.name, displayName: o.user.displayName },
+        pubKeyCredParams: o.pubKeyCredParams,
+        timeout: o.timeout,
+        attestation: o.attestation,
+        authenticatorSelection: o.authenticatorSelection,
+        excludeCredentials: (o.excludeCredentials || []).map((c) => __spreadProps(__spreadValues({}, c), { id: toBuffer(c.id) }))
+      }
+    });
+  } catch (e) {
+    throw { message: explain(e), cancelled: e && e.name === "NotAllowedError" };
+  }
+  const r = cred.response;
+  return (0, import_api.authPost)("/auth/passkey/register", {
+    name,
+    credential: {
+      id: cred.id,
+      rawId: toB64url(cred.rawId),
+      type: cred.type,
+      response: {
+        clientDataJSON: toB64url(r.clientDataJSON),
+        attestationObject: toB64url(r.attestationObject),
+        transports: typeof r.getTransports === "function" ? r.getTransports() : []
+      }
+    }
+  });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Auth/SignInMethods.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SignInMethods_exports = {};
+__export(SignInMethods_exports, {
+  MagicLinkForm: () => MagicLinkForm,
+  MethodTabs: () => MethodTabs,
+  PasskeyButton: () => PasskeyButton,
+  PhoneOtpForm: () => PhoneOtpForm
+});
+module.exports = __toCommonJS(SignInMethods_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
+var import_api = __webpack_require__("./resources/js/Components/Auth/api.js");
+var import_webauthn = __webpack_require__("./resources/js/Components/Auth/webauthn.js");
+function PasskeyButton({ verb = "Sign in", remember = true, onError }) {
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  if (!(0, import_webauthn.passkeysSupported)()) return null;
+  const go = async () => {
+    setBusy(true);
+    onError && onError(null);
+    try {
+      const r = await (0, import_webauthn.signInWithPasskey)(remember);
+      (0, import_api.goTo)(r.redirect);
+    } catch (e) {
+      if (!e.cancelled && onError) onError(e.message);
+      setBusy(false);
+    }
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "dm-btn dm-btn--line dm-btn--block dm-btn--lg dm-passkey", onClick: go, disabled: busy, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-key" }),
+    " ",
+    busy ? "Waiting for your passkey\u2026" : `${verb} with a passkey`
+  ] });
+}
+function MethodTabs({ value, onChange, tabs }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-mtabs", role: "tablist", children: tabs.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    "button",
+    {
+      type: "button",
+      role: "tab",
+      "aria-selected": value === t.id,
+      className: value === t.id ? "is-active" : "",
+      onClick: () => onChange(t.id),
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${t.icon}` }),
+        " ",
+        t.label
+      ]
+    },
+    t.id
+  )) });
+}
+function MagicLinkForm({ initialEmail = "", buttonLabel = "Email me a sign-in link", children }) {
+  const [email, setEmail] = (0, import_react.useState)(initialEmail);
+  const [error, setError] = (0, import_react.useState)(null);
+  const [sent, setSent] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const send = async (e) => {
+    e && e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      const rt = new URLSearchParams(window.location.search).get("return_to");
+      const r = await (0, import_api.authPost)("/auth/magic-link", { email, return_to: rt });
+      setSent(r.message);
+    } catch (err) {
+      setError(err.message);
+    }
+    setBusy(false);
+  };
+  if (sent) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-sent", role: "status", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-sent__icon", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-envelope-open-o" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: sent }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted", children: "Open the e-mail on any device and tap the button. Can't find it? Check your spam folder." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-sent__actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: send, disabled: busy, children: "Send it again" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setSent(null), children: "Use a different e-mail" })
+      ] })
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: send, noValidate: true, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AuthFields.Field,
+      {
         label: "Email",
         name: "email",
         type: "email",
-        value: data.email,
-        onChange: function onChange(e) {
-          return setData('email', e.target.value);
-        },
-        error: errors.email,
+        value: email,
+        onChange: (e) => setEmail(e.target.value),
+        error,
         autoComplete: "email",
-        placeholder: "you@example.com",
-        autoFocus: true
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
-        type: "submit",
-        className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg",
-        disabled: processing,
-        children: processing ? 'Sending…' : 'Send reset link'
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "dm-auth__switch",
-      children: ["Remembered it? ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: route('login'),
-        children: "Back to log in"
-      })]
-    })]
-  });
+        placeholder: "you@example.com"
+      }
+    ),
+    children,
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: busy || !email, children: busy ? "Sending\u2026" : buttonLabel })
+  ] });
 }
+const COUNTRIES = [
+  ["91", "India +91"],
+  ["1", "US / Canada +1"],
+  ["44", "UK +44"],
+  ["971", "UAE +971"],
+  ["65", "Singapore +65"],
+  ["61", "Australia +61"],
+  ["974", "Qatar +974"],
+  ["966", "Saudi Arabia +966"],
+  ["49", "Germany +49"]
+];
+function PhoneOtpForm({ defaultCountryCode = "91", remember = true, devMode = false }) {
+  const [step, setStep] = (0, import_react.useState)("phone");
+  const [cc, setCc] = (0, import_react.useState)(defaultCountryCode);
+  const [number, setNumber] = (0, import_react.useState)("");
+  const [phone, setPhone] = (0, import_react.useState)(null);
+  const [masked, setMasked] = (0, import_react.useState)("");
+  const [code, setCode] = (0, import_react.useState)("");
+  const [devCode, setDevCode] = (0, import_react.useState)(null);
+  const [name, setName] = (0, import_react.useState)("");
+  const [email, setEmail] = (0, import_react.useState)("");
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [notice, setNotice] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [wait, setWait] = (0, import_react.useState)(0);
+  const codeRef = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (wait <= 0) return void 0;
+    const t = setTimeout(() => setWait(wait - 1), 1e3);
+    return () => clearTimeout(t);
+  }, [wait]);
+  (0, import_react.useEffect)(() => {
+    if (step !== "code" || !("OTPCredential" in window)) return void 0;
+    const ac = new AbortController();
+    navigator.credentials.get({ otp: { transport: ["sms"] }, signal: ac.signal }).then((otp) => {
+      if (otp && otp.code) {
+        setCode(otp.code);
+        verify(null, otp.code);
+      }
+    }).catch(() => {
+    });
+    return () => ac.abort();
+  }, [step, phone]);
+  const fullNumber = () => number.trim().startsWith("+") ? number.trim() : `+${cc}${number.replace(/^0+/, "")}`;
+  const send = async (e) => {
+    e && e.preventDefault();
+    setBusy(true);
+    setErrors({});
+    setNotice(null);
+    try {
+      const r = await (0, import_api.authPost)("/auth/otp/send", { phone: phone || fullNumber() });
+      setPhone(r.phone);
+      setMasked(r.masked);
+      setWait(r.resendIn || 30);
+      setDevCode(r.devCode || null);
+      setCode("");
+      setStep("code");
+      setTimeout(() => codeRef.current && codeRef.current.focus(), 50);
+    } catch (err) {
+      setErrors({ phone: err.message });
+      if (err.retryAfter) setWait(Math.min(err.retryAfter, 3600));
+    }
+    setBusy(false);
+  };
+  const verify = async (e, value) => {
+    e && e.preventDefault();
+    const c = (value || code).replace(/\D/g, "");
+    if (c.length !== 6) {
+      setErrors({ code: "Enter the 6-digit code." });
+      return;
+    }
+    setBusy(true);
+    setErrors({});
+    try {
+      const r = await (0, import_api.authPost)("/auth/otp/verify", { phone, code: c, remember });
+      if (r.next === "profile") {
+        setStep("profile");
+        setBusy(false);
+        return;
+      }
+      (0, import_api.goTo)(r.redirect);
+    } catch (err) {
+      setErrors({ code: err.message });
+      if (err.status === 410 || err.status === 429) setCode("");
+      setBusy(false);
+    }
+  };
+  const complete = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setErrors({});
+    try {
+      const r = await (0, import_api.authPost)("/auth/otp/complete", { name, email: email || null });
+      (0, import_api.goTo)(r.redirect);
+    } catch (err) {
+      if (err.status === 410) {
+        setStep("phone");
+        setNotice(err.message);
+      } else {
+        setErrors(Object.keys(err.fieldErrors).length ? err.fieldErrors : { name: err.message });
+      }
+      setBusy(false);
+    }
+  };
+  if (step === "profile") {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: complete, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--ok", children: "Number verified. One last step to create your account." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_AuthFields.Field,
+        {
+          label: "Your name",
+          name: "name",
+          value: name,
+          onChange: (e) => setName(e.target.value),
+          error: errors.name,
+          autoComplete: "name",
+          placeholder: "How should we call you?",
+          autoFocus: true
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_AuthFields.Field,
+        {
+          label: "Email (optional)",
+          name: "email",
+          type: "email",
+          value: email,
+          onChange: (e) => setEmail(e.target.value),
+          error: errors.email,
+          autoComplete: "email",
+          placeholder: "For course updates and receipts",
+          required: false
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: busy || !name.trim(), children: busy ? "Creating your account\u2026" : "Create my account" })
+    ] });
+  }
+  if (step === "code") {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: verify, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-muted dm-center", children: [
+        "We sent a 6-digit code to ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: masked }),
+        ".",
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => {
+          setStep("phone");
+          setPhone(null);
+        }, children: "Change" })
+      ] }),
+      devMode && devCode && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-alert ac-alert--ok dm-devcode", children: [
+        "Development mode (no SMS is sent): your code is ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: devCode })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-field", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "f-otp", children: "Verification code" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "input",
+          {
+            id: "f-otp",
+            ref: codeRef,
+            className: `ac-input dm-otp ${errors.code ? "is-invalid" : ""}`,
+            inputMode: "numeric",
+            autoComplete: "one-time-code",
+            pattern: "[0-9]*",
+            maxLength: 6,
+            value: code,
+            placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022",
+            "aria-invalid": !!errors.code,
+            "aria-describedby": errors.code ? "e-otp" : void 0,
+            onChange: (e) => {
+              const v = e.target.value.replace(/\D/g, "").slice(0, 6);
+              setCode(v);
+              if (v.length === 6) verify(null, v);
+            }
+          }
+        ),
+        errors.code && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-field__error", id: "e-otp", children: errors.code })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: busy || code.length !== 6, children: busy ? "Checking\u2026" : "Verify and continue" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted dm-center", style: { marginTop: 14 }, children: wait > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        "You can request a new code in ",
+        wait,
+        "s"
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: send, disabled: busy, children: "Send a new code" }) })
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: send, noValidate: true, children: [
+    notice && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--error", children: notice }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-field", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "f-phone", children: "Mobile number" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-phone", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { "aria-label": "Country code", value: cc, onChange: (e) => setCc(e.target.value), className: "ac-input", children: COUNTRIES.map(([v, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: v, children: l }, v)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "input",
+          {
+            id: "f-phone",
+            type: "tel",
+            inputMode: "tel",
+            autoComplete: "tel-national",
+            className: `ac-input ${errors.phone ? "is-invalid" : ""}`,
+            placeholder: "98765 43210",
+            value: number,
+            onChange: (e) => setNumber(e.target.value),
+            "aria-invalid": !!errors.phone,
+            "aria-describedby": errors.phone ? "e-phone" : "h-phone"
+          }
+        )
+      ] }),
+      errors.phone ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-field__error", id: "e-phone", children: errors.phone }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-field__hint", id: "h-phone", children: "We'll text you a code. No password needed. Standard SMS rates may apply." })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: busy || number.replace(/\D/g, "").length < 6 || wait > 0, children: busy ? "Sending code\u2026" : wait > 0 ? `Try again in ${wait}s` : "Send code" })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Auth/MagicLink.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var MagicLink_exports = {};
+__export(MagicLink_exports, {
+  default: () => MagicLink
+});
+module.exports = __toCommonJS(MagicLink_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/AuthLayout.js"));
+function MagicLink({ token, email, valid }) {
+  const { post, processing } = (0, import_inertia_react.useForm)({ token });
+  const submit = (e) => {
+    e.preventDefault();
+    post("/auth/magic-link/consume");
+  };
+  if (!valid) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AuthLayout.default, { title: "Link expired", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "This link has expired" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Sign-in links work once and only for 15 minutes. Request a fresh one and use it right away." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("login"), className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", children: "Back to log in" })
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AuthLayout.default, { title: "Sign in", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Sign in to ArtistikCity" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-lede", children: [
+      "Continue as ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: email })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("form", { onSubmit: submit, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: processing, autoFocus: true, children: processing ? "Signing you in\u2026" : "Continue" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-legal", children: "Not you? Just close this page - nothing happens without the click." })
+  ] });
+}
+
 
 /***/ }),
 
 /***/ "./resources/js/Pages/Auth/Login.js":
-/*!******************************************!*\
-  !*** ./resources/js/Pages/Auth/Login.js ***!
-  \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Login)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Layouts_AuthLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Layouts/AuthLayout */ "./resources/js/Layouts/AuthLayout.js");
-/* harmony import */ var _Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Auth/AuthFields */ "./resources/js/Components/Auth/AuthFields.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-function Login(_ref) {
-  var status = _ref.status,
-    canResetPassword = _ref.canResetPassword;
-  var _useForm = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.useForm)({
-      email: '',
-      password: '',
-      remember: true
-    }),
-    data = _useForm.data,
-    setData = _useForm.setData,
-    post = _useForm.post,
-    processing = _useForm.processing,
-    errors = _useForm.errors,
-    reset = _useForm.reset;
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    return function () {
-      return reset('password');
-    };
-  }, []);
-  var change = function change(e) {
-    return setData(e.target.name, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Login_exports = {};
+__export(Login_exports, {
+  default: () => Login
+});
+module.exports = __toCommonJS(Login_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/AuthLayout.js"));
+var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
+var import_SignInMethods = __webpack_require__("./resources/js/Components/Auth/SignInMethods.js");
+function Login({ status, canResetPassword, providers, defaultCountryCode, otpDevMode, errors: pageErrors = {} }) {
+  const [tab, setTab] = (0, import_react.useState)(() => typeof window !== "undefined" && window.localStorage && safeGet("ac.login.tab") || "email");
+  const [usePassword, setUsePassword] = (0, import_react.useState)(() => !!(pageErrors.email || pageErrors.password));
+  const [passkeyError, setPasskeyError] = (0, import_react.useState)(null);
+  const { data, setData, post, processing, errors, reset } = (0, import_inertia_react.useForm)({ email: "", password: "", remember: true });
+  (0, import_react.useEffect)(() => () => reset("password"), []);
+  (0, import_react.useEffect)(() => {
+    if (errors.password || errors.email && data.password) setUsePassword(true);
+  }, [errors]);
+  const choose = (t) => {
+    setTab(t);
+    safeSet("ac.login.tab", t);
   };
-  var submit = function submit(e) {
+  const change = (e) => setData(e.target.name, e.target.type === "checkbox" ? e.target.checked : e.target.value);
+  const submit = (e) => {
     e.preventDefault();
-    post(route('login'), {
-      onFinish: function onFinish() {
-        return reset('password');
-      }
-    });
+    post(route("login"), { preserveState: true, onFinish: () => setData("password", "") });
   };
-  var joinHref = typeof window !== 'undefined' && window.location.search.includes('return_to') ? route('join') + window.location.search : route('join');
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(_Layouts_AuthLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: "Log in",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h1", {
-      children: "Log in"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-      className: "dm-lede",
-      children: "Welcome back. Pick up your courses right where you left off."
-    }), status && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-      className: "ac-alert ac-alert--ok",
-      children: status
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.SocialButtons, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-      className: "dm-or",
-      children: "or log in with your email"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("form", {
-      onSubmit: submit,
-      noValidate: true,
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.Field, {
-        label: "Email",
-        name: "email",
-        type: "email",
-        value: data.email,
-        onChange: change,
-        error: errors.email,
-        autoComplete: "username",
-        placeholder: "you@example.com",
-        autoFocus: true
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.Field, {
-        label: "Password",
-        name: "password",
-        type: "password",
-        value: data.password,
-        onChange: change,
-        error: errors.password,
-        autoComplete: "current-password",
-        placeholder: "Your password"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "dm-auth__row",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("label", {
-          className: "ac-check",
-          style: {
-            fontSize: 14
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
-            type: "checkbox",
-            name: "remember",
-            checked: !!data.remember,
-            onChange: change
-          }), " Remember me"]
-        }), canResetPassword && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: route('password.request'),
-          children: "Forgot your password?"
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
-        type: "submit",
-        className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg",
-        disabled: processing,
-        children: processing ? 'Logging in…' : 'Log in'
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "dm-auth__switch",
-      children: ["Don't have an account? ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: joinHref,
-        children: "Join for free"
-      })]
-    })]
-  });
+  const query = typeof window !== "undefined" ? window.location.search : "";
+  const joinHref = query.includes("return_to") ? route("join") + query : route("join");
+  const verified = query.includes("verified=1");
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AuthLayout.default, { title: "Log in", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Log in" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Welcome back. Pick up your courses right where you left off." }),
+    status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--ok", children: status }),
+    verified && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--ok", children: "Your e-mail is confirmed. Log in to continue." }),
+    passkeyError && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--error", role: "alert", children: passkeyError }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.SocialButtons, { providers, remember: data.remember }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.PasskeyButton, { verb: "Log in", remember: data.remember, onError: setPasskeyError }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-or", children: "or" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.MethodTabs, { value: tab, onChange: choose, tabs: [
+      { id: "email", label: "Email", icon: "fa-envelope-o" },
+      { id: "phone", label: "Phone", icon: "fa-mobile" }
+    ] }),
+    tab === "phone" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.PhoneOtpForm, { defaultCountryCode, remember: data.remember, devMode: otpDevMode }),
+    tab === "email" && !usePassword && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.MagicLinkForm, { initialEmail: data.email }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-center dm-muted", style: { marginTop: 14 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setUsePassword(true), children: "Log in with a password instead" }) })
+    ] }),
+    tab === "email" && usePassword && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: submit, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_AuthFields.Field,
+        {
+          label: "Email",
+          name: "email",
+          type: "email",
+          value: data.email,
+          onChange: change,
+          error: errors.email,
+          autoComplete: "username",
+          placeholder: "you@example.com",
+          autoFocus: true
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_AuthFields.Field,
+        {
+          label: "Password",
+          name: "password",
+          type: "password",
+          value: data.password,
+          onChange: change,
+          error: errors.password,
+          autoComplete: "current-password",
+          placeholder: "Your password"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-auth__row", children: [
+        canResetPassword && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("password.request"), children: "Forgot your password?" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setUsePassword(false), children: "Email me a link instead" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: processing, children: processing ? "Logging in\u2026" : "Log in" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "ac-check dm-remember", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", name: "remember", checked: !!data.remember, onChange: change }),
+      " Keep me signed in on this device"
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-auth__switch", children: [
+      "Don't have an account? ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: joinHref, children: "Join for free" })
+    ] })
+  ] });
 }
+function safeGet(k) {
+  try {
+    return window.localStorage.getItem(k);
+  } catch (e) {
+    return null;
+  }
+}
+function safeSet(k, v) {
+  try {
+    window.localStorage.setItem(k, v);
+  } catch (e) {
+  }
+}
+
 
 /***/ }),
 
 /***/ "./resources/js/Pages/Auth/Register.js":
-/*!*********************************************!*\
-  !*** ./resources/js/Pages/Auth/Register.js ***!
-  \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Register)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Layouts_AuthLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Layouts/AuthLayout */ "./resources/js/Layouts/AuthLayout.js");
-/* harmony import */ var _Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Auth/AuthFields */ "./resources/js/Components/Auth/AuthFields.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-function Register() {
-  var _useForm = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.useForm)({
-      name: '',
-      email: '',
-      password: '',
-      password_confirmation: '',
-      newsletter_signup: true
-    }),
-    data = _useForm.data,
-    setData = _useForm.setData,
-    post = _useForm.post,
-    processing = _useForm.processing,
-    errors = _useForm.errors,
-    reset = _useForm.reset;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState2 = _slicedToArray(_useState, 2),
-    withEmail = _useState2[0],
-    setWithEmail = _useState2[1];
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    return function () {
-      return reset('password', 'password_confirmation');
-    };
-  }, []);
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    if (Object.keys(errors).length) setWithEmail(true);
-  }, [errors]);
-  var change = function change(e) {
-    var _e$target = e.target,
-      name = _e$target.name,
-      type = _e$target.type,
-      checked = _e$target.checked,
-      value = _e$target.value;
-    if (name === 'password') {
-      setData(_objectSpread(_objectSpread({}, data), {}, {
-        password: value,
-        password_confirmation: value
-      }));
-    } else {
-      setData(name, type === 'checkbox' ? checked : value);
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
     }
-  };
-  var submit = function submit(e) {
-    e.preventDefault();
-    post(route('register'), {
-      preserveScroll: true
-    });
-  };
-  var loginHref = typeof window !== 'undefined' && window.location.search.includes('return_to') ? route('login') + window.location.search : route('login');
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(_Layouts_AuthLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: "Join for free",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h1", {
-      children: "Join for free"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-      className: "dm-lede",
-      children: "Create your ArtistikCity account and start learning to draw and paint today."
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "dm-perklist",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-          className: "fa fa-check"
-        }), "Free starter lessons"]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-          className: "fa fa-check"
-        }), "Save courses"]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-          className: "fa fa-check"
-        }), "Artist profile"]
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.SocialButtons, {
-      verb: "Sign up"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-      className: "dm-or",
-      children: "or"
-    }), !withEmail ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("button", {
-      type: "button",
-      className: "dm-btn dm-btn--line dm-btn--block dm-btn--lg",
-      onClick: function onClick() {
-        return setWithEmail(true);
-      },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-        className: "fa fa-envelope-o"
-      }), " Sign up with email"]
-    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("form", {
-      onSubmit: submit,
-      noValidate: true,
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.Field, {
-        label: "Full name",
-        name: "name",
-        value: data.name,
-        onChange: change,
-        error: errors.name,
-        autoComplete: "name",
-        placeholder: "How should we call you?",
-        autoFocus: true
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.Field, {
-        label: "Email",
-        name: "email",
-        type: "email",
-        value: data.email,
-        onChange: change,
-        error: errors.email,
-        autoComplete: "email",
-        placeholder: "you@example.com"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.Field, {
-        label: "Password",
-        name: "password",
-        type: "password",
-        value: data.password,
-        onChange: change,
-        error: errors.password || errors.password_confirmation,
-        autoComplete: "new-password",
-        placeholder: "At least 8 characters",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.StrengthMeter, {
-          password: data.password
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("label", {
-        className: "ac-optin",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
-          type: "checkbox",
-          name: "newsletter_signup",
-          checked: !!data.newsletter_signup,
-          onChange: change
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-          children: "Send me free lessons, course recommendations and Studio Stories by email. Unsubscribe anytime."
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
-        type: "submit",
-        className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg",
-        disabled: processing,
-        children: processing ? 'Creating your account…' : 'Join for free'
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
-      className: "dm-legal",
-      children: ["By joining, you agree to ArtistikCity's ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: route('terms.conditions'),
-        children: "Terms of use"
-      }), " and ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: route('privacy.policy'),
-        children: "Privacy policy"
-      }), "."]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "dm-auth__switch",
-      children: ["Already have an account? ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: loginHref,
-        children: "Log in"
-      })]
-    })]
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Register_exports = {};
+__export(Register_exports, {
+  default: () => Register
+});
+module.exports = __toCommonJS(Register_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/AuthLayout.js"));
+var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
+var import_SignInMethods = __webpack_require__("./resources/js/Components/Auth/SignInMethods.js");
+function Register({ providers, defaultCountryCode, otpDevMode }) {
+  const { data, setData, post, processing, errors, reset } = (0, import_inertia_react.useForm)({
+    name: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+    newsletter_signup: true,
+    remember: true
   });
+  const [tab, setTab] = (0, import_react.useState)("email");
+  const [passwordless, setPasswordless] = (0, import_react.useState)(false);
+  (0, import_react.useEffect)(() => () => reset("password", "password_confirmation"), []);
+  const change = (e) => {
+    const { name, type, checked, value } = e.target;
+    if (name === "password") setData(__spreadProps(__spreadValues({}, data), { password: value, password_confirmation: value }));
+    else setData(name, type === "checkbox" ? checked : value);
+  };
+  const submit = (e) => {
+    e.preventDefault();
+    post(route("register"), { preserveScroll: true, preserveState: true });
+  };
+  const query = typeof window !== "undefined" ? window.location.search : "";
+  const loginHref = query.includes("return_to") ? route("login") + query : route("login");
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AuthLayout.default, { title: "Join for free", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Join for free" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Create your ArtistikCity account and start learning to draw and paint today." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-perklist", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }),
+        "Free starter lessons"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }),
+        "Save courses"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }),
+        "Artist profile"
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.SocialButtons, { verb: "Sign up", providers }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-or", children: "or" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.MethodTabs, { value: tab, onChange: setTab, tabs: [
+      { id: "email", label: "Email", icon: "fa-envelope-o" },
+      { id: "phone", label: "Phone", icon: "fa-mobile" }
+    ] }),
+    tab === "phone" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.PhoneOtpForm, { defaultCountryCode, devMode: otpDevMode }),
+    tab === "email" && passwordless && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.MagicLinkForm, { buttonLabel: "Email me a link to join" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-center dm-muted", style: { marginTop: 14 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setPasswordless(false), children: "Choose a password instead" }) })
+    ] }),
+    tab === "email" && !passwordless && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: submit, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_AuthFields.Field,
+        {
+          label: "Full name",
+          name: "name",
+          value: data.name,
+          onChange: change,
+          error: errors.name,
+          autoComplete: "name",
+          placeholder: "How should we call you?"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_AuthFields.Field,
+        {
+          label: "Email",
+          name: "email",
+          type: "email",
+          value: data.email,
+          onChange: change,
+          error: errors.email,
+          autoComplete: "email",
+          placeholder: "you@example.com"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_AuthFields.Field,
+        {
+          label: "Password",
+          name: "password",
+          type: "password",
+          value: data.password,
+          onChange: change,
+          error: errors.password || errors.password_confirmation,
+          autoComplete: "new-password",
+          placeholder: "At least 8 characters",
+          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.StrengthMeter, { password: data.password })
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "ac-optin", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", name: "newsletter_signup", checked: !!data.newsletter_signup, onChange: change }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Send me free lessons, course recommendations and Studio Stories by email. Unsubscribe anytime." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: processing, children: processing ? "Creating your account\u2026" : "Join for free" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-center dm-muted", style: { marginTop: 14 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setPasswordless(true), children: "Join without a password (we'll e-mail you a link)" }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-legal", children: [
+      "By joining, you agree to ArtistikCity's ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("terms.conditions"), children: "Terms of use" }),
+      " and ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("privacy.policy"), children: "Privacy policy" }),
+      "."
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-auth__switch", children: [
+      "Already have an account? ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: loginHref, children: "Log in" })
+    ] })
+  ] });
 }
+
 
 /***/ }),
 
 /***/ "./resources/js/Pages/Auth/ResetPassword.js":
-/*!**************************************************!*\
-  !*** ./resources/js/Pages/Auth/ResetPassword.js ***!
-  \**************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ ResetPassword)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Layouts_AuthLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Layouts/AuthLayout */ "./resources/js/Layouts/AuthLayout.js");
-/* harmony import */ var _Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Auth/AuthFields */ "./resources/js/Components/Auth/AuthFields.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-function ResetPassword(_ref) {
-  var token = _ref.token,
-    email = _ref.email;
-  var _useForm = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.useForm)({
-      token: token,
-      email: email,
-      password: '',
-      password_confirmation: ''
-    }),
-    data = _useForm.data,
-    setData = _useForm.setData,
-    post = _useForm.post,
-    processing = _useForm.processing,
-    errors = _useForm.errors,
-    reset = _useForm.reset;
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    return function () {
-      return reset('password', 'password_confirmation');
-    };
-  }, []);
-  var change = function change(e) {
-    return setData(e.target.name, e.target.value);
-  };
-  var submit = function submit(e) {
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var ResetPassword_exports = {};
+__export(ResetPassword_exports, {
+  default: () => ResetPassword
+});
+module.exports = __toCommonJS(ResetPassword_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/AuthLayout.js"));
+var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
+function ResetPassword({ token, email, valid = true }) {
+  const { data, setData, post, processing, errors, reset } = (0, import_inertia_react.useForm)({ token, email, password: "", password_confirmation: "" });
+  (0, import_react.useEffect)(() => () => reset("password", "password_confirmation"), []);
+  const change = (e) => setData(e.target.name, e.target.value);
+  const submit = (e) => {
     e.preventDefault();
-    post(route('password.update'));
+    post(route("password.update"), { preserveState: true });
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(_Layouts_AuthLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: "Choose a new password",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h1", {
-      children: "Choose a new password"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-      className: "dm-lede",
-      children: "Use at least 8 characters. Mixing letters, numbers and symbols makes it stronger."
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.FormErrors, {
-      errors: errors.token ? {
-        token: errors.token
-      } : {}
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("form", {
-      onSubmit: submit,
-      noValidate: true,
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.Field, {
-        label: "Email",
-        name: "email",
-        type: "email",
-        value: data.email,
-        onChange: change,
-        error: errors.email,
-        autoComplete: "username"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.Field, {
-        label: "New password",
-        name: "password",
-        type: "password",
-        value: data.password,
-        onChange: change,
-        error: errors.password,
-        autoComplete: "new-password",
-        autoFocus: true,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.StrengthMeter, {
-          password: data.password
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Auth_AuthFields__WEBPACK_IMPORTED_MODULE_3__.Field, {
-        label: "Repeat new password",
-        name: "password_confirmation",
-        type: "password",
-        value: data.password_confirmation,
-        onChange: change,
-        error: errors.password_confirmation,
-        autoComplete: "new-password"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
-        type: "submit",
-        className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg",
-        disabled: processing,
-        children: processing ? 'Saving…' : 'Save password'
-      })]
-    })]
-  });
+  if (!valid) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AuthLayout.default, { title: "Link expired", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "This reset link has expired" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Reset links work once and for 60 minutes. Ask for a new one - or skip the password and sign in with an e-mail link." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("password.request"), className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", children: "Send a new reset link" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-auth__switch", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("login"), children: "Back to log in" }) })
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AuthLayout.default, { title: "Choose a new password", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Choose a new password" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Use at least 8 characters. A short phrase of a few words is strong and easy to remember." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.FormErrors, { errors: errors.token ? { token: errors.token } : {} }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: submit, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.Field, { label: "Email", name: "email", type: "email", value: data.email, onChange: change, error: errors.email, autoComplete: "username" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.Field, { label: "New password", name: "password", type: "password", value: data.password, onChange: change, error: errors.password, autoComplete: "new-password", autoFocus: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.StrengthMeter, { password: data.password }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_AuthFields.Field,
+        {
+          label: "Repeat new password",
+          name: "password_confirmation",
+          type: "password",
+          value: data.password_confirmation,
+          onChange: change,
+          error: errors.password_confirmation,
+          autoComplete: "new-password"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: processing, children: processing ? "Saving\u2026" : "Save password" })
+    ] })
+  ] });
 }
+
 
 /***/ }),
 
@@ -23283,80 +23851,409 @@ function LessonTask(props) {
 /***/ }),
 
 /***/ "./resources/js/Pages/Students/LinkedAccounts.js":
-/*!*******************************************************!*\
-  !*** ./resources/js/Pages/Students/LinkedAccounts.js ***!
-  \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ LinkedAccounts)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _Layouts_Authenticated__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/Layouts/Authenticated */ "./resources/js/Layouts/Authenticated.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Students_StudentHeader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Students/StudentHeader */ "./resources/js/Components/Students/StudentHeader.js");
-/* harmony import */ var _Components_Students_StudentNavigation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Students/StudentNavigation */ "./resources/js/Components/Students/StudentNavigation.js");
-/* harmony import */ var _Components_Students_MyAccountNavigation__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/Components/Students/MyAccountNavigation */ "./resources/js/Components/Students/MyAccountNavigation.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-
-
-function LinkedAccounts(props) {
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_Components_Students_StudentHeader__WEBPACK_IMPORTED_MODULE_3__["default"], {
-      auth: props.auth
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_Layouts_Authenticated__WEBPACK_IMPORTED_MODULE_1__["default"], {
-      auth: props.auth,
-      errors: props.errors,
-      header: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h2", {
-        className: "font-semibold text-xl text-gray-800 leading-tight",
-        children: "Dashboard"
-      }),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.Head, {
-        title: "Course Home"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-        className: "container-fluid",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-          className: "row",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_Components_Students_StudentNavigation__WEBPACK_IMPORTED_MODULE_4__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("main", {
-            className: "col-md-10 px-0 ms-sm-auto rightsidebar",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-              className: "accountPage p30",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_Components_Students_MyAccountNavigation__WEBPACK_IMPORTED_MODULE_5__["default"], {
-                auth: props.auth
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                className: "accountDtl",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  className: "accountEdit",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-                    children: "Linked Accounts"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                    className: "accountForm"
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  className: "accountActn",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-                    className: "btn btn-secondary",
-                    children: "Cancel"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-                    className: "btn btn-primary",
-                    children: "SAve"
-                  })]
-                })]
-              })]
-            })
-          })]
-        })
-      })]
-    })]
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var LinkedAccounts_exports = {};
+__export(LinkedAccounts_exports, {
+  default: () => LinkedAccounts
+});
+module.exports = __toCommonJS(LinkedAccounts_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_Authenticated = __toESM(__webpack_require__("./resources/js/Layouts/Authenticated.js"));
+var import_StudentHeader = __toESM(__webpack_require__("./resources/js/Components/Students/StudentHeader.js"));
+var import_StudentNavigation = __toESM(__webpack_require__("./resources/js/Components/Students/StudentNavigation.js"));
+var import_MyAccountNavigation = __toESM(__webpack_require__("./resources/js/Components/Students/MyAccountNavigation.js"));
+var import_api = __webpack_require__("./resources/js/Components/Auth/api.js");
+var import_webauthn = __webpack_require__("./resources/js/Components/Auth/webauthn.js");
+const PROVIDERS = {
+  google: { label: "Google", icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/google-icon.png", alt: "" }) },
+  facebook: { label: "Facebook", icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-facebook-official", style: { color: "#1877f2" } }) }
+};
+const METHOD = { password: "Password", google: "Google", facebook: "Facebook", otp: "Phone code", magic_link: "E-mail link", passkey: "Passkey", signup: "Sign-up" };
+const EVENT = {
+  login: "Signed in",
+  login_failed: "Failed sign-in attempt",
+  signup: "Account created",
+  provider_linked: "Account connected",
+  provider_unlinked: "Account disconnected",
+  passkey_added: "Passkey added",
+  passkey_removed: "Passkey removed",
+  password_changed: "Password changed",
+  password_set: "Password set",
+  password_reset: "Password reset",
+  phone_verified: "Phone verified",
+  email_verified: "E-mail confirmed",
+  email_changed: "E-mail changed",
+  sessions_revoked: "Signed out other devices",
+  session_revoked: "Signed out a device",
+  refresh_reuse_detected: "Suspicious session reuse blocked",
+  otp_sent: "Code sent",
+  otp_invalid: "Wrong code entered",
+  unverified_account_claimed: "Account secured after e-mail verification",
+  magic_link_sent: "Sign-in link sent",
+  passkey_failed: "Passkey sign-in failed"
+};
+function when(s) {
+  if (!s) return "";
+  const d = new Date(String(s).replace(" ", "T"));
+  return isNaN(d) ? s : d.toLocaleString(void 0, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
+function LinkedAccounts(props) {
+  const s = props.security;
+  const [msg, setMsg] = (0, import_react.useState)(props.success ? { ok: true, text: props.success } : props.error ? { ok: false, text: props.error } : null);
+  const [reauth, setReauth] = (0, import_react.useState)(false);
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const reload = () => import_inertia.Inertia.reload({ only: ["security"], preserveScroll: true });
+  const run = async (key, fn, okText) => {
+    setBusy(key);
+    setMsg(null);
+    try {
+      const r = await fn();
+      if (okText) setMsg({ ok: true, text: typeof okText === "function" ? okText(r) : okText });
+      reload();
+      return r;
+    } catch (e) {
+      if (e.reauth) setReauth(true);
+      else if (!e.cancelled) setMsg({ ok: false, text: e.message });
+      return null;
+    } finally {
+      setBusy(null);
+    }
+  };
+  const signInAgain = async () => {
+    const r = await (0, import_api.authPost)("/auth/reauthenticate");
+    window.location.assign(r.redirect);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudentHeader.default, { auth: props.auth }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_Authenticated.default, { auth: props.auth, errors: props.errors, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: "Login & security" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "container-fluid", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "row", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudentNavigation.default, {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { className: "col-md-10 px-0 ms-sm-auto rightsidebar", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "accountPage p30", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_MyAccountNavigation.default, { auth: props.auth }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "accountDtl sec", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Login & security" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sec-lede", children: "Choose how you sign in. Everything here belongs to one account, however you log in." }),
+            msg && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `ac-alert ${msg.ok ? "ac-alert--ok" : "ac-alert--error"}`, role: "status", children: msg.text }),
+            reauth && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-alert ac-alert--error", children: [
+              "For your security, sign in again before changing your sign-in methods.",
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: signInAgain, children: "Sign in again" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SignInMethods, { s, busy, run }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Connected, { s, busy, run }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Passkeys, { s, busy, run }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sessions, { s, busy, run }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { events: s.events })
+          ] })
+        ] }) })
+      ] }) })
+    ] })
+  ] });
+}
+function SignInMethods({ s, busy, run }) {
+  const [editEmail, setEditEmail] = (0, import_react.useState)(false);
+  const [email, setEmail] = (0, import_react.useState)(s.email || "");
+  const [phoneStep, setPhoneStep] = (0, import_react.useState)(null);
+  const [phone, setPhone] = (0, import_react.useState)("");
+  const [sentTo, setSentTo] = (0, import_react.useState)(null);
+  const [code, setCode] = (0, import_react.useState)("");
+  const [devCode, setDevCode] = (0, import_react.useState)(null);
+  const [pw, setPw] = (0, import_react.useState)(null);
+  const saveEmail = async (e) => {
+    e.preventDefault();
+    const r = await run("email", () => (0, import_api.authPost)("/auth/email", { email }), (x) => x.message);
+    if (r) setEditEmail(false);
+  };
+  const resendVerification = () => run("verify", () => (0, import_api.authPost)("/email/verification-notification"), "Confirmation e-mail sent. Check your inbox.");
+  const sendPhone = async (e) => {
+    e.preventDefault();
+    const full = phone.trim().startsWith("+") ? phone.trim() : `+${s.countryCode}${phone.replace(/^0+/, "")}`;
+    const r = await run("phone", () => (0, import_api.authPost)("/auth/phone/send", { phone: full }));
+    if (r) {
+      setSentTo(r);
+      setDevCode(r.devCode || null);
+      setPhoneStep("code");
+    }
+  };
+  const verifyPhone = async (e) => {
+    e.preventDefault();
+    const r = await run("phone", () => (0, import_api.authPost)("/auth/phone/verify", { phone: sentTo.phone, code }), "Phone number verified. You can now sign in with a text message code.");
+    if (r) {
+      setPhoneStep(null);
+      setCode("");
+      setPhone("");
+    }
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sec-card", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { children: "Sign-in methods" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__icon", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-envelope-o" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row__body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "E-mail" }),
+        !editEmail ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          s.email || /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-muted", children: "No e-mail yet" }),
+          " ",
+          s.email && (s.emailVerified ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sec-badge sec-badge--ok", children: "Verified" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sec-badge", children: "Not confirmed" })),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-muted sec-small", children: [
+            "Sign in with an e-mail link",
+            s.hasPassword ? " or your password" : "",
+            "."
+          ] })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: saveEmail, className: "sec-inline", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "ac-input", type: "email", value: email, onChange: (e) => setEmail(e.target.value), autoComplete: "email", required: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--brand", disabled: busy === "email", children: "Save" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--line", onClick: () => setEditEmail(false), children: "Cancel" })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row__actions", children: [
+        s.email && !s.emailVerified && !editEmail && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-linkbtn", onClick: resendVerification, disabled: busy === "verify", children: "Resend confirmation" }),
+        !editEmail && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--line", onClick: () => setEditEmail(true), children: s.email ? "Change" : "Add" })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__icon", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-mobile", style: { fontSize: 22 } }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row__body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Phone" }),
+        !phoneStep && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          s.phone ? s.phoneMasked : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-muted", children: "No phone number" }),
+          " ",
+          s.phone && (s.phoneVerified ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sec-badge sec-badge--ok", children: "Verified" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sec-badge", children: "Not verified" })),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-muted sec-small", children: s.phoneVerified ? "Sign in with a code sent by text message." : "Verify a number to sign in with a text message code." })
+        ] }),
+        phoneStep === "number" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: sendPhone, className: "sec-inline", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              className: "ac-input",
+              type: "tel",
+              inputMode: "tel",
+              autoComplete: "tel",
+              placeholder: `+${s.countryCode} 98765 43210`,
+              value: phone,
+              onChange: (e) => setPhone(e.target.value),
+              required: true,
+              autoFocus: true
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--brand", disabled: busy === "phone", children: "Send code" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--line", onClick: () => setPhoneStep(null), children: "Cancel" })
+        ] }),
+        phoneStep === "code" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: verifyPhone, className: "sec-inline", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "dm-muted sec-small", style: { width: "100%" }, children: [
+            "Code sent to ",
+            sentTo.masked
+          ] }),
+          devCode && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ac-alert ac-alert--ok dm-devcode", style: { width: "100%" }, children: [
+            "Development mode: your code is ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: devCode })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              className: "ac-input dm-otp",
+              inputMode: "numeric",
+              autoComplete: "one-time-code",
+              maxLength: 6,
+              value: code,
+              onChange: (e) => setCode(e.target.value.replace(/\D/g, "")),
+              placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022",
+              required: true,
+              autoFocus: true
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--brand", disabled: busy === "phone" || code.length !== 6, children: "Verify" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--line", onClick: () => setPhoneStep(null), children: "Cancel" })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__actions", children: !phoneStep && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--line", onClick: () => setPhoneStep("number"), children: s.phone ? s.phoneVerified ? "Change" : "Verify" : "Add" }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__icon", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row__body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Password" }),
+        !pw && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-muted sec-small", children: s.hasPassword ? "You can sign in with your e-mail and password." : "You don't have a password - you sign in without one. You can add one if you like." }),
+        pw && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PasswordForm, { hasPassword: s.hasPassword, busy, run, done: () => setPw(null) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__actions", children: !pw && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--line", onClick: () => setPw(true), children: s.hasPassword ? "Change" : "Set a password" }) })
+    ] })
+  ] });
+}
+function PasswordForm({ hasPassword, busy, run, done }) {
+  const [current, setCurrent] = (0, import_react.useState)("");
+  const [next, setNext] = (0, import_react.useState)("");
+  const [again, setAgain] = (0, import_react.useState)("");
+  const submit = async (e) => {
+    e.preventDefault();
+    const r = await run(
+      "password",
+      () => (0, import_api.authPost)("/auth/password", { current_password: current, password: next, password_confirmation: again }),
+      (x) => `Password saved.${x.signedOutOthers ? ` We signed you out on ${x.signedOutOthers} other device(s).` : ""}`
+    );
+    if (r) done();
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: submit, className: "sec-stack", children: [
+    hasPassword && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "ac-input", type: "password", placeholder: "Current password", autoComplete: "current-password", value: current, onChange: (e) => setCurrent(e.target.value), required: true }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "ac-input", type: "password", placeholder: "New password (at least 8 characters)", autoComplete: "new-password", value: next, onChange: (e) => setNext(e.target.value), required: true, minLength: 8 }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "ac-input", type: "password", placeholder: "Repeat new password", autoComplete: "new-password", value: again, onChange: (e) => setAgain(e.target.value), required: true }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-inline", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--brand", disabled: busy === "password" || !next || next !== again, children: "Save password" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--line", onClick: done, children: "Cancel" })
+    ] })
+  ] });
+}
+function Connected({ s, busy, run }) {
+  const linked = {};
+  (s.linked || []).forEach((l) => {
+    linked[l.provider_name] = l;
+  });
+  const names = Object.keys(PROVIDERS).filter((p) => linked[p] || s.providers && s.providers[p]);
+  if (!names.length) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sec-card", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { children: "Connected accounts" }),
+    names.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__icon", children: PROVIDERS[p].icon }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row__body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: PROVIDERS[p].label }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-muted sec-small", children: linked[p] ? `Connected${linked[p].email ? ` as ${linked[p].email}` : ""} \xB7 since ${when(linked[p].created_at)}` : "Not connected" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__actions", children: linked[p] ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          className: "dm-btn dm-btn--line",
+          disabled: busy === p,
+          onClick: () => run(p, () => (0, import_api.authDelete)(`/auth/linked/${p}`), `${PROVIDERS[p].label} disconnected.`),
+          children: "Disconnect"
+        }
+      ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "dm-btn dm-btn--line", href: `/social-login/${p}?intent=link`, children: "Connect" }) })
+    ] }, p))
+  ] });
+}
+function Passkeys({ s, busy, run }) {
+  const supported = (0, import_webauthn.passkeysSupported)();
+  const add = () => run("passkey-add", () => (0, import_webauthn.registerPasskey)(), 'Passkey added. Next time, choose "Log in with a passkey".');
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sec-card", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { children: "Passkeys" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted sec-small", children: "Sign in with your fingerprint, face or device PIN instead of a password. Passkeys can't be phished or guessed." }),
+    (s.passkeys || []).map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__icon", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-key" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row__body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: k.name }),
+        k.backed_up ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sec-badge sec-badge--ok", style: { marginLeft: 6 }, children: "Synced" }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-muted sec-small", children: [
+          "Added ",
+          when(k.created_at),
+          k.last_used_at ? ` \xB7 last used ${when(k.last_used_at)}` : " \xB7 not used yet"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__actions", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          className: "dm-btn dm-btn--line",
+          disabled: busy === `pk${k.id}`,
+          onClick: () => run(`pk${k.id}`, () => (0, import_api.authDelete)(`/auth/passkey/${k.id}`), "Passkey removed."),
+          children: "Remove"
+        }
+      ) })
+    ] }, k.id)),
+    supported ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { className: "dm-btn dm-btn--brand", style: { marginTop: 12 }, onClick: add, disabled: busy === "passkey-add", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-plus" }),
+      " ",
+      busy === "passkey-add" ? "Follow the prompt on your device\u2026" : "Add a passkey"
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted sec-small", children: "This browser doesn't support passkeys." })
+  ] });
+}
+function Sessions({ s, busy, run }) {
+  const others = (s.sessions || []).filter((x) => !x.current).length;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sec-card", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { children: "Where you're signed in" }),
+    (s.sessions || []).map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__icon", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${/iPhone|Android/.test(x.device) ? "fa-mobile" : "fa-desktop"}` }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sec-row__body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: x.device }),
+        x.current && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sec-badge sec-badge--ok", style: { marginLeft: 6 }, children: "This device" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-muted sec-small", children: [
+          "Signed in with ",
+          METHOD[x.auth_method] || x.auth_method,
+          " \xB7 ",
+          when(x.created_at),
+          " \xB7 last active ",
+          when(x.last_seen_at),
+          x.ip_address ? ` \xB7 ${x.ip_address}` : ""
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sec-row__actions", children: !x.current && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          className: "dm-btn dm-btn--line",
+          disabled: busy === `s${x.id}`,
+          onClick: () => run(`s${x.id}`, () => (0, import_api.authPost)(`/auth/sessions/${x.id}/revoke`), "Signed out on that device."),
+          children: "Sign out"
+        }
+      ) })
+    ] }, x.id)),
+    others > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "button",
+      {
+        className: "dm-btn dm-btn--line",
+        style: { marginTop: 12 },
+        disabled: busy === "others",
+        onClick: () => run("others", () => (0, import_api.authPost)("/auth/sessions/revoke-others"), (r) => `Signed out on ${r.revoked} other device(s).`),
+        children: "Sign out of all other devices"
+      }
+    )
+  ] });
+}
+function Activity({ events }) {
+  if (!events || !events.length) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sec-card", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { children: "Recent security activity" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "sec-events", children: events.map((e, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: e.success ? "" : "is-bad", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        EVENT[e.event] || e.event,
+        e.method ? ` \xB7 ${METHOD[e.method] || e.method}` : ""
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "dm-muted", children: [
+        when(e.created_at),
+        e.ip_address ? ` \xB7 ${e.ip_address}` : ""
+      ] })
+    ] }, i)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted sec-small", children: "Don't recognise something? Change your password and sign out of all other devices." })
+  ] });
+}
+
 
 /***/ }),
 
@@ -101190,6 +102087,8 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Auth/MagicLink": "./resources/js/Pages/Auth/MagicLink.js",
+	"./Auth/MagicLink.js": "./resources/js/Pages/Auth/MagicLink.js",
 	"./Admin/Commissions": "./resources/js/Pages/Admin/Commissions.js",
 	"./Admin/Commissions.js": "./resources/js/Pages/Admin/Commissions.js",
 	"./Admin/Denied": "./resources/js/Pages/Admin/Denied.js",

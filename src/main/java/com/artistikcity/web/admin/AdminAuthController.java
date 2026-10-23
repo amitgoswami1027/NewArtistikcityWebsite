@@ -28,8 +28,13 @@ public class AdminAuthController {
     private final Json json;
     private final Validator validator;
     private final Redirects redirect;
+    private final com.artistikcity.auth.RateLimiter limiter;
+    private final com.artistikcity.auth.AuthEvents events;
 
-    public AdminAuthController(Views views, Auth auth, Json json, Validator validator, Redirects redirect) {
+    public AdminAuthController(Views views, Auth auth, Json json, Validator validator, Redirects redirect,
+                               com.artistikcity.auth.RateLimiter limiter, com.artistikcity.auth.AuthEvents events) {
+        this.limiter = limiter;
+        this.events = events;
         this.views = views;
         this.auth = auth;
         this.json = json;
@@ -48,10 +53,21 @@ public class AdminAuthController {
     @PostMapping("/admin/login")
     public ResponseEntity<String> login(HttpServletRequest request) {
         Input in = Input.of(request, json);
-        validator.validate(in, "email", "required|email", "password", "required");
+        validator.validate(in, "email", "required|email|max:255", "password", "required|max:200");
+        String ip = com.artistikcity.auth.AuthEvents.ip(request);
+        String email = in.get("email").trim().toLowerCase();
+        var byIp = limiter.hit("admin:login:ip:" + ip, 20, 900);
+        var pair = limiter.peek("admin:login:pair:" + email + "|" + ip, 5, 900);
+        if (!byIp.allowed() || !pair.allowed()) {
+            throw ValidationException.withMessage("email", "Too many attempts. Please try again in "
+                    + Math.max(byIp.retryAfterSeconds(), pair.retryAfterSeconds()) + " seconds.");
+        }
         if (!auth.attemptAdmin(request, in.get("email"), in.get("password"))) {
+            limiter.hit("admin:login:pair:" + email + "|" + ip, 5, 900);
+            events.fail(request, null, "admin_login_failed", "password", email);
             throw ValidationException.withMessage("email", "These credentials do not match our records.");
         }
+        limiter.reset("admin:login:pair:" + email + "|" + ip);
         return redirect.route(request, "admin.dashboard");
     }
 

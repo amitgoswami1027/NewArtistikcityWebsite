@@ -86,13 +86,13 @@ public class AdminConsoleController {
         p.put("pipeline", pipeline(teacher));
         p.put("reviewQueue", repo.submissionsForReview("Pending Review", teacher).stream().limit(5).toList());
         p.put("recentStudents", teacher == null
-                ? repo.list("select top 6 id, name, email, profile_photo, created_at from users order by id desc")
-                : repo.list("select distinct top 6 u.id, u.name, u.email, u.profile_photo, u.created_at from users u join enrollments e on e.user_id = u.id"
-                + " join courses c on c.id = e.course_id where c.admin_id = ? order by u.id desc", teacher));
+                ? repo.list("select id, name, email, profile_photo, created_at from users order by id desc limit 6")
+                : repo.list("select distinct u.id, u.name, u.email, u.profile_photo, u.created_at from users u join enrollments e on e.user_id = u.id"
+                + " join courses c on c.id = e.course_id where c.admin_id = ? order by u.id desc limit 6", teacher));
         if (Personas.can(admin, "commissions")) {
-            p.put("recentCommissions", repo.list("select top 5 o.order_id, o.customer_name, o.order_status, o.total_price, o.currency, o.created_at,"
+            p.put("recentCommissions", repo.list("select o.order_id, o.customer_name, o.order_status, o.total_price, o.currency, o.created_at,"
                     + " i.artwork_theme from commission_orders o left join commission_artwork_items i on i.order_id = o.order_id"
-                    + " where o.order_status <> 'PAYMENT_PENDING' order by o.created_at desc"));
+                    + " where o.order_status <> 'PAYMENT_PENDING' order by o.created_at desc limit 5"));
         }
         return inertia.render(request, "Admin/Overview", p);
     }
@@ -139,7 +139,8 @@ public class AdminConsoleController {
         if (!Personas.can(admin, "people")) return denied(request, admin);
         Long teacher = teacherScope(admin);
         Map<String, Object> p = base(admin);
-        String studentSql = "select u.id, u.name, u.email, u.phone, u.location, u.status, u.provider, u.created_at, u.profile_photo,"
+        String studentSql = "select u.id, u.name, u.email, u.phone_number as phone, u.location, u.status,"
+                + " (select group_concat(l.provider_name order by l.provider_name) from linked_accounts l where l.user_id = u.id) as provider, u.created_at, u.profile_photo,"
                 + " (select count(*) from enrollments e where e.user_id = u.id) as enrollments,"
                 + " (select count(*) from student_submissions s where s.user_id = u.id) as submissions,"
                 + " (select count(*) from portfolio_marketplace m where m.user_id = u.id and m.is_listed_for_sale = ?) as listed from users u";
@@ -167,8 +168,8 @@ public class AdminConsoleController {
         p.put("homeArtworks", repo.list("select id, photo_name, comments, status, created_at from home_artworks order by id desc"));
         p.put("studentArtworks", repo.list("select a.id, a.photo_name, a.comments, a.status, a.created_at, u.name as student_name"
                 + " from student_artworks a left join users u on u.id = a.user_id order by a.id desc"));
-        p.put("approvedSubmissions", repo.list("select top 24 s.id, s.title, s.file_url, u.name as student_name from student_submissions s"
-                + " join users u on u.id = s.user_id where s.admin_status = 'Approved' order by s.reviewed_at desc"));
+        p.put("approvedSubmissions", repo.list("select s.id, s.title, s.file_url, u.name as student_name from student_submissions s"
+                + " join users u on u.id = s.user_id where s.admin_status = 'Approved' order by s.reviewed_at desc limit 24"));
         return inertia.render(request, "Admin/Gallery", p);
     }
 

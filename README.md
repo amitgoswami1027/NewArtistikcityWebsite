@@ -1,11 +1,11 @@
-# ArtistikCity – Java / Spring Boot + React + SQL Server
+# ArtistikCity – Java / Spring Boot + React + MySQL
 
 This is the Java port of the original **Laravel 8 + Inertia.js + React** application in `Artistik-City/`.
 
 | Layer | Before (Laravel) | Now |
 |---|---|---|
 | Backend | PHP 7/8, Laravel 8, Eloquent | **Java 17+, Spring Boot 3.3**, plain JDBC (`Db` helper) |
-| Database | MySQL | **Microsoft SQL Server** (T-SQL schema in `database/`) |
+| Database | MySQL | **MySQL 8.4 LTS** (schema in `database/`; the same table and column names as Laravel) |
 | Public site + student area UI | React 17 pages via Inertia.js | **Unchanged React pages.** The Java backend speaks the Inertia protocol and publishes the Ziggy `route()` list |
 | Server-rendered pages (checkout, static pages, admin, e-mails) | Blade | **Mustache** templates (same HTML/CSS) |
 | Auth | Laravel guards `web` + `admin`, bcrypt | Session auth with the same two guards. **Existing Laravel bcrypt hashes still work** |
@@ -17,101 +17,112 @@ This is the Java port of the original **Laravel 8 + Inertia.js + React** applica
 
 ## 1. Requirements
 
-* **JDK 17 or newer** and **Maven 3.8+**
-* **SQL Server 2016+** (Express / Developer / Azure SQL all work)
-* Node.js 18+ (only if you want to rebuild the React bundle; a compiled `js/app.js` is already included)
+* **JDK 17 or newer** and **Maven 3.8+**. The Windows launcher downloads portable copies when they're missing.
+* **MySQL 8.0.16+** (8.4 LTS recommended). The Windows launcher can download and run a portable MySQL 8.4 for you.
+* Node.js 18+, only if you want to rebuild the React bundle (a compiled `js/app.js` is already included).
 
-## 🐳 Run everything in Docker
+## ★ One-click setup on Windows
 
-The stack is split into containers:
+Double-click **`START-ArtistikCity.bat`**. It does everything, with no installers and no admin rights:
 
-| Service | Image | What it does |
-|---|---|---|
-| `db` | `mcr.microsoft.com/mssql/server:2022-latest` | SQL Server 2022 (Developer edition). Data lives in the `mssql-data` volume. Exposed on `localhost,1433`. |
-| `db-init` | built from `docker/db-init.Dockerfile` | Runs once. It creates the `artistikcity` database and loads `database/schema.sql` + `seed.sql` if the tables don't exist yet, then exits. |
-| `app` | built from `Dockerfile` (Maven build, then a Java 17 runtime image) | Spring Boot backend plus the compiled React UI on http://localhost:8080. Uploads live in the `app-storage` volume. |
-| `frontend` (optional) | `node:18` | Rebuilds the React bundle: `docker compose --profile frontend run --rm frontend`, then `docker compose up -d --build app`. |
+1. Uses your JDK 17+ and Maven, or downloads portable copies into `.tools\`.
+2. Builds the app.
+3. **MySQL:** the first time, it downloads MySQL 8.4 LTS (about 270 MB) into `.tools\mysql-8.4.13-winx64\`,
+   creates its data folder `.tools\mysql-data\`, sets the passwords, creates the `artistikcity` database and the
+   `artistik` user, and loads `database/schema.sql` and `database/seed.sql`. Later starts reuse it, so **your data is kept**.
+4. Starts the site on http://localhost:8080 and opens your browser.
 
-**Start:** with Docker Desktop running, double-click **`DOCKER-START.bat`**, or run:
+Closing the window or pressing **Ctrl+C** stops the site, and MySQL too if the launcher started it.
 
-```bash
-docker compose up -d --build
-```
-
-The first run downloads about 2 GB of images and builds the app, which takes 5–15 minutes. Later starts take seconds.
-
-| Task | Command |
+| File | What it does |
 |---|---|
-| Logs | `docker compose logs -f app` (or `db-init`, `db`) |
-| Stop, keeping data | `DOCKER-STOP.bat` or `docker compose down` |
-| Stop and delete the database and uploads | `docker compose down -v` |
-| Reload demo data | `docker compose run --rm -e RESET_DB=true db-init` |
-| Change the password, ports or payment keys | copy `.env.example` to `.env` and edit it, then `docker compose up -d` |
+| **`START-ArtistikCity.bat`** | MySQL + website (see above). **Start here.** |
+| `START-MySQL.bat` | Starts only MySQL, which keeps running in the background. Use it before running the app from VS Code (F5 also starts it for you). |
+| `STOP-MySQL.bat` | Stops the portable MySQL. Your data is kept. |
+| `DOCKER-START.bat` | The whole stack in Docker Desktop (see below). |
 
-If SQL Server exits right away, check Docker Desktop > Settings > Resources. SQL Server needs at least 2 GB of memory, and the `SA_PASSWORD` must be at least 8 characters with upper case, lower case, digits and symbols.
-
-## ★ One-click setup on Windows (without Docker)
-
-Double-click one of these files in the project folder. Each one downloads a portable Java 17 and Maven into `.tools\` if you don't have them (no admin rights needed), builds the app, prepares the database, starts the site and opens http://localhost:8080.
-
-| File | Database |
-|---|---|
-| **`START-ArtistikCity.bat`** | In-memory database in SQL Server mode. Nothing to install; demo data is reloaded on every start. **Start here.** |
-| `START-with-SQLServer.bat` | Your own SQL Server / SQL Server Express on `localhost:1433`, using Windows login. The `artistikcity` database is created and filled with demo data on the first run. |
-| `START-with-Docker-SQLServer.bat` | SQL Server 2022 in Docker Desktop (container `artistikcity-sql`, SA password `Artistik#2026Pass`). |
-
-The first run takes a few minutes, because it downloads Java (about 190 MB) and the Maven libraries (about 150 MB). Later starts take about 20 seconds. Close the window or press **Ctrl+C** to stop.
-
-You can pass options from a command prompt, either to a `.bat` file or directly to `setup-and-run.ps1`:
+Options, from a command prompt (also accepted by `setup-and-run.ps1`):
 
 ```bat
-START-with-SQLServer.bat -SqlUser sa -SqlPassword "YourPassword"      :: SQL login instead of Windows login
-START-with-SQLServer.bat -SqlInstance SQLEXPRESS -Trusted             :: named instance (SQL Server Browser must run)
-START-with-SQLServer.bat -ResetDatabase                               :: drop and recreate tables + demo data
+START-ArtistikCity.bat -ResetDatabase                 :: drop all tables and reload the demo data
 START-ArtistikCity.bat -Port 9090 -SkipBuild -NoBrowser
+START-ArtistikCity.bat -DbPort 3307                   :: if another MySQL already uses 3306
+START-ArtistikCity.bat -Db mysql -DbUser root -DbPassword "YourPassword"   :: your own MySQL server
 ```
+
+The first run takes a few minutes: Java (about 190 MB, only if you have no JDK 17+), the Maven libraries (about 150 MB) and MySQL (about 270 MB). Later starts take about 20 seconds.
+
+### Database access (portable MySQL)
+
+| | Value |
+|---|---|
+| Host / port | `127.0.0.1` : `3306` (local connections only) |
+| Database | `artistikcity` (utf8mb4) |
+| Application user | `artistik` / `Artistik@2026` (all privileges on `artistikcity` only) |
+| Administrator | `root` / `ArtistikRoot@2026` |
+| JDBC URL | `jdbc:mysql://127.0.0.1:3306/artistikcity?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false` |
+| Command line | `.tools\mysql-8.4.13-winx64\bin\mysql.exe -h 127.0.0.1 -u artistik -p artistikcity` |
+| Files | binaries `.tools\mysql-8.4.13-winx64\`, data `.tools\mysql-data\`, log `logs\mysql-error.log` |
+
+These are **local development passwords**. Change them for anything reachable from other machines: pass
+`-AppPassword` / `-RootPassword` to the launcher, and set `DB_PASSWORD` for the app.
+
+Any MySQL client works with these details, for example the SQLTools extension in VS Code (the connection is
+pre-configured in `ArtistikCity.code-workspace`), MySQL Workbench, DBeaver or HeidiSQL.
 
 **Troubleshooting**
 
 | Problem | Fix |
 |---|---|
-| "Could not connect to SQL Server" | Open SQL Server Configuration Manager > SQL Server Network Configuration > Protocols > enable **TCP/IP**, then restart the SQL Server service. SQL Express uses a dynamic port: use `-SqlInstance SQLEXPRESS` or set the port to 1433. |
-| Login failed for `sa` | Enable *SQL Server and Windows Authentication mode* (server Properties > Security) and enable the `sa` login, or use `-Trusted`. |
+| "MySQL needs the Microsoft Visual C++ Redistributable" | Install https://aka.ms/vs/17/release/vc_redist.x64.exe, then run again. |
+| "Port 3306 is already used" | Another MySQL is running. Stop it, run with `-DbPort 3307`, or use it with `-Db mysql`. |
+| MySQL does not start | See `logs\mysql-error.log`. To start completely fresh, stop MySQL and delete `.tools\mysql-data\` (this deletes all data). |
 | Port 8080 in use | `START-ArtistikCity.bat -Port 8081` |
 | Build fails | Copy the error text. A corporate proxy may block Maven Central; set the proxy in `%USERPROFILE%\.m2\settings.xml`. |
 
-## 2. Quick start without SQL Server (dev profile)
+## 🐳 Run everything in Docker
 
-Runs on an in-memory H2 database in **SQL Server compatibility mode**, created from `database/schema.sql` and `database/seed.sql` on every start.
+| Service | Image | What it does |
+|---|---|---|
+| `db` | `mysql:8.4` | MySQL 8.4 LTS. On the first start (empty `mysql-data` volume) it creates the `artistikcity` database and the `artistik` user, and loads `database/schema.sql` + `seed.sql`. Exposed on `localhost:3306`. |
+| `app` | built from `Dockerfile` (Maven build, then a Java 17 runtime image) | Spring Boot backend plus the compiled React UI on http://localhost:8080. Uploads live in the `app-storage` volume. |
+| `frontend` (optional) | `node:18` | Rebuilds the React bundle: `docker compose --profile frontend run --rm frontend`, then `docker compose up -d --build app`. |
 
-```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
+**Start:** with Docker Desktop running, double-click **`DOCKER-START.bat`**, or run `docker compose up -d --build`.
 
-Open http://localhost:8080
+| Task | Command |
+|---|---|
+| Logs | `docker compose logs -f app` (or `db`) |
+| Stop, keeping data | `DOCKER-STOP.bat` or `docker compose down` |
+| Reload the demo data | `docker compose down -v`, then `docker compose up -d` (this deletes the database and uploads) |
+| Change passwords, ports or payment keys | copy `.env.example` to `.env` and edit it, then `docker compose up -d` |
 
-The dev profile also enables **test payments**: when no Razorpay keys are set, the payment step shows *"Complete test payment"*.
+The Docker database uses the same user, password and port as the portable one.
 
-## 3. Run against SQL Server
+## 2. Run with Maven against any MySQL
 
-1. Create the database, for example in SSMS or `sqlcmd`:
+1. Create the database and a user, for example in the `mysql` client as root:
    ```sql
-   CREATE DATABASE artistikcity;
+   CREATE DATABASE artistikcity CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+   CREATE USER 'artistik'@'%' IDENTIFIED BY 'Artistik@2026';
+   GRANT ALL PRIVILEGES ON artistikcity.* TO 'artistik'@'%';
    ```
-2. Create the tables and demo data (run from the project folder):
+2. Create the tables and demo data, from the project folder:
    ```bash
-   sqlcmd -S localhost -U sa -P <password> -d artistikcity -i database/schema.sql
-   sqlcmd -S localhost -U sa -P <password> -d artistikcity -i database/seed.sql
+   mysql -h 127.0.0.1 -u artistik -p artistikcity < database/schema.sql
+   mysql -h 127.0.0.1 -u artistik -p artistikcity < database/seed.sql
    ```
-   Alternatively, start the app **once** with `DB_INIT=always`. Note that `schema.sql` drops and recreates every table.
-3. Configure the connection with environment variables (or edit `src/main/resources/application.properties`):
+   Alternatively, start the app **once** with `DB_INIT=always`. `schema.sql` drops and recreates every table.
+3. Start it. The defaults in `application.properties` already point at `127.0.0.1:3306` / `artistikcity` / `artistik`;
+   use environment variables for anything else:
    ```bash
    # Windows (PowerShell)
-   $env:DB_URL="jdbc:sqlserver://localhost:1433;databaseName=artistikcity;encrypt=true;trustServerCertificate=true"
-   $env:DB_USERNAME="sa"
+   $env:DB_URL="jdbc:mysql://dbhost:3306/artistikcity?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+   $env:DB_USERNAME="artistik"
    $env:DB_PASSWORD="YourPassword"
-   mvn spring-boot:run
+   mvn spring-boot:run -Dspring-boot.run.profiles=dev
    ```
+   The `dev` profile turns off template caching and enables **test payments**: when no Razorpay keys are set, the payment step shows *"Complete test payment"*.
 4. Or build a jar: `mvn package`, then `java -jar target/artistikcity-1.0.0.jar`. Run it from the project folder so that `database/` and `storage/` are found, or set `STORAGE_DIR`.
 
 ### Demo logins (from `seed.sql`, password `password`)
@@ -122,15 +133,22 @@ The dev profile also enables **test payments**: when no Razorpay keys are set, t
 | Admin panel | `/admin/login` | `admin@artistikcity.com` |
 | Teacher (instructor) | `/admin/login` | `vaishali@artistikcity.com` |
 
-### Migrating existing MySQL data
+### Bringing over data from the old Laravel (MySQL) site
 
-`schema.sql` keeps the Laravel table and column names, and adds the columns the PHP code used but the migrations never created. Export the MySQL data (for example with SSMA for MySQL, or CSV export and `BULK INSERT`) into the new tables. Existing user and admin passwords keep working. Also copy Laravel's `storage/app/public/*` (`uploads/…`, `certificates/…`) into this project's `storage/` folder.
+`schema.sql` keeps the Laravel table and column names. It also adds the columns the PHP code used but the migrations
+never created, plus the new marketplace, commission and student-lifecycle tables. Because both sides are MySQL:
+
+1. Load `schema.sql` into an empty `artistikcity` database. Don't load `seed.sql`.
+2. Export only the data from the Laravel database: `mysqldump --no-create-info --complete-insert --skip-triggers <laraveldb> > laravel-data.sql`.
+3. Import it: `mysql -u artistik -p artistikcity < laravel-data.sql`. `--complete-insert` names every column, so the extra columns simply keep their defaults.
+
+Existing user and admin passwords keep working. Also copy Laravel's `storage/app/public/*` (`uploads/…`, `certificates/…`) into this project's `storage/` folder.
 
 ## 4. Configuration (environment variables)
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | SQL Server connection | localhost / `sa` |
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | MySQL connection | `jdbc:mysql://127.0.0.1:3306/artistikcity…` / `artistik` / `Artistik@2026` |
 | `DB_INIT` | `always` = run schema + seed on start | `never` |
 | `PORT` | HTTP port | 8080 |
 | `STORAGE_DIR` | Uploaded files (served at `/storage/**`) | `./storage` |
@@ -139,11 +157,56 @@ The dev profile also enables **test payments**: when no Razorpay keys are set, t
 | `RAZORPAY_KEY`, `RAZORPAY_SECRET` | INR payments | – |
 | `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_MODE` (`sandbox`/`live`) | USD payments | sandbox |
 | `PAYMENT_TEST_MODE` | `true` = simulated payments when no keys are set | false |
-| `GOOGLE_CLIENT_ID/SECRET`, `FACEBOOK_CLIENT_ID/SECRET` | Social login; callback URL is `{site}/social-login/{provider}/callback` | – |
+| `APP_URL` | Public site address used in e-mail links and OAuth callbacks, e.g. `https://artistikcity.com` | taken from the request |
+| `GOOGLE_CLIENT_ID/SECRET`, `FACEBOOK_CLIENT_ID/SECRET` | Google / Facebook sign-in (see §4a). A button only appears when both values are set | – |
+| `FACEBOOK_TRUST_EMAIL` | `false` = never merge a Facebook login into an existing account by e-mail | true |
+| `SMS_PROVIDER` | `log` (codes only written to the log) or `twilio` | log |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` or `TWILIO_MESSAGING_SERVICE_SID` | Sending sign-in codes by SMS | – |
+| `OTP_SECRET` | Secret for hashing SMS codes (any long random string). **Set it in production** | random per start |
+| `AUTH_COOKIE_SECURE` | `auto` (Secure on HTTPS), `true` or `false` | auto |
+| `AUTH_SESSION_IDLE_MINUTES`, `AUTH_SESSION_MAX_HOURS`, `AUTH_REMEMBER_DAYS` | Sign-out after inactivity / longest session without "keep me signed in" / with it | 30 / 12 / 30 |
+| `AUTH_DEFAULT_COUNTRY_CODE` | Country code added to phone numbers typed without one | 91 |
+| `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGINS` | Passkeys: your domain (e.g. `artistikcity.com`) and allowed origins (e.g. `https://artistikcity.com`). Empty = the request's host | – |
+| `FORWARD_HEADERS` | `framework` when running behind a reverse proxy / load balancer that terminates HTTPS | none |
+
+### 4a. Sign-in & security
+
+Students can sign in with **Google**, **Facebook**, **a code sent by SMS**, **an e-mail link**, **e-mail + password** or a **passkey**
+(fingerprint / face / device PIN). Every method leads to the same account: one person = one `users` row, with providers in
+`linked_accounts`. Admin and teacher logins (`/admin/login`) stay password-only.
+
+**Setting up Google** (Google Cloud Console → APIs & Services → Credentials → OAuth client ID → *Web application*):
+authorised redirect URI `https://YOUR-SITE/social-login/google/callback` (for local testing also
+`http://localhost:8080/social-login/google/callback`). Put the client ID and secret in `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`.
+
+**Setting up Facebook** (developers.facebook.com → your app → Facebook Login → Settings): valid OAuth redirect URI
+`https://YOUR-SITE/social-login/facebook/callback`; request the `email` and `public_profile` permissions. Put the app ID and app secret
+in `FACEBOOK_CLIENT_ID` / `FACEBOOK_CLIENT_SECRET`.
+
+**SMS codes:** with the default `SMS_PROVIDER=log` no SMS is sent; the code is written to the log and, with the `dev` profile, shown on
+the page. For real SMS set `SMS_PROVIDER=twilio` and the `TWILIO_*` values. To use another gateway (MSG91, Firebase, …) implement
+`auth/sms/SmsSender` (one method) and select it in `auth/sms/SmsConfig`.
+
+**E-mail links** need SMTP (`MAIL_*`). Without SMTP every e-mail is saved as an HTML file in `logs/mail-outbox/`, so sign-in links,
+confirmations and password resets can still be tested locally.
+
+**How accounts are joined:** a Google/Facebook login joins an existing account only when the provider confirms the e-mail address. An SMS
+login finds an account only by a phone number that was verified with a code. Numbers imported from the old site are not verified yet: a
+student verifies theirs once on *Account → Login & security*. If someone signs up with an e-mail they never confirmed and the real owner
+later signs in with Google, the unconfirmed password is removed and that person's sessions are ended.
+
+**Sessions:** two HttpOnly, SameSite=Lax cookies (`ac_session`, `ac_refresh`), Secure on HTTPS. Only SHA-256 hashes are stored in
+`auth_sessions` / `auth_refresh_tokens`. The session token rotates every 15 minutes; refresh tokens are single-use, and reusing an old one
+signs that login out everywhere. Students see and end their sessions on *Login & security*. Login, OTP and e-mail endpoints are rate limited, and changing
+sign-in methods requires a login from the last 30 minutes. Security events are kept in `auth_events` for 180 days.
+
+**Going live checklist:** HTTPS, `APP_URL`, `OTP_SECRET`, `MAIL_*`, `SMS_PROVIDER=twilio` + keys, the Google/Facebook keys with production
+redirect URIs, `WEBAUTHN_RP_ID`/`WEBAUTHN_ORIGINS`, and `FORWARD_HEADERS=framework` behind a proxy. Without `-Dspring.profiles.active=dev`,
+SMS codes are never shown on the page.
 
 ## 5. Front-end (React)
 
-The React/Inertia source is in `frontend/resources/js`, unchanged from the Laravel project. To rebuild the bundle:
+The React/Inertia source is in `frontend/resources/js` (the Laravel project's pages plus the new sign-in pages in `Pages/Auth`, `Components/Auth` and `Pages/Students/LinkedAccounts.js`). To rebuild the bundle:
 
 ```bash
 cd frontend
@@ -156,7 +219,7 @@ The build writes `src/main/resources/static/js/app.js` (Laravel Mix runs standal
 ## 6. Project layout
 
 ```
-database/schema.sql, seed.sql      SQL Server DDL + demo data
+database/schema.sql, seed.sql      MySQL 8 DDL + demo data (migrations/ for future schema changes)
 storage/uploads/...                demo images (course photos, mediums, teachers, ...)
 frontend/                          React + Inertia source and build config
 src/main/java/com/artistikcity/

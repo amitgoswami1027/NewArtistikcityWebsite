@@ -23,9 +23,8 @@ import java.util.StringJoiner;
 /**
  * Thin JDBC helper (the Java replacement for Laravel's query builder / Eloquent calls).
  *
- * All SQL in the application is written in the common subset understood by Microsoft SQL Server
- * and by H2 in MSSQLServer mode (used for the "dev" profile): TOP n, OFFSET/FETCH, [bracketed]
- * reserved words, no vendor specific functions.
+ * All SQL in the application is written for MySQL 8: LIMIT n [OFFSET m] for paging,
+ * `backtick` quoted reserved words, and standard functions only.
  *
  * Rows come back as {@link Row} maps with lower-case column names. Temporal values are converted
  * to strings the way Laravel serialises them ("yyyy-MM-dd HH:mm:ss" / "yyyy-MM-dd") so that the
@@ -104,6 +103,12 @@ public class Db {
         LocalDateTime now = LocalDateTime.now();
         v.putIfAbsent("created_at", now);
         v.putIfAbsent("updated_at", now);
+        return insertReturningId(table, v);
+    }
+
+    /** Insert exactly the given columns (no automatic timestamps) and return the generated id. */
+    public long insertReturningId(String table, Map<String, ?> values) {
+        Row v = new Row(values);
         StringJoiner cols = new StringJoiner(", ");
         StringJoiner marks = new StringJoiner(", ");
         List<Object> params = new ArrayList<>();
@@ -176,10 +181,10 @@ public class Db {
 
     // ---------------------------------------------------------------- helpers
 
-    private static final java.util.Set<String> RESERVED = java.util.Set.of("primary", "like", "key", "order", "user");
+    private static final java.util.Set<String> RESERVED = java.util.Set.of("primary", "like", "key", "order", "user", "rank", "groups", "condition", "range", "interval", "read", "row", "rows");
 
     private static String quote(String column) {
-        return RESERVED.contains(column.toLowerCase()) ? "[" + column + "]" : column;
+        return RESERVED.contains(column.toLowerCase()) ? "`" + column + "`" : column;
     }
 
     private static void bind(PreparedStatement ps, Object[] params) throws SQLException {

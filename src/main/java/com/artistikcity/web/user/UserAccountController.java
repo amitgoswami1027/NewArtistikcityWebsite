@@ -42,9 +42,22 @@ public class UserAccountController {
     private final Storage storage;
     private final CertificateService certificates;
     private final Redirects redirect;
+    private final com.artistikcity.auth.AccountService accounts;
+    private final com.artistikcity.auth.SessionService sessions;
+    private final com.artistikcity.auth.AuthMail authMail;
+    private final com.artistikcity.auth.PasskeyView passkeys;
+    private final org.springframework.core.env.Environment env;
 
     public UserAccountController(Inertia inertia, Views views, Db db, Json json, Auth auth, Validator validator, Storage storage,
-                                 CertificateService certificates, Redirects redirect) {
+                                 CertificateService certificates, Redirects redirect,
+                                 com.artistikcity.auth.AccountService accounts, com.artistikcity.auth.SessionService sessions,
+                                 com.artistikcity.auth.AuthMail authMail, com.artistikcity.auth.PasskeyView passkeys,
+                                 org.springframework.core.env.Environment env) {
+        this.accounts = accounts;
+        this.sessions = sessions;
+        this.authMail = authMail;
+        this.passkeys = passkeys;
+        this.env = env;
         this.inertia = inertia;
         this.views = views;
         this.db = db;
@@ -64,14 +77,40 @@ public class UserAccountController {
     @PostMapping("/user/my-account")
     public ResponseEntity<String> saveAccount(HttpServletRequest request) {
         Input in = Input.of(request, json);
-        validator.validate(in, "name", "required", "email", "required|email");
+        validator.validate(in, "name", "required|max:255", "email", "email|max:255");
         Long id = auth.userId(request);
-        if (db.count("select count(*) from users where email = ? and id <> ?", in.get("email"), id) > 0) {
+        Row before = db.find("users", id);
+        String email = com.artistikcity.auth.AccountService.normalizeEmail(in.get("email"));
+        if (email == null && before.get("email") != null) {
+            throw ValidationException.withMessage("email", "Please keep an e-mail address on your account.");
+        }
+        if (email != null && db.count("select count(*) from users where email = ? and id <> ?", email, id) > 0) {
             throw ValidationException.withMessage("email", "The email has already been taken.");
         }
-        db.updateById("users", id, Row.of("name", in.get("name"), "email", in.get("email"), "phone", in.get("phone"),
+        Row changes = Row.of("name", in.get("name"), "email", email,
                 "profile_title", in.get("profile_title"), "profile_description", in.get("profile_description"),
-                "location", in.get("location")));
+                "location", in.get("location"));
+        boolean emailChanged = email != null && !email.equals(before.get("email"));
+        if (emailChanged) {
+            changes.put("email_verified_at", null); // a new address must be confirmed again
+        }
+        // the phone number is managed (and verified by SMS) on the Login & security page; a typed number
+        // is only stored when the account has no verified one yet
+        if (before.get("phone_verified_at") == null && in.has("phone")) {
+            String phone = com.artistikcity.auth.PhoneNumbers.normalize(in.get("phone"),
+                    env.getProperty("app.auth.default-country-code", "91"));
+            if (in.get("phone") != null && phone == null) {
+                throw ValidationException.withMessage("phone", "Enter a valid mobile number.");
+            }
+            if (phone != null && db.count("select count(*) from users where phone_number = ? and id <> ?", phone, id) > 0) {
+                throw ValidationException.withMessage("phone", "This phone number is used by another account.");
+            }
+            changes.put("phone_number", phone);
+        }
+        db.updateById("users", id, changes);
+        if (emailChanged) {
+            authMail.sendVerification(request, id, email, in.get("name"));
+        }
         if (in.hasFile("tmp_profile_photo")) {
             String name = storage.storeUpload(in.file("tmp_profile_photo"), "uploads/students/" + id);
             db.updateById("users", id, Row.of("profile_photo", name));
@@ -89,11 +128,17 @@ public class UserAccountController {
     public ResponseEntity<String> saveChangePassword(HttpServletRequest request) {
         Input in = Input.of(request, json);
         validator.validate(in, "password", "required", "new_password", "required", "confirm_new_password", "same:new_password");
-        Row u = db.first("select password from users where id = ?", auth.userId(request));
-        if (!auth.check(in.get("password"), u.str("password"))) {
+        Row u = db.first("select password_hash, email, name from users where id = ?", auth.userId(request));
+        if (u.get("password_hash") == null || !auth.check(in.get("password"), u.str("password_hash"))) {
             throw ValidationException.withMessage("password", "The current password is incorrect.");
         }
-        db.updateById("users", auth.userId(request), Row.of("password", auth.hash(in.get("new_password"))));
+        String problem = com.artistikcity.auth.PasswordPolicy.problem(in.get("new_password"), u.str("email"), u.str("name"));
+        if (problem != null) {
+            throw ValidationException.withMessage("new_password", problem);
+        }
+        db.updateById("users", auth.userId(request), Row.of("password_hash", auth.hash(in.get("new_password"))));
+        var ctx = auth.context(request);
+        sessions.revokeAll(auth.userId(request), ctx == null ? null : ctx.sessionId(), "password_changed");
         return redirect.route(request, "user.account");
     }
 
@@ -102,9 +147,37 @@ public class UserAccountController {
         return inertia.renderUser(request, "Students/Notifications", Map.of());
     }
 
+    /** Login & security: sign-in methods, connected accounts, passkeys, devices. */
     @GetMapping("/user/linked-accounts")
     public ResponseEntity<String> linkedAccounts(HttpServletRequest request) {
-        return inertia.renderUser(request, "Students/LinkedAccounts", Map.of());
+        long id = auth.userId(request);
+        Row u = db.find("users", id);
+        var ctx = auth.context(request);
+        Map<String, Object> security = new java.util.LinkedHashMap<>();
+        security.put("email", u.get("email"));
+        security.put("emailVerified", u.get("email_verified_at") != null);
+        security.put("phone", u.get("phone_number"));
+        security.put("phoneMasked", com.artistikcity.auth.PhoneNumbers.mask(u.str("phone_number")));
+        security.put("phoneVerified", u.get("phone_verified_at") != null);
+        security.put("hasPassword", u.get("password_hash") != null);
+        security.put("linked", accounts.linkedAccounts(id));
+        security.put("providers", com.artistikcity.web.SocialController.enabledProviders(env));
+        security.put("passkeys", passkeys.list(id));
+        List<Row> active = sessions.active(id);
+        for (Row s : active) {
+            s.put("current", ctx != null && s.lng("id") == ctx.sessionId());
+            s.put("device", com.artistikcity.auth.PasskeyView.describeAgent(s.str("user_agent")));
+            s.remove("user_agent");
+        }
+        security.put("sessions", active);
+        security.put("events", db.select("select event, method, success, ip_address, created_at from auth_events where user_id = ?"
+                + " order by id desc limit 12", id));
+        security.put("countryCode", env.getProperty("app.auth.default-country-code", "91"));
+        Map<String, Object> props = new java.util.LinkedHashMap<>();
+        props.put("security", security);
+        props.put("success", com.artistikcity.http.Flash.get(request, "success"));
+        props.put("error", com.artistikcity.http.Flash.get(request, "error"));
+        return inertia.renderUser(request, "Students/LinkedAccounts", props);
     }
 
     @GetMapping("/user/language-preference")
@@ -170,7 +243,7 @@ public class UserAccountController {
             // invalid id
         }
         if (orderId != null) {
-            Row cert = db.first("select top 1 certificate_name from certificates where order_id = ? order by id desc", orderId);
+            Row cert = db.first("select certificate_name from certificates where order_id = ? order by id desc limit 1", orderId);
             if (cert != null) {
                 image = Inertia.baseUrl(request) + "/storage/certificates/" + cert.str("certificate_name").replace(".pdf", ".jpeg");
             }

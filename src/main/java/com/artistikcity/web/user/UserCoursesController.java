@@ -44,8 +44,8 @@ public class UserCoursesController {
     private List<Row> enrolled(HttpServletRequest request, Integer courseType) {
         return db.select("select c.title, c.sub_title, o.id as order_id, c.id as course_id, c.course_type_id, c.schedule_pdf, c.age_group, c.duration, "
                         + CourseService.photoSubquery("o.course_id") + ","
-                        + " (select top 1 name from mediums where id = c.medium_id) as medium,"
-                        + " (select top 1 name from skills where id = c.skill_id) as skill"
+                        + " (select name from mediums where id = c.medium_id limit 1) as medium,"
+                        + " (select name from skills where id = c.skill_id limit 1) as skill"
                         + " from orders o join courses c on c.id = o.course_id"
                         + " where o.user_id = ? and o.payment_status = 1" + (courseType == null ? "" : " and c.course_type_id = " + courseType)
                         + " order by o.id desc",
@@ -127,8 +127,7 @@ public class UserCoursesController {
     public ResponseEntity<String> lesson(HttpServletRequest request, @PathVariable("module_id") Long moduleId,
                                          @RequestParam(value = "page", required = false) String pageParam) {
         int page = Paginator.page(pageParam);
-        List<Row> rows = db.select("select * from course_module_lessons where module_id = ? order by id offset "
-                + (page - 1) + " rows fetch next 2 rows only", moduleId);
+        List<Row> rows = db.select("select * from course_module_lessons where module_id = ? order by id limit 2 offset " + (page - 1), moduleId);
         boolean more = rows.size() > 1;
         List<Row> items = rows.isEmpty() ? rows : new ArrayList<>(rows.subList(0, 1));
         for (Row l : items) {
@@ -179,7 +178,7 @@ public class UserCoursesController {
     public ResponseEntity<String> workshopHome(HttpServletRequest request, @PathVariable("id") Long courseId) {
         // The original rendered Students/CourseHome with a different prop shape; send the student to the
         // regular course home for their paid order of this workshop instead.
-        Row order = db.first("select top 1 id from orders where user_id = ? and course_id = ? and payment_status = 1 order by id desc",
+        Row order = db.first("select id from orders where user_id = ? and course_id = ? and payment_status = 1 order by id desc limit 1",
                 auth.userId(request), courseId);
         if (order == null) {
             throw new NotFoundException();
@@ -194,8 +193,8 @@ public class UserCoursesController {
         int perPage = 5;
         int page = Paginator.page(pageParam);
         long total = db.count("select count(*) from free_courses where status = 1");
-        List<Row> rows = db.select("select id, title, photo, description from free_courses where status = 1 order by id desc offset "
-                + ((page - 1) * perPage) + " rows fetch next " + perPage + " rows only");
+        List<Row> rows = db.select("select id, title, photo, description from free_courses where status = 1 order by id desc limit " + perPage
+                + " offset " + ((page - 1) * perPage));
         String path = Inertia.baseUrl(request) + request.getRequestURI();
         return inertia.renderUser(request, "Students/FreeCourses", Map.of("FreeCourses", Paginator.paginate(rows, total, perPage, page, path)));
     }

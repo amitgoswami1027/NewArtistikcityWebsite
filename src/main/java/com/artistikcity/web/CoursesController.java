@@ -101,14 +101,14 @@ public class CoursesController {
         props.put("curriculum", modules);
         props.put("projects", db.select("select id, project_title, project_description from course_projects"
                 + " where course_id = ? and status = '1' order by id", id));
-        props.put("reviews", db.select("select top 12 r.id, r.rating, r.review, r.created_at, u.name, u.slug, u.profile_photo, u.id as user_id"
+        props.put("reviews", db.select("select r.id, r.rating, r.review, r.created_at, u.name, u.slug, u.profile_photo, u.id as user_id"
                 + " from course_reviews r left join users u on u.id = r.added_by_id and r.added_by_type = 'Student'"
-                + " where r.course_id = ? and r.status = 1 order by r.id desc", id));
-        props.put("gallery", db.select("select top 8 a.id, a.photo_name, a.user_id, u.name, u.slug from student_artworks a"
-                + " join users u on u.id = a.user_id where a.status = 1 order by a.id desc"));
-        props.put("videos", db.select("select top 1 video_title, video_url from course_videos where course_id = ? and status = 1 order by id", id));
-        props.put("related", courses.withStats(courses.withRelations(db.select("select top 4 * from courses where status = 1 and id <> ?"
-                + " and course_start_date >= ? order by case when medium_id = ? then 0 else 1 end, id", id, java.time.LocalDate.now(),
+                + " where r.course_id = ? and r.status = 1 order by r.id desc limit 12", id));
+        props.put("gallery", db.select("select a.id, a.photo_name, a.user_id, u.name, u.slug from student_artworks a"
+                + " join users u on u.id = a.user_id where a.status = 1 order by a.id desc limit 8"));
+        props.put("videos", db.select("select video_title, video_url from course_videos where course_id = ? and status = 1 order by id limit 1", id));
+        props.put("related", courses.withStats(courses.withRelations(db.select("select * from courses where status = 1 and id <> ?"
+                + " and course_start_date >= ? order by case when medium_id = ? then 0 else 1 end, id limit 4", id, java.time.LocalDate.now(),
                 course.get("medium_id")), true)));
         props.put("stats", stats);
         return inertia.render(request, "CourseDetails", props);

@@ -67,8 +67,7 @@ public class AdminCourseController {
         int page = Paginator.page(pageParam);
         String where = " where course_type_id = 1 and course_start_date >= ?";
         long total = db.count("select count(*) from courses" + where, LocalDate.now());
-        List<Row> list = courses.withRelations(db.select("select * from courses" + where + " order by id desc offset "
-                + ((page - 1) * PER_PAGE) + " rows fetch next " + PER_PAGE + " rows only", LocalDate.now()), false);
+        List<Row> list = courses.withRelations(db.select("select * from courses" + where + " order by id desc limit " + PER_PAGE + " offset " + ((page - 1) * PER_PAGE), LocalDate.now()), false);
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("courses", list);
         m.put("courses_count", list.size());

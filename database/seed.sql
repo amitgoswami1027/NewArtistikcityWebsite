@@ -1,5 +1,5 @@
 -- =====================================================================
---  ArtistikCity - demo seed data (SQL Server)
+--  ArtistikCity - demo seed data (MySQL)
 --  Logins created here (password for all: "password"):
 --    admin panel : admin@artistikcity.com      (admin)
 --                  vaishali@artistikcity.com   (teacher / instructor)
@@ -14,9 +14,9 @@ INSERT INTO admins (name, slug, email, password, admin_type, location, profile_p
  'Vaishali is a professional artist with more than 15 years of experience teaching drawing, watercolour and acrylic painting to learners of every age. Her classes focus on building strong fundamentals and helping every student discover a personal style.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---- users -------------------------------------------------------------
-INSERT INTO users (name, slug, email, email_verified_at, password, phone, profile_title, profile_description, profile_photo, location, notifications, language_preference, free_courses, free_course_type, status, created_at, updated_at) VALUES
-('Aarav Sharma', 'aarav-sharma', 'student@artistikcity.com', CURRENT_TIMESTAMP, '$2y$10$8uheEMmigBJbrXk8eKxWW.BEfBIWUeZtLGRdZ7a.ms.WP8GuMa31e', '9876543210', 'Aspiring watercolour artist', 'I love painting landscapes and learning new techniques.', 'student.jpg', 'Mumbai, India', 1, 'English', 1, 'color', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('Diya Patel', 'diya-patel', 'diya@example.com', CURRENT_TIMESTAMP, '$2y$10$8uheEMmigBJbrXk8eKxWW.BEfBIWUeZtLGRdZ7a.ms.WP8GuMa31e', NULL, 'Hobbyist', NULL, NULL, 'Delhi, India', 1, 'English', 1, 'default', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (name, slug, email, email_verified_at, password_hash, phone_number, profile_title, profile_description, profile_photo, location, notifications, language_preference, free_courses, free_course_type, status, is_verified, phone_verified_at, created_at, updated_at) VALUES
+('Aarav Sharma', 'aarav-sharma', 'student@artistikcity.com', CURRENT_TIMESTAMP, '$2y$10$8uheEMmigBJbrXk8eKxWW.BEfBIWUeZtLGRdZ7a.ms.WP8GuMa31e', '+919876543210', 'Aspiring watercolour artist', 'I love painting landscapes and learning new techniques.', 'student.jpg', 'Mumbai, India', 1, 'English', 1, 'color', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Diya Patel', 'diya-patel', 'diya@example.com', CURRENT_TIMESTAMP, '$2y$10$8uheEMmigBJbrXk8eKxWW.BEfBIWUeZtLGRdZ7a.ms.WP8GuMa31e', NULL, 'Hobbyist', NULL, NULL, 'Delhi, India', 1, 'English', 1, 'default', 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---- taxonomies --------------------------------------------------------
 INSERT INTO mediums (name, medium_slug, photo, status, created_at, updated_at) VALUES
@@ -58,25 +58,25 @@ INSERT INTO courses (admin_id, medium_id, genre_id, course_type_id, skill_id, ca
  'Fundamentals of watercolour, from materials to finished paintings.', '<ul><li>Materials and set-up</li><li>Flat, graded and wet-in-wet washes</li><li>Skies, trees and water</li></ul>',
  'Live sessions twice a week.', '<p>Week 1: Materials &amp; washes<br>Week 2: Colour mixing<br>Week 3: Skies &amp; trees<br>Week 4: Final landscape</p>',
  '12+ years', '4', '8', '3', '4', '2', '{"certificate":"yes","study_material_access":"yes"}', '["Live classes","Personal feedback"]', '["Beginners"]', '["Professional artists"]', '["Muddy colours"]', '["Washes","Layering"]',
- 'Three finished watercolour landscapes.', '["Certificate","Study material"]', 'No prior experience needed.', DATEADD(day, 30, CAST(CURRENT_TIMESTAMP AS DATE)), 'instructor_based', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+ 'Three finished watercolour landscapes.', '["Certificate","Study material"]', 'No prior experience needed.', DATE_ADD(CURRENT_DATE, INTERVAL 30 DAY), 'instructor_based', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 2, '2,4', 1, 2, 2, 'Acrylic Portrait Painting', 'acrylic-portrait-painting', 'Capture likeness, skin tones and light with fast-drying acrylics.',
  'Paint expressive portraits with acrylic colours.', '<p>Understand facial proportions, value studies and blending techniques for acrylics.</p>',
  'Proportions, values and skin tones.', '<ul><li>Facial proportions</li><li>Value mapping</li><li>Skin tone palettes</li></ul>',
  'Weekend live sessions.', '<p>Six weekend sessions with homework reviews.</p>',
  '15+ years', '6', '12', '4', '5', '3', '{"certificate":"yes","study_material_access":"yes"}', '["Portrait fundamentals"]', '["Intermediate learners"]', '["Absolute beginners"]', '["Flat looking faces"]', '["Proportions","Blending"]',
- 'Two finished acrylic portraits.', '["Certificate"]', 'Basic drawing skills.', DATEADD(day, 45, CAST(CURRENT_TIMESTAMP AS DATE)), 'instructor_based', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+ 'Two finished acrylic portraits.', '["Certificate"]', 'Basic drawing skills.', DATE_ADD(CURRENT_DATE, INTERVAL 45 DAY), 'instructor_based', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 3, '3', 1, 1, 1, 'Pencil Sketching Essentials', 'pencil-sketching-essentials', 'Build confident drawing skills with graphite pencils.',
  'Drawing fundamentals for everyone.', '<p>Lines, shapes, shading and perspective explained simply.</p>',
  'Everything you need to start sketching.', '<ul><li>Line control</li><li>Shading</li><li>Perspective</li></ul>',
  'Self paced with weekly live Q&amp;A.', '<p>Four modules, one live Q&amp;A each week.</p>',
  '8+ years', '4', '6', '4', '4', '1', '{"certificate":"yes","study_material_access":"no"}', '["Self paced"]', '["Kids and adults"]', '["Experts"]', '["Stiff lines"]', '["Shading","Perspective"]',
- 'A sketchbook of finished studies.', '["Certificate"]', 'None.', DATEADD(day, 60, CAST(CURRENT_TIMESTAMP AS DATE)), 'instructor_based', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+ 'A sketchbook of finished studies.', '["Certificate"]', 'None.', DATE_ADD(CURRENT_DATE, INTERVAL 60 DAY), 'instructor_based', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 1, '1,3', 2, 1, 3, 'Weekend Watercolour Florals Workshop', 'weekend-watercolour-florals-workshop', 'A relaxing two-day workshop painting loose florals.',
  'Loose florals in a weekend.', '<p>Paint roses, peonies and leaves with a loose, joyful style.</p>',
  'Two days of guided painting.', '<ul><li>Brush strokes</li><li>Colour harmony</li></ul>',
  'Saturday and Sunday, 3 hours each.', '<p>Day 1: Strokes &amp; leaves<br>Day 2: Full floral composition</p>',
  '10+ years', '2', '2', '1', '2', '3', '{"certificate":"no","study_material_access":"yes"}', '["Live workshop"]', '["Everyone"]', '["-"]', '["Stiff florals"]', '["Loose brushwork"]',
- 'One framed floral painting.', '["Study material"]', 'None.', DATEADD(day, 20, CAST(CURRENT_TIMESTAMP AS DATE)), 'instructor_based', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+ 'One framed floral painting.', '["Study material"]', 'None.', DATE_ADD(CURRENT_DATE, INTERVAL 20 DAY), 'instructor_based', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO course_prices (course_id, price_inr, price_usd, created_at, updated_at) VALUES
 (1, 4999, 69, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -110,7 +110,7 @@ INSERT INTO course_projects (admin_id, course_id, project_title, project_descrip
 INSERT INTO orders (order_number, user_id, course_id, session_id, billing_name, billing_email, billing_address, billing_city, billing_state, billing_zipcode, billing_country, price_type, price, payment_option, payment_id, payment_status, issue_certificate, created_at, updated_at) VALUES
 ('ORD00001', 1, 1, 'seed', 'Aarav Sharma', 'student@artistikcity.com', '12 MG Road', 'Mumbai', 'Maharashtra', '400001', 'India', 'inr', '4999', 'RazorPay', 'pay_demo_001', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT INTO user_addresses (user_id, address_name, address, city, state, country, zipcode, [primary], status, created_at, updated_at) VALUES
+INSERT INTO user_addresses (user_id, address_name, address, city, state, country, zipcode, `primary`, status, created_at, updated_at) VALUES
 (1, 'Aarav Sharma', '12 MG Road', 'Mumbai', 'Maharashtra', 'India', '400001', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---- free courses ------------------------------------------------------
@@ -143,7 +143,7 @@ INSERT INTO settings (meta_tag, meta_key, meta_value, created_at, updated_at) VA
 ('home', 'workshop_text_3', 'Small batches', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---- blog ------------------------------------------------------------------
-INSERT INTO posts (title, subtitle, slug, body, status, posted_by, image, featured, [like], dislike, created_at, updated_at) VALUES
+INSERT INTO posts (title, subtitle, slug, body, status, posted_by, image, featured, `like`, dislike, created_at, updated_at) VALUES
 ('5 Watercolour Mistakes Beginners Make', 'And how to avoid them', '5-watercolour-mistakes-beginners-make', '<p>Watercolour rewards planning. Here are the five most common mistakes we see in beginner classes and simple ways to fix them.</p>', 1, 2, 'blog-1.jpg', 1, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('Choosing Your First Set of Brushes', 'A practical buying guide', 'choosing-your-first-set-of-brushes', '<p>You do not need dozens of brushes. Three good brushes will take you a long way.</p>', 1, 2, 'blog-2.jpg', 0, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('Finding Inspiration Every Day', 'Keep a sketchbook habit', 'finding-inspiration-every-day', '<p>A daily five-minute sketch builds observation skills faster than anything else.</p>', 1, 2, 'blog-3.jpg', 0, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -240,7 +240,7 @@ INSERT INTO painting_images (painting_id, image_url, is_primary, sort_order, alt
 
 -- a live 15-minute hold by another collector, so the "on hold" state is visible after start-up
 INSERT INTO cart_reservations (session_or_user_id, painting_id, user_id, reserved_at, expires_at) VALUES
-('S:demo-collector', 5, NULL, CURRENT_TIMESTAMP, DATEADD(MINUTE, 15, CURRENT_TIMESTAMP));
+('S:demo-collector', 5, NULL, CURRENT_TIMESTAMP, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 15 MINUTE));
 
 INSERT INTO marketplace_orders (order_id, painting_id, user_id, holder_key, buyer_name, buyer_email, buyer_phone, address_line1, address_line2, city, state, postal_code, country,
     gateway, currency, amount, price_inr, provider_ref, transaction_id, status, courier, tracking_number, paid_at, created_at, updated_at) VALUES

@@ -1,9 +1,11 @@
 @echo off
 REM ============================================================
-REM  ArtistikCity - one-click start (no database install needed)
-REM  Downloads Java 17 + Maven if missing, builds, starts the app on
-REM  an in-memory SQL Server-compatible database, opens the browser.
-REM  Options example:  START-ArtistikCity.bat -Port 9090
+REM  ArtistikCity - one-click start (nothing to install)
+REM  Downloads Java 17, Maven and MySQL 8.4 into .tools\ if missing,
+REM  builds, starts MySQL + the site, opens the browser.
+REM  First run: creates the database and loads the demo data.
+REM  Options:  START-ArtistikCity.bat -Port 9090
+REM            START-ArtistikCity.bat -ResetDatabase   (reload demo data)
 REM ============================================================
 REM ---- keep this window open whatever happens (re-runs itself inside "cmd /k") ----
 if not defined ARTISTIK_KEEP_OPEN (

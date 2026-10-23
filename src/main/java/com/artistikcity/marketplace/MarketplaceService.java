@@ -70,6 +70,13 @@ public class MarketplaceService {
         }
     }
 
+    /** DATETIME column value as LocalDateTime (MySQL Connector/J returns LocalDateTime, other drivers Timestamp). */
+    private static LocalDateTime ldt(Object v) {
+        if (v instanceof LocalDateTime l) return l;
+        if (v instanceof Timestamp t) return t.toLocalDateTime();
+        throw new IllegalStateException("Unexpected date/time value: " + v);
+    }
+
     private static Timestamp ts(LocalDateTime t) {
         return Timestamp.valueOf(t);
     }
@@ -100,7 +107,7 @@ public class MarketplaceService {
         List<Map<String, Object>> existing = jdbc.queryForList("select id, session_or_user_id, expires_at from cart_reservations where painting_id = ?", paintingId);
         if (!existing.isEmpty()) {
             Map<String, Object> r = existing.get(0);
-            LocalDateTime exp = ((Timestamp) r.get("expires_at")).toLocalDateTime();
+            LocalDateTime exp = ldt(r.get("expires_at"));
             if (exp.isAfter(now)) {
                 if (myKeys.contains(String.valueOf(r.get("session_or_user_id")))) {
                     return new Hold(paintingId, exp, false);
@@ -205,7 +212,7 @@ public class MarketplaceService {
         args.addAll(myKeys);
         List<Map<String, Object>> rows = jdbc.queryForList("select expires_at from cart_reservations where painting_id = ? and expires_at > ? and session_or_user_id in ("
                 + inList(myKeys) + ")", args.toArray());
-        return rows.isEmpty() ? null : new Hold(paintingId, ((Timestamp) rows.get(0).get("expires_at")).toLocalDateTime(), false);
+        return rows.isEmpty() ? null : new Hold(paintingId, ldt(rows.get(0).get("expires_at")), false);
     }
 
     /** All of the visitor's live holds (for the site-wide "held for you" banner). */
@@ -314,7 +321,7 @@ public class MarketplaceService {
                 String pst = jdbc.queryForObject("select stock_status from paintings where id = ?", String.class, pid);
                 List<Map<String, Object>> res = jdbc.queryForList("select session_or_user_id, expires_at from cart_reservations where painting_id = ?", pid);
                 boolean heldByOther = !res.isEmpty() && !holder.equals(String.valueOf(res.get(0).get("session_or_user_id")))
-                        && ((Timestamp) res.get(0).get("expires_at")).toLocalDateTime().isAfter(now);
+                        && ldt(res.get(0).get("expires_at")).isAfter(now);
                 boolean canSell = ("AVAILABLE".equals(pst) || "RESERVED".equals(pst)) && !heldByOther;
                 if (!canSell) {
                     jdbc.update("update marketplace_orders set status = 'REFUND_REQUIRED', transaction_id = ?, paid_at = ?, updated_at = ? where order_id = ?",

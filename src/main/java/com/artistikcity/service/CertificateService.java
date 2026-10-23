@@ -58,8 +58,8 @@ public class CertificateService {
 
     /** Certificate of a student's order joined with the order (null if none). */
     public Row forOrder(long userId, long orderId) {
-        return db.first("select top 1 c.* from orders o join certificates c on c.order_id = o.id"
-                + " where o.user_id = ? and o.id = ? order by c.id desc", userId, orderId);
+        return db.first("select c.* from orders o join certificates c on c.order_id = o.id"
+                + " where o.user_id = ? and o.id = ? order by c.id desc limit 1", userId, orderId);
     }
 
     /** View data used by both the PDF and the HTML certificate pages. */

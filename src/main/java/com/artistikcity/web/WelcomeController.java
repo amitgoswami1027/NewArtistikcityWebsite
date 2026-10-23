@@ -1,5 +1,11 @@
 package com.artistikcity.web;
 
+import com.artistikcity.auth.AccountService;
+import com.artistikcity.auth.AuthEvents;
+import com.artistikcity.auth.AuthMail;
+import com.artistikcity.auth.EmailTokenService;
+import com.artistikcity.auth.RateLimiter;
+
 import com.artistikcity.http.Auth;
 import com.artistikcity.http.Redirects;
 import com.artistikcity.inertia.Inertia;
@@ -39,9 +45,18 @@ public class WelcomeController {
     private final Slugs slugs;
     private final Mailer mailer;
     private final Redirects redirect;
+    private final AccountService accounts;
+    private final EmailTokenService emailTokens;
+    private final AuthMail authMail;
+    private final RateLimiter limiter;
 
     public WelcomeController(Inertia inertia, Db db, CourseService courses, PostService posts, Validator validator, Json json,
-                             Auth auth, Slugs slugs, Mailer mailer, Redirects redirect) {
+                             Auth auth, Slugs slugs, Mailer mailer, Redirects redirect, AccountService accounts,
+                             EmailTokenService emailTokens, AuthMail authMail, RateLimiter limiter) {
+        this.accounts = accounts;
+        this.emailTokens = emailTokens;
+        this.authMail = authMail;
+        this.limiter = limiter;
         this.inertia = inertia;
         this.db = db;
         this.courses = courses;
@@ -66,8 +81,8 @@ public class WelcomeController {
         props.put("open_workshops", courses.collection(courses.withRelations(courses.upcoming(6, CourseService.TYPE_WORKSHOP), true)));
         props.put("openHomeText", homeCourseWorkshopText());
         props.put("home_artworks", db.select("select id, photo_name from home_artworks where status = 1 order by id desc"));
-        props.put("blog_posts", posts.present(db.select("select top 3 id, title, slug, image, created_at from posts where status = 1 order by id"), false));
-        props.put("testimonials", db.select("select top 3 id, name, slug, title, description, photo from testimonials where status = 1 order by id"));
+        props.put("blog_posts", posts.present(db.select("select id, title, slug, image, created_at from posts where status = 1 order by id limit 3"), false));
+        props.put("testimonials", db.select("select id, name, slug, title, description, photo from testimonials where status = 1 order by id limit 3"));
         props.put("instructor", instructor());
         return inertia.render(request, "Welcome", props);
     }
@@ -76,7 +91,7 @@ public class WelcomeController {
     private Row instructor() {
         Row i = db.first("select * from admins where slug = ?", INSTRUCTOR_SLUG);
         if (i == null) {
-            i = db.first("select top 1 * from admins order by case when admin_type = 'teacher' then 0 else 1 end, id");
+            i = db.first("select * from admins order by case when admin_type = 'teacher' then 0 else 1 end, id limit 1");
         }
         return i == null ? new Row() : i.without("password", "remember_token");
     }
@@ -89,33 +104,32 @@ public class WelcomeController {
         return m;
     }
 
-    /** "Get free courses" form on the home page: creates an account and e-mails the password. */
+    /**
+     * "Get free courses" form on the home page: creates a passwordless account and e-mails a one-time
+     * sign-in link (no password is ever generated or e-mailed).
+     */
     @PostMapping("/get-free-courses")
     public ResponseEntity<String> getFreeCourses(HttpServletRequest request) {
         Input in = Input.of(request, json);
-        validator.validate(in, "name", "required", "email", "required|email|unique:users");
-        String password = Str.random(8);
+        validator.validate(in, "name", "required|max:255", "email", "required|email|max:255|unique:users");
+        if (!limiter.hit("freecourses:ip:" + AuthEvents.ip(request), 5, 3600).allowed()) {
+            return redirect.routeWith(request, "message", "Too many sign-ups from your network. Please try again later.", "welcome");
+        }
         String type = in.get("free_course_type", "default");
         if (!List.of("color", "black-white", "default").contains(type)) {
             type = "default";
         }
-        Row user = Row.of(
-                "name", in.get("name"),
-                "slug", slugs.unique("users", "slug", in.get("name"), null),
-                "email", in.get("email"),
-                "password", auth.hash(password),
-                "free_courses", 1,
-                "free_course_type", type,
-                "status", 1);
-        long id = db.insert("users", user);
-        if (id > 0) {
-            Map<String, Object> mail = Row.of("userData", Row.of("name", in.get("name"), "email", in.get("email"), "password", password),
-                    "loginUrl", Inertia.baseUrl(request) + "/login", "baseUrl", Inertia.baseUrl(request));
-            boolean sent = mailer.send(in.get("email"), "Your free ArtistikCity courses", "emails/free-courses-notify", mail);
-            return redirect.routeWith(request, "message", sent
-                    ? "Thanks for registring, please check your email for next steps."
-                    : "There is some issue please pry again later.", "welcome");
-        }
-        return redirect.routeWith(request, "message", "Sorry! Please try again latter", "welcome");
+        String email = AccountService.normalizeEmail(in.get("email"));
+        long id = accounts.create(in.get("name"), email, false, null, false, null, null);
+        db.updateById("users", id, Row.of("free_courses", 1, "free_course_type", type));
+        String token = emailTokens.issue(request, EmailTokenService.MAGIC_LINK, email, id, AuthMail.MAGIC_LINK_TTL,
+                Map.of("return_to", "/user/free-courses"));
+        Map<String, Object> mail = Row.of("userData", Row.of("name", in.get("name"), "email", email),
+                "loginUrl", authMail.baseUrl(request) + "/auth/magic-link?token=" + java.net.URLEncoder.encode(token, java.nio.charset.StandardCharsets.UTF_8),
+                "expire", AuthMail.MAGIC_LINK_TTL.toMinutes(), "baseUrl", authMail.baseUrl(request));
+        boolean sent = mailer.send(email, "Your free ArtistikCity courses", "emails/free-courses-notify", mail);
+        return redirect.routeWith(request, "message", sent
+                ? "Thanks for registering! Check your e-mail for your sign-in link."
+                : "We couldn't send the e-mail right now. Please try again later.", "welcome");
     }
 }

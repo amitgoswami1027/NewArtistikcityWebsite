@@ -6,7 +6,7 @@ const LINKS = [
     { href: '/user/my-courses', label: 'My courses', icon: 'fa-graduation-cap', match: /^\/user\/(my-courses|course)/ },
     { href: '/user/my-workshop', label: 'My workshops', icon: 'fa-calendar', match: /^\/user\/(my-workshop|workshop)/ },
     { href: '/dashboard/certificates', label: 'Certificates', icon: 'fa-certificate', match: /^$/ },
-    { href: '/user/my-account', label: 'Account', icon: 'fa-user', match: /^\/user\/(my-account|my-address|change-password|order-history|notifications)/ },
+    { href: '/user/my-account', label: 'Account', icon: 'fa-user', match: /^\/user\/(my-account|my-address|change-password|order-history|notifications|linked-accounts)/ },
     { href: '/user/help', label: 'Help', icon: 'fa-question-circle-o', match: /^\/user\/help/ },
 ];
 

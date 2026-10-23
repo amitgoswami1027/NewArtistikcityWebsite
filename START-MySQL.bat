@@ -1,8 +1,8 @@
 @echo off
 REM ============================================================
-REM  ArtistikCity - SQL Server 2022 in Docker Desktop (container
-REM  "artistikcity-sql"), app runs on this PC with Java.
-REM  For the fully containerised version use DOCKER-START.bat
+REM  ArtistikCity - start only the MySQL database (portable, in .tools\)
+REM  Use this before running the app from VS Code (F5).
+REM  MySQL keeps running in the background until STOP-MySQL.bat.
 REM ============================================================
 REM ---- keep this window open whatever happens (re-runs itself inside "cmd /k") ----
 if not defined ARTISTIK_KEEP_OPEN (
@@ -19,7 +19,7 @@ if errorlevel 1 (
   echo ERROR: powershell not found >> "logs\launcher.log"
   goto :eof
 )
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup-and-run.ps1" -Db docker %*
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup-and-run.ps1" -DatabaseOnly %*
 echo [%date% %time%] setup-and-run.ps1 exited with code %errorlevel% >> "logs\launcher.log"
 echo.
 echo ---------------------------------------------------------------

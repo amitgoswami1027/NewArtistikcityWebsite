@@ -28,14 +28,14 @@ public class ProfilesController {
 
     @GetMapping("/student/{slug}")
     public ResponseEntity<String> student(HttpServletRequest request, @PathVariable("slug") String slug) {
-        Row student = NotFoundException.orFail(db.first("select * from users where slug = ?", slug)).without("password", "remember_token");
+        Row student = NotFoundException.orFail(db.first("select * from users where slug = ?", slug)).without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email");
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("student", student);
         props.put("enrolledCourses", db.select(
                 "select c.title, c.sub_title, o.id, o.order_number, o.created_at, c.id as course_id, c.course_type_id, c.schedule_pdf, c.age_group,"
-                        + " (select top 1 name from mediums where id = c.medium_id) as medium,"
-                        + " (select top 1 name from admins where id = c.admin_id) as teacher,"
-                        + " (select top 1 name from skills where id = c.skill_id) as skill, "
+                        + " (select name from mediums where id = c.medium_id limit 1) as medium,"
+                        + " (select name from admins where id = c.admin_id limit 1) as teacher,"
+                        + " (select name from skills where id = c.skill_id limit 1) as skill, "
                         + CourseService.photoSubquery("o.course_id")
                         + " from orders o join courses c on c.id = o.course_id"
                         + " where o.user_id = ? and o.payment_status = 1 and o.payment_id <> '' order by o.id", student.get("id")));
@@ -54,13 +54,13 @@ public class ProfilesController {
 
     @GetMapping("/teacher/{slug}")
     public ResponseEntity<String> teacher(HttpServletRequest request, @PathVariable("slug") String slug) {
-        Row teacher = NotFoundException.orFail(db.first("select * from admins where slug = ?", slug)).without("password", "remember_token");
+        Row teacher = NotFoundException.orFail(db.first("select * from admins where slug = ?", slug)).without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email");
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("teacher", teacher);
         props.put("teachingCources", db.select("select c.*,"
-                + " (select top 1 name from mediums where id = c.medium_id) as medium,"
-                + " (select top 1 name from admins where id = c.admin_id) as teacher,"
-                + " (select top 1 name from skills where id = c.skill_id) as skill, "
+                + " (select name from mediums where id = c.medium_id limit 1) as medium,"
+                + " (select name from admins where id = c.admin_id limit 1) as teacher,"
+                + " (select name from skills where id = c.skill_id limit 1) as skill, "
                 + CourseService.photoSubquery("c.id")
                 + " from courses c where c.status = 1 and c.admin_id = ? order by c.id", teacher.get("id")));
         return inertia.render(request, "Teacher", props);
@@ -69,6 +69,6 @@ public class ProfilesController {
     @GetMapping("/instructor")
     public ResponseEntity<String> instructor(HttpServletRequest request) {
         Row i = db.first("select * from admins where slug = ?", WelcomeController.INSTRUCTOR_SLUG);
-        return inertia.render(request, "Instructor", Map.of("instructor", i == null ? new Row() : i.without("password", "remember_token")));
+        return inertia.render(request, "Instructor", Map.of("instructor", i == null ? new Row() : i.without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email")));
     }
 }

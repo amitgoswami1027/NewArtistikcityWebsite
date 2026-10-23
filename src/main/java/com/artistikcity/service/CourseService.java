@@ -37,14 +37,14 @@ public class CourseService {
 
     /** Upcoming (start date today or later) courses of the given types, newest first. */
     public List<Row> upcoming(int limit, Integer... types) {
-        StringBuilder sql = new StringBuilder("select top " + limit + " * from courses where course_start_date >= ?");
+        StringBuilder sql = new StringBuilder("select * from courses where course_start_date >= ?");
         List<Object> params = new ArrayList<>();
         params.add(LocalDate.now());
         if (types.length > 0) {
             sql.append(" and course_type_id in (").append(Db.marks(types.length)).append(")");
             params.addAll(List.of(types));
         }
-        sql.append(" order by id");
+        sql.append(" order by id limit ").append(limit);
         return db.select(sql.toString(), params.toArray());
     }
 
@@ -279,6 +279,6 @@ public class CourseService {
 
     /** First photo name of a course (the addSelect(['photo' => CoursePhoto::select('photo_name')...]) sub-query). */
     public static String photoSubquery(String courseIdColumn) {
-        return "(select top 1 photo_name from course_photos cp where cp.course_id = " + courseIdColumn + " order by cp.id) as photo";
+        return "(select photo_name from course_photos cp where cp.course_id = " + courseIdColumn + " order by cp.id limit 1) as photo";
     }
 }
