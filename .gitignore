@@ -20,3 +20,7 @@ tools/redesign_patch_mustache.py
 test-output/
 TEST-CERTIFICATES.bat
 tools/*.tgz
+
+# Claude Code personal settings (shared settings live in .claude/settings.json)
+.claude/settings.local.json
+CLAUDE.local.md
