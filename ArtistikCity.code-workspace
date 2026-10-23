@@ -1,0 +1,178 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "ArtistikCity"
+    }
+  ],
+  "settings": {
+    "java.configuration.runtimes": [
+      {
+        "name": "JavaSE-22",
+        "path": "C:\\Program Files\\Java\\jdk-22",
+        "default": true
+      }
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "disabled",
+    "maven.executable.path": "C:\\Storage\\AmitGoswami\\NewArtistikcity\\NewArtistikcityWebsite\\.tools\\apache-maven-3.9.9\\bin\\mvn.cmd",
+    "maven.terminal.useJavaHome": true,
+    "java.import.exclusions": [
+      "**/node_modules/**",
+      "**/.tools/**",
+      "**/target/**"
+    ],
+    "files.associations": {
+      "*.mustache": "html"
+    },
+    "emmet.includeLanguages": {
+      "javascript": "javascriptreact",
+      "mustache": "html"
+    },
+    "files.exclude": {
+      "**/target": true,
+      ".tools": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/target": true,
+      ".tools": true,
+      "logs": true,
+      "src/main/resources/static/js/app.js": true,
+      "src/main/resources/static/js/admin/app.js": true,
+      "src/main/resources/static/assets/plugins": true
+    },
+    "files.watcherExclude": {
+      "**/node_modules/**": true,
+      "**/target/**": true,
+      "**/.tools/**": true
+    },
+    "files.readonlyInclude": {
+      "src/main/resources/static/js/app.js": true,
+      "src/main/resources/static/js/admin/app.js": true
+    }
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "java",
+        "name": "ArtistikCity (demo DB)",
+        "request": "launch",
+        "mainClass": "com.artistikcity.ArtistikCityApplication",
+        "projectName": "artistikcity",
+        "cwd": "${workspaceFolder:ArtistikCity}",
+        "args": "--spring.profiles.active=dev",
+        "env": {
+          "PAYMENT_TEST_MODE": "true"
+        },
+        "shortenCommandLine": "jarmanifest",
+        "javaExec": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe"
+      },
+      {
+        "type": "java",
+        "name": "ArtistikCity (local SQL Server)",
+        "request": "launch",
+        "mainClass": "com.artistikcity.ArtistikCityApplication",
+        "projectName": "artistikcity",
+        "cwd": "${workspaceFolder:ArtistikCity}",
+        "env": {
+          "DB_URL": "jdbc:sqlserver://localhost:1433;databaseName=artistikcity;encrypt=true;trustServerCertificate=true",
+          "DB_USERNAME": "sa",
+          "DB_PASSWORD": "${input:sqlPassword}",
+          "PAYMENT_TEST_MODE": "true"
+        },
+        "shortenCommandLine": "jarmanifest",
+        "javaExec": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe"
+      }
+    ],
+    "inputs": [
+      {
+        "id": "sqlPassword",
+        "type": "promptString",
+        "description": "SQL Server password for 'sa'",
+        "password": true
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "options": {
+      "env": {
+        "JAVA_HOME": "C:\\Program Files\\Java\\jdk-22"
+      }
+    },
+    "tasks": [
+      {
+        "label": "Build (mvn package)",
+        "type": "shell",
+        "command": "${workspaceFolder:ArtistikCity}\\.tools\\apache-maven-3.9.9\\bin\\mvn.cmd",
+        "args": [
+          "-B",
+          "package",
+          "-DskipTests"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Run site (demo DB)",
+        "type": "shell",
+        "command": "${workspaceFolder:ArtistikCity}\\.tools\\apache-maven-3.9.9\\bin\\mvn.cmd",
+        "args": [
+          "spring-boot:run",
+          "-Dspring-boot.run.profiles=dev"
+        ],
+        "isBackground": true,
+        "problemMatcher": []
+      },
+      {
+        "label": "Build React bundle",
+        "type": "shell",
+        "command": "npm install --no-audit --no-fund; npm run dev",
+        "options": {
+          "cwd": "${workspaceFolder:ArtistikCity}/frontend"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Watch React bundle",
+        "type": "shell",
+        "command": "npm run watch",
+        "options": {
+          "cwd": "${workspaceFolder:ArtistikCity}/frontend"
+        },
+        "isBackground": true,
+        "problemMatcher": []
+      },
+      {
+        "label": "Docker: start full stack",
+        "type": "shell",
+        "command": "docker compose up -d --build",
+        "problemMatcher": []
+      },
+      {
+        "label": "Docker: stop",
+        "type": "shell",
+        "command": "docker compose down",
+        "problemMatcher": []
+      }
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "vscjava.vscode-java-pack",
+      "vmware.vscode-boot-dev-pack",
+      "anthropic.claude-code",
+      "dbaeumer.vscode-eslint",
+      "bradlc.vscode-tailwindcss",
+      "dawhitfield.vscode-mustache-syntax",
+      "ms-mssql.mssql",
+      "ms-azuretools.vscode-docker",
+      "editorconfig.editorconfig"
+    ]
+  }
+}
