@@ -78,12 +78,19 @@ public class StudentStudioController {
     @GetMapping("/dashboard/classroom/{id}")
     public ResponseEntity<String> classroom(HttpServletRequest request, @PathVariable("id") long courseId) {
         long userId = auth.userId(request);
+        // one learning view for every course: the course pages under /user/course (overview, lessons, tasks)
+        Object paidOrder = repo.paidOrderId(userId, courseId);
+        if (paidOrder != null) {
+            return ResponseEntity.status(302).header("Location", "/user/course/" + paidOrder + "/resume").build();
+        }
         repo.syncEnrollments(userId);
         Map<String, Object> course = NotFoundException.orFail(repo.course(courseId));
         Map<String, Object> enrollment = repo.enrollment(userId, courseId);
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("course", course);
         props.put("enrolled", enrollment != null);
+        // the paid order behind this course: its "Schedule, modules & tasks" page lives at /user/course/{orderId}
+        props.put("orderId", repo.paidOrderId(userId, courseId));
         if (enrollment != null) {
             long enrollmentId = ((Number) enrollment.get("id")).longValue();
             List<Map<String, Object>> modules = repo.modules(courseId);
@@ -230,18 +237,16 @@ public class StudentStudioController {
         return auth.userId(request);
     }
 
-    /** Where the student is in the 6-stage lifecycle (1 discover ... 6 exhibit & sell). */
+    /** The next step in the lifecycle: 3 choose a course, 4 learn, 5 submit, 6 certify, 7 showcase (exhibit & sell). */
     static int stage(List<Map<String, Object>> enrollments, List<Map<String, Object>> subs) {
         return stage(enrollments, subs, List.of());
     }
 
-    /** Stage 7 (certify & showcase) once any course certificate is earned or issued. */
     static int stage(List<Map<String, Object>> enrollments, List<Map<String, Object>> subs, List<Map<String, Object>> credentials) {
-        if (credentials.stream().anyMatch(c -> Boolean.TRUE.equals(c.get("eligible")) || c.get("certificate") != null)) return 7;
-        if (subs.stream().anyMatch(s -> Boolean.TRUE.equals(s.get("is_listed_for_sale")))) return 6;
+        boolean certified = credentials.stream().anyMatch(c -> Boolean.TRUE.equals(c.get("eligible")) || c.get("certificate") != null);
+        if (certified || subs.stream().anyMatch(s -> Boolean.TRUE.equals(s.get("is_listed_for_sale")))) return 7;
         if (subs.stream().anyMatch(s -> "Approved".equals(s.get("admin_status")))) return 6;
         if (!subs.isEmpty()) return 5;
-        if (enrollments.stream().anyMatch(e -> ((Number) e.get("completed_lessons")).intValue() > 0)) return 4;
         if (!enrollments.isEmpty()) return 4;
         return 3;
     }

@@ -49,7 +49,7 @@ export default function Submissions() {
     };
 
     return (
-        <StudioLayout title="Submissions" subtitle="Upload your assignment milestones for review. Approved pieces go straight into your portfolio." active="/dashboard/submissions" stage={5}>
+        <StudioLayout title="Submissions" subtitle="Upload your assignment milestones for review. Approved pieces go straight into your portfolio." active="/dashboard/submissions">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <form onSubmit={submit} className="lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 space-y-5 self-start" noValidate>
                     <h2 className="text-2xl font-black tracking-tight text-ink">New submission</h2>

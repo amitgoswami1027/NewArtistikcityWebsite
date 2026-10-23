@@ -44,6 +44,7 @@ public class Inertia {
     public static final String ROOT_USER = "inertia/user";
 
     private final Json json;
+    private final com.artistikcity.web.user.WishlistService wishlist;
     private final Auth auth;
     private final Routes routes;
     private final Views views;
@@ -51,12 +52,14 @@ public class Inertia {
     private final String ziggyRoutesJson;
     private final String ziggyScript;
 
-    public Inertia(Json json, Auth auth, Routes routes, Views views, Environment env) {
+    public Inertia(Json json, Auth auth, Routes routes, Views views, Environment env,
+                   com.artistikcity.web.user.WishlistService wishlist) {
         this.json = json;
+        this.wishlist = wishlist;
         this.auth = auth;
         this.routes = routes;
         this.views = views;
-        this.version = env.getProperty("app.asset-version", "1");
+        this.version = assetVersion(env.getProperty("app.asset-version", ""));
         Map<String, Object> list = new LinkedHashMap<>();
         routes.all().forEach((name, r) -> list.put(name, Row.of("uri", r.uri(), "methods", r.methods())));
         this.ziggyRoutesJson = json.encode(list);
@@ -82,6 +85,12 @@ public class Inertia {
         all.put("errors", new LinkedHashMap<>(Flash.errors(request)));
         Row user = auth.user(request);
         all.put("auth", Row.of("user", user));
+        if (user != null) {
+            // counts for the "My studio" header menu (Your orders / Your wish list)
+            long uid = user.lng("id");
+            Supplier<Object> nav = () -> wishlist.nav(uid);
+            all.put("nav", nav);
+        }
         Supplier<Object> flashMessage = () -> Flash.get(request, "message");
         all.put("flash", Row.of("message", flashMessage));
         if (props != null) {
@@ -102,6 +111,11 @@ public class Inertia {
         page.put("version", version);
 
         if (isInertia(request)) {
+            String clientVersion = request.getHeader("X-Inertia-Version");
+            if ("GET".equals(request.getMethod()) && clientVersion != null && !clientVersion.equals(version)) {
+                // the page in this tab was built from older assets: make Inertia do one full reload
+                return ResponseEntity.status(HttpStatus.CONFLICT).header("X-Inertia-Location", currentUrl(request)).body("");
+            }
             return ResponseEntity.ok()
                     .header("X-Inertia", "true")
                     .header(HttpHeaders.VARY, "Accept")
@@ -112,6 +126,7 @@ public class Inertia {
         model.put("page", json.encode(page));
         model.put("ziggy", ziggy(request));
         model.put("csrf", Csrf.token(request));
+        model.put("assetVersion", version);
         return views.page(request, rootView, model);
     }
 
@@ -121,6 +136,34 @@ public class Inertia {
             return ResponseEntity.status(HttpStatus.CONFLICT).header("X-Inertia-Location", url).body("");
         }
         return ResponseEntity.status(HttpStatus.FOUND).header(HttpHeaders.LOCATION, url).body("");
+    }
+
+    /**
+     * Asset version: a short hash of the compiled bundle and theme, so every new build gets a new value. It is used
+     * as {@code ?v=} on the script/style URLs (browsers fetch the new files instead of an old cached copy) and as the
+     * Inertia version (open tabs reload once after a deploy). APP_ASSET_VERSION / app.asset-version overrides it.
+     */
+    static String assetVersion(String configured) {
+        if (configured != null && !configured.isBlank() && !"1".equals(configured.trim())) {
+            return configured.trim();
+        }
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            for (String path : new String[]{"static/js/app.js", "static/css/ac-theme.css"}) {
+                try (java.io.InputStream in = Inertia.class.getClassLoader().getResourceAsStream(path)) {
+                    if (in != null) {
+                        md.update(in.readAllBytes());
+                    }
+                }
+            }
+            return java.util.HexFormat.of().formatHex(md.digest()).substring(0, 12);
+        } catch (Exception e) {
+            return String.valueOf(System.currentTimeMillis());
+        }
+    }
+
+    public String assetVersion() {
+        return version;
     }
 
     public static boolean isInertia(HttpServletRequest request) {

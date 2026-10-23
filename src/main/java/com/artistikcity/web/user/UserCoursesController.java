@@ -33,11 +33,16 @@ public class UserCoursesController {
     private final Inertia inertia;
     private final Db db;
     private final Auth auth;
+    private final com.artistikcity.lifecycle.LifecycleRepository lifecycle;
+    private final com.artistikcity.http.Redirects redirect;
 
-    public UserCoursesController(Inertia inertia, Db db, Auth auth) {
+    public UserCoursesController(Inertia inertia, Db db, Auth auth, com.artistikcity.lifecycle.LifecycleRepository lifecycle,
+                                 com.artistikcity.http.Redirects redirect) {
         this.inertia = inertia;
         this.db = db;
         this.auth = auth;
+        this.lifecycle = lifecycle;
+        this.redirect = redirect;
     }
 
     /** Paid orders of the current student joined with their course (optionally one course type). */
@@ -57,89 +62,39 @@ public class UserCoursesController {
         return inertia.renderUser(request, "Dashboard", Map.of("enrolledCourses", enrolled(request, null)));
     }
 
+    /** My studio > My courses: every paid course and workshop with progress, in one list. */
     @GetMapping("/user/my-courses")
     public ResponseEntity<String> courses(HttpServletRequest request) {
-        return inertia.renderUser(request, "Students/MyCourses", Map.of("myCourses", enrolled(request, CourseService.TYPE_COURSE)));
+        long userId = auth.userId(request);
+        lifecycle.syncEnrollments(userId);
+        Map<Object, Map<String, Object>> progress = new LinkedHashMap<>();
+        for (Map<String, Object> e : lifecycle.enrollments(userId)) {
+            progress.put(String.valueOf(e.get("course_id")), e);
+        }
+        List<Map<String, Object>> list = new ArrayList<>();
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (Row o : enrolled(request, null)) {
+            String courseId = String.valueOf(o.get("course_id"));
+            if (!seen.add(courseId)) {
+                continue; // one card per course, even when it was bought twice
+            }
+            Map<String, Object> e = progress.getOrDefault(courseId, Map.of());
+            Map<String, Object> m = new LinkedHashMap<>(o);
+            m.put("type", Integer.valueOf(CourseService.TYPE_WORKSHOP).equals(((Number) o.get("course_type_id")).intValue()) ? "workshop" : "course");
+            m.put("progress", e.getOrDefault("progress_percentage", 0));
+            m.put("completed_lessons", e.getOrDefault("completed_lessons", 0));
+            m.put("total_lessons", e.getOrDefault("total_lessons", 0));
+            m.put("submissions", e.getOrDefault("submissions", 0));
+            m.put("start_date", e.get("course_start_date"));
+            list.add(m);
+        }
+        return inertia.render(request, "Studio/Courses", Map.of("courses", list));
     }
 
+    /** Workshops are listed together with courses now. */
     @GetMapping("/user/my-workshop")
     public ResponseEntity<String> workshops(HttpServletRequest request) {
-        return inertia.renderUser(request, "Students/MyWorkshops", Map.of("myWorkshops", enrolled(request, CourseService.TYPE_WORKSHOP)));
-    }
-
-    /** Course home for a paid order. */
-    @GetMapping("/user/course/{order_id}")
-    public ResponseEntity<String> courseHome(HttpServletRequest request, @PathVariable("order_id") Long orderId) {
-        Row data = NotFoundException.orFail(db.first(
-                "select c.title, c.sub_title, c.duration, c.mini_projects, c.course_modules, o.id as order_id, c.id as course_id,"
-                        + " c.course_type_id, o.issue_certificate, " + CourseService.photoSubquery("o.course_id")
-                        + " from orders o join courses c on c.id = o.course_id"
-                        + " where o.user_id = ? and o.id = ? and o.payment_status = 1", auth.userId(request), orderId));
-        String host = Inertia.baseUrl(request);
-        String encodedOrder = Base64.getEncoder().encodeToString(String.valueOf(orderId).getBytes(StandardCharsets.UTF_8));
-        String text = "I am feeling proud to share my certification of completion.";
-        data.put("certificate_facebook_share_url", enc(host + "/user/certificate/social_share?order_id=" + encodedOrder));
-        data.put("certificate_twitter_share_url", enc(host + "/user/certificate/social_share?type=certificate&order_id=" + encodedOrder));
-        data.put("certificate_linkedin_share_url", enc(host + "/user/certificate/social_share?order_id=" + encodedOrder));
-        data.put("certificate_text", text);
-
-        Map<String, Object> details = new LinkedHashMap<>();
-        details.put("coursesData", data);
-        details.put("courseModules", modulesWithLessons(data.lng("course_id")));
-        details.put("courseProject", db.select("select * from course_projects where course_id = ? order by id", data.get("course_id")));
-        Map<String, Object> props = new LinkedHashMap<>();
-        props.put("CourseDetails", details);
-        props.put("CourseNav", courseNavigation(data.lng("course_id")));
-        return inertia.renderUser(request, "Students/CourseHome", props);
-    }
-
-    private List<Row> modulesWithLessons(Long courseId) {
-        List<Row> modules = db.select("select * from course_modules where course_id = ? order by id", courseId);
-        Map<Long, List<Row>> lessons = CourseService.groupBy(
-                db.select("select * from course_module_lessons where course_id = ? order by id", courseId), "module_id");
-        for (Row m : modules) {
-            m.put("lessons", lessons.getOrDefault(m.lng("id"), new ArrayList<>()));
-        }
-        return modules;
-    }
-
-    @GetMapping("/user/course/modules/{id}")
-    public ResponseEntity<String> courseModule(HttpServletRequest request, @PathVariable("id") Long id) {
-        Row module = NotFoundException.orFail(db.find("course_modules", id));
-        module.put("lessons", db.select("select * from course_module_lessons where module_id = ? order by id", id));
-        module.put("course", db.find("courses", module.get("course_id")));
-        Map<String, Object> props = new LinkedHashMap<>();
-        props.put("CourseModule", module);
-        props.put("CourseNav", courseNavigation(module.lng("course_id")));
-        return inertia.renderUser(request, "Students/CourseModule", props);
-    }
-
-    @GetMapping("/user/course/syllabus/{id}")
-    public ResponseEntity<String> syllabus(HttpServletRequest request, @PathVariable("id") Long courseId) {
-        Map<String, Object> props = new LinkedHashMap<>();
-        props.put("CourseModule", modulesWithLessons(courseId));
-        props.put("CourseNav", courseNavigation(courseId));
-        return inertia.renderUser(request, "Students/CourseSyllabus", props);
-    }
-
-    /** One lesson per page (simplePaginate(1)) with its module, course and tasks. */
-    @GetMapping("/user/course/module/lesson/{module_id}")
-    public ResponseEntity<String> lesson(HttpServletRequest request, @PathVariable("module_id") Long moduleId,
-                                         @RequestParam(value = "page", required = false) String pageParam) {
-        int page = Paginator.page(pageParam);
-        List<Row> rows = db.select("select * from course_module_lessons where module_id = ? order by id limit 2 offset " + (page - 1), moduleId);
-        boolean more = rows.size() > 1;
-        List<Row> items = rows.isEmpty() ? rows : new ArrayList<>(rows.subList(0, 1));
-        for (Row l : items) {
-            l.put("module", db.first("select id, module_title from course_modules where id = ?", l.get("module_id")));
-            l.put("course", db.first("select id, title from courses where id = ?", l.get("course_id")));
-            l.put("tasks", db.select("select * from course_module_lesson_tasks where lesson_id = ? order by id", l.get("id")));
-        }
-        String path = Inertia.baseUrl(request) + request.getRequestURI();
-        Map<String, Object> props = new LinkedHashMap<>();
-        props.put("lessonDetails", Paginator.simple(items, more, 1, page, path));
-        props.put("lessonNav", moduleLessonNavigation(moduleId));
-        return inertia.renderUser(request, "Students/CourseLesson", props);
+        return redirect.to(request, "/user/my-courses?type=workshop");
     }
 
     /** CoursesController::module_lesson_navigation(). */
@@ -172,18 +127,6 @@ public class UserCoursesController {
         }
         nav.put("course_module", modules);
         return nav;
-    }
-
-    @GetMapping("/user/workshop/{id}")
-    public ResponseEntity<String> workshopHome(HttpServletRequest request, @PathVariable("id") Long courseId) {
-        // The original rendered Students/CourseHome with a different prop shape; send the student to the
-        // regular course home for their paid order of this workshop instead.
-        Row order = db.first("select id from orders where user_id = ? and course_id = ? and payment_status = 1 order by id desc limit 1",
-                auth.userId(request), courseId);
-        if (order == null) {
-            throw new NotFoundException();
-        }
-        return courseHome(request, order.lng("id"));
     }
 
     // ------------------------------------------------------------ free courses

@@ -67,8 +67,6 @@ export default function LinkedAccounts(props) {
                             <div className="accountPage p30">
                                 <MyAccountNavigation auth={props.auth} />
                                 <div className="accountDtl sec">
-                                    <h3>Login &amp; security</h3>
-                                    <p className="sec-lede">Choose how you sign in. Everything here belongs to one account, however you log in.</p>
                                     {msg && <div className={`ac-alert ${msg.ok ? 'ac-alert--ok' : 'ac-alert--error'}`} role="status">{msg.text}</div>}
                                     {reauth && (
                                         <div className="ac-alert ac-alert--error">

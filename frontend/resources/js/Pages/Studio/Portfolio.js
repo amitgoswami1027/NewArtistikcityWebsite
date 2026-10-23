@@ -105,7 +105,7 @@ export default function Portfolio() {
     };
 
     return (
-        <StudioLayout title="Portfolio & shop" subtitle="Your curated body of work. Approved pieces can be sold as 1-of-1 originals in the ArtistikCity Marketplace; pieces in review stay locked until they're approved." active="/dashboard/portfolio" stage={6}
+        <StudioLayout title="Portfolio & shop" subtitle="Your curated body of work. Approved pieces can be sold as 1-of-1 originals in the ArtistikCity Marketplace; pieces in review stay locked until they're approved." active="/dashboard/portfolio"
                       actions={<a href="/marketplace?source=student" className="dm-btn dm-btn--line">Student originals in the marketplace</a>}>
             <div className="flex flex-wrap gap-2" role="tablist">
                 {[['all', 'All work'], ['Approved', 'Approved'], ['Pending Review', 'In review'], ['sale', 'Marketplace listings']].map(([k, label]) => (

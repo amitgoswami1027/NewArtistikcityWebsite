@@ -10,7 +10,8 @@ import { DefaultEditor } from 'react-simple-wysiwyg';
 
 export default function LessonTask(props) {
     const { taskDetails, lessonDetails, lessonNav, messages } = usePage().props;
-    const { auth } = usePage().props;
+    const { auth, courseLinks } = usePage().props;
+    const links = courseLinks || {};
     // console.log(lessonDetails);
     // console.log(taskDetails);
     // const { data, setData, post, progress, reset } = useForm({
@@ -48,58 +49,18 @@ export default function LessonTask(props) {
                 errors={props.errors}
                 header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
             >
-                <Head title="Course Home" />
-
-                {/* Main Section */}
-
-                <div className="container-fluid">
-                    <div className="row">
-                        <div className="col-md-2 px-0 sidebar coursesidebar">
-                            <div className="courseTitle">{lessonNav.course_title}
-                                <button className="navbar-toggler d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle Navigation"> <span className="navbar-toggler-icon"></span> </button>
-                            </div>
-                            <nav id="sidebarMenu" className="w-100 d-md-block collapse">
-                                <div className=" position-sticky">
-                                    <ul className="coursenav">
-                                    {lessonNav.course_module_lesson.length != 0 && (
-                                        <li className="dropdown">
-                                            <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">{lessonNav.course_module_title}</button>
-                                            <div id="collapseOne" className="accordion-collapse collapse show">
-                                                <ul>
-                                                    {lessonNav.course_module_lesson.map((lesson, i) => {
-                                                        return (
-                                                            <li><a href={route('user.course.module.lesson', lesson.module_id)}>{i+1}. {lesson.lesson_title}</a></li>
-                                                        );
-                                                    })}
-                                                </ul>
-                                            </div>
-                                        </li>
-                                        )}
-                                    </ul>
-                                </div>
-                            </nav>
+                <Head title={`${taskDetails.task_title || 'Task'} · ${links.courseTitle || 'Course'}`} />
+                <div className="cl-task">
+                    <div className="cl-task__head">
+                        <span className="ac-eyebrow">Practice task{links.lessonTitle ? ` · ${links.lessonTitle}` : ''}</span>
+                        <h1>{taskDetails.task_title || 'Task'}</h1>
+                        <div className="cl-task__links">
+                            {links.lesson && <a href={links.lesson} className="dm-btn dm-btn--line"><i className="fa fa-arrow-left" aria-hidden="true"></i>&nbsp; Back to the lesson</a>}
+                            {links.overview && <a href={links.overview} className="dm-linkbtn">Course overview</a>}
                         </div>
-                        <main className="col-md-10 px-0 ms-sm-auto rightsidebar">
-                            <div className="siteBreadcrumb">
-                                <nav aria-label="breadcrumb">
-                                    <ol className="breadcrumb">
-                                    <li className="breadcrumb-item"><a href={route('user.dashboard')}>My Classroom</a></li>
-                                        <li className="breadcrumb-item"><a href={route('user.courses')}>Course</a></li>
-                                        <li className="breadcrumb-item"><a href={route('user.course.home', lessonNav.course_id)}>{lessonNav.course_title}</a></li>
-                                        <li className="breadcrumb-item"><a href={route('user.course.syllabus', lessonNav.course_id)}>Syllabus</a></li>
-                                        <li className="breadcrumb-item" aria-current="page">Modules</li>
-                                        <li className="breadcrumb-item active" aria-current="page">{lessonNav.course_module_title}</li>
-                                        <li className="breadcrumb-item" aria-current="page">{lessonDetails.lesson_title}</li>
-                                    </ol>
-                                </nav>
-                            </div>
-                            <div className="aboutCourse p30">
-                                <div className="row align-items-center">
-                                    <div className="col-md-10 px-0 pe-5">
-                                        <h2>Lesson 1: {lessonDetails.lesson_title}</h2>
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
+                    <div>
+                        <div>
                             <div className="taskPage p30">
                                 <div className="taskLists">
                                     <div className="row">
@@ -185,7 +146,7 @@ export default function LessonTask(props) {
                                     </form>
                                 </div>
                             </div>
-                        </main>
+                        </div>
                     </div>
                 </div>
                 {/* Main Section */}

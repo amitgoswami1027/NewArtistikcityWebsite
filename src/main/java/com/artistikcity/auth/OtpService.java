@@ -80,8 +80,21 @@ public class OtpService {
         this.appUrl = env.getProperty("app.url", "");
     }
 
-    public boolean devCodesVisible() {
-        return exposeDevCode;
+    /**
+     * Whether the code may be shown on the page instead of being sent: only with the log SMS gateway, only when
+     * expose-dev-otp is on (dev profile / local Windows launcher), and only for a browser on this same computer.
+     */
+    public boolean devCodesVisible(HttpServletRequest request) {
+        return exposeDevCode && isLocalRequest(request);
+    }
+
+    /** A request made from the machine the app runs on (not through a proxy). */
+    public static boolean isLocalRequest(HttpServletRequest request) {
+        if (request == null || request.getHeader("X-Forwarded-For") != null || request.getHeader("Forwarded") != null) {
+            return false;
+        }
+        String a = request.getRemoteAddr();
+        return "127.0.0.1".equals(a) || "::1".equals(a) || "0:0:0:0:0:0:0:1".equals(a);
     }
 
     /** Sends a new code to {@code phone} (E.164). Throws {@link OtpLimitException} when a limit is hit. */
@@ -124,7 +137,7 @@ public class OtpService {
             throw e;
         }
         events.ok(request, userId, "otp_sent", "otp");
-        return new SendResult(TTL_SECONDS, RESEND_COOLDOWN_SECONDS, exposeDevCode ? code : null);
+        return new SendResult(TTL_SECONDS, RESEND_COOLDOWN_SECONDS, devCodesVisible(request) ? code : null);
     }
 
     /** Checks a code; on success it is consumed and can't be used again. */

@@ -47,9 +47,17 @@ function withReturnTo(href, extra) {
  * Google / Facebook buttons. Only providers configured on the server are shown
  * ({@code providers} = { google: bool, facebook: bool }); missing prop = show both (older pages).
  */
-export function SocialButtons({ verb = 'Continue', providers, remember = true }) {
+export function SocialButtons({ verb = 'Continue', providers, remember = true, setupHint = false }) {
     const show = (p) => !providers || providers[p];
-    if (providers && !providers.google && !providers.facebook) return null;
+    if (providers && !providers.google && !providers.facebook) {
+        // only sent to a browser on the developer's own computer
+        return setupHint ? (
+            <div className="ac-alert dm-setup-hint" role="note">
+                <b>Google and Facebook sign-in are not set up yet.</b> Add <code>GOOGLE_CLIENT_ID</code> / <code>GOOGLE_CLIENT_SECRET</code> and{' '}
+                <code>FACEBOOK_CLIENT_ID</code> / <code>FACEBOOK_CLIENT_SECRET</code> to the <code>.env</code> file and restart. See README section 4a.
+            </div>
+        ) : null;
+    }
     const extra = remember ? {} : { remember: '0' };
     return (
         <div className="dm-social">

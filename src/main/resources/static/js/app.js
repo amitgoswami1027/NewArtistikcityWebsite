@@ -3527,9 +3527,25 @@ function withReturnTo(href, extra) {
   const q = params.toString();
   return q ? `${href}?${q}` : href;
 }
-function SocialButtons({ verb = "Continue", providers, remember = true }) {
+function SocialButtons({ verb = "Continue", providers, remember = true, setupHint = false }) {
   const show = (p) => !providers || providers[p];
-  if (providers && !providers.google && !providers.facebook) return null;
+  if (providers && !providers.google && !providers.facebook) {
+    return setupHint ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-alert dm-setup-hint", role: "note", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Google and Facebook sign-in are not set up yet." }),
+      " Add ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "GOOGLE_CLIENT_ID" }),
+      " / ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "GOOGLE_CLIENT_SECRET" }),
+      " and",
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "FACEBOOK_CLIENT_ID" }),
+      " / ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "FACEBOOK_CLIENT_SECRET" }),
+      " to the ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: ".env" }),
+      " file and restart. See README section 4a."
+    ] }) : null;
+  }
   const extra = remember ? {} : { remember: "0" };
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-social", children: [
     show("google") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: withReturnTo("/social-login/google", extra), children: [
@@ -8758,403 +8774,254 @@ function SiteFooter() {
 /***/ }),
 
 /***/ "./resources/js/Components/Site/SiteHeader.js":
-/*!****************************************************!*\
-  !*** ./resources/js/Components/Site/SiteHeader.js ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AGE_GROUPS: () => (/* binding */ AGE_GROUPS),
-/* harmony export */   catalogUrl: () => (/* binding */ catalogUrl),
-/* harmony export */   "default": () => (/* binding */ SiteHeader),
-/* harmony export */   loginUrl: () => (/* binding */ loginUrl)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "../../febuild/node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _Components_Constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Constants */ "./resources/js/Components/Constants.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-var AGE_GROUPS = ['Sub-junior - 8 to 12 yrs', 'Junior - 12 to 15 yrs', 'Adult - 16 yrs and above'];
-function catalogUrl() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var qs = new URLSearchParams(Object.assign({
-    type: 'all'
-  }, params)).toString();
-  return route('courses') + '?' + qs;
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SiteHeader_exports = {};
+__export(SiteHeader_exports, {
+  AGE_GROUPS: () => AGE_GROUPS,
+  catalogUrl: () => catalogUrl,
+  default: () => SiteHeader,
+  loginUrl: () => loginUrl
+});
+module.exports = __toCommonJS(SiteHeader_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_Constants = __webpack_require__("./resources/js/Components/Constants.js");
+var import_nav = __webpack_require__("./resources/js/Components/Account/nav.js");
+const AGE_GROUPS = ["Sub-junior - 8 to 12 yrs", "Junior - 12 to 15 yrs", "Adult - 16 yrs and above"];
+function catalogUrl(params = {}) {
+  const qs = new URLSearchParams(Object.assign({ type: "all" }, params)).toString();
+  return route("courses") + "?" + qs;
 }
 function loginUrl() {
-  var here = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
-  return route('login') + (here && here !== '/' && !here.startsWith('/login') && !here.startsWith('/join') ? '?return_to=' + encodeURIComponent(here) : '');
+  const here = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/";
+  return route("login") + (here && here !== "/" && !here.startsWith("/login") && !here.startsWith("/join") ? "?return_to=" + encodeURIComponent(here) : "");
 }
-function SiteHeader(_ref) {
-  var _ref$showCategories = _ref.showCategories,
-    showCategories = _ref$showCategories === void 0 ? false : _ref$showCategories,
-    _ref$activeMedium = _ref.activeMedium,
-    activeMedium = _ref$activeMedium === void 0 ? null : _ref$activeMedium;
-  var auth = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props.auth;
-  var user = auth && auth.user;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
-    _useState2 = _slicedToArray(_useState, 2),
-    mediums = _useState2[0],
-    setMediums = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState4 = _slicedToArray(_useState3, 2),
-    open = _useState4[0],
-    setOpen = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState6 = _slicedToArray(_useState5, 2),
-    drawer = _useState6[0],
-    setDrawer = _useState6[1];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
-    _useState8 = _slicedToArray(_useState7, 2),
-    query = _useState8[0],
-    setQuery = _useState8[1];
-  var exploreRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    axios__WEBPACK_IMPORTED_MODULE_2___default().get("".concat(_Components_Constants__WEBPACK_IMPORTED_MODULE_3__.API_URL, "/get_mediums")).then(function (r) {
-      return setMediums(Array.isArray(r.data) ? r.data : []);
-    })["catch"](function () {
-      return setMediums([]);
-    });
-    if (typeof window !== 'undefined') {
-      var q = new URLSearchParams(window.location.search).get('q');
+function MenuLinks({ links, here, onPick }) {
+  return links.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: l.href, role: "menuitem", onClick: onPick, "aria-current": here === l.href ? "page" : void 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${l.icon}`, "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: l.label }),
+    l.count > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-menu__count", children: l.count })
+  ] }, l.href));
+}
+function HeaderMenu({ id, button, buttonClass, label, align = "left", children }) {
+  const [open, setOpen] = (0, import_react.useState)(false);
+  const ref = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (!open) return void 0;
+    const onDoc = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-menuwrap", ref, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "button",
+      {
+        type: "button",
+        className: `${buttonClass || ""} ${open ? "is-open" : ""}`,
+        "aria-haspopup": "menu",
+        "aria-expanded": open,
+        "aria-controls": id,
+        "aria-label": label,
+        onClick: () => setOpen(!open),
+        children: button
+      }
+    ),
+    open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id, className: `dm-menu dm-menu--${align}`, role: "menu", children: typeof children === "function" ? children(() => setOpen(false)) : children })
+  ] });
+}
+function SiteHeader({ showCategories = false, activeMedium = null }) {
+  const { auth, nav } = (0, import_inertia_react.usePage)().props;
+  const user = auth && auth.user;
+  const [mediums, setMediums] = (0, import_react.useState)([]);
+  const [open, setOpen] = (0, import_react.useState)(false);
+  const [drawer, setDrawer] = (0, import_react.useState)(false);
+  const [query, setQuery] = (0, import_react.useState)("");
+  const exploreRef = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    import_axios.default.get(`${import_Constants.API_URL}/get_mediums`).then((r) => setMediums(Array.isArray(r.data) ? r.data : [])).catch(() => setMediums([]));
+    if (typeof window !== "undefined") {
+      const q = new URLSearchParams(window.location.search).get("q");
       if (q) setQuery(q);
     }
   }, []);
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    var onDoc = function onDoc(e) {
+  (0, import_react.useEffect)(() => {
+    const onDoc = (e) => {
       if (exploreRef.current && !exploreRef.current.contains(e.target)) setOpen(false);
     };
-    var onKey = function onKey(e) {
-      if (e.key === 'Escape') {
+    const onKey = (e) => {
+      if (e.key === "Escape") {
         setOpen(false);
         setDrawer(false);
       }
     };
-    document.addEventListener('mousedown', onDoc);
-    window.addEventListener('keydown', onKey);
-    return function () {
-      document.removeEventListener('mousedown', onDoc);
-      window.removeEventListener('keydown', onKey);
+    document.addEventListener("mousedown", onDoc);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      window.removeEventListener("keydown", onKey);
     };
   }, []);
-  var search = function search(e) {
+  const search = (e) => {
     e.preventDefault();
-    window.location.href = catalogUrl({
-      q: query
-    });
+    window.location.href = catalogUrl({ q: query });
   };
-  var here = typeof window !== 'undefined' ? window.location.pathname : '';
-  var initials = user && user.name ? user.name.trim().charAt(0).toUpperCase() : 'A';
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("header", {
-      className: "dm-header",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "ac-wide dm-header__row",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: route('welcome'),
-          className: "ac-logo",
-          "aria-label": "ArtistikCity home",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("img", {
-            src: "/assets/images/logo.png",
-            alt: "ArtistikCity"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("nav", {
-          className: "dm-links dm-links--main",
-          "aria-label": "Main",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            href: route('how.it.works'),
-            "aria-current": here.startsWith('/how-it-works') ? 'page' : undefined,
-            children: "How it works"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-            className: "dm-explore",
-            ref: exploreRef,
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("button", {
-              type: "button",
-              className: open ? 'is-open' : '',
-              "aria-expanded": open,
-              onClick: function onClick() {
-                return setOpen(!open);
-              },
-              children: ["Courses ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                className: "fa fa-angle-".concat(open ? 'up' : 'down')
-              })]
-            }), open && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-              className: "dm-dropdown",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h6", {
-                  children: "By medium"
-                }), mediums.map(function (m) {
-                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-                    href: catalogUrl({
-                      medium: m.id
-                    }),
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-                      className: "ac-mega__thumb",
-                      style: {
-                        backgroundImage: "url(/storage/uploads/mediums/".concat(m.id, "/").concat(m.photo, ")")
-                      }
-                    }), m.name]
-                  }, m.id);
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h6", {
-                  children: "Format"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-                  href: catalogUrl({
-                    type: 'course'
-                  }),
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                    className: "fa fa-graduation-cap"
-                  }), " Live courses"]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-                  href: catalogUrl({
-                    type: 'workshop'
-                  }),
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                    className: "fa fa-paint-brush"
-                  }), " Workshops"]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h6", {
-                  style: {
-                    marginTop: 16
-                  },
-                  children: "By age"
-                }), AGE_GROUPS.map(function (a) {
-                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-                    href: catalogUrl({
-                      age: a
-                    }),
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                      className: "fa fa-user-o"
-                    }), " ", a]
-                  }, a);
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-                className: "dm-all",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-                  href: catalogUrl({}),
-                  children: ["Browse all courses ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                    className: "fa fa-arrow-right"
-                  })]
-                })
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            href: route('commission.step1'),
-            "aria-current": here.startsWith('/commission') ? 'page' : undefined,
-            children: "Commission art"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            href: "/marketplace",
-            "aria-current": here.startsWith('/marketplace') ? 'page' : undefined,
-            children: "Marketplace"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            href: route('studio.stories'),
-            className: "is-accent",
-            "aria-current": here.startsWith('/studio-stories') ? 'page' : undefined,
-            children: "Studio Stories"
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("form", {
-          className: "dm-search",
-          onSubmit: search,
-          role: "search",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-            className: "fa fa-search"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
-            type: "search",
-            value: query,
-            onChange: function onChange(e) {
-              return setQuery(e.target.value);
-            },
-            placeholder: "Search courses\u2026",
-            "aria-label": "Search courses"
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("nav", {
-          className: "dm-links dm-links--account",
-          "aria-label": "Account",
-          children: user ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: "/dashboard",
-              children: "My studio"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.InertiaLink, {
-              as: "button",
-              method: "post",
-              href: route('logout'),
-              className: "dm-btn dm-btn--line",
-              children: "Log out"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: route('user.account'),
-              className: "ac-avatar",
-              style: {
-                marginLeft: 8
-              },
-              title: user.name,
-              children: initials
-            })]
-          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: loginUrl(),
-              children: "Log in"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: route('join'),
-              className: "dm-btn dm-btn--brand",
-              style: {
-                marginLeft: 6
-              },
-              children: "Join for free"
-            })]
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
-          type: "button",
-          className: "ac-burger",
-          "aria-label": "Menu",
-          onClick: function onClick() {
-            return setDrawer(!drawer);
-          },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-            className: "fa ".concat(drawer ? 'fa-times' : 'fa-bars')
-          })
-        })]
-      })
-    }), showCategories && mediums.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("nav", {
-      className: "dm-cats",
-      "aria-label": "Categories",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-        className: "ac-wide",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: catalogUrl({}),
-              className: !activeMedium ? 'is-active' : '',
-              children: "All courses"
-            })
-          }), mediums.map(function (m) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: catalogUrl({
-                  medium: m.id
-                }),
-                className: String(activeMedium) === String(m.id) ? 'is-active' : '',
-                children: m.name
-              })
-            }, m.id);
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: catalogUrl({
-                type: 'workshop'
-              }),
-              children: "Workshops"
-            })
-          })]
-        })
-      })
-    }), drawer && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "ac-drawer",
-      style: {
-        top: 68
-      },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("form", {
-        className: "dm-hero__search",
-        onSubmit: search,
-        style: {
-          border: '1px solid var(--dm-line)'
-        },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
-          type: "search",
-          value: query,
-          onChange: function onChange(e) {
-            return setQuery(e.target.value);
-          },
-          placeholder: "Search courses"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
-          className: "dm-btn dm-btn--ink",
-          type: "submit",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-            className: "fa fa-search"
-          })
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: route('how.it.works'),
-        style: {
-          fontWeight: 700
-        },
-        children: "How it works"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h6", {
-        children: "Courses"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: catalogUrl({}),
-        children: "All courses"
-      }), mediums.map(function (m) {
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: catalogUrl({
-            medium: m.id
-          }),
-          children: m.name
-        }, m.id);
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: catalogUrl({
-          type: 'workshop'
-        }),
-        children: "Workshops"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h6", {
-        children: "ArtistikCity"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: route('commission.step1'),
-        children: "Commission art"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: "/marketplace",
-        children: "Marketplace"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: "/marketplace?source=student",
-        children: "Student originals"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: route('studio.stories'),
-        children: "Studio Stories"
-      }), user ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: "/dashboard",
-          className: "dm-btn dm-btn--line dm-btn--block",
-          children: "My studio"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.InertiaLink, {
-          as: "button",
-          method: "post",
-          href: route('logout'),
-          className: "dm-btn dm-btn--ink dm-btn--block",
-          style: {
-            marginTop: 10
-          },
-          children: "Log out"
-        })]
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: route('join'),
-          className: "dm-btn dm-btn--brand dm-btn--block",
-          children: "Join for free"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: loginUrl(),
-          className: "dm-btn dm-btn--line dm-btn--block",
-          style: {
-            marginTop: 10
-          },
-          children: "Log in"
-        })]
-      })]
-    })]
-  });
+  const here = typeof window !== "undefined" ? window.location.pathname : "";
+  const initials = user && user.name ? user.name.trim().charAt(0).toUpperCase() : "A";
+  const account = user ? (0, import_nav.accountNav)(nav) : [];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", { className: "dm-header", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide dm-header__row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("welcome"), className: "ac-logo", "aria-label": "ArtistikCity home", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/logo.png", alt: "ArtistikCity" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { className: "dm-links dm-links--main", "aria-label": "Main", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("how.it.works"), "aria-current": here.startsWith("/how-it-works") ? "page" : void 0, children: "How it works" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-explore", ref: exploreRef, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: open ? "is-open" : "", "aria-expanded": open, onClick: () => setOpen(!open), children: [
+            "Courses ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa fa-angle-${open ? "up" : "down"}` })
+          ] }),
+          open && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-dropdown", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "By medium" }),
+              mediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ medium: m.id }), children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-mega__thumb", style: { backgroundImage: `url(/storage/uploads/mediums/${m.id}/${m.photo})` } }),
+                m.name
+              ] }, m.id))
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "Format" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ type: "course" }), children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-graduation-cap" }),
+                " Live courses"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ type: "workshop" }), children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush" }),
+                " Workshops"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { style: { marginTop: 16 }, children: "By age" }),
+              AGE_GROUPS.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ age: a }), children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-user-o" }),
+                " ",
+                a
+              ] }, a))
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-all", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({}), children: [
+              "Browse all courses ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right" })
+            ] }) })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("commission.step1"), "aria-current": here.startsWith("/commission") ? "page" : void 0, children: "Commission art" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", "aria-current": here.startsWith("/marketplace") ? "page" : void 0, children: "Marketplace" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("studio.stories"), className: "is-accent", "aria-current": here.startsWith("/studio-stories") ? "page" : void 0, children: "Studio Stories" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "dm-search", onSubmit: search, role: "search", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", value: query, onChange: (e) => setQuery(e.target.value), placeholder: "Search courses\u2026", "aria-label": "Search courses" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-links dm-links--account", "aria-label": "Account", children: user ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard", "aria-current": /^\/(dashboard|user\/(my-courses|course|workshop))/.test(here) ? "page" : void 0, children: "My studio" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.InertiaLink, { as: "button", method: "post", href: route("logout"), className: "dm-btn dm-btn--line", children: "Log out" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          HeaderMenu,
+          {
+            id: "menu-account",
+            align: "right",
+            buttonClass: "ac-avatar dm-avatarbtn",
+            label: `Account menu for ${user.name}`,
+            button: initials,
+            children: (close) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-menu__head", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-avatar", "aria-hidden": "true", children: initials }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: user.name }),
+                  (user.email || user.phone) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: user.email || user.phone })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MenuLinks, { links: account, here, onPick: close })
+            ] })
+          }
+        )
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: loginUrl(), children: "Log in" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("join"), className: "dm-btn dm-btn--brand", style: { marginLeft: 6 }, children: "Join for free" })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "ac-burger", "aria-label": "Menu", onClick: () => setDrawer(!drawer), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${drawer ? "fa-times" : "fa-bars"}` }) })
+    ] }) }),
+    showCategories && mediums.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-cats", "aria-label": "Categories", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({}), className: !activeMedium ? "is-active" : "", children: "All courses" }) }),
+      mediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({ medium: m.id }), className: String(activeMedium) === String(m.id) ? "is-active" : "", children: m.name }) }, m.id)),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({ type: "workshop" }), children: "Workshops" }) })
+    ] }) }) }),
+    drawer && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-drawer", style: { top: 68 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "dm-hero__search", onSubmit: search, style: { border: "1px solid var(--dm-line)" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", value: query, onChange: (e) => setQuery(e.target.value), placeholder: "Search courses" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--ink", type: "submit", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search" }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("how.it.works"), style: { fontWeight: 700 }, children: "How it works" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "Courses" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({}), children: "All courses" }),
+      mediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({ medium: m.id }), children: m.name }, m.id)),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({ type: "workshop" }), children: "Workshops" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "ArtistikCity" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("commission.step1"), children: "Commission art" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", children: "Marketplace" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace?source=student", children: "Student originals" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("studio.stories"), children: "Studio Stories" }),
+      user ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard", className: "dm-btn dm-btn--line dm-btn--block", style: { marginTop: 16 }, children: "My studio" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "My account" }),
+        account.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: l.href, children: [
+          l.label,
+          l.count > 0 ? ` (${l.count})` : ""
+        ] }, l.href)),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.InertiaLink, { as: "button", method: "post", href: route("logout"), className: "dm-btn dm-btn--ink dm-btn--block", style: { marginTop: 16 }, children: "Log out" })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("join"), className: "dm-btn dm-btn--brand dm-btn--block", children: "Join for free" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: loginUrl(), className: "dm-btn dm-btn--line dm-btn--block", style: { marginTop: 10 }, children: "Log in" })
+      ] })
+    ] })
+  ] });
 }
+
 
 /***/ }),
 
@@ -9448,11 +9315,9 @@ function CourseNavigation(_ref) {
 /***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -9466,38 +9331,14 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var MyAccountNavigation_exports = {};
 __export(MyAccountNavigation_exports, {
   default: () => MyAccountNavigation
 });
 module.exports = __toCommonJS(MyAccountNavigation_exports);
-var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
-var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
-var import_react_dom = __toESM(__webpack_require__("../../febuild/node_modules/react-dom/index.js"));
-var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-var import_Example = __toESM(__webpack_require__("./resources/js/Components/Example.js"));
-function MyAccountNavigation({ auth, header, children }) {
-  const { url, component } = (0, import_inertia_react.usePage)();
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "accountMenu", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h5", { children: "MY Account" }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/my-account" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.account"), children: "Personal Information" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/my-address" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.my.address"), children: "My Address" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/linked-accounts" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: "/user/linked-accounts", children: "Login & Security" }) }),
-      auth.user.has_password && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/change-password" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.change.password"), children: "Change Password" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/order-history" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.order.history"), children: "Order History" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: url === "/user/notifications" ? "active" : "", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Link, { href: route("user.notifications"), children: "Notifications" }) })
-    ] })
-  ] }) });
+function MyAccountNavigation() {
+  return null;
 }
 
 
@@ -9522,6 +9363,92 @@ function StudentHeader() {
 /***/ }),
 
 /***/ "./resources/js/Components/Students/StudentNavigation.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var StudentNavigation_exports = {};
+__export(StudentNavigation_exports, {
+  default: () => StudentNavigation
+});
+module.exports = __toCommonJS(StudentNavigation_exports);
+function StudentNavigation() {
+  return null;
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Studio/Journey.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Journey_exports = {};
+__export(Journey_exports, {
+  JOURNEY: () => JOURNEY,
+  inr: () => inr,
+  shortDate: () => shortDate,
+  statusStyle: () => statusStyle
+});
+module.exports = __toCommonJS(Journey_exports);
+const JOURNEY = [
+  { n: "01", key: "DISCOVER", title: "Discover", text: "See how ArtistikCity takes you from first sketch to a sold artwork.", href: "/how-it-works", cta: "How it works" },
+  { n: "02", key: "JOIN", title: "Join", text: "Create your free account in under a minute, with email, phone, Google or Facebook.", href: "/join", cta: "Join for free" },
+  { n: "03", key: "CHOOSE_COURSE", title: "Choose a course", text: "Pick a live course or a weekend workshop in the medium you love.", href: "/courses?type=all", cta: "Browse courses" },
+  { n: "04", key: "LEARN", title: "Learn", text: "Follow the lessons in your course, practise and track your progress.", href: "/user/my-courses", cta: "Go to my courses" },
+  { n: "05", key: "SUBMIT", title: "Submit", text: "Upload your assignment milestone for a personal review from your instructor.", href: "/dashboard/submissions", cta: "Submit work" },
+  { n: "06", key: "CERTIFY", title: "Certify", text: "Finish the course with approved work to earn your verifiable ArtistikCity certificate and PDF portfolio report.", href: "/dashboard/certificates", cta: "Certificates & reports" },
+  { n: "07", key: "SHOWCASE", title: "Showcase", subtitle: "Exhibit & sell", text: "Approved pieces join your portfolio. Exhibit them and list any as a 1-of-1 original in the ArtistikCity Marketplace.", href: "/dashboard/portfolio", cta: "Portfolio & shop" }
+];
+const statusStyle = (status) => ({
+  "Pending Review": { chip: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: "fa-clock-o", label: "Pending review" },
+  Approved: { chip: "bg-green-100 text-green-800 border-green-200", icon: "fa-check-circle", label: "Approved" },
+  Rejected: { chip: "bg-red-100 text-red-800 border-red-200", icon: "fa-times-circle", label: "Changes requested" }
+})[status] || { chip: "bg-gray-100 text-gray-700 border-gray-200", icon: "fa-circle-o", label: status };
+const inr = (n) => "\u20B9" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
+const shortDate = (d) => {
+  if (!d) return "";
+  const dt = new Date(String(d).replace(" ", "T"));
+  return isNaN(dt) ? String(d).slice(0, 10) : dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+};
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Studio/StudioLayout.js":
 /***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
@@ -9552,311 +9479,92 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var StudentNavigation_exports = {};
-__export(StudentNavigation_exports, {
-  default: () => StudentNavigation
+var StudioLayout_exports = {};
+__export(StudioLayout_exports, {
+  JourneyStepper: () => JourneyStepper,
+  StudioTabs: () => StudioTabs,
+  TABS: () => TABS,
+  default: () => StudioLayout
 });
-module.exports = __toCommonJS(StudentNavigation_exports);
+module.exports = __toCommonJS(StudioLayout_exports);
 var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
 var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
-var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-const LINKS = [
-  { href: "/dashboard", label: "My studio", icon: "fa-th-large", match: /^\/(dashboard|user\/dashboard)$/ },
-  { href: "/user/my-courses", label: "My courses", icon: "fa-graduation-cap", match: /^\/user\/(my-courses|course)/ },
-  { href: "/user/my-workshop", label: "My workshops", icon: "fa-calendar", match: /^\/user\/(my-workshop|workshop)/ },
-  { href: "/dashboard/certificates", label: "Certificates", icon: "fa-certificate", match: /^$/ },
-  { href: "/user/my-account", label: "Account", icon: "fa-user", match: /^\/user\/(my-account|my-address|change-password|order-history|notifications|linked-accounts)/ },
-  { href: "/user/help", label: "Help", icon: "fa-question-circle-o", match: /^\/user\/help/ }
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
+const TABS = [
+  { href: "/dashboard", label: "My studio", icon: "fa-th-large" },
+  { href: "/user/my-courses", label: "My courses", icon: "fa-graduation-cap" },
+  { href: "/dashboard/submissions", label: "Submissions", icon: "fa-upload" },
+  { href: "/dashboard/portfolio", label: "Portfolio & shop", icon: "fa-picture-o" },
+  { href: "/dashboard/certificates", label: "Certificates & reports", icon: "fa-certificate" }
 ];
-function StudentNavigation() {
-  const { url } = (0, import_inertia_react.usePage)();
-  const path = String(url || "").split("?")[0];
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "col-md-3 col-lg-2 px-0 ac-sidenav", "aria-label": "My courses and account", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { children: [
-    LINKS.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: l.href, className: l.match.test(path) ? "is-active" : "", "aria-current": l.match.test(path) ? "page" : void 0, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${l.icon}`, "aria-hidden": "true" }),
-      l.label
-    ] }, l.href)),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_inertia_react.InertiaLink, { href: route("logout"), method: "post", as: "button", className: "ac-sidenav__logout", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-sign-out", "aria-hidden": "true" }),
-      "Log out"
-    ] })
-  ] }) });
-}
-
-
-/***/ }),
-
-/***/ "./resources/js/Components/Studio/Journey.js":
-/*!***************************************************!*\
-  !*** ./resources/js/Components/Studio/Journey.js ***!
-  \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   JOURNEY: () => (/* binding */ JOURNEY),
-/* harmony export */   inr: () => (/* binding */ inr),
-/* harmony export */   shortDate: () => (/* binding */ shortDate),
-/* harmony export */   statusStyle: () => (/* binding */ statusStyle)
-/* harmony export */ });
-/** The six stages of the Student Creative Lifecycle, shared by the roadmap page and the studio. */
-var JOURNEY = [{
-  n: '01',
-  key: 'DISCOVER',
-  title: 'Discover',
-  text: 'See how ArtistikCity takes you from first sketch to a sold artwork.',
-  href: '/how-it-works',
-  cta: 'How it works'
-}, {
-  n: '02',
-  key: 'JOIN',
-  title: 'Join',
-  text: 'Create your free account in under a minute, with email, Google or Facebook.',
-  href: '/join',
-  cta: 'Join for free'
-}, {
-  n: '03',
-  key: 'CHOOSE_TRACK',
-  title: 'Choose a track',
-  text: 'Pick a live course or a weekend workshop in the medium you love.',
-  href: '/courses?type=all',
-  cta: 'Browse courses'
-}, {
-  n: '04',
-  key: 'LEARN',
-  title: 'Learn',
-  text: 'Follow lessons in your classroom, practise and track your progress.',
-  href: '/dashboard',
-  cta: 'Open my studio'
-}, {
-  n: '05',
-  key: 'SUBMIT',
-  title: 'Submit',
-  text: 'Upload your assignment milestone for a personal review from your instructor.',
-  href: '/dashboard/submissions',
-  cta: 'Submit work'
-}, {
-  n: '06',
-  key: 'EXHIBIT_SELL',
-  title: 'Exhibit & sell',
-  text: 'Approved pieces join your portfolio. List any of them as a 1-of-1 original in the ArtistikCity Marketplace.',
-  href: '/dashboard/portfolio',
-  cta: 'My portfolio'
-}, {
-  n: '07',
-  key: 'CERTIFY',
-  title: 'Certify & showcase',
-  text: 'Download your ArtistikCity certificate and a printable PDF portfolio with curriculum and instructor comments.',
-  href: '/dashboard/certificates',
-  cta: 'Certificates & reports'
-}];
-var statusStyle = function statusStyle(status) {
-  return {
-    'Pending Review': {
-      chip: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      icon: 'fa-clock-o',
-      label: 'Pending review'
+function StudioTabs({ active }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "mt-6 flex gap-2 overflow-x-auto border-b border-gray-200", "aria-label": "Studio", children: TABS.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    "a",
+    {
+      href: t.href,
+      "aria-current": active === t.href ? "page" : void 0,
+      className: `whitespace-nowrap px-4 py-3 text-base font-bold border-b-2 -mb-px ${active === t.href ? "border-ink text-ink" : "border-transparent text-gray-500 hover:text-ink"}`,
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${t.icon} mr-2`, "aria-hidden": "true" }),
+        t.label
+      ]
     },
-    Approved: {
-      chip: 'bg-green-100 text-green-800 border-green-200',
-      icon: 'fa-check-circle',
-      label: 'Approved'
-    },
-    Rejected: {
-      chip: 'bg-red-100 text-red-800 border-red-200',
-      icon: 'fa-times-circle',
-      label: 'Changes requested'
-    }
-  }[status] || {
-    chip: 'bg-gray-100 text-gray-700 border-gray-200',
-    icon: 'fa-circle-o',
-    label: status
-  };
-};
-var inr = function inr(n) {
-  return '₹' + Number(n || 0).toLocaleString('en-IN', {
-    maximumFractionDigits: 2
-  });
-};
-var shortDate = function shortDate(d) {
-  if (!d) return '';
-  var dt = new Date(String(d).replace(' ', 'T'));
-  return isNaN(dt) ? String(d).slice(0, 10) : dt.toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
-};
-
-/***/ }),
-
-/***/ "./resources/js/Components/Studio/StudioLayout.js":
-/*!********************************************************!*\
-  !*** ./resources/js/Components/Studio/StudioLayout.js ***!
-  \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   JourneyStepper: () => (/* binding */ JourneyStepper),
-/* harmony export */   StudioTabs: () => (/* binding */ StudioTabs),
-/* harmony export */   TABS: () => (/* binding */ TABS),
-/* harmony export */   "default": () => (/* binding */ StudioLayout)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/Components/Site/SiteLayout */ "./resources/js/Components/Site/SiteLayout.js");
-/* harmony import */ var _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Studio/Journey */ "./resources/js/Components/Studio/Journey.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-var TABS = [{
-  href: '/dashboard',
-  label: 'My studio',
-  icon: 'fa-th-large'
-}, {
-  href: '/user/my-courses',
-  label: 'My courses',
-  icon: 'fa-graduation-cap'
-}, {
-  href: '/dashboard/submissions',
-  label: 'Submissions',
-  icon: 'fa-upload'
-}, {
-  href: '/dashboard/portfolio',
-  label: 'Portfolio & shop',
-  icon: 'fa-picture-o'
-}, {
-  href: '/dashboard/certificates',
-  label: 'Certificates & reports',
-  icon: 'fa-certificate'
-}, {
-  href: '/user/my-account',
-  label: 'Account',
-  icon: 'fa-user'
-}];
-
-/** The studio tab bar, shared by the new studio pages and the classic course/account pages under /user. */
-function StudioTabs(_ref) {
-  var active = _ref.active;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("nav", {
-    className: "mt-6 flex gap-2 overflow-x-auto border-b border-gray-200",
-    "aria-label": "Studio",
-    children: TABS.map(function (t) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("a", {
-        href: t.href,
-        "aria-current": active === t.href ? 'page' : undefined,
-        className: "whitespace-nowrap px-4 py-3 text-base font-bold border-b-2 -mb-px ".concat(active === t.href ? 'border-ink text-ink' : 'border-transparent text-gray-500 hover:text-ink'),
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("i", {
-          className: "fa ".concat(t.icon, " mr-2"),
-          "aria-hidden": "true"
-        }), t.label]
-      }, t.href);
-    })
-  });
+    t.href
+  )) });
 }
-
-/** The student's lifecycle progress, styled like the commission wizard stepper. */
-function JourneyStepper(_ref2) {
-  var _ref2$stage = _ref2.stage,
-    stage = _ref2$stage === void 0 ? 4 : _ref2$stage;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("ol", {
-    className: "flex flex-wrap items-center gap-x-2 gap-y-3",
-    "aria-label": "Your creative journey",
-    children: _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_2__.JOURNEY.map(function (s, i) {
-      var n = i + 1;
-      var done = n < stage;
-      var active = n === stage;
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("li", {
-        className: "flex items-center gap-2",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("a", {
+function JourneyStepper({ stage = 4 }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "flex flex-wrap items-center gap-x-2 gap-y-3", "aria-label": "Your creative journey", children: import_Journey.JOURNEY.map((s, i) => {
+    const n = i + 1;
+    const done = n < stage;
+    const active = n === stage;
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex items-center gap-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "a",
+        {
           href: s.href,
-          "aria-current": active ? 'step' : undefined,
-          className: "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ".concat(active ? 'bg-brand text-white' : done ? 'bg-ink text-white' : 'bg-white border border-gray-300 text-gray-500'),
-          children: done ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("i", {
-            className: "fa fa-check",
-            "aria-hidden": "true"
-          }) : n
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
-          className: "text-base ".concat(active ? 'font-bold text-ink' : 'text-gray-500'),
-          children: s.title
-        }), n < _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_2__.JOURNEY.length && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
-          className: "hidden sm:block w-6 h-px bg-gray-300 mx-1",
-          "aria-hidden": "true"
-        })]
-      }, s.key);
-    })
-  });
+          "aria-current": active ? "step" : void 0,
+          className: `flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${active ? "bg-brand text-white" : done ? "bg-ink text-white" : "bg-white border border-gray-300 text-gray-500"}`,
+          children: done ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }) : n
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `text-base ${active ? "font-bold text-ink" : "text-gray-500"}`, children: [
+        s.title,
+        s.subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "font-normal", children: [
+          " \u2013 ",
+          s.subtitle
+        ] })
+      ] }),
+      n < import_Journey.JOURNEY.length && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "hidden sm:block w-6 h-px bg-gray-300 mx-1", "aria-hidden": "true" })
+    ] }, s.key);
+  }) });
 }
-function StudioLayout(_ref3) {
-  var title = _ref3.title,
-    subtitle = _ref3.subtitle,
-    active = _ref3.active,
-    stage = _ref3.stage,
-    actions = _ref3.actions,
-    children = _ref3.children;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_1__["default"], {
-    title: title,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-      className: "ac-wide",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("ul", {
-        className: "dm-crumbs",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("a", {
-            href: "/",
-            children: "Home"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("a", {
-            href: "/dashboard",
-            children: "My studio"
-          })
-        }), title !== 'My studio' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("li", {
-          children: title
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-        className: "dm-listhead",
-        style: {
-          paddingTop: 8,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          gap: 16,
-          flexWrap: 'wrap'
-        },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
-            className: "ac-eyebrow",
-            children: "Student studio"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h1", {
-            children: title
-          }), subtitle && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("p", {
-            children: subtitle
-          })]
-        }), actions]
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
-      className: "tw",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-        className: "ac-wide",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(StudioTabs, {
-          active: active
-        }), stage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
-          className: "py-5 border-b border-gray-100",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(JourneyStepper, {
-            stage: stage
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
-          className: "py-10",
-          children: children
-        })]
-      })
-    })]
-  });
+function StudioLayout({ title, subtitle, active, stage, actions, crumbs = [], children }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "dm-crumbs", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: "Home" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard", children: "My studio" }) }),
+        crumbs.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: c.href, children: c.label }) }, c.href)),
+        title !== "My studio" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: title })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-listhead", style: { paddingTop: 8, display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-eyebrow", children: "Student studio" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: title }),
+          subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: subtitle })
+        ] }),
+        actions
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tw", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StudioTabs, { active }),
+      stage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "py-5 border-b border-gray-100", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JourneyStepper, { stage }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "py-10", children })
+    ] }) })
+  ] });
 }
+
 
 /***/ }),
 
@@ -10032,114 +9740,109 @@ function AuthLayout(_ref) {
 /***/ }),
 
 /***/ "./resources/js/Layouts/Authenticated.js":
-/*!***********************************************!*\
-  !*** ./resources/js/Layouts/Authenticated.js ***!
-  \***********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Authenticated)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Site/SiteHeader */ "./resources/js/Components/Site/SiteHeader.js");
-/* harmony import */ var _Components_Site_SiteFooter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Site/SiteFooter */ "./resources/js/Components/Site/SiteFooter.js");
-/* harmony import */ var _Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Studio/StudioLayout */ "./resources/js/Components/Studio/StudioLayout.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-
-/*
- * Shell for the classic student pages under /user (course home, modules, lessons, account, orders, help).
- * They now share the site header, the "My studio" tab bar and the footer with the rest of ArtistikCity,
- * so moving between the studio and a course never feels like leaving the website.
- */
-
-var SECTIONS = [{
-  test: /^\/user\/(my-courses|my-workshop|course|workshop|free-course)/,
-  tab: '/user/my-courses',
-  title: 'My courses',
-  crumb: 'My courses',
-  subtitle: 'Your live courses and workshops: schedules, modules, lessons and tasks.'
-}, {
-  test: /^\/user\/(my-account|my-address|change-password|order-history|notifications|linked-accounts|language)/,
-  tab: '/user/my-account',
-  title: 'Account',
-  crumb: 'Account',
-  subtitle: 'Your personal details, address, password, orders and notifications.'
-}, {
-  test: /^\/user\/help/,
-  tab: '/user/my-account',
-  title: 'Help',
-  crumb: 'Help',
-  subtitle: 'Answers to common questions and ways to reach the studio.'
-}, {
-  test: /.*/,
-  tab: '/dashboard',
-  title: 'My studio',
-  crumb: null,
-  subtitle: null
-}];
-function Authenticated(_ref) {
-  var children = _ref.children;
-  var _usePage = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)(),
-    url = _usePage.url;
-  var path = String(url || '').split('?')[0];
-  var sec = SECTIONS.find(function (s) {
-    return s.test.test(path);
-  });
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-    className: "ac ac-student",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_2__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "ac-wide",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("ul", {
-        className: "dm-crumbs",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-            href: "/",
-            children: "Home"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-            href: "/dashboard",
-            children: "My studio"
-          })
-        }), sec.crumb && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("li", {
-          children: sec.crumb
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "dm-listhead",
-        style: {
-          paddingTop: 8
-        },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-          className: "ac-eyebrow",
-          children: "Student studio"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h1", {
-          children: sec.title
-        }), sec.subtitle && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-          children: sec.subtitle
-        })]
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-      className: "tw",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-        className: "ac-wide",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_4__.StudioTabs, {
-          active: sec.tab
-        })
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("main", {
-      className: "ac-wide ac-student__body",
-      children: children
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Site_SiteFooter__WEBPACK_IMPORTED_MODULE_3__["default"], {})]
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Authenticated_exports = {};
+__export(Authenticated_exports, {
+  default: () => Authenticated
+});
+module.exports = __toCommonJS(Authenticated_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteHeader = __toESM(__webpack_require__("./resources/js/Components/Site/SiteHeader.js"));
+var import_SiteFooter = __toESM(__webpack_require__("./resources/js/Components/Site/SiteFooter.js"));
+var import_StudioLayout = __webpack_require__("./resources/js/Components/Studio/StudioLayout.js");
+var import_AccountLayout = __toESM(__webpack_require__("./resources/js/Components/Account/AccountLayout.js"));
+var import_CourseShell = __toESM(__webpack_require__("./resources/js/Components/Course/CourseShell.js"));
+function courseTitle(props) {
+  return props.CourseNav && props.CourseNav.course_title || props.lessonNav && props.lessonNav.course_title || props.CourseDetails && props.CourseDetails.coursesData && props.CourseDetails.coursesData.title || props.CourseModule && props.CourseModule.course && props.CourseModule.course.title || null;
 }
+const STUDIO = [
+  {
+    test: /^\/user\/(course|workshop)/,
+    title: "Course",
+    crumbs: [{ href: "/user/my-courses", label: "My courses" }],
+    subtitle: "Schedule, modules, lessons and tasks."
+  },
+  {
+    test: /^\/user\/(free-course|free-courses)/,
+    title: "Free courses",
+    crumbs: [{ href: "/user/my-courses", label: "My courses" }],
+    subtitle: "Free lessons to get you started."
+  },
+  { test: /.*/, title: "My courses", crumbs: [], subtitle: null }
+];
+function Authenticated({ children }) {
+  const page = (0, import_inertia_react.usePage)();
+  const path = String(page.url || "").split("?")[0];
+  if (import_AccountLayout.ACCOUNT_PATHS.test(path)) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AccountLayout.default, { children });
+  }
+  const links = page.props.courseLinks;
+  if (links && /^\/user\/course\/module\/lesson\/task/.test(path)) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_CourseShell.default,
+      {
+        title: false,
+        course: { title: links.courseTitle || "Course" },
+        back: { href: links.lesson || links.overview, label: "Back to lesson" },
+        className: "ac-student",
+        children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { className: "ac-wide ac-student__body cl-taskwrap", children })
+      }
+    );
+  }
+  const sec = STUDIO.find((s) => s.test.test(path));
+  const title = sec.title === "Course" && courseTitle(page.props) || sec.title;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac ac-student", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteHeader.default, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "dm-crumbs", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: "Home" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard", children: "My studio" }) }),
+        sec.crumbs.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: c.href, children: c.label }) }, c.href)),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: title })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-listhead", style: { paddingTop: 8 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-eyebrow", children: "Student studio" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: title }),
+        sec.subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: sec.subtitle })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tw", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudioLayout.StudioTabs, { active: "/user/my-courses" }) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { className: "ac-wide ac-student__body", children }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteFooter.default, {})
+  ] });
+}
+
 
 /***/ }),
 
@@ -14200,6 +13903,1984 @@ function MagicLink({ token, email, valid }) {
 
 /***/ }),
 
+/***/ "./resources/js/Components/Wishlist/SaveButton.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SaveButton_exports = {};
+__export(SaveButton_exports, {
+  default: () => SaveButton
+});
+module.exports = __toCommonJS(SaveButton_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_api = __webpack_require__("./resources/js/Components/Auth/api.js");
+function SaveButton({ type, id, saved: initial, iconOnly = false, className = "", onChange }) {
+  const { auth } = (0, import_inertia_react.usePage)().props;
+  const [saved, setSaved] = (0, import_react.useState)(!!initial);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [error, setError] = (0, import_react.useState)(null);
+  const toggle = async () => {
+    if (!(auth && auth.user)) {
+      const here = window.location.pathname + window.location.search;
+      window.location.assign("/login?return_to=" + encodeURIComponent(here));
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    const next = !saved;
+    try {
+      await (0, import_api.authPost)("/wishlist", { type, id, saved: next });
+      setSaved(next);
+      if (onChange) onChange(next);
+      import_inertia.Inertia.reload({ only: ["nav"], preserveScroll: true, preserveState: true });
+    } catch (e) {
+      setError(e.message);
+    }
+    setBusy(false);
+  };
+  const label = saved ? "Saved to wish list" : "Save to wish list";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "button",
+      {
+        type: "button",
+        onClick: toggle,
+        disabled: busy,
+        "aria-pressed": saved,
+        "aria-label": iconOnly ? label : void 0,
+        title: iconOnly ? label : void 0,
+        className: `dm-heart ${iconOnly ? "dm-heart--icon" : ""} ${saved ? "is-saved" : ""} ${className}`,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${saved ? "fa-heart" : "fa-heart-o"}`, "aria-hidden": "true" }),
+          !iconOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: label })
+        ]
+      }
+    ),
+    error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ac-field__error", role: "alert", style: { marginTop: 6 }, children: error })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Students/Wishlist.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Wishlist_exports = {};
+__export(Wishlist_exports, {
+  default: () => Wishlist
+});
+module.exports = __toCommonJS(Wishlist_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_Authenticated = __toESM(__webpack_require__("./resources/js/Layouts/Authenticated.js"));
+var import_StudentNavigation = __toESM(__webpack_require__("./resources/js/Components/Students/StudentNavigation.js"));
+var import_SaveButton = __toESM(__webpack_require__("./resources/js/Components/Wishlist/SaveButton.js"));
+const money = (amount, currency) => {
+  const n = Number(amount);
+  if (!amount || isNaN(n) || n <= 0) return null;
+  const symbol = currency === "USD" ? "$" : "\u20B9";
+  return symbol + n.toLocaleString(currency === "USD" ? "en-US" : "en-IN", { maximumFractionDigits: 0 });
+};
+const STATUS = { RESERVED: "Reserved by a collector right now", SOLD: "Sold" };
+function Wishlist(props) {
+  const [items, setItems] = (0, import_react.useState)(props.items || []);
+  const remove = (item) => setItems((list) => list.filter((x) => !(x.type === item.type && x.id === item.id)));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_Authenticated.default, { auth: props.auth, errors: props.errors, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: "Your wish list" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "container-fluid", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudentNavigation.default, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { className: "col-md-10 px-0 ms-sm-auto rightsidebar", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "p30", children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "wl-empty", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-heart-o", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { marginTop: 12 }, children: "Your wish list is empty" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted", children: "Tap the heart on a course, workshop or original artwork to save it here for later." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { marginTop: 16, display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "dm-btn dm-btn--brand", children: "Browse courses" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "dm-btn dm-btn--line", children: "Visit the marketplace" })
+        ] })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-muted", style: { marginBottom: 16 }, children: [
+          items.length,
+          " saved ",
+          items.length === 1 ? "item" : "items",
+          ". Originals are one of a kind, so they can sell while they wait here."
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "wl-list", children: items.map((it) => {
+          const price = it.type === "course" ? money(it.price_inr, "INR") : money(it.price, it.currency || "INR");
+          const meta = [it.medium, it.detail, it.start_date ? `Starts ${it.start_date}` : null].filter(Boolean).join(" \xB7 ");
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "wl-item", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "a",
+              {
+                href: it.url,
+                className: "wl-item__img",
+                "aria-hidden": "true",
+                tabIndex: -1,
+                style: it.image ? { backgroundImage: `url("${it.image}")` } : void 0
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "wl-item__body", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "wl-item__kind", children: it.kind }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: it.url, children: it.title }) }),
+              it.subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "wl-item__meta", children: it.subtitle }),
+              meta && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "wl-item__meta", children: meta }),
+              STATUS[it.status] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sec-badge", style: { marginTop: 6 }, children: STATUS[it.status] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "wl-item__side", children: [
+              price && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "wl-item__price", children: price }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: it.url, className: "dm-btn dm-btn--brand", children: it.type === "course" ? "View & enroll" : it.status === "SOLD" ? "View" : "View & buy" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SaveButton.default, { type: it.type, id: it.id, saved: true, iconOnly: true, onChange: (s) => {
+                  if (!s) remove(it);
+                } })
+              ] })
+            ] })
+          ] }, `${it.type}-${it.id}`);
+        }) })
+      ] }) }) })
+    ] }) })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Account/nav.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var nav_exports = {};
+__export(nav_exports, {
+  ACCOUNT_PATHS: () => ACCOUNT_PATHS,
+  accountNav: () => accountNav,
+  activeAccountItem: () => activeAccountItem
+});
+module.exports = __toCommonJS(nav_exports);
+function accountNav(nav) {
+  const n = nav || {};
+  return [
+    {
+      href: "/user/my-account",
+      label: "Profile",
+      icon: "fa-user",
+      title: "Profile",
+      subtitle: "View and update your personal details and how others see you on ArtistikCity."
+    },
+    {
+      href: "/user/orders",
+      label: "Your orders",
+      icon: "fa-shopping-bag",
+      count: n.orders,
+      title: "Your orders",
+      subtitle: "Courses, workshops, original artworks and commissions you have ordered.",
+      match: /^\/user\/(orders|order-history)/
+    },
+    {
+      href: "/user/wishlist",
+      label: "Wish list",
+      icon: "fa-heart-o",
+      count: n.wishlist,
+      title: "Your wish list",
+      subtitle: "Courses, workshops and original artworks you saved for later."
+    },
+    {
+      href: "/user/my-address",
+      label: "Addresses",
+      icon: "fa-map-marker",
+      title: "Addresses",
+      subtitle: "Billing and shipping addresses used at checkout."
+    },
+    {
+      href: "/user/linked-accounts",
+      label: "Login & security",
+      icon: "fa-shield",
+      title: "Login & security",
+      subtitle: "Choose how you sign in. Everything here belongs to one account, however you log in.",
+      match: /^\/user\/(linked-accounts|change-password)/
+    },
+    {
+      href: "/user/notifications",
+      label: "Notifications",
+      icon: "fa-bell-o",
+      title: "Notifications",
+      subtitle: "Choose which e-mails and messages you receive.",
+      match: /^\/user\/(notifications|language)/
+    },
+    {
+      href: "/user/help",
+      label: "Help & support",
+      icon: "fa-question-circle-o",
+      title: "Help & support",
+      subtitle: "Answers to common questions and ways to reach the studio."
+    }
+  ];
+}
+const ACCOUNT_PATHS = /^\/user\/(my-account|my-address|change-password|order-history|orders|notifications|linked-accounts|language|wishlist|help)(\/|$)/;
+function activeAccountItem(path, nav) {
+  const items = accountNav(nav);
+  return items.find((i) => i.match ? i.match.test(path) : path.startsWith(i.href)) || items[0];
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Account/AccountLayout.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var AccountLayout_exports = {};
+__export(AccountLayout_exports, {
+  ACCOUNT_PATHS: () => import_nav2.ACCOUNT_PATHS,
+  default: () => AccountLayout
+});
+module.exports = __toCommonJS(AccountLayout_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteHeader = __toESM(__webpack_require__("./resources/js/Components/Site/SiteHeader.js"));
+var import_SiteFooter = __toESM(__webpack_require__("./resources/js/Components/Site/SiteFooter.js"));
+var import_nav = __webpack_require__("./resources/js/Components/Account/nav.js");
+var import_nav2 = __webpack_require__("./resources/js/Components/Account/nav.js");
+function AccountLayout({ children }) {
+  const page = (0, import_inertia_react.usePage)();
+  const path = String(page.url || "").split("?")[0];
+  const user = page.props.auth && page.props.auth.user;
+  const items = (0, import_nav.accountNav)(page.props.nav);
+  const current = (0, import_nav.activeAccountItem)(path, page.props.nav);
+  const pageTitle = path.startsWith("/user/change-password") ? "Change password" : path.startsWith("/user/language") ? "Language" : current.title;
+  const initials = user && user.name ? user.name.trim().charAt(0).toUpperCase() : "A";
+  const photo = user && user.profile_photo ? `/storage/uploads/students/${user.id}/${user.profile_photo}` : null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac ac-student ac-account", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteHeader.default, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "dm-crumbs", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: "Home" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/user/my-account", children: "My account" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: pageTitle })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-listhead", style: { paddingTop: 8 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-eyebrow", children: "My account" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: pageTitle }),
+        current.subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: current.subtitle })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { className: "ac-wide ac-student__body", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "acc-grid", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "ac-sidenav acc-nav", "aria-label": "My account", children: [
+        user && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "acc-who", children: [
+          photo ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: photo, alt: "", className: "acc-who__img", onError: (e) => {
+            e.currentTarget.style.display = "none";
+          } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-avatar", "aria-hidden": "true", children: initials }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "acc-who__text", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: user.name }),
+            (user.email || user.phone) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: user.email || user.phone }),
+            user.slug && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/student/${user.slug}`, children: "View public profile" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { children: items.map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: i.href, className: i.href === current.href ? "is-active" : "", "aria-current": i.href === current.href ? "page" : void 0, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${i.icon}`, "aria-hidden": "true" }),
+          i.label,
+          i.count > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "acc-count", children: i.count })
+        ] }, i.href)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/dashboard", className: "acc-studio", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-th-large", "aria-hidden": "true" }),
+          "Go to My studio"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "acc-body", children })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteFooter.default, {})
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Account/Orders.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Orders_exports = {};
+__export(Orders_exports, {
+  default: () => Orders
+});
+module.exports = __toCommonJS(Orders_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_Authenticated = __toESM(__webpack_require__("./resources/js/Layouts/Authenticated.js"));
+const KINDS = { course: "Course", workshop: "Workshop", original: "Original artwork", commission: "Commission" };
+const TYPE_FILTERS = [
+  { id: "all", label: "All orders" },
+  { id: "course", label: "Courses" },
+  { id: "workshop", label: "Workshops" },
+  { id: "original", label: "Original artworks" },
+  { id: "commission", label: "Commissions" }
+];
+const money = (a, c) => {
+  const n = Number(a);
+  if (a == null || isNaN(n)) return "";
+  const cur = String(c || "INR").toUpperCase();
+  return (cur === "USD" ? "$" : "\u20B9") + n.toLocaleString(cur === "USD" ? "en-US" : "en-IN", { maximumFractionDigits: 2 });
+};
+const toDate = (v) => v ? new Date(String(v).replace(" ", "T")) : null;
+const niceDate = (v) => {
+  const d = toDate(v);
+  return d && !isNaN(d) ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
+};
+const tone = (status) => {
+  const s = String(status || "").toLowerCase();
+  if (/(fail|cancel|refund)/.test(s)) return "bad";
+  if (/(pending|queued|production|proof|packed)/.test(s)) return "wait";
+  return "ok";
+};
+function Orders(props) {
+  const { orders = [] } = (0, import_inertia_react.usePage)().props;
+  const [type, setType] = (0, import_react.useState)("all");
+  const [status, setStatus] = (0, import_react.useState)("all");
+  const [period, setPeriod] = (0, import_react.useState)("all");
+  const [query, setQuery] = (0, import_react.useState)("");
+  const [open, setOpen] = (0, import_react.useState)(null);
+  const statuses = (0, import_react.useMemo)(() => Array.from(new Set(orders.map((o) => o.status).filter(Boolean))).sort(), [orders]);
+  const years = (0, import_react.useMemo)(() => Array.from(new Set(orders.map((o) => {
+    const d = toDate(o.date);
+    return d && !isNaN(d) ? d.getFullYear() : null;
+  }).filter(Boolean))).sort((a, b) => b - a), [orders]);
+  const counts = (0, import_react.useMemo)(() => {
+    const c = { all: orders.length };
+    orders.forEach((o) => {
+      c[o.kind] = (c[o.kind] || 0) + 1;
+    });
+    return c;
+  }, [orders]);
+  const shown = orders.filter((o) => {
+    if (type !== "all" && o.kind !== type) return false;
+    if (status !== "all" && o.status !== status) return false;
+    if (period !== "all") {
+      const d = toDate(o.date);
+      if (!d || isNaN(d)) return false;
+      if (period === "30" || period === "180") {
+        if ((Date.now() - d.getTime()) / 864e5 > Number(period)) return false;
+      } else if (String(d.getFullYear()) !== period) return false;
+    }
+    const q = query.trim().toLowerCase();
+    return !q || [o.number, o.title, o.subtitle].filter(Boolean).join(" ").toLowerCase().includes(q);
+  });
+  const filtered = type !== "all" || status !== "all" || period !== "all" || query.trim() !== "";
+  const reset = () => {
+    setType("all");
+    setStatus("all");
+    setPeriod("all");
+    setQuery("");
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_Authenticated.default, { auth: props.auth, errors: props.errors, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: "Your orders" }),
+    orders.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "wl-empty", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { marginTop: 12 }, children: "No orders yet" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted", children: "When you enroll in a course, buy an original or commission artwork, it will appear here." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { marginTop: 16, display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "dm-btn dm-btn--brand", children: "Browse courses" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "dm-btn dm-btn--line", children: "Visit the marketplace" })
+      ] })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ord-filters", role: "search", "aria-label": "Filter orders", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ord-chips", role: "group", "aria-label": "Order type", children: TYPE_FILTERS.filter((f) => f.id === "all" || counts[f.id]).map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            type: "button",
+            "aria-pressed": type === f.id,
+            className: `ord-chip ${type === f.id ? "is-on" : ""}`,
+            onClick: () => setType(f.id),
+            children: [
+              f.label,
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: counts[f.id] || 0 })
+            ]
+          },
+          f.id
+        )) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ord-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "ord-search", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Search orders" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", className: "ac-input", value: query, onChange: (e) => setQuery(e.target.value), placeholder: "Order number or title" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Status" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "ac-input", value: status, onChange: (e) => setStatus(e.target.value), children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "all", children: "Any status" }),
+              statuses.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: s, children: s }, s))
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Date" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "ac-input", value: period, onChange: (e) => setPeriod(e.target.value), children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "all", children: "All time" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "30", children: "Last 30 days" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "180", children: "Last 6 months" }),
+              years.map((y) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: String(y), children: y }, y))
+            ] })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-muted ord-summary", "aria-live": "polite", children: [
+        shown.length === orders.length ? `${orders.length} order${orders.length === 1 ? "" : "s"}` : `${shown.length} of ${orders.length} orders`,
+        filtered && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          " \xB7 ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: reset, children: "Clear filters" })
+        ] })
+      ] }),
+      shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "wl-empty", style: { padding: 32 }, children: "No orders match these filters." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "ord-list", children: shown.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "ord-item", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ord-item__main", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ord-item__img", "aria-hidden": "true", style: o.image ? { backgroundImage: `url("${o.image}")` } : void 0, children: !o.image && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${o.kind === "commission" ? "fa-paint-brush" : "fa-picture-o"}` }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ord-item__body", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "wl-item__kind", children: KINDS[o.kind] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { children: o.title }),
+            o.subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "wl-item__meta", children: o.subtitle }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "wl-item__meta", children: [
+              "Order ",
+              o.number,
+              " \xB7 ",
+              niceDate(o.date)
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ord-item__side", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "wl-item__price", children: money(o.amount, o.currency) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `ord-status ord-status--${tone(o.status)}`, children: o.status })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ord-item__actions", children: [
+          o.link && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: o.link, className: "dm-btn dm-btn--brand", children: o.linkLabel }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--line", "aria-expanded": open === o.key, onClick: () => setOpen(open === o.key ? null : o.key), children: open === o.key ? "Hide details" : "Order details" })
+        ] }),
+        open === o.key && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "ord-details", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Order number" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.number })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Ordered on" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: niceDate(o.date) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Amount" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: money(o.amount, o.currency) })
+          ] }),
+          o.payment && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Payment" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.payment })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Status" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.status })
+          ] }),
+          o.tracking && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Tracking" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.tracking })
+          ] }),
+          o.billing && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ord-details__wide", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: o.kind === "original" ? "Ship to" : "Billed to" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.billing })
+          ] })
+        ] })
+      ] }, o.key)) })
+    ] })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Studio/Courses.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Courses_exports = {};
+__export(Courses_exports, {
+  default: () => Courses
+});
+module.exports = __toCommonJS(Courses_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
+const FILTERS = [
+  { id: "all", label: "All" },
+  { id: "course", label: "Courses" },
+  { id: "workshop", label: "Workshops" },
+  { id: "active", label: "In progress" },
+  { id: "done", label: "Completed" }
+];
+const statusOf = (c) => {
+  const pct = Number(c.progress || 0);
+  return pct >= 100 ? "done" : pct > 0 ? "active" : "new";
+};
+function Courses() {
+  const { courses = [] } = (0, import_inertia_react.usePage)().props;
+  const initial = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("type") : null;
+  const [filter, setFilter] = (0, import_react.useState)(FILTERS.some((f) => f.id === initial) ? initial : "all");
+  const [query, setQuery] = (0, import_react.useState)("");
+  const counts = (0, import_react.useMemo)(() => ({
+    all: courses.length,
+    course: courses.filter((c) => c.type === "course").length,
+    workshop: courses.filter((c) => c.type === "workshop").length,
+    active: courses.filter((c) => statusOf(c) === "active").length,
+    done: courses.filter((c) => statusOf(c) === "done").length
+  }), [courses]);
+  const shown = courses.filter((c) => {
+    if (filter === "course" || filter === "workshop") {
+      if (c.type !== filter) return false;
+    }
+    if (filter === "active" && statusOf(c) !== "active") return false;
+    if (filter === "done" && statusOf(c) !== "done") return false;
+    const q = query.trim().toLowerCase();
+    return !q || [c.title, c.sub_title, c.medium].filter(Boolean).join(" ").toLowerCase().includes(q);
+  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_StudioLayout.default,
+    {
+      title: "My courses",
+      subtitle: "Your live courses and workshops. Open one to continue learning, see its schedule and submit work.",
+      active: "/user/my-courses",
+      children: courses.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-2xl font-black text-ink", children: "You haven't joined a course yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: "Choose a course or workshop to unlock your lessons, assignments and portfolio." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold hover:bg-brand-dark", children: "Choose a course" })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex flex-col md:flex-row md:items-center gap-4 justify-between", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex flex-wrap gap-2", role: "group", "aria-label": "Filter courses", children: FILTERS.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+            "button",
+            {
+              type: "button",
+              onClick: () => setFilter(f.id),
+              "aria-pressed": filter === f.id,
+              className: `h-10 px-4 rounded-full text-sm font-bold border ${filter === f.id ? "bg-ink text-white border-ink" : "bg-white text-ink border-gray-300 hover:border-ink"}`,
+              children: [
+                f.label,
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: filter === f.id ? "text-gray-300" : "text-gray-500", children: counts[f.id] })
+              ]
+            },
+            f.id
+          )) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "relative block st-search", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Search my courses" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "input",
+              {
+                type: "search",
+                value: query,
+                onChange: (e) => setQuery(e.target.value),
+                placeholder: "Search courses",
+                className: "w-full h-11 pl-10 pr-4 rounded-full border border-gray-300 focus:outline-none st-search__input"
+              }
+            )
+          ] })
+        ] }),
+        shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-10 text-center text-gray-600", children: [
+          "Nothing matches this filter. ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "font-bold underline", onClick: () => {
+            setFilter("all");
+            setQuery("");
+          }, children: "Show all" })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6", children: shown.map((c) => {
+          const pct = Number(c.progress || 0);
+          const st = statusOf(c);
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg transition flex flex-col", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/user/course/${c.order_id}`, className: "relative block h-40 overflow-hidden", style: { background: "linear-gradient(135deg,#111,#3b0a24 60%,#e5156b)" }, tabIndex: -1, "aria-hidden": "true", children: [
+              c.photo && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: `/storage/uploads/courses/${c.course_id}/${c.photo}`, alt: "", className: "absolute inset-0 w-full h-full object-cover", onError: (ev) => {
+                ev.currentTarget.style.display = "none";
+              } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-bold ${st === "done" ? "bg-green-600 text-white" : st === "active" ? "bg-white text-ink" : "bg-brand text-white"}`, children: st === "done" ? "Completed" : st === "active" ? "In progress" : "Not started" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "p-5 flex-1 flex flex-col", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-mono text-xs uppercase tracking-widest text-gray-500", children: [
+                c.type === "workshop" ? "Workshop" : "Course",
+                c.medium ? ` \xB7 ${c.medium}` : "",
+                c.duration ? ` \xB7 ${c.duration} weeks` : ""
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-1 text-lg font-extrabold text-ink", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/user/course/${c.order_id}`, className: "st-link", children: c.title }) }),
+              c.sub_title && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-1 text-sm text-gray-600 st-clamp2", children: c.sub_title }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4", "aria-label": `Progress ${pct}%`, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex justify-between text-sm", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "text-gray-600", children: [
+                    c.completed_lessons,
+                    "/",
+                    c.total_lessons,
+                    " lessons"
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "font-bold text-ink", children: [
+                    pct,
+                    "%"
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-1.5 h-2 rounded-full bg-gray-100 overflow-hidden", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-full bg-brand", style: { width: `${pct}%` } }) })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-5 grid grid-cols-2 gap-2 mt-auto pt-5", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/user/course/${c.order_id}/resume`, className: "inline-flex justify-center items-center h-11 rounded-full bg-ink text-white text-sm font-bold hover:bg-gray-800", children: st === "done" ? "Revisit lessons" : st === "active" ? "Continue" : "Start learning" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/user/course/${c.order_id}`, className: "inline-flex justify-center items-center h-11 rounded-full border border-gray-300 text-sm font-bold hover:border-ink", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-list-ul mr-2", "aria-hidden": "true" }),
+                  "Course overview"
+                ] })
+              ] }),
+              c.schedule_pdf && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                "a",
+                {
+                  href: `/storage/uploads/courses/schedule/${c.course_id}/${c.schedule_pdf}`,
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  className: "mt-3 text-center text-sm font-semibold text-gray-500 hover:text-ink",
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o mr-1", "aria-hidden": "true" }),
+                    "Download schedule (PDF)"
+                  ]
+                }
+              )
+            ] })
+          ] }, c.course_id);
+        }) })
+      ] })
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Checkout/Course.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Course_exports = {};
+__export(Course_exports, {
+  default: () => CheckoutCourse
+});
+module.exports = __toCommonJS(Course_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_api = __webpack_require__("./resources/js/Components/Auth/api.js");
+const COUNTRIES = [
+  "India",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "United Arab Emirates",
+  "Singapore",
+  "Saudi Arabia",
+  "Qatar",
+  "Kuwait",
+  "Oman",
+  "Bahrain",
+  "Germany",
+  "France",
+  "Netherlands",
+  "Ireland",
+  "New Zealand",
+  "Malaysia",
+  "Nepal",
+  "Sri Lanka",
+  "Bangladesh",
+  "South Africa",
+  "Other"
+];
+const fmt = (amount, currency) => {
+  const n = Number(amount || 0);
+  return currency === "USD" ? "$" + n.toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) : "\u20B9" + n.toLocaleString("en-IN", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+};
+function loadRazorpay() {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) return resolve(window.Razorpay);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(window.Razorpay);
+    s.onerror = () => reject(new Error("Could not load the payment window. Check your connection and try again."));
+    document.body.appendChild(s);
+  });
+}
+function Step({ n, title, state, children, aside }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: `co-step is-${state}`, "aria-labelledby": `co-step-${n}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "co-step__head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-step__num", "aria-hidden": "true", children: state === "done" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }) : n }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: `co-step-${n}`, children: title }),
+      aside
+    ] }),
+    children && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "co-step__body", children })
+  ] });
+}
+function Field({ id, label, error, children, wide, optional }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `co-field ${wide ? "co-field--wide" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { htmlFor: id, children: [
+      label,
+      optional && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-muted", children: " (optional)" })
+    ] }),
+    children,
+    error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ac-field__error", id: `${id}-err`, children: error })
+  ] });
+}
+function CheckoutCourse() {
+  const { course, prices, methods = {}, auth, addresses = [], order, enrolled, returnTo, providers = {}, notice } = (0, import_inertia_react.usePage)().props;
+  const user = auth && auth.user;
+  const primary = addresses.find((a) => String(a.primary) === "1" || a.primary === true) || addresses[0];
+  const initial = {
+    billing_name: order && order.billing_name || primary && primary.address_name || user && user.name || "",
+    billing_address: order && order.billing_address || primary && primary.address || "",
+    billing_city: order && order.billing_city || primary && primary.city || "",
+    billing_state: order && order.billing_state || primary && primary.state || "",
+    billing_zipcode: order && order.billing_zipcode || primary && primary.zipcode || "",
+    billing_country: order && order.billing_country || primary && primary.country || "India"
+  };
+  const [form, setForm] = (0, import_react.useState)(initial);
+  const [saveAddress, setSaveAddress] = (0, import_react.useState)(addresses.length === 0);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [orderId, setOrderId] = (0, import_react.useState)(order && order.billing_address ? order.id : null);
+  const [editing, setEditing] = (0, import_react.useState)(!(order && order.billing_address));
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [message, setMessage] = (0, import_react.useState)(notice === "cancelled" ? { tone: "info", text: "You cancelled the PayPal payment. No money was taken - choose a method to try again." } : notice === "failed" ? { tone: "error", text: "Your payment was not completed. No money was taken. Please try again." } : null);
+  const india = /^india$/i.test(String(form.billing_country || "").trim());
+  const [method, setMethod] = (0, import_react.useState)(methods.free ? "free" : india || !methods.paypal ? "razorpay" : "paypal");
+  const [test, setTest] = (0, import_react.useState)(null);
+  const currency = method === "paypal" ? "USD" : "INR";
+  const total = method === "paypal" ? prices.usd : prices.inr;
+  const signIn = (path) => `${path}?return_to=${encodeURIComponent(returnTo)}`;
+  const step = !user ? 1 : editing || !orderId ? 2 : 3;
+  const set = (k) => (e) => setForm(__spreadProps(__spreadValues({}, form), { [k]: e.target.value }));
+  const pickAddress = (a) => {
+    setForm({
+      billing_name: a.address_name || form.billing_name,
+      billing_address: a.address || "",
+      billing_city: a.city || "",
+      billing_state: a.state || "",
+      billing_zipcode: a.zipcode || "",
+      billing_country: a.country || "India"
+    });
+    setSaveAddress(false);
+  };
+  const saveBilling = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setErrors({});
+    setMessage(null);
+    try {
+      const r = await (0, import_api.authPost)("/checkout/billing", __spreadProps(__spreadValues({}, form), { save_address: saveAddress }));
+      setOrderId(r.orderId);
+      setEditing(false);
+      setMethod(methods.free ? "free" : /^india$/i.test(form.billing_country.trim()) || !methods.paypal ? "razorpay" : "paypal");
+    } catch (err) {
+      if (err.data && err.data.enrolled) window.location.reload();
+      setErrors(err.fieldErrors || {});
+      setMessage({ tone: "error", text: err.message });
+    }
+    setBusy(false);
+  };
+  const pay = async () => {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const r = await (0, import_api.authPost)("/checkout/pay", { orderId, method });
+      if (r.gateway === "done") {
+        window.location.assign(r.redirect);
+        return;
+      }
+      if (r.gateway === "paypal") {
+        window.location.assign(r.approveUrl);
+        return;
+      }
+      if (r.gateway === "test") {
+        setTest(r);
+        setBusy(false);
+        return;
+      }
+      const Razorpay = await loadRazorpay();
+      const rzp = new Razorpay({
+        key: r.key,
+        amount: r.amount,
+        currency: r.currency,
+        order_id: r.razorpayOrderId,
+        name: r.name,
+        description: r.description,
+        prefill: r.prefill || {},
+        theme: { color: "#e5156b" },
+        handler: async (resp) => {
+          setBusy(true);
+          try {
+            const v = await (0, import_api.authPost)("/checkout/razorpay/verify", __spreadValues({ orderId }, resp));
+            window.location.assign(v.redirect);
+          } catch (err) {
+            setMessage({ tone: "error", text: err.message });
+            setBusy(false);
+          }
+        },
+        modal: { ondismiss: () => {
+          setBusy(false);
+          setMessage({ tone: "info", text: "Payment window closed. No money was taken - you can try again any time." });
+        } }
+      });
+      rzp.on("payment.failed", (resp) => {
+        setMessage({ tone: "error", text: resp && resp.error && resp.error.description || "The payment failed. No money was taken. Please try again." });
+      });
+      rzp.open();
+    } catch (err) {
+      if (err.data && err.data.enrolled) {
+        window.location.reload();
+        return;
+      }
+      setMessage({ tone: "error", text: err.message });
+      setBusy(false);
+    }
+  };
+  const completeTest = async () => {
+    setBusy(true);
+    try {
+      const r = await (0, import_api.authPost)("/checkout/test-pay", { orderId });
+      window.location.assign(r.redirect);
+    } catch (err) {
+      setMessage({ tone: "error", text: err.message });
+      setBusy(false);
+    }
+  };
+  const facts = (0, import_react.useMemo)(() => [
+    course.start_date && ["fa-calendar", `Starts ${course.start_date}`],
+    course.duration && ["fa-clock-o", `${course.duration} weeks${course.hours_per_week ? ` \xB7 ${course.hours_per_week} hrs/week` : ""}`],
+    course.sessions && ["fa-video-camera", `${course.sessions} live sessions`],
+    course.age_group && ["fa-user", `Age ${course.age_group}`]
+  ].filter(Boolean), [course]);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: "Checkout", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide co", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "dm-crumbs", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: "Home" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", children: "Courses" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/course/${course.slug}`, children: course.title }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Checkout" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-eyebrow", children: "Enroll" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Checkout" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "co-secure", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+        " Secure checkout"
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-grid", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-main", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "#co-summary", className: "co-mini", "aria-label": "Order summary", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-course__img", style: course.image ? { backgroundImage: `url("${course.image}")` } : void 0, "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-mini__title", children: course.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: methods.free ? "Free" : fmt(total, currency) })
+        ] }),
+        enrolled ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-card co-enrolled", role: "status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check-circle", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "You're already enrolled" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+              "This ",
+              course.kind.toLowerCase(),
+              " is in your studio. Pick up right where you left off."
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: enrolled.classroom, className: "dm-btn dm-btn--brand dm-btn--lg", children: "Go to course" })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          message && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `ac-alert ${message.tone === "error" ? "ac-alert--error" : "co-alert--info"}`, role: "alert", children: message.text }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            Step,
+            {
+              n: 1,
+              title: "Your account",
+              state: user ? "done" : "active",
+              aside: user ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "co-step__meta", children: [
+                user.name,
+                user.email ? ` \xB7 ${user.email}` : ""
+              ] }) : null,
+              children: !user && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-signin", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Sign in or create a free account. Your lessons, progress and certificate are saved to it." }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-signin__social", children: [
+                  providers.google && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { className: "co-social", href: signIn("/social-login/google"), children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/google-icon.png", alt: "" }),
+                    " Continue with Google"
+                  ] }),
+                  providers.facebook && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { className: "co-social co-social--fb", href: signIn("/social-login/facebook"), children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-facebook-official", "aria-hidden": "true" }),
+                    " Continue with Facebook"
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-signin__main", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "dm-btn dm-btn--brand dm-btn--lg", href: signIn("/join"), children: "Create free account" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "dm-btn dm-btn--line dm-btn--lg", href: signIn("/login"), children: "Log in" })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted co-small", children: "You can also log in with a code sent to your phone or a link sent by e-mail." })
+              ] })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+            Step,
+            {
+              n: 2,
+              title: "Billing details",
+              state: step === 2 ? "active" : step > 2 ? "done" : "todo",
+              aside: step > 2 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setEditing(true), children: "Edit" }) : null,
+              children: [
+                step === 2 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: saveBilling, noValidate: true, children: [
+                  addresses.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "co-saved", role: "group", "aria-label": "Saved addresses", children: addresses.map((a) => {
+                    const on = a.address === form.billing_address && a.zipcode === form.billing_zipcode;
+                    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: `co-saved__item ${on ? "is-on" : ""}`, "aria-pressed": on, onClick: () => pickAddress(a), children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: a.address_name }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: [a.address, a.city, a.zipcode, a.country].filter(Boolean).join(", ") })
+                    ] }, a.id);
+                  }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-fields", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-name", label: "Full name", error: errors.billing_name, wide: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-name", className: `ac-input ${errors.billing_name ? "is-invalid" : ""}`, autoComplete: "name", value: form.billing_name, onChange: set("billing_name") }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-address", label: "Street address", error: errors.billing_address, wide: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-address", className: `ac-input ${errors.billing_address ? "is-invalid" : ""}`, autoComplete: "street-address", value: form.billing_address, onChange: set("billing_address"), placeholder: "House no., street, area" }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-city", label: "City", error: errors.billing_city, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-city", className: `ac-input ${errors.billing_city ? "is-invalid" : ""}`, autoComplete: "address-level2", value: form.billing_city, onChange: set("billing_city") }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-state", label: "State / region", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-state", className: "ac-input", autoComplete: "address-level1", value: form.billing_state, onChange: set("billing_state") }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-zip", label: "PIN / postal code", error: errors.billing_zipcode, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-zip", className: `ac-input ${errors.billing_zipcode ? "is-invalid" : ""}`, autoComplete: "postal-code", value: form.billing_zipcode, onChange: set("billing_zipcode") }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-country", label: "Country", error: errors.billing_country, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "co-country", className: "ac-input", autoComplete: "country-name", value: form.billing_country, onChange: set("billing_country"), children: [
+                      !COUNTRIES.includes(form.billing_country) && form.billing_country && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: form.billing_country, children: form.billing_country }),
+                      COUNTRIES.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: c, children: c }, c))
+                    ] }) })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "ac-check co-save", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: saveAddress, onChange: (e) => setSaveAddress(e.target.checked) }),
+                    " Save this address to my account"
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--lg co-next", disabled: busy, children: [
+                    busy ? "Saving\u2026" : "Continue to payment",
+                    " ",
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+                  ] })
+                ] }),
+                step > 2 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "co-recap", children: [form.billing_name, form.billing_address, form.billing_city, form.billing_state, form.billing_zipcode, form.billing_country].filter(Boolean).join(", ") })
+              ]
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Step, { n: 3, title: "Payment", state: step === 3 ? "active" : "todo", children: step === 3 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            methods.free ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+              "This ",
+              course.kind.toLowerCase(),
+              " is free - no payment needed."
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-methods", role: "radiogroup", "aria-label": "Payment method", children: [
+              methods.razorpay && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `co-method ${method === "razorpay" ? "is-on" : ""}`, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "method", value: "razorpay", checked: method === "razorpay", onChange: () => setMethod("razorpay") }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-method__icon", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-mobile" }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "co-method__text", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "UPI, cards & NetBanking" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Google Pay, PhonePe, Paytm, Visa, Mastercard, RuPay \xB7 secured by Razorpay" })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-method__price", children: fmt(prices.inr, "INR") })
+              ] }),
+              methods.paypal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `co-method ${method === "paypal" ? "is-on" : ""}`, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "method", value: "paypal", checked: method === "paypal", onChange: () => setMethod("paypal") }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-method__icon", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paypal" }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "co-method__text", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "PayPal" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Pay in US dollars with your PayPal balance or card \xB7 best outside India" })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-method__price", children: fmt(prices.usd, "USD") })
+              ] }),
+              !methods.razorpay && !methods.paypal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ac-alert ac-alert--error", children: [
+                "Online payments aren't available right now. Please ",
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/contact", style: { textDecoration: "underline" }, children: "contact us" }),
+                " to enroll."
+              ] })
+            ] }),
+            methods.testMode && !methods.free && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "co-test", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-flask", "aria-hidden": "true" }),
+              " Test mode: payment keys are not set, so no real money is charged."
+            ] }),
+            test ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-testpay", role: "dialog", "aria-label": "Test payment", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+                "Simulated payment of ",
+                fmt(test.amount, test.currency)
+              ] }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted co-small", children: "This only happens while PAYMENT_TEST_MODE is on and no gateway keys are configured." }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--brand", onClick: completeTest, disabled: busy, children: busy ? "Completing\u2026" : "Complete test payment" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--line", onClick: () => setTest(null), children: "Cancel" })
+              ] })
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+              "button",
+              {
+                type: "button",
+                className: "dm-btn dm-btn--brand dm-btn--lg co-pay",
+                onClick: pay,
+                disabled: busy || !methods.free && !methods.razorpay && !methods.paypal,
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+                  busy ? "Opening secure payment\u2026" : methods.free ? "Enroll for free" : `Pay ${fmt(total, currency)}`
+                ]
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-muted co-small co-center", children: [
+              "By continuing you agree to our ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/terms-conditions", children: "Terms" }),
+              " and ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/privacy-policy", children: "Privacy policy" }),
+              "."
+            ] })
+          ] }) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "co-summary", id: "co-summary", "aria-label": "Order summary", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "co-summary__title", children: "Order summary" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/course/${course.slug}`, className: "co-course", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-course__img", style: course.image ? { backgroundImage: `url("${course.image}")` } : void 0, "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "wl-item__kind", children: [
+                course.kind,
+                course.medium ? ` \xB7 ${course.medium}` : ""
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: course.title }),
+              course.teacher && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                "with ",
+                course.teacher
+              ] })
+            ] })
+          ] }),
+          facts.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "co-facts", children: facts.map(([icon, text]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+            text
+          ] }, text)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "co-includes", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+              "Live classes with personal feedback"
+            ] }),
+            course.certificate && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+              "Verifiable certificate on completion"
+            ] }),
+            course.materials && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+              "Study materials to download"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+              "Instant access to your classroom after payment"
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "co-total", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Course fee" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: methods.free ? "Free" : fmt(total, currency) })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Taxes" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: "Included" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-total__sum", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Total" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: methods.free ? "Free" : fmt(total, currency) })
+            ] })
+          ] }),
+          !methods.free && methods.paypal && methods.razorpay && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-muted co-small", children: [
+            "Paying from outside India? Choose PayPal to pay ",
+            fmt(prices.usd, "USD"),
+            "."
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "co-trust", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shield", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Payments are encrypted and handled by Razorpay or PayPal - we never see your card details." })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-envelope-o", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "You'll get an e-mail receipt and a link to your classroom." })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-comments-o", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              "Questions before you pay? ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/contact", children: "Ask the studio" }),
+              "."
+            ] })
+          ] })
+        ] })
+      ] })
+    ] })
+  ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Checkout/Result.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Result_exports = {};
+__export(Result_exports, {
+  default: () => CheckoutResult
+});
+module.exports = __toCommonJS(Result_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+const fmt = (amount, currency) => {
+  const n = Number(amount || 0);
+  if (!n) return "Free";
+  return currency === "USD" ? "$" + n.toLocaleString("en-US", { maximumFractionDigits: 2 }) : "\u20B9" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+};
+const niceDate = (v) => {
+  const d = v ? new Date(String(v).replace(" ", "T")) : null;
+  return d && !isNaN(d) ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
+};
+function CheckoutResult() {
+  const { paid, order, course } = (0, import_inertia_react.usePage)().props;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: paid ? "You are enrolled" : "Payment not completed", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide co co-result", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `co-card co-result__card ${paid ? "is-ok" : "is-bad"}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-result__icon", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${paid ? "fa-check" : "fa-times"}` }) }),
+    paid ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-eyebrow", children: "Payment successful" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "You're enrolled!" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "co-result__lede", children: [
+        "Welcome to ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: course && course.title }),
+        ". Your classroom is ready in My studio",
+        order.email ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          ", and a receipt is on its way to ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: order.email })
+        ] }) : null,
+        "."
+      ] })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-eyebrow", children: "Payment not completed" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Your payment didn't go through" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "co-result__lede", children: "No money was taken. You can try again with the same or a different payment method." })
+    ] }),
+    course && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-course co-result__course", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-course__img", style: course.image ? { backgroundImage: `url("${course.image}")` } : void 0, "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "wl-item__kind", children: [
+          course.kind,
+          course.medium ? ` \xB7 ${course.medium}` : ""
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: course.title }),
+        course.start_date && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          "Starts ",
+          course.start_date
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "co-total co-result__facts", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Order number" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: order.number })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Amount" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: fmt(order.amount, order.currency) })
+      ] }),
+      order.method && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Paid with" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: order.method })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Date" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: niceDate(order.date) })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "co-row co-result__actions", children: paid ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/classroom/${course ? course.id : ""}`, className: "dm-btn dm-btn--brand dm-btn--lg", children: "Start learning" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard", className: "dm-btn dm-btn--line dm-btn--lg", children: "Go to My studio" })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: course ? `/checkout?course=${course.slug}` : "/checkout", className: "dm-btn dm-btn--brand dm-btn--lg", children: "Try again" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/contact", className: "dm-btn dm-btn--line dm-btn--lg", children: "Contact us" })
+    ] }) }),
+    paid && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-muted co-small", children: [
+      "Find this order any time under ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/user/orders", children: "My account \u203A Your orders" }),
+      "."
+    ] })
+  ] }) }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Course/Overview.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Overview_exports = {};
+__export(Overview_exports, {
+  default: () => Overview
+});
+module.exports = __toCommonJS(Overview_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_CourseShell = __toESM(__webpack_require__("./resources/js/Components/Course/CourseShell.js"));
+function Overview() {
+  const { course, syllabus = [], progress, resume, projects = [], certificate } = (0, import_inertia_react.usePage)().props;
+  const resumeModule = resume ? resume.moduleId : syllabus[0] && syllabus[0].id;
+  const [open, setOpen] = (0, import_react.useState)(() => /* @__PURE__ */ new Set([String(resumeModule)]));
+  const toggle = (id) => setOpen((s) => {
+    const n = new Set(s);
+    const k = String(id);
+    n.has(k) ? n.delete(k) : n.add(k);
+    return n;
+  });
+  const allDone = progress.total > 0 && progress.done === progress.total;
+  const cta = !resume ? null : allDone ? "Review the course" : resume.started ? `Resume: ${resume.title}` : "Start learning";
+  const facts = [
+    course.start_date && ["fa-calendar", `Starts ${course.start_date}`],
+    course.duration && ["fa-clock-o", `${course.duration} weeks${course.hours_per_week ? ` \xB7 ${course.hours_per_week} hrs/week` : ""}`],
+    course.sessions && ["fa-video-camera", `${course.sessions} live sessions`],
+    syllabus.length > 0 && ["fa-list-ul", `${syllabus.length} module${syllabus.length === 1 ? "" : "s"} \xB7 ${progress.total} lesson${progress.total === 1 ? "" : "s"}`]
+  ].filter(Boolean);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CourseShell.default, { course, back: { href: "/user/my-courses", label: "My courses" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", { className: "ac-wide cl-overview", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "cl-hero", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cl-hero__img", style: course.image ? { backgroundImage: `url("${course.image}")` } : void 0, "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-hero__body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ac-eyebrow", children: [
+          course.kind,
+          course.medium ? ` \xB7 ${course.medium}` : ""
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: course.title }),
+        course.sub_title && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "cl-hero__lede", children: course.sub_title }),
+        course.teacher && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "cl-hero__teacher", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-user", "aria-hidden": "true" }),
+          " with ",
+          course.teacher
+        ] }),
+        facts.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "cl-facts", children: facts.map(([i, t]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${i}`, "aria-hidden": "true" }),
+          t
+        ] }, t)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-hero__progress", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-hero__progress-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: allDone ? "Course completed" : progress.done > 0 ? "Your progress" : "Not started yet" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              progress.done,
+              " of ",
+              progress.total,
+              " lessons \xB7 ",
+              progress.percent,
+              "%"
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CourseShell.ProgressBar, { percent: progress.percent })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-hero__actions", children: [
+          resume ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: (0, import_CourseShell.lessonUrl)(resume.moduleId, resume.lessonId), className: "dm-btn dm-btn--brand dm-btn--lg", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play", "aria-hidden": "true" }),
+            " ",
+            cta
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-muted", children: "Lessons for this course will appear here soon." }),
+          course.schedule_pdf && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: course.schedule_pdf, target: "_blank", rel: "noopener noreferrer", className: "dm-btn dm-btn--line dm-btn--lg", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o", "aria-hidden": "true" }),
+            " Class schedule"
+          ] })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-cols", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "cl-syllabus", id: "syllabus", "aria-labelledby": "syllabus-title", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "syllabus-title", children: "Syllabus" }),
+        syllabus.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted", children: "The syllabus will be published before the first class." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "cl-modules", children: syllabus.map((m, mi) => {
+          const isOpen = open.has(String(m.id));
+          const doneCount = m.lessons.filter((l) => l.done).length;
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: `cl-module ${isOpen ? "is-open" : ""}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "cl-module__head", "aria-expanded": isOpen, "aria-controls": `mod-${m.id}`, onClick: () => toggle(m.id), children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `cl-module__num ${m.done ? "is-done" : ""}`, "aria-hidden": "true", children: m.done ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }) : mi + 1 }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "cl-module__title", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+                  "Module ",
+                  mi + 1,
+                  ": ",
+                  m.title
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                  m.lessons.length,
+                  " lesson",
+                  m.lessons.length === 1 ? "" : "s",
+                  m.duration ? ` \xB7 ${m.duration}` : "",
+                  " \xB7 ",
+                  doneCount,
+                  "/",
+                  m.lessons.length,
+                  " done"
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa fa-angle-${isOpen ? "up" : "down"} cl-module__chev`, "aria-hidden": "true" })
+            ] }),
+            isOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "cl-lessons", id: `mod-${m.id}`, children: [
+              m.lessons.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: "cl-lesson cl-lesson--empty", children: "Lessons coming soon" }),
+              m.lessons.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: (0, import_CourseShell.lessonUrl)(m.id, l.id), className: `cl-lesson ${l.done ? "is-done" : ""} ${resume && resume.lessonId === l.id ? "is-next" : ""}`, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cl-lesson__icon", "aria-hidden": "true", children: l.done ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }) : l.number }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cl-lesson__title", children: l.title }),
+                Number(l.tasks) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "cl-chip", children: [
+                  l.tasks,
+                  " task",
+                  Number(l.tasks) === 1 ? "" : "s"
+                ] }),
+                resume && resume.lessonId === l.id && !allDone && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cl-chip cl-chip--brand", children: "Up next" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: l.done ? "(completed)" : "" })
+              ] }) }, l.id))
+            ] })
+          ] }, m.id);
+        }) }),
+        projects.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-projects", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [
+            "Course project",
+            projects.length > 1 ? "s" : ""
+          ] }),
+          projects.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-project", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: p.project_title }),
+              p.project_description && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { dangerouslySetInnerHTML: { __html: String(p.project_description).replace(/<script[\s\S]*?<\/script>/gi, "") } })
+            ] })
+          ] }, p.id)),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/submissions?course=${course.id}`, className: "dm-btn dm-btn--line", children: "Submit your work" })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "cl-side", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate", "aria-hidden": "true" }),
+            " Certificate"
+          ] }),
+          certificate.issued ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Your certificate for this course is ready." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: certificate.download, className: "dm-btn dm-btn--brand dm-btn--block", children: "Download certificate" })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Complete every lesson and get your submission approved to earn your verifiable certificate." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/certificates", className: "dm-btn dm-btn--line dm-btn--block", children: "Check my progress" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-upload", "aria-hidden": "true" }),
+            " Share your work"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+            "Upload your assignment for personal feedback from ",
+            course.teacher || "your instructor",
+            "."
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/submissions?course=${course.id}`, className: "dm-btn dm-btn--line dm-btn--block", children: "Submit work" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-card cl-card--soft", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-question-circle-o", "aria-hidden": "true" }),
+            " Need help?"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "See answers to common questions or write to the studio." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/user/help", className: "dm-linkbtn", children: "Help & support" })
+        ] })
+      ] })
+    ] })
+  ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Course/Learn.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Learn_exports = {};
+__export(Learn_exports, {
+  default: () => Learn
+});
+module.exports = __toCommonJS(Learn_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_CourseShell = __toESM(__webpack_require__("./resources/js/Components/Course/CourseShell.js"));
+const SIDEBAR_KEY = "ac.cl.sidebar";
+const readPref = () => {
+  try {
+    return window.localStorage.getItem(SIDEBAR_KEY) !== "closed";
+  } catch (e) {
+    return true;
+  }
+};
+const writePref = (open) => {
+  try {
+    window.localStorage.setItem(SIDEBAR_KEY, open ? "open" : "closed");
+  } catch (e) {
+  }
+};
+const embed = (url) => {
+  const m = String(url || "").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+  return m ? `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0` : null;
+};
+function Syllabus({ syllabus, current, done, onPick }) {
+  const [open, setOpen] = (0, import_react.useState)(() => new Set(syllabus.map((m) => String(m.id))));
+  const toggle = (id) => setOpen((s) => {
+    const n = new Set(s);
+    n.has(id) ? n.delete(id) : n.add(id);
+    return n;
+  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "cl-nav", "aria-label": "Course lessons", children: syllabus.map((m, mi) => {
+    const id = String(m.id);
+    const isOpen = open.has(id);
+    const count = m.lessons.filter((l) => done.has(String(l.id))).length;
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-nav__module", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "cl-nav__head", "aria-expanded": isOpen, onClick: () => toggle(id), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+            "Module ",
+            mi + 1
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: m.title })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "cl-nav__count", children: [
+          count,
+          "/",
+          m.lessons.length
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa fa-angle-${isOpen ? "up" : "down"}`, "aria-hidden": "true" })
+      ] }),
+      isOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
+        m.lessons.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: "cl-nav__empty", children: "Lessons coming soon" }),
+        m.lessons.map((l) => {
+          const isDone = done.has(String(l.id));
+          const isCur = current && String(current.id) === String(l.id);
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+            import_inertia_react.Link,
+            {
+              href: (0, import_CourseShell.lessonUrl)(m.id, l.id),
+              onClick: onPick,
+              "aria-current": isCur ? "page" : void 0,
+              className: `cl-nav__lesson ${isCur ? "is-current" : ""} ${isDone ? "is-done" : ""}`,
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cl-nav__dot", "aria-hidden": "true", children: isDone ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }) : l.number }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cl-nav__title", children: l.title }),
+                isDone && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "(completed)" })
+              ]
+            }
+          ) }, l.id);
+        })
+      ] })
+    ] }, id);
+  }) });
+}
+function Learn() {
+  const { course, syllabus = [], progress: initialProgress, module: module2, lesson, prev, next } = (0, import_inertia_react.usePage)().props;
+  const initialDone = (0, import_react.useMemo)(() => new Set(syllabus.flatMap((m) => m.lessons.filter((l) => l.done).map((l) => String(l.id)))), [syllabus]);
+  const [done, setDone] = (0, import_react.useState)(initialDone);
+  const [progress, setProgress] = (0, import_react.useState)(initialProgress);
+  const [sidebar, setSidebar] = (0, import_react.useState)(readPref);
+  const [drawer, setDrawer] = (0, import_react.useState)(false);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [error, setError] = (0, import_react.useState)(null);
+  (0, import_react.useEffect)(() => {
+    if (!drawer) return void 0;
+    const onKey = (e) => {
+      if (e.key === "Escape") setDrawer(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [drawer]);
+  const isDone = lesson && done.has(String(lesson.id));
+  const toggleSidebar = () => {
+    if (window.matchMedia && window.matchMedia("(max-width: 960px)").matches) {
+      setDrawer((d) => !d);
+      return;
+    }
+    setSidebar((s) => {
+      writePref(!s);
+      return !s;
+    });
+  };
+  const complete = () => {
+    if (!lesson || busy) return;
+    setBusy(true);
+    setError(null);
+    import_axios.default.post(`/api/classroom/${course.id}/lessons/${lesson.id}/complete`).then((r) => {
+      const ids = (r.data.completed || []).map(String);
+      const set = new Set(ids);
+      setDone(set);
+      const total = initialProgress.total;
+      const count = syllabus.reduce((n, m) => n + m.lessons.filter((l) => set.has(String(l.id))).length, 0);
+      setProgress({ done: count, total, percent: total ? Math.round(count * 100 / total) : 0 });
+    }).catch((e) => setError(e.response && e.response.data && e.response.data.message || "Could not save your progress. Please try again.")).finally(() => setBusy(false));
+  };
+  const src = lesson && lesson.video ? embed(lesson.video.url) : null;
+  const toggleLabel = drawer || sidebar ? "Hide lessons" : "Show lessons";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_CourseShell.default,
+    {
+      title: lesson ? `${lesson.title} \xB7 ${course.title}` : course.title,
+      course,
+      progress,
+      footer: false,
+      back: { href: `/user/course/${course.orderId}`, label: "Course overview" },
+      actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "cl-bar__toggle", onClick: toggleSidebar, "aria-controls": "cl-sidebar", "aria-expanded": drawer || sidebar, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-list-ul", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: toggleLabel })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `cl-learn ${sidebar ? "" : "is-collapsed"} ${drawer ? "is-drawer" : ""}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cl-scrim", onClick: () => setDrawer(false), "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { id: "cl-sidebar", className: "cl-sidebar", "aria-label": "Lessons", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-sidebar__head", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Course content" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              progress.done,
+              "/",
+              progress.total,
+              " done"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "cl-sidebar__close", onClick: () => setDrawer(false), "aria-label": "Close lessons", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cl-sidebar__progress", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CourseShell.ProgressBar, { percent: progress.percent }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Syllabus, { syllabus, current: lesson, done, onPick: () => setDrawer(false) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { className: "cl-main", id: "lesson", children: !lesson ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-empty", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-hourglass-half", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: module2.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "The lessons for this module haven't been published yet. Check back soon." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/user/course/${course.orderId}`, className: "dm-btn dm-btn--line", children: "Back to the course overview" })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "cl-lessonview", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ac-eyebrow", children: [
+            module2.title,
+            " \xB7 Lesson ",
+            lesson.number,
+            " of ",
+            lesson.total
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: lesson.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `cl-media ${src ? "" : "cl-media--ph"}`, children: src ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "iframe",
+            {
+              src,
+              title: lesson.video.title || lesson.title,
+              loading: "lazy",
+              allow: "accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen",
+              allowFullScreen: true
+            }
+          ) : lesson.video && lesson.video.url ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { className: "cl-media__ph", href: lesson.video.url, target: "_blank", rel: "noopener noreferrer", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play-circle", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              "Watch \u201C",
+              lesson.video.title,
+              "\u201D"
+            ] })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-media__ph", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-video-camera", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "This lesson is taught live. The recording appears here after the class." })
+          ] }) }),
+          lesson.description ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cl-prose", dangerouslySetInnerHTML: { __html: lesson.description } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted", children: "Notes for this lesson will be added by your instructor." }),
+          (lesson.pdf || lesson.tasks.length > 0) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-resources", children: [
+            lesson.pdf && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: lesson.pdf, target: "_blank", rel: "noopener noreferrer", className: "cl-resource", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o", "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Lesson notes" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "PDF download" })
+              ] })
+            ] }),
+            lesson.tasks.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/user/course/module/lesson/task/${t.id}`, className: "cl-resource", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-pencil-square-o", "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.title }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Practice task \xB7 submit your answer" })
+              ] })
+            ] }, t.id))
+          ] }),
+          error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "cl-error", role: "alert", children: error }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-pager", children: [
+            prev ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_inertia_react.Link, { href: (0, import_CourseShell.lessonUrl)(prev.moduleId, prev.lessonId), className: "cl-pager__link", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-left", "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Previous" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: prev.title })
+              ] })
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+            isDone ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "cl-done", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+              " Completed"
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--ink", onClick: complete, disabled: busy, children: busy ? "Saving\u2026" : "Mark as complete" }),
+            next ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_inertia_react.Link, { href: (0, import_CourseShell.lessonUrl)(next.moduleId, next.lessonId), className: "cl-pager__link cl-pager__link--next", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Next" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: next.title })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/user/course/${course.orderId}`, className: "cl-pager__link cl-pager__link--next", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Finished?" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Back to overview" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-flag-checkered", "aria-hidden": "true" })
+            ] })
+          ] })
+        ] }) })
+      ] })
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Course/CourseShell.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var CourseShell_exports = {};
+__export(CourseShell_exports, {
+  ProgressBar: () => ProgressBar,
+  default: () => CourseShell,
+  lessonUrl: () => lessonUrl
+});
+module.exports = __toCommonJS(CourseShell_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteHeader = __toESM(__webpack_require__("./resources/js/Components/Site/SiteHeader.js"));
+var import_SiteFooter = __toESM(__webpack_require__("./resources/js/Components/Site/SiteFooter.js"));
+function ProgressBar({ percent = 0, label }) {
+  const pct = Math.max(0, Math.min(100, Number(percent) || 0));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cl-progress", role: "progressbar", "aria-valuenow": pct, "aria-valuemin": 0, "aria-valuemax": 100, "aria-label": label || "Course progress", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: `${pct}%` } }) });
+}
+const lessonUrl = (moduleId, lessonId) => `/user/course/modules/${moduleId}${lessonId ? `?lesson=${lessonId}` : ""}`;
+function CourseShell({ title, course, progress, back, actions, footer = true, className = "", children }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `ac cl ${className}`, children: [
+    title !== false && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: title || course.title }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteHeader.default, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cl-bar", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide cl-bar__row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: back.href, className: "cl-bar__back", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-left", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: back.label })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cl-bar__title", title: course.title, children: course.title }),
+      progress && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "cl-bar__progress", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProgressBar, { percent: progress.percent }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          progress.percent,
+          "%"
+        ] })
+      ] }),
+      actions
+    ] }) }),
+    children,
+    footer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteFooter.default, {})
+  ] });
+}
+
+
+/***/ }),
+
 /***/ "./resources/js/Pages/Auth/Login.js":
 /***/ ((module, exports, __webpack_require__) => {
 
@@ -14242,7 +15923,7 @@ var import_inertia_react = __webpack_require__("../../febuild/node_modules/@iner
 var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/AuthLayout.js"));
 var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
 var import_SignInMethods = __webpack_require__("./resources/js/Components/Auth/SignInMethods.js");
-function Login({ status, canResetPassword, providers, defaultCountryCode, otpDevMode, errors: pageErrors = {} }) {
+function Login({ status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, errors: pageErrors = {} }) {
   const [tab, setTab] = (0, import_react.useState)(() => typeof window !== "undefined" && window.localStorage && safeGet("ac.login.tab") || "email");
   const [usePassword, setUsePassword] = (0, import_react.useState)(() => !!(pageErrors.email || pageErrors.password));
   const [passkeyError, setPasskeyError] = (0, import_react.useState)(null);
@@ -14269,7 +15950,7 @@ function Login({ status, canResetPassword, providers, defaultCountryCode, otpDev
     status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--ok", children: status }),
     verified && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--ok", children: "Your e-mail is confirmed. Log in to continue." }),
     passkeyError && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--error", role: "alert", children: passkeyError }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.SocialButtons, { providers, remember: data.remember }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.SocialButtons, { providers, remember: data.remember, setupHint: socialSetupHint }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 10 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.PasskeyButton, { verb: "Log in", remember: data.remember, onError: setPasskeyError }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-or", children: "or" }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.MethodTabs, { value: tab, onChange: choose, tabs: [
@@ -14401,7 +16082,7 @@ var import_inertia_react = __webpack_require__("../../febuild/node_modules/@iner
 var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/AuthLayout.js"));
 var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
 var import_SignInMethods = __webpack_require__("./resources/js/Components/Auth/SignInMethods.js");
-function Register({ providers, defaultCountryCode, otpDevMode }) {
+function Register({ providers, defaultCountryCode, otpDevMode, socialSetupHint }) {
   const { data, setData, post, processing, errors, reset } = (0, import_inertia_react.useForm)({
     name: "",
     email: "",
@@ -14441,7 +16122,7 @@ function Register({ providers, defaultCountryCode, otpDevMode }) {
         "Artist profile"
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.SocialButtons, { verb: "Sign up", providers }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AuthFields.SocialButtons, { verb: "Sign up", providers, setupHint: socialSetupHint }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-or", children: "or" }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.MethodTabs, { value: tab, onChange: setTab, tabs: [
       { id: "email", label: "Email", icon: "fa-envelope-o" },
@@ -16644,1175 +18325,702 @@ function ThankYou() {
 /***/ }),
 
 /***/ "./resources/js/Pages/CourseDetails.js":
-/*!*********************************************!*\
-  !*** ./resources/js/Pages/CourseDetails.js ***!
-  \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ CourseDetails)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Site/SiteLayout */ "./resources/js/Components/Site/SiteLayout.js");
-/* harmony import */ var _Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Site/CourseCard */ "./resources/js/Components/Site/CourseCard.js");
-/* harmony import */ var _Components_Site_ProgramCard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Site/ProgramCard */ "./resources/js/Components/Site/ProgramCard.js");
-/* harmony import */ var _Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/Components/Site/SiteHeader */ "./resources/js/Components/Site/SiteHeader.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-
-
-
-
-
-
-
-var asList = function asList(v) {
-  return Array.isArray(v) ? v.filter(function (x) {
-    return x !== null && String(x).trim() !== '';
-  }) : [];
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
 };
-var has = function has(v) {
-  return v !== undefined && v !== null && String(v).trim() !== '';
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
-var stripHtml = function stripHtml(h) {
-  return String(h || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var CourseDetails_exports = {};
+__export(CourseDetails_exports, {
+  default: () => CourseDetails
+});
+module.exports = __toCommonJS(CourseDetails_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_CourseCard = __toESM(__webpack_require__("./resources/js/Components/Site/CourseCard.js"));
+var import_ProgramCard = __webpack_require__("./resources/js/Components/Site/ProgramCard.js");
+var import_SiteHeader = __webpack_require__("./resources/js/Components/Site/SiteHeader.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_api = __webpack_require__("./resources/js/Components/Auth/api.js");
+const asList = (v) => Array.isArray(v) ? v.filter((x) => x !== null && String(x).trim() !== "") : [];
+const has = (v) => v !== void 0 && v !== null && String(v).trim() !== "";
+const stripHtml = (h) => String(h || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 function youtubeEmbed(url) {
   if (!url) return null;
-  var m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  return m ? "https://www.youtube-nocookie.com/embed/".concat(m[1], "?autoplay=1&rel=0") : null;
+  const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+  return m ? `https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0` : null;
 }
-var TABS = [{
-  id: 'information',
-  label: 'Information'
-}, {
-  id: 'content',
-  label: 'Content'
-}, {
-  id: 'projects',
-  label: 'Projects'
-}, {
-  id: 'reviews',
-  label: 'Reviews'
-}, {
-  id: 'faq',
-  label: 'FAQ'
-}];
-var PERKS = [{
-  icon: 'fa-video-camera',
-  title: 'Live classes',
-  text: 'Learn alongside a small group with real-time demos.'
-}, {
-  icon: 'fa-comments-o',
-  title: 'Instructor feedback',
-  text: 'Get personal notes on the projects you submit.'
-}, {
-  icon: 'fa-refresh',
-  title: 'Replay anytime',
-  text: 'Study material stays in your classroom to revisit.'
-}, {
-  icon: 'fa-download',
-  title: 'Downloadable resources',
-  text: 'Worksheets and references for each lesson.'
-}, {
-  icon: 'fa-certificate',
-  title: 'Certificate',
-  text: 'Earn a certificate when you complete the course.'
-}, {
-  icon: 'fa-mobile',
-  title: 'Any device',
-  text: 'Join from your laptop, tablet or phone.'
-}, {
-  icon: 'fa-users',
-  title: 'Creative community',
-  text: 'Share progress and learn from classmates.'
-}, {
-  icon: 'fa-life-ring',
-  title: 'Friendly support',
-  text: 'Our team is here if you get stuck.'
-}];
+const TABS = [
+  { id: "information", label: "Information" },
+  { id: "content", label: "Content" },
+  { id: "projects", label: "Projects" },
+  { id: "reviews", label: "Reviews" },
+  { id: "faq", label: "FAQ" }
+];
+const PERKS = [
+  { icon: "fa-video-camera", title: "Live classes", text: "Learn alongside a small group with real-time demos." },
+  { icon: "fa-comments-o", title: "Instructor feedback", text: "Get personal notes on the projects you submit." },
+  { icon: "fa-refresh", title: "Replay anytime", text: "Study material stays in your classroom to revisit." },
+  { icon: "fa-download", title: "Downloadable resources", text: "Worksheets and references for each lesson." },
+  { icon: "fa-certificate", title: "Certificate", text: "Earn a certificate when you complete the course." },
+  { icon: "fa-mobile", title: "Any device", text: "Join from your laptop, tablet or phone." },
+  { icon: "fa-users", title: "Creative community", text: "Share progress and learn from classmates." },
+  { icon: "fa-life-ring", title: "Friendly support", text: "Our team is here if you get stuck." }
+];
 function CourseDetails() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    course = _usePage$props.course,
-    _usePage$props$curric = _usePage$props.curriculum,
-    curriculum = _usePage$props$curric === void 0 ? [] : _usePage$props$curric,
-    _usePage$props$projec = _usePage$props.projects,
-    projects = _usePage$props$projec === void 0 ? [] : _usePage$props$projec,
-    _usePage$props$review = _usePage$props.reviews,
-    reviews = _usePage$props$review === void 0 ? [] : _usePage$props$review,
-    _usePage$props$galler = _usePage$props.gallery,
-    gallery = _usePage$props$galler === void 0 ? [] : _usePage$props$galler,
-    _usePage$props$videos = _usePage$props.videos,
-    videos = _usePage$props$videos === void 0 ? [] : _usePage$props$videos,
-    _usePage$props$relate = _usePage$props.related,
-    related = _usePage$props$relate === void 0 ? [] : _usePage$props$relate,
-    _usePage$props$stats = _usePage$props.stats,
-    stats = _usePage$props$stats === void 0 ? {} : _usePage$props$stats,
-    auth = _usePage$props.auth;
-  var data = course.data;
-  var workshop = (0,_Components_Site_ProgramCard__WEBPACK_IMPORTED_MODULE_4__.isWorkshop)(data);
-  var kind = workshop ? 'workshop' : 'course';
-  var price = (0,_Components_Site_ProgramCard__WEBPACK_IMPORTED_MODULE_4__.programPrice)(data);
-  var token = typeof document !== 'undefined' ? document.head.querySelector('meta[name="csrf-token"]') : null;
-  var includes = data.course_includes || {};
-  var learn = [].concat(_toConsumableArray(asList(data.course_learn)), _toConsumableArray(asList(data.course_highlights)));
-  var forWho = asList(data.course_for);
-  var notFor = asList(data.course_not_for);
-  var solves = asList(data.course_problems_solved);
-  var deliverables = asList(data.course_deliverables);
-  var teacher = data.teacher || {};
-  var cover = (0,_Components_Site_ProgramCard__WEBPACK_IMPORTED_MODULE_4__.programImage)(data);
-  var video = videos[0];
-  var embed = video ? youtubeEmbed(video.video_url) : null;
-  var allLessons = curriculum.flatMap(function (u, ui) {
-    return (u.lessons || []).map(function (l, li) {
-      return _objectSpread(_objectSpread({}, l), {}, {
-        unit: ui + 1,
-        n: li + 1
-      });
-    });
-  });
-  var firstPrice = data.prices && data.prices[0] ? data.prices[0].price_inr : 0;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('information'),
-    _useState2 = _slicedToArray(_useState, 2),
-    active = _useState2[0],
-    setActive = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState4 = _slicedToArray(_useState3, 2),
-    playing = _useState4[0],
-    setPlaying = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState6 = _slicedToArray(_useState5, 2),
-    aboutOpen = _useState6[0],
-    setAboutOpen = _useState6[1];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState8 = _slicedToArray(_useState7, 2),
-    allLessonsOpen = _useState8[0],
-    setAllLessonsOpen = _useState8[1];
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(6),
-    _useState0 = _slicedToArray(_useState9, 2),
-    reviewCount = _useState0[0],
-    setReviewCount = _useState0[1];
-  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
-    _useState10 = _slicedToArray(_useState1, 2),
-    pageUrl = _useState10[0],
-    setPageUrl = _useState10[1];
-  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState12 = _slicedToArray(_useState11, 2),
-    copied = _useState12[0],
-    setCopied = _useState12[1];
-  var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState14 = _slicedToArray(_useState13, 2),
-    saved = _useState14[0],
-    setSaved = _useState14[1];
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+  const { course, curriculum = [], projects = [], reviews = [], gallery = [], videos = [], related = [], stats = {}, auth, saved: wishlisted } = (0, import_inertia_react.usePage)().props;
+  const data = course.data;
+  const workshop = (0, import_ProgramCard.isWorkshop)(data);
+  const kind = workshop ? "workshop" : "course";
+  const price = (0, import_ProgramCard.programPrice)(data);
+  const token = typeof document !== "undefined" ? document.head.querySelector('meta[name="csrf-token"]') : null;
+  const includes = data.course_includes || {};
+  const learn = [...asList(data.course_learn), ...asList(data.course_highlights)];
+  const forWho = asList(data.course_for);
+  const notFor = asList(data.course_not_for);
+  const solves = asList(data.course_problems_solved);
+  const deliverables = asList(data.course_deliverables);
+  const teacher = data.teacher || {};
+  const cover = (0, import_ProgramCard.programImage)(data);
+  const video = videos[0];
+  const embed = video ? youtubeEmbed(video.video_url) : null;
+  const allLessons = curriculum.flatMap((u, ui) => (u.lessons || []).map((l, li) => __spreadProps(__spreadValues({}, l), { unit: ui + 1, n: li + 1 })));
+  const firstPrice = data.prices && data.prices[0] ? data.prices[0].price_inr : 0;
+  const [active, setActive] = (0, import_react.useState)("information");
+  const [playing, setPlaying] = (0, import_react.useState)(false);
+  const [aboutOpen, setAboutOpen] = (0, import_react.useState)(false);
+  const [allLessonsOpen, setAllLessonsOpen] = (0, import_react.useState)(false);
+  const [reviewCount, setReviewCount] = (0, import_react.useState)(6);
+  const [pageUrl, setPageUrl] = (0, import_react.useState)("");
+  const [copied, setCopied] = (0, import_react.useState)(false);
+  const [saved, setSaved] = (0, import_react.useState)(!!wishlisted);
+  const [saving, setSaving] = (0, import_react.useState)(false);
+  (0, import_react.useEffect)(() => {
     setPageUrl(window.location.href);
-    try {
-      setSaved(JSON.parse(localStorage.getItem('ac-saved') || '[]').includes(data.id));
-    } catch (e) {/* storage unavailable */}
-    var onScroll = function onScroll() {
-      var current = 'information';
-      TABS.forEach(function (t) {
-        var el = document.getElementById(t.id);
+    const onScroll = () => {
+      let current = "information";
+      TABS.forEach((t) => {
+        const el = document.getElementById(t.id);
         if (el && el.getBoundingClientRect().top < 160) current = t.id;
       });
       setActive(current);
     };
-    window.addEventListener('scroll', onScroll, {
-      passive: true
-    });
-    return function () {
-      return window.removeEventListener('scroll', onScroll);
-    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  var share = function share() {
+  const share = () => {
     if (navigator.share) {
-      navigator.share({
-        title: data.title,
-        url: pageUrl
-      })["catch"](function () {});
+      navigator.share({ title: data.title, url: pageUrl }).catch(() => {
+      });
       return;
     }
-    if (navigator.clipboard) navigator.clipboard.writeText(pageUrl).then(function () {
+    if (navigator.clipboard) navigator.clipboard.writeText(pageUrl).then(() => {
       setCopied(true);
-      setTimeout(function () {
-        return setCopied(false);
-      }, 2000);
+      setTimeout(() => setCopied(false), 2e3);
     });
   };
-  var toggleSave = function toggleSave() {
-    try {
-      var list = JSON.parse(localStorage.getItem('ac-saved') || '[]');
-      var next = list.includes(data.id) ? list.filter(function (x) {
-        return x !== data.id;
-      }) : [].concat(_toConsumableArray(list), [data.id]);
-      localStorage.setItem('ac-saved', JSON.stringify(next));
-      setSaved(next.includes(data.id));
-    } catch (e) {
-      setSaved(!saved);
+  const toggleSave = async () => {
+    if (!(auth && auth.user)) {
+      window.location.assign("/login?return_to=" + encodeURIComponent(window.location.pathname));
+      return;
     }
+    setSaving(true);
+    try {
+      await (0, import_api.authPost)("/wishlist", { type: "course", id: data.id, saved: !saved });
+      setSaved(!saved);
+      import_inertia.Inertia.reload({ only: ["nav"], preserveScroll: true, preserveState: true });
+    } catch (e) {
+    }
+    setSaving(false);
   };
-  var BuyForm = function BuyForm(_ref) {
-    var _ref$label = _ref.label,
-      label = _ref$label === void 0 ? 'Enroll now' : _ref$label,
-      _ref$big = _ref.big,
-      big = _ref$big === void 0 ? true : _ref$big;
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("form", {
-      method: "post",
-      action: "/add-to-cart",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
-        type: "hidden",
-        name: "course_id",
-        value: data.id
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
-        type: "hidden",
-        name: "_token",
-        value: token ? token.content : ''
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
-        type: "hidden",
-        name: "price_type",
-        value: "inr"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
-        type: "hidden",
-        name: "price",
-        value: firstPrice
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-        type: "submit",
-        className: "dm-btn dm-btn--brand dm-btn--block ".concat(big ? 'dm-btn--lg' : ''),
-        children: label
-      })]
-    });
-  };
-  var lessonsShown = allLessonsOpen ? allLessons : allLessons.slice(0, 6);
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: data.title,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-      className: "ac-wide",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("ul", {
-        className: "dm-crumbs",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-            href: route('welcome'),
-            children: "Home"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-            href: (0,_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_5__.catalogUrl)({}),
-            children: "Courses"
-          })
-        }), data.medium && data.medium.name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-            href: (0,_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_5__.catalogUrl)({
-              medium: data.medium_id
-            }),
-            children: data.medium.name
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-          children: data.title
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-        className: "dm-course",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-            className: "dm-cover",
-            children: playing && embed ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("iframe", {
-              src: embed,
-              title: video.video_title || data.title,
-              allow: "autoplay; encrypted-media; picture-in-picture",
-              allowFullScreen: true
-            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("img", {
-                src: cover,
-                alt: data.title
-              }), video && (embed ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-                type: "button",
-                className: "dm-cover__play",
-                onClick: function onClick() {
-                  return setPlaying(true);
-                },
-                "aria-label": "Play trailer",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-play"
-                  })
-                })
-              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                className: "dm-cover__play",
-                href: video.video_url,
-                target: "_blank",
-                rel: "noopener",
-                "aria-label": "Watch trailer",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-play"
-                  })
-                })
-              })), video && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                className: "dm-cover__label",
-                children: "Watch the trailer"
-              })]
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-            className: "dm-titleblock",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-              className: "dm-badges",
-              children: [Number(stats.students || 0) >= 10 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                className: "dm-badge dm-badge--brand",
-                children: "Bestseller"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                className: "dm-badge",
-                children: workshop ? 'Workshop' : 'Live course'
-              }), data.skill && data.skill.name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                className: "dm-badge",
-                children: data.skill.name
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h1", {
-              children: data.title
-            }), has(data.sub_title) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-              className: "dm-sub",
-              children: data.sub_title
-            }), teacher.name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-              className: "dm-by",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("img", {
-                src: "/storage/uploads/teachers/".concat(teacher.id, "/").concat(teacher.profile_photo),
-                alt: ""
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("strong", {
-                  children: ["A ", kind, " by ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                    href: route('teacher.profile', teacher.slug),
-                    style: {
-                      textDecoration: 'underline'
-                    },
-                    children: teacher.name
-                  })]
-                }), has(teacher.profile_title) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                  children: teacher.profile_title
-                })]
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-              className: "dm-metarow",
-              children: [stats.positive !== null && stats.positive !== undefined && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                className: "is-good",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-thumbs-o-up"
-                }), " ", stats.positive, "% positive reviews (", (0,_Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__.formatCount)(stats.reviews), ")"]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-user-o"
-                }), " ", (0,_Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__.formatCount)(stats.students), " students"]
-              }), data.medium && data.medium.name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-tint"
-                }), " ", data.medium.name]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("button", {
-                type: "button",
-                onClick: share,
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-share-alt"
-                }), " ", copied ? 'Link copied' : 'Share']
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("button", {
-                type: "button",
-                onClick: toggleSave,
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa ".concat(saved ? 'fa-bookmark' : 'fa-bookmark-o')
-                }), " ", saved ? 'Saved' : 'Save for later']
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("nav", {
-            className: "dm-tabs",
-            "aria-label": "Course sections",
-            children: TABS.map(function (t) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                href: "#".concat(t.id),
-                className: active === t.id ? 'is-active' : '',
-                children: t.label
-              }, t.id);
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-            id: "information",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-              className: "dm-block",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("h2", {
-                children: ["About this ", kind]
-              }), has(data.introduction) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                style: {
-                  fontSize: 18,
-                  fontWeight: 600
-                },
-                children: data.introduction
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                className: "dm-readmore ".concat(aboutOpen ? 'is-open' : ''),
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                  className: "ac-rich",
-                  dangerouslySetInnerHTML: {
-                    __html: data.introduction_details || ''
-                  }
-                }), has(data.summary) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("h3", {
-                    children: [workshop ? 'Workshop' : 'Course', " summary"]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                    children: data.summary
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                  className: "ac-rich",
-                  dangerouslySetInnerHTML: {
-                    __html: data.summary_details || ''
-                  }
-                }), has(data.course_outcome) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-                    children: "By the end you will have"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                    children: data.course_outcome
-                  })]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-                type: "button",
-                className: "dm-textbtn",
-                onClick: function onClick() {
-                  return setAboutOpen(!aboutOpen);
-                },
-                children: aboutOpen ? 'Read less' : 'Read more'
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-              className: "dm-block",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("h2", {
-                children: ["What you'll learn in this ", kind]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                className: "dm-callout",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-play-circle-o"
-                  }), stats.lessons || data.course_modules || 0, " lessons"]
-                }), Number(stats.downloads || 0) > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-download"
-                  }), stats.downloads, " downloads"]
-                }), has(data.sessions) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-video-camera"
-                  }), data.sessions, " live sessions"]
-                })]
-              }), allLessons.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                  className: "dm-lessons",
-                  children: lessonsShown.map(function (l, i) {
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                      className: "dm-lesson",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                        className: "dm-lesson__img",
-                        style: {
-                          backgroundImage: "url(".concat(cover, ")")
-                        },
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                          className: "fa fa-lock"
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                          children: ["U", l.unit, " \xB7 L", l.n]
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("p", {
-                        children: [l.lesson_title, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("small", {
-                          children: stripHtml(l.lesson_description).slice(0, 70)
-                        })]
-                      })]
-                    }, l.id);
-                  })
-                }), allLessons.length > 6 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-                  type: "button",
-                  className: "dm-textbtn",
-                  onClick: function onClick() {
-                    return setAllLessonsOpen(!allLessonsOpen);
-                  },
-                  children: allLessonsOpen ? 'Show fewer lessons' : "View all ".concat(allLessons.length, " lessons")
-                })]
-              }) : learn.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("ul", {
-                className: "ac-checklist dm-twocol",
-                style: {
-                  gap: '0 24px'
-                },
-                children: learn.map(function (x, i) {
-                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-                    children: x
-                  }, i);
-                })
-              }) : null, learn.length > 0 && allLessons.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-                  children: "Skills you'll practise"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("ul", {
-                  className: "ac-checklist dm-twocol",
-                  style: {
-                    gap: '0 24px'
-                  },
-                  children: learn.map(function (x, i) {
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-                      children: x
-                    }, i);
-                  })
-                })]
-              }), solves.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("h3", {
-                  children: ["Common problems this ", kind, " fixes"]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                  className: "ac-card__chips",
-                  children: solves.map(function (x, i) {
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                      className: "ac-chip ac-chip--brand",
-                      children: x
-                    }, i);
-                  })
-                })]
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-              className: "dm-block",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h2", {
-                children: "What's included"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                className: "ac-includes",
-                children: [Number(stats.units || 0) > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-th-list"
-                  }), stats.units, " units"]
-                }), has(data.mini_projects) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-paint-brush"
-                  }), data.mini_projects, " hands-on projects"]
-                }), has(data.sessions) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-video-camera"
-                  }), data.sessions, " live sessions"]
-                }), includes.study_material_access === 'yes' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-book"
-                  }), "Study material access"]
-                }), includes.certificate === 'yes' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-certificate"
-                  }), "Certificate of completion"]
-                }), deliverables.map(function (x, i) {
-                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                      className: "fa fa-check"
-                    }), x]
-                  }, i);
-                })]
-              }), has(data.schedule) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-                  children: "Schedule"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                  children: data.schedule
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                  className: "ac-rich",
-                  dangerouslySetInnerHTML: {
-                    __html: data.schedule_details || ''
-                  }
-                })]
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-            id: "projects",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-              className: "dm-block",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("h2", {
-                children: [workshop ? 'Workshop' : 'Course', " project"]
-              }), projects.length > 0 ? projects.map(function (p, i) {
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  className: "dm-project",
-                  style: {
-                    marginBottom: i < projects.length - 1 ? 24 : 0
-                  },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-                      style: {
-                        marginTop: 0
-                      },
-                      children: p.project_title
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                      style: {
-                        color: '#444'
-                      },
-                      children: p.project_description
-                    })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("img", {
-                    src: cover,
-                    alt: p.project_title
-                  })]
-                }, p.id);
-              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                style: {
-                  color: '#444'
-                },
-                children: has(data.course_outcome) ? data.course_outcome : "You'll finish the ".concat(kind, " with completed artwork ready to share.")
-              })]
-            }), gallery.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-              className: "dm-block",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h2", {
-                children: "Projects by ArtistikCity students"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                className: "dm-gallery",
-                children: [gallery.slice(0, 7).map(function (g) {
-                  var src = "/storage/uploads/artworks/".concat(g.id, "/").concat(g.photo_name);
-                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                    href: src,
-                    "data-fancybox": "course-gallery",
-                    style: {
-                      backgroundImage: "url(".concat(src, ")")
-                    },
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                      children: g.name
-                    })
-                  }, g.id);
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                  href: "/marketplace?source=student",
-                  className: "dm-more",
-                  children: "Student originals"
-                })]
-              })]
-            }), (forWho.length > 0 || notFor.length > 0) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-              className: "dm-block",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("h2", {
-                children: ["Who is this ", kind, " for?"]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                className: "dm-twocol",
-                children: [forWho.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-                    style: {
-                      marginTop: 0
-                    },
-                    children: "Perfect for"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("ul", {
-                    className: "ac-checklist",
-                    children: forWho.map(function (x, i) {
-                      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-                        children: x
-                      }, i);
-                    })
-                  })]
-                }), notFor.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-                    style: {
-                      marginTop: 0
-                    },
-                    children: "Probably not for"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("ul", {
-                    children: notFor.map(function (x, i) {
-                      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                        style: {
-                          marginBottom: 10
-                        },
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                          className: "fa fa-minus-circle",
-                          style: {
-                            color: 'var(--dm-grey)',
-                            marginRight: 8
-                          }
-                        }), x]
-                      }, i);
-                    })
-                  })]
-                })]
-              }), has(data.age_group) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("p", {
-                style: {
-                  marginTop: 16
-                },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                  children: "Age group:"
-                }), " ", data.age_group]
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-              className: "dm-block",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h2", {
-                children: "Requirements and materials"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                style: {
-                  color: '#444'
-                },
-                children: has(data.course_prerequisites) ? data.course_prerequisites : 'No previous experience is needed. Every lesson starts with a live demonstration.'
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("p", {
-                style: {
-                  color: '#444'
-                },
-                children: ["You'll receive a full materials list after you enroll. We recommend affordable, student-grade ", data.medium && data.medium.name ? data.medium.name.toLowerCase() + ' ' : '', "supplies so you can start without a big spend."]
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-            className: "dm-block",
-            id: "reviews",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h2", {
-              children: "Reviews"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-              className: "dm-reviewsum",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                  children: (0,_Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__.formatCount)(stats.students)
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                  children: "Students"
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                  children: (0,_Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__.formatCount)(stats.reviews)
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                  children: "Reviews"
-                })]
-              }), stats.positive !== null && stats.positive !== undefined && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                className: "is-good",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("strong", {
-                  children: [stats.positive, "%"]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                  children: "Positive reviews"
-                })]
-              })]
-            }), reviews.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                className: "dm-reviews",
-                children: reviews.slice(0, reviewCount).map(function (r) {
-                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                    className: "dm-review",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                      className: "dm-review__who",
-                      children: [r.profile_photo ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("img", {
-                        src: "/storage/uploads/students/".concat(r.user_id, "/").concat(r.profile_photo),
-                        alt: ""
-                      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                        className: "dm-initial",
-                        children: (r.name || 'S').charAt(0)
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                          children: r.name || 'ArtistikCity student'
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                          children: String(r.created_at || '').split(' ')[0]
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                        className: "fa fa-thumbs-o-".concat(Number(r.rating || 5) >= 3 ? 'up' : 'down', " dm-review__thumb ").concat(Number(r.rating || 5) >= 3 ? '' : 'is-bad')
-                      })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                      children: r.review
-                    })]
-                  }, r.id);
-                })
-              }), reviews.length > reviewCount && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-                type: "button",
-                className: "dm-textbtn",
-                onClick: function onClick() {
-                  return setReviewCount(reviewCount + 6);
-                },
-                children: "More reviews"
-              })]
-            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("p", {
-              style: {
-                color: 'var(--dm-grey)'
-              },
-              children: ["This ", kind, " doesn't have reviews yet. Enroll and be the first to share your experience."]
-            })]
-          }), teacher.name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-            className: "dm-block",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h2", {
-              children: "Your instructor"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-              className: "dm-teacher",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("img", {
-                src: "/storage/uploads/teachers/".concat(teacher.id, "/").concat(teacher.profile_photo),
-                alt: teacher.name
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-                  children: teacher.name
-                }), has(teacher.profile_title) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                  className: "dm-role",
-                  children: teacher.profile_title
-                }), has(teacher.location) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  className: "dm-role",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-map-marker"
-                  }), " ", teacher.location]
-                }), has(teacher.profile_description) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-                  className: "ac-rich",
-                  dangerouslySetInnerHTML: {
-                    __html: teacher.profile_description
-                  }
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  className: "dm-teacher__links",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                    href: "https://studiovaishaliarts.com/",
-                    target: "_blank",
-                    rel: "noopener",
-                    "aria-label": "Website",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                      className: "fa fa-globe"
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                    href: "https://www.instagram.com/artistikcity/",
-                    target: "_blank",
-                    rel: "noopener",
-                    "aria-label": "Instagram",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                      className: "fa fa-instagram"
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                    href: "https://www.youtube.com/@artistikcityYT",
-                    target: "_blank",
-                    rel: "noopener",
-                    "aria-label": "YouTube",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                      className: "fa fa-youtube-play"
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                    href: "https://www.facebook.com/StudioVaishaliArts/",
-                    target: "_blank",
-                    rel: "noopener",
-                    "aria-label": "Facebook",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                      className: "fa fa-facebook"
-                    })
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                  href: route('teacher.profile', teacher.slug),
-                  className: "dm-btn dm-btn--line",
-                  children: "View full profile"
-                })]
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-            className: "dm-block dm-units",
-            id: "content",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h2", {
-              children: "Content"
-            }), curriculum.length > 0 ? curriculum.map(function (u, ui) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("details", {
-                open: ui === 0,
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("summary", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                    className: "dm-unit-code",
-                    children: ["U", ui + 1]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                    children: [u.module_title, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("small", {
-                      children: [(u.lessons || []).length, " lessons", has(u.module_duration) ? " \xB7 ".concat(u.module_duration) : '']
-                    })]
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("ol", {
-                  children: (u.lessons || []).map(function (l) {
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                        className: "fa ".concat(Number(l.has_download) ? 'fa-file-pdf-o' : 'fa-play-circle-o')
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                        children: [l.lesson_title, stripHtml(l.lesson_description) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("small", {
-                          children: stripHtml(l.lesson_description)
-                        })]
-                      })]
-                    }, l.id);
-                  })
-                })]
-              }, u.id);
-            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-              className: "ac-rich",
-              dangerouslySetInnerHTML: {
-                __html: data.summary_details || data.schedule_details || '<p>The detailed syllabus will be shared when the batch opens.</p>'
-              }
-            }), projects.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("details", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("summary", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                  className: "dm-unit-code",
-                  children: "FP"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                  children: ["Final project", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("small", {
-                    children: projects[0].project_title
-                  })]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("ol", {
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa fa-paint-brush"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: projects[0].project_description
-                  })]
-                })
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-            className: "dm-block",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("h2", {
-              children: ["What to expect from an ArtistikCity ", kind]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-              className: "dm-perks",
-              children: PERKS.map(function (p) {
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  className: "dm-perk",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                    className: "fa ".concat(p.icon)
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h4", {
-                    children: p.title
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                    children: p.text
-                  })]
-                }, p.title);
-              })
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-            className: "dm-block dm-faq",
-            id: "faq",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h2", {
-              children: "Frequently asked questions"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("details", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("summary", {
-                children: "Do I need any previous experience?"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                children: has(data.course_prerequisites) ? data.course_prerequisites : 'No. The lessons start from the basics and build up step by step.'
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("details", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("summary", {
-                children: ["When does the ", kind, " start and how long is it?"]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("p", {
-                children: [has(data.course_start_date) ? "The next batch starts on ".concat(data.course_start_date, ". ") : '', has(data.duration) ? "It runs for ".concat(data.duration, " ").concat(workshop ? 'days' : 'weeks') : '', has(data.time_required) ? ", with about ".concat(data.time_required, " hours per session.") : '.']
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("details", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("summary", {
-                children: "What if I miss a live session?"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                children: "Study material stays available in your classroom, so you can catch up and still submit your projects for feedback."
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("details", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("summary", {
-                children: "What materials will I need?"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                children: "You'll get a materials list right after enrolling, with budget-friendly options."
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("details", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("summary", {
-                children: "Will I get a certificate?"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-                children: includes.certificate === 'yes' ? 'Yes. Complete the lessons and projects and your certificate appears in your classroom, ready to download and share.' : 'Certificates are issued for full courses. Check the course details panel for this program.'
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("details", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("summary", {
-                children: "Who can I contact with questions?"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("p", {
-                children: ["Write to us any time through the ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                  href: route('contact'),
-                  style: {
-                    textDecoration: 'underline'
-                  },
-                  children: "contact page"
-                }), " and we'll get back to you quickly."]
-              })]
-            })]
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("aside", {
-          className: "dm-aside",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-            className: "dm-buy",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-              className: "dm-buy__price",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                children: price || ''
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-              className: "dm-buy__note",
-              children: ["One-time payment \xB7 ", workshop ? 'Full workshop access' : 'Full course access']
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BuyForm, {}), !(auth && auth.user) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-              href: route('join') + '?return_to=' + encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '/'),
-              className: "dm-btn dm-btn--line dm-btn--block dm-btn--lg",
-              children: "Join for free"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-              className: "dm-buy__guarantee",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                className: "fa fa-shield"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                children: ["Secure checkout. Questions before you enroll? ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-                  href: route('contact'),
-                  style: {
-                    textDecoration: 'underline'
-                  },
-                  children: "Ask us"
-                }), "."]
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-            className: "dm-details",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("h4", {
-              children: [workshop ? 'Workshop' : 'Course', " details"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("ul", {
-              children: [data.medium && data.medium.name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-tint"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Medium"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                    children: data.medium.name
-                  })]
-                })]
-              }), stats.positive !== null && stats.positive !== undefined && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-thumbs-o-up"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Positive reviews"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("strong", {
-                    children: [stats.positive, "% (", (0,_Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__.formatCount)(stats.reviews), ")"]
-                  })]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-user-o"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Students"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                    children: (0,_Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__.formatCount)(stats.students)
-                  })]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-play-circle-o"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Lessons"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("strong", {
-                    children: [stats.lessons || data.course_modules || '—', has(data.sessions) ? " \xB7 ".concat(data.sessions, " live sessions") : '']
-                  })]
-                })]
-              }), has(data.duration) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-clock-o"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Duration"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("strong", {
-                    children: [data.duration, " ", workshop ? 'days' : 'weeks', has(data.time_required) ? " \xB7 ".concat(data.time_required, " hrs/session") : '']
-                  })]
-                })]
-              }), has(data.course_start_date) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-calendar-o"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Starts"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                    children: data.course_start_date
-                  })]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-laptop"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Format"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("strong", {
-                    children: ["Online, live ", workshop ? 'workshop' : 'classes']
-                  })]
-                })]
-              }), data.skill && data.skill.name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-signal"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Level"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                    children: data.skill.name
-                  })]
-                })]
-              }), has(data.age_group) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-child"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Age group"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                    children: data.age_group
-                  })]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-language"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Language"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                    children: "English, Hindi"
-                  })]
-                })]
-              }), includes.certificate === 'yes' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-certificate"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Certificate"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                    children: "Included"
-                  })]
-                })]
-              }), teacher.name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("li", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-                  className: "fa fa-graduation-cap"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                    children: "Instructor"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-                    children: teacher.name
-                  })]
-                })]
-              })]
-            })]
-          })]
-        })]
-      })]
-    }), related.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("section", {
-      className: "dm-section dm-section--soft",
-      style: {
-        marginTop: 40
-      },
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-        className: "ac-wide",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-          className: "dm-head",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h2", {
-              children: "You might also like"
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-            href: (0,_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_5__.catalogUrl)({}),
-            children: "Browse all courses"
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-          className: "dm-grid",
-          children: related.map(function (c, i) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
-              course: c,
-              index: i
-            }, c.id);
-          })
-        })]
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-      className: "dm-mobilebuy",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-        children: price || ''
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-        style: {
-          flex: 1,
-          maxWidth: 220
-        },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BuyForm, {
-          big: false
-        })
-      })]
-    })]
-  });
+  const BuyForm = ({ label = "Enroll now", big = true }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { method: "post", action: "/add-to-cart", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "hidden", name: "course_id", value: data.id }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "hidden", name: "_token", value: token ? token.content : "" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "hidden", name: "price_type", value: "inr" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "hidden", name: "price", value: firstPrice }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: `dm-btn dm-btn--brand dm-btn--block ${big ? "dm-btn--lg" : ""}`, children: label })
+  ] });
+  const lessonsShown = allLessonsOpen ? allLessons : allLessons.slice(0, 6);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: data.title, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "dm-crumbs", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("welcome"), children: "Home" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({}), children: "Courses" }) }),
+        data.medium && data.medium.name && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({ medium: data.medium_id }), children: data.medium.name }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: data.title })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-course", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-cover", children: playing && embed ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", { src: embed, title: video.video_title || data.title, allow: "autoplay; encrypted-media; picture-in-picture", allowFullScreen: true }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: cover, alt: data.title }),
+            video && (embed ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-cover__play", onClick: () => setPlaying(true), "aria-label": "Play trailer", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play" }) }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "dm-cover__play", href: video.video_url, target: "_blank", rel: "noopener", "aria-label": "Watch trailer", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play" }) }) })),
+            video && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-cover__label", children: "Watch the trailer" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-titleblock", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-badges", children: [
+              Number(stats.students || 0) >= 10 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-badge dm-badge--brand", children: "Bestseller" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-badge", children: workshop ? "Workshop" : "Live course" }),
+              data.skill && data.skill.name && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-badge", children: data.skill.name })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: data.title }),
+            has(data.sub_title) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-sub", children: data.sub_title }),
+            teacher.name && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-by", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: `/storage/uploads/teachers/${teacher.id}/${teacher.profile_photo}`, alt: "" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
+                  "A ",
+                  kind,
+                  " by ",
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("teacher.profile", teacher.slug), style: { textDecoration: "underline" }, children: teacher.name })
+                ] }),
+                has(teacher.profile_title) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: teacher.profile_title })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-metarow", children: [
+              stats.positive !== null && stats.positive !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "is-good", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-thumbs-o-up" }),
+                " ",
+                stats.positive,
+                "% positive reviews (",
+                (0, import_CourseCard.formatCount)(stats.reviews),
+                ")"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-user-o" }),
+                " ",
+                (0, import_CourseCard.formatCount)(stats.students),
+                " students"
+              ] }),
+              data.medium && data.medium.name && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-tint" }),
+                " ",
+                data.medium.name
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: share, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-share-alt" }),
+                " ",
+                copied ? "Link copied" : "Share"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: toggleSave, disabled: saving, "aria-pressed": saved, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${saved ? "fa-heart" : "fa-heart-o"}`, style: saved ? { color: "var(--ac-brand)" } : void 0 }),
+                " ",
+                saved ? "In your wish list" : "Save to wish list"
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-tabs", "aria-label": "Course sections", children: TABS.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `#${t.id}`, className: active === t.id ? "is-active" : "", children: t.label }, t.id)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { id: "information", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { children: [
+                "About this ",
+                kind
+              ] }),
+              has(data.introduction) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 18, fontWeight: 600 }, children: data.introduction }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `dm-readmore ${aboutOpen ? "is-open" : ""}`, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-rich", dangerouslySetInnerHTML: { __html: data.introduction_details || "" } }),
+                has(data.summary) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [
+                    workshop ? "Workshop" : "Course",
+                    " summary"
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: data.summary })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-rich", dangerouslySetInnerHTML: { __html: data.summary_details || "" } }),
+                has(data.course_outcome) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "By the end you will have" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: data.course_outcome })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-textbtn", onClick: () => setAboutOpen(!aboutOpen), children: aboutOpen ? "Read less" : "Read more" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { children: [
+                "What you'll learn in this ",
+                kind
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-callout", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play-circle-o" }),
+                  stats.lessons || data.course_modules || 0,
+                  " lessons"
+                ] }),
+                Number(stats.downloads || 0) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-download" }),
+                  stats.downloads,
+                  " downloads"
+                ] }),
+                has(data.sessions) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-video-camera" }),
+                  data.sessions,
+                  " live sessions"
+                ] })
+              ] }),
+              allLessons.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-lessons", children: lessonsShown.map((l, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-lesson", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-lesson__img", style: { backgroundImage: `url(${cover})` }, children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                      "U",
+                      l.unit,
+                      " \xB7 L",
+                      l.n
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+                    l.lesson_title,
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: stripHtml(l.lesson_description).slice(0, 70) })
+                  ] })
+                ] }, l.id)) }),
+                allLessons.length > 6 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-textbtn", onClick: () => setAllLessonsOpen(!allLessonsOpen), children: allLessonsOpen ? "Show fewer lessons" : `View all ${allLessons.length} lessons` })
+              ] }) : learn.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "ac-checklist dm-twocol", style: { gap: "0 24px" }, children: learn.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: x }, i)) }) : null,
+              learn.length > 0 && allLessons.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Skills you'll practise" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "ac-checklist dm-twocol", style: { gap: "0 24px" }, children: learn.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: x }, i)) })
+              ] }),
+              solves.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [
+                  "Common problems this ",
+                  kind,
+                  " fixes"
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-card__chips", children: solves.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-chip ac-chip--brand", children: x }, i)) })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "What's included" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-includes", children: [
+                Number(stats.units || 0) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-th-list" }),
+                  stats.units,
+                  " units"
+                ] }),
+                has(data.mini_projects) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush" }),
+                  data.mini_projects,
+                  " hands-on projects"
+                ] }),
+                has(data.sessions) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-video-camera" }),
+                  data.sessions,
+                  " live sessions"
+                ] }),
+                includes.study_material_access === "yes" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-book" }),
+                  "Study material access"
+                ] }),
+                includes.certificate === "yes" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate" }),
+                  "Certificate of completion"
+                ] }),
+                deliverables.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }),
+                  x
+                ] }, i))
+              ] }),
+              has(data.schedule) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Schedule" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: data.schedule }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-rich", dangerouslySetInnerHTML: { __html: data.schedule_details || "" } })
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { id: "projects", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { children: [
+                workshop ? "Workshop" : "Course",
+                " project"
+              ] }),
+              projects.length > 0 ? projects.map((p, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-project", style: { marginBottom: i < projects.length - 1 ? 24 : 0 }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { marginTop: 0 }, children: p.project_title }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { color: "#444" }, children: p.project_description })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: cover, alt: p.project_title })
+              ] }, p.id)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { color: "#444" }, children: has(data.course_outcome) ? data.course_outcome : `You'll finish the ${kind} with completed artwork ready to share.` })
+            ] }),
+            gallery.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Projects by ArtistikCity students" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-gallery", children: [
+                gallery.slice(0, 7).map((g) => {
+                  const src = `/storage/uploads/artworks/${g.id}/${g.photo_name}`;
+                  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: src, "data-fancybox": "course-gallery", style: { backgroundImage: `url(${src})` }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: g.name }) }, g.id);
+                }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace?source=student", className: "dm-more", children: "Student originals" })
+              ] })
+            ] }),
+            (forWho.length > 0 || notFor.length > 0) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { children: [
+                "Who is this ",
+                kind,
+                " for?"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-twocol", children: [
+                forWho.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { marginTop: 0 }, children: "Perfect for" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "ac-checklist", children: forWho.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: x }, i)) })
+                ] }),
+                notFor.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { marginTop: 0 }, children: "Probably not for" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { children: notFor.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { style: { marginBottom: 10 }, children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-minus-circle", style: { color: "var(--dm-grey)", marginRight: 8 } }),
+                    x
+                  ] }, i)) })
+                ] })
+              ] }),
+              has(data.age_group) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { marginTop: 16 }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Age group:" }),
+                " ",
+                data.age_group
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Requirements and materials" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { color: "#444" }, children: has(data.course_prerequisites) ? data.course_prerequisites : "No previous experience is needed. Every lesson starts with a live demonstration." }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { color: "#444" }, children: [
+                "You'll receive a full materials list after you enroll. We recommend affordable, student-grade ",
+                data.medium && data.medium.name ? data.medium.name.toLowerCase() + " " : "",
+                "supplies so you can start without a big spend."
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", id: "reviews", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Reviews" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-reviewsum", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: (0, import_CourseCard.formatCount)(stats.students) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Students" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: (0, import_CourseCard.formatCount)(stats.reviews) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Reviews" })
+              ] }),
+              stats.positive !== null && stats.positive !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "is-good", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
+                  stats.positive,
+                  "%"
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Positive reviews" })
+              ] })
+            ] }),
+            reviews.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-reviews", children: reviews.slice(0, reviewCount).map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-review", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-review__who", children: [
+                  r.profile_photo ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: `/storage/uploads/students/${r.user_id}/${r.profile_photo}`, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-initial", children: (r.name || "S").charAt(0) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: r.name || "ArtistikCity student" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: String(r.created_at || "").split(" ")[0] })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa fa-thumbs-o-${Number(r.rating || 5) >= 3 ? "up" : "down"} dm-review__thumb ${Number(r.rating || 5) >= 3 ? "" : "is-bad"}` })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: r.review })
+              ] }, r.id)) }),
+              reviews.length > reviewCount && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-textbtn", onClick: () => setReviewCount(reviewCount + 6), children: "More reviews" })
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { color: "var(--dm-grey)" }, children: [
+              "This ",
+              kind,
+              " doesn't have reviews yet. Enroll and be the first to share your experience."
+            ] })
+          ] }),
+          teacher.name && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Your instructor" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-teacher", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: `/storage/uploads/teachers/${teacher.id}/${teacher.profile_photo}`, alt: teacher.name }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: teacher.name }),
+                has(teacher.profile_title) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-role", children: teacher.profile_title }),
+                has(teacher.location) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-role", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-map-marker" }),
+                  " ",
+                  teacher.location
+                ] }),
+                has(teacher.profile_description) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-rich", dangerouslySetInnerHTML: { __html: teacher.profile_description } }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-teacher__links", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://studiovaishaliarts.com/", target: "_blank", rel: "noopener", "aria-label": "Website", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-globe" }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://www.instagram.com/artistikcity/", target: "_blank", rel: "noopener", "aria-label": "Instagram", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-instagram" }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://www.youtube.com/@artistikcityYT", target: "_blank", rel: "noopener", "aria-label": "YouTube", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-youtube-play" }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://www.facebook.com/StudioVaishaliArts/", target: "_blank", rel: "noopener", "aria-label": "Facebook", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-facebook" }) })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("teacher.profile", teacher.slug), className: "dm-btn dm-btn--line", children: "View full profile" })
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block dm-units", id: "content", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Content" }),
+            curriculum.length > 0 ? curriculum.map((u, ui) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { open: ui === 0, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "dm-unit-code", children: [
+                  "U",
+                  ui + 1
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  u.module_title,
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                    (u.lessons || []).length,
+                    " lessons",
+                    has(u.module_duration) ? ` \xB7 ${u.module_duration}` : ""
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: (u.lessons || []).map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${Number(l.has_download) ? "fa-file-pdf-o" : "fa-play-circle-o"}` }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  l.lesson_title,
+                  stripHtml(l.lesson_description) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: stripHtml(l.lesson_description) })
+                ] })
+              ] }, l.id)) })
+            ] }, u.id)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-rich", dangerouslySetInnerHTML: { __html: data.summary_details || data.schedule_details || "<p>The detailed syllabus will be shared when the batch opens.</p>" } }),
+            projects.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-unit-code", children: "FP" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  "Final project",
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: projects[0].project_title })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: projects[0].project_description })
+              ] }) })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { children: [
+              "What to expect from an ArtistikCity ",
+              kind
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-perks", children: PERKS.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-perk", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${p.icon}` }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { children: p.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: p.text })
+            ] }, p.title)) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block dm-faq", id: "faq", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Frequently asked questions" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "Do I need any previous experience?" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: has(data.course_prerequisites) ? data.course_prerequisites : "No. The lessons start from the basics and build up step by step." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
+                "When does the ",
+                kind,
+                " start and how long is it?"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+                has(data.course_start_date) ? `The next batch starts on ${data.course_start_date}. ` : "",
+                has(data.duration) ? `It runs for ${data.duration} ${workshop ? "days" : "weeks"}` : "",
+                has(data.time_required) ? `, with about ${data.time_required} hours per session.` : "."
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "What if I miss a live session?" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Study material stays available in your classroom, so you can catch up and still submit your projects for feedback." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "What materials will I need?" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "You'll get a materials list right after enrolling, with budget-friendly options." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "Will I get a certificate?" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: includes.certificate === "yes" ? "Yes. Complete the lessons and projects and your certificate appears in your classroom, ready to download and share." : "Certificates are issued for full courses. Check the course details panel for this program." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "Who can I contact with questions?" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+                "Write to us any time through the ",
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("contact"), style: { textDecoration: "underline" }, children: "contact page" }),
+                " and we'll get back to you quickly."
+              ] })
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "dm-aside", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-buy", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-buy__price", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: price || "" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-buy__note", children: [
+              "One-time payment \xB7 ",
+              workshop ? "Full workshop access" : "Full course access"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuyForm, {}),
+            !(auth && auth.user) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("join") + "?return_to=" + encodeURIComponent(typeof window !== "undefined" ? window.location.pathname : "/"), className: "dm-btn dm-btn--line dm-btn--block dm-btn--lg", children: "Join for free" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-buy__guarantee", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shield" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                "Secure checkout. Questions before you enroll? ",
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("contact"), style: { textDecoration: "underline" }, children: "Ask us" }),
+                "."
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-details", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", { children: [
+              workshop ? "Workshop" : "Course",
+              " details"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
+              data.medium && data.medium.name && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-tint" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Medium" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: data.medium.name })
+                ] })
+              ] }),
+              stats.positive !== null && stats.positive !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-thumbs-o-up" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Positive reviews" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
+                    stats.positive,
+                    "% (",
+                    (0, import_CourseCard.formatCount)(stats.reviews),
+                    ")"
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-user-o" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Students" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: (0, import_CourseCard.formatCount)(stats.students) })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play-circle-o" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lessons" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
+                    stats.lessons || data.course_modules || "\u2014",
+                    has(data.sessions) ? ` \xB7 ${data.sessions} live sessions` : ""
+                  ] })
+                ] })
+              ] }),
+              has(data.duration) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-clock-o" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Duration" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
+                    data.duration,
+                    " ",
+                    workshop ? "days" : "weeks",
+                    has(data.time_required) ? ` \xB7 ${data.time_required} hrs/session` : ""
+                  ] })
+                ] })
+              ] }),
+              has(data.course_start_date) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-calendar-o" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Starts" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: data.course_start_date })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-laptop" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Format" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
+                    "Online, live ",
+                    workshop ? "workshop" : "classes"
+                  ] })
+                ] })
+              ] }),
+              data.skill && data.skill.name && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-signal" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Level" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: data.skill.name })
+                ] })
+              ] }),
+              has(data.age_group) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-child" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Age group" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: data.age_group })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-language" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Language" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "English, Hindi" })
+                ] })
+              ] }),
+              includes.certificate === "yes" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Certificate" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Included" })
+                ] })
+              ] }),
+              teacher.name && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-graduation-cap" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Instructor" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: teacher.name })
+                ] })
+              ] })
+            ] })
+          ] })
+        ] })
+      ] })
+    ] }),
+    related.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "dm-section dm-section--soft", style: { marginTop: 40 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-head", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "You might also like" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({}), children: "Browse all courses" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-grid", children: related.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CourseCard.default, { course: c, index: i }, c.id)) })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-mobilebuy", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: price || "" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, maxWidth: 220 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuyForm, { big: false }) })
+    ] })
+  ] });
 }
+
 
 /***/ }),
 
@@ -20512,546 +21720,333 @@ function MarketplaceNotFound() {
 /***/ }),
 
 /***/ "./resources/js/Pages/Marketplace/Show.js":
-/*!************************************************!*\
-  !*** ./resources/js/Pages/Marketplace/Show.js ***!
-  \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ MarketplaceShow)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "../../febuild/node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Site/SiteLayout */ "./resources/js/Components/Site/SiteLayout.js");
-/* harmony import */ var _Components_Marketplace_ZoomViewer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Marketplace/ZoomViewer */ "./resources/js/Components/Marketplace/ZoomViewer.js");
-/* harmony import */ var _Components_Marketplace_RoomView__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/Components/Marketplace/RoomView */ "./resources/js/Components/Marketplace/RoomView.js");
-/* harmony import */ var _Components_Marketplace_ArtCard__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/Components/Marketplace/ArtCard */ "./resources/js/Components/Marketplace/ArtCard.js");
-/* harmony import */ var _Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @/Components/Marketplace/shared */ "./resources/js/Components/Marketplace/shared.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-
-
-
-
-function Spec(_ref) {
-  var label = _ref.label,
-    value = _ref.value,
-    hint = _ref.hint;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-    className: "py-4 border-b border-gray-100 grid grid-cols-3 gap-4",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("dt", {
-      className: "text-sm text-gray-500",
-      children: label
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("dd", {
-      className: "col-span-2 text-sm font-semibold text-ink",
-      children: [value, hint && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("span", {
-        className: "block font-normal text-gray-500",
-        children: hint
-      })]
-    })]
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Show_exports = {};
+__export(Show_exports, {
+  default: () => MarketplaceShow
+});
+module.exports = __toCommonJS(Show_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_ZoomViewer = __toESM(__webpack_require__("./resources/js/Components/Marketplace/ZoomViewer.js"));
+var import_RoomView = __toESM(__webpack_require__("./resources/js/Components/Marketplace/RoomView.js"));
+var import_ArtCard = __toESM(__webpack_require__("./resources/js/Components/Marketplace/ArtCard.js"));
+var import_SaveButton = __toESM(__webpack_require__("./resources/js/Components/Wishlist/SaveButton.js"));
+var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
+function Spec({ label, value, hint }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "py-4 border-b border-gray-100 grid grid-cols-3 gap-4", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { className: "text-sm text-gray-500", children: label }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { className: "col-span-2 text-sm font-semibold text-ink", children: [
+      value,
+      hint && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block font-normal text-gray-500", children: hint })
+    ] })
+  ] });
 }
-function BuyBox(_ref2) {
-  var p = _ref2.p,
-    hold = _ref2.hold,
-    serverNow = _ref2.serverNow,
-    preview = _ref2.preview;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState2 = _slicedToArray(_useState, 2),
-    busy = _useState2[0],
-    setBusy = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState4 = _slicedToArray(_useState3, 2),
-    err = _useState4[0],
-    setErr = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState6 = _slicedToArray(_useState5, 2),
-    conflict = _useState6[0],
-    setConflict = _useState6[1];
-  var mineLeft = (0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.useCountdown)(hold && hold.mine ? hold.expiresAt : null, serverNow);
-  var otherLeft = (0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.useCountdown)(p.stock_status === 'RESERVED' && !(hold && hold.mine) ? p.reserved_until : null, serverNow);
-  var mine = hold && hold.mine && mineLeft > 0;
-  var heldByOther = p.stock_status === 'RESERVED' && !mine && otherLeft > 0;
-  var sold = p.stock_status === 'SOLD';
-  var reserve = function reserve() {
-    var switchHold = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+function BuyBox({ p, hold, serverNow, preview }) {
+  const { saved } = (0, import_inertia_react.usePage)().props;
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [err, setErr] = (0, import_react.useState)(null);
+  const [conflict, setConflict] = (0, import_react.useState)(null);
+  const mineLeft = (0, import_shared.useCountdown)(hold && hold.mine ? hold.expiresAt : null, serverNow);
+  const otherLeft = (0, import_shared.useCountdown)(p.stock_status === "RESERVED" && !(hold && hold.mine) ? p.reserved_until : null, serverNow);
+  const mine = hold && hold.mine && mineLeft > 0;
+  const heldByOther = p.stock_status === "RESERVED" && !mine && otherLeft > 0;
+  const sold = p.stock_status === "SOLD";
+  const reserve = (switchHold = false) => {
     setBusy(true);
     setErr(null);
-    axios__WEBPACK_IMPORTED_MODULE_2___default().post("/api/v1/marketplace/paintings/".concat(p.id, "/reserve"), {
-      "switch": switchHold
-    }).then(function (r) {
+    import_axios.default.post(`/api/v1/marketplace/paintings/${p.id}/reserve`, { switch: switchHold }).then((r) => {
       window.location.href = r.data.checkoutUrl;
-    })["catch"](function (e) {
+    }).catch((e) => {
       setBusy(false);
-      var d = e.response && e.response.data;
-      if (d && d.code === 'HOLD_LIMIT') setConflict(d);else if (d && (d.code === 'HELD_BY_OTHER' || d.code === 'JUST_TAKEN' || d.code === 'SOLD')) {
+      const d = e.response && e.response.data;
+      if (d && d.code === "HOLD_LIMIT") setConflict(d);
+      else if (d && (d.code === "HELD_BY_OTHER" || d.code === "JUST_TAKEN" || d.code === "SOLD")) {
         setErr(d.message);
-        setTimeout(function () {
-          return window.location.reload();
-        }, 2200);
-      } else setErr((0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.errorText)(e));
+        setTimeout(() => window.location.reload(), 2200);
+      } else setErr((0, import_shared.errorText)(e));
     });
   };
-  var release = function release() {
+  const release = () => {
     setBusy(true);
-    axios__WEBPACK_IMPORTED_MODULE_2___default()["delete"]("/api/v1/marketplace/reservations/".concat(p.id))["finally"](function () {
-      return window.location.reload();
-    });
+    import_axios.default.delete(`/api/v1/marketplace/reservations/${p.id}`).finally(() => window.location.reload());
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-    className: "rounded-2xl border border-gray-200 bg-white p-6 sm:p-7 shadow-sm",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-      className: "flex items-center justify-between gap-3",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-        className: "font-mono text-xs uppercase tracking-widest text-gray-500",
-        children: [p.source === 'STUDENT' ? 'Student original' : 'Studio original', " \xB7 ", p.year_created]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.StatusChip, {
-        status: heldByOther || mine ? 'RESERVED' : sold ? 'SOLD' : p.stock_status
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("h1", {
-      className: "mt-3 text-3xl sm:text-4xl font-black tracking-tight text-ink leading-tight",
-      children: p.title
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-      className: "mt-1 text-lg text-gray-600",
-      children: ["by ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("span", {
-        className: "font-bold text-ink",
-        children: p.artist_name
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-      className: "mt-3 text-sm text-gray-600",
-      children: [p.medium, " on ", String(p.surface).toLowerCase(), " \xB7 ", (0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.dims)(p), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("span", {
-        className: "text-gray-400",
-        children: ["(", (0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.dimsCm)(p), ")"]
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-      className: "mt-4",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.TrustBadges, {
-        p: p
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-      className: "mt-6 pt-6 border-t border-gray-100",
-      children: sold ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-          className: "text-2xl font-black text-ink",
-          children: "This original has found its collector."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-          className: "mt-2 text-gray-600",
-          children: "Love the style? Commission something similar, made for you."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-          href: "/commission/step-1",
-          className: "mt-5 flex items-center justify-center h-14 rounded-full bg-ink text-white text-lg font-bold hover:bg-gray-800",
-          children: "Commission a similar piece"
-        })]
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.Price, {
-          p: p,
-          size: "lg"
-        }), Number(p.discount_percentage) > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-          className: "mt-1 text-sm font-semibold text-green-700",
-          children: ["You save ", (0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.inr)(p.base_price - p.final_price)]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-          className: "mt-1 text-xs text-gray-500",
-          children: "Price in Indian rupees, taxes included. International collectors pay the USD equivalent via PayPal."
-        }), preview && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-          className: "mt-4 rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm text-blue-900",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-            className: "fa fa-eye mr-1",
-            "aria-hidden": "true"
-          }), "Preview \xB7 this listing is ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("strong", {
-            children: preview.replace('_', ' ').toLowerCase()
-          }), " and not visible to collectors."]
-        }), mine ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-          className: "mt-5",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-            className: "rounded-xl bg-ink text-white p-4 flex items-center gap-3",
-            role: "status",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-              className: "fa fa-lock text-pink-300 text-xl",
-              "aria-hidden": "true"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-              className: "text-sm",
-              children: ["Held exclusively for you for ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("span", {
-                className: "font-mono font-bold text-lg",
-                children: (0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.mmss)(mineLeft)
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-            href: "/marketplace/".concat(p.slug, "/checkout"),
-            className: "mt-3 flex items-center justify-center h-14 rounded-full bg-brand text-white text-lg font-bold hover:bg-brand-dark",
-            children: "Continue to checkout"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("button", {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border border-gray-200 bg-white p-6 sm:p-7 shadow-sm", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-center justify-between gap-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-mono text-xs uppercase tracking-widest text-gray-500", children: [
+        p.source === "STUDENT" ? "Student original" : "Studio original",
+        " \xB7 ",
+        p.year_created
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.StatusChip, { status: heldByOther || mine ? "RESERVED" : sold ? "SOLD" : p.stock_status })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { className: "mt-3 text-3xl sm:text-4xl font-black tracking-tight text-ink leading-tight", children: p.title }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-1 text-lg text-gray-600", children: [
+      "by ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-bold text-ink", children: p.artist_name })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-3 text-sm text-gray-600", children: [
+      p.medium,
+      " on ",
+      String(p.surface).toLowerCase(),
+      " \xB7 ",
+      (0, import_shared.dims)(p),
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "text-gray-400", children: [
+        "(",
+        (0, import_shared.dimsCm)(p),
+        ")"
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-4", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.TrustBadges, { p }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-6 pt-6 border-t border-gray-100", children: sold ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-2xl font-black text-ink", children: "This original has found its collector." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: "Love the style? Commission something similar, made for you." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/commission/step-1", className: "mt-5 flex items-center justify-center h-14 rounded-full bg-ink text-white text-lg font-bold hover:bg-gray-800", children: "Commission a similar piece" })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.Price, { p, size: "lg" }),
+      Number(p.discount_percentage) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-1 text-sm font-semibold text-green-700", children: [
+        "You save ",
+        (0, import_shared.inr)(p.base_price - p.final_price)
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-1 text-xs text-gray-500", children: "Price in Indian rupees, taxes included. International collectors pay the USD equivalent via PayPal." }),
+      preview && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-4 rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm text-blue-900", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-eye mr-1", "aria-hidden": "true" }),
+        "Preview \xB7 this listing is ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: preview.replace("_", " ").toLowerCase() }),
+        " and not visible to collectors."
+      ] }),
+      mine ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-5", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-xl bg-ink text-white p-4 flex items-center gap-3", role: "status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock text-pink-300 text-xl", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "text-sm", children: [
+            "Held exclusively for you for ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono font-bold text-lg", children: (0, import_shared.mmss)(mineLeft) })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${p.slug}/checkout`, className: "mt-3 flex items-center justify-center h-14 rounded-full bg-brand text-white text-lg font-bold hover:bg-brand-dark", children: "Continue to checkout" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: release, disabled: busy, className: "mt-2 w-full h-11 rounded-full text-sm font-bold text-gray-600 hover:text-ink", children: "Release my hold" })
+      ] }) : heldByOther ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-5 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900", role: "status", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-bold", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-hourglass-half mr-1", "aria-hidden": "true" }),
+          "Another collector is checking out."
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-1", children: [
+          "If they don't complete payment, it returns to the gallery in ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono font-bold", children: (0, import_shared.mmss)(otherLeft) }),
+          ". Refresh then to reserve it."
+        ] })
+      ] }) : !preview && (p.stock_status === "AVAILABLE" || p.stock_status === "RESERVED") ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-5", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
             type: "button",
-            onClick: release,
-            disabled: busy,
-            className: "mt-2 w-full h-11 rounded-full text-sm font-bold text-gray-600 hover:text-ink",
-            children: "Release my hold"
-          })]
-        }) : heldByOther ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-          className: "mt-5 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900",
-          role: "status",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-            className: "font-bold",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-              className: "fa fa-hourglass-half mr-1",
-              "aria-hidden": "true"
-            }), "Another collector is checking out."]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-            className: "mt-1",
-            children: ["If they don't complete payment, it returns to the gallery in ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("span", {
-              className: "font-mono font-bold",
-              children: (0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.mmss)(otherLeft)
-            }), ". Refresh then to reserve it."]
-          })]
-        }) : !preview && (p.stock_status === 'AVAILABLE' || p.stock_status === 'RESERVED') ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-          className: "mt-5",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("button", {
-            type: "button",
-            onClick: function onClick() {
-              return reserve(false);
-            },
+            onClick: () => reserve(false),
             disabled: busy,
             className: "w-full flex items-center justify-center gap-2 h-14 rounded-full bg-brand text-white text-lg font-bold hover:bg-brand-dark disabled:opacity-60",
-            children: [busy ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.Spinner, {}) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-              className: "fa fa-lock",
-              "aria-hidden": "true"
-            }), " Reserve this original"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-            className: "mt-3 text-center text-xs text-gray-500",
-            children: "Reserving holds it only for you for 15 minutes while you check out. No payment is taken yet."
-          })]
-        }) : null, err && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-          className: "mt-3 rounded-xl bg-red-50 border border-red-200 p-3 text-sm font-semibold text-red-700",
-          role: "alert",
-          children: err
-        }), conflict && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-          className: "mt-3 rounded-xl border border-gray-300 p-4 text-sm",
-          role: "alertdialog",
-          "aria-label": "You're already holding a piece",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-            className: "font-bold text-ink",
-            children: ["You're already holding \u201C", conflict.heldTitle, "\u201D."]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-            className: "mt-1 text-gray-600",
-            children: "You can hold one original at a time. Switch your hold to this piece?"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-            className: "mt-3 flex flex-wrap gap-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("button", {
-              type: "button",
-              onClick: function onClick() {
-                setConflict(null);
-                reserve(true);
-              },
-              className: "h-10 px-4 rounded-full bg-ink text-white font-bold",
-              children: "Switch to this piece"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-              href: "/marketplace/".concat(conflict.heldSlug, "/checkout"),
-              className: "inline-flex items-center h-10 px-4 rounded-full border border-gray-300 font-bold hover:border-ink",
-              children: "Go to my held piece"
-            })]
-          })]
-        })]
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("ul", {
-      className: "mt-6 pt-6 border-t border-gray-100 space-y-3 text-sm text-gray-700",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("li", {
-        className: "flex gap-3",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-          className: "fa fa-shield text-brand mt-0.5 w-4",
-          "aria-hidden": "true"
-        }), "Secure payment: UPI, cards and NetBanking (Razorpay) or PayPal"]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("li", {
-        className: "flex gap-3",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-          className: "fa fa-truck text-brand mt-0.5 w-4",
-          "aria-hidden": "true"
-        }), "Insured, tracked shipping \xB7 India 5\u20138 days \xB7 worldwide 10\u201315 days"]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("li", {
-        className: "flex gap-3",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-          className: "fa fa-comments-o text-brand mt-0.5 w-4",
-          "aria-hidden": "true"
-        }), "Questions? ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-          href: "/contact",
-          className: "font-bold underline",
-          children: "Ask the studio"
-        }), " before you buy"]
-      })]
-    })]
-  });
+            children: [
+              busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.Spinner, {}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+              " Reserve this original"
+            ]
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 text-center text-xs text-gray-500", children: "Reserving holds it only for you for 15 minutes while you check out. No payment is taken yet." })
+      ] }) : null,
+      err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 rounded-xl bg-red-50 border border-red-200 p-3 text-sm font-semibold text-red-700", role: "alert", children: err }),
+      conflict && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-3 rounded-xl border border-gray-300 p-4 text-sm", role: "alertdialog", "aria-label": "You're already holding a piece", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-bold text-ink", children: [
+          "You're already holding \u201C",
+          conflict.heldTitle,
+          "\u201D."
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-1 text-gray-600", children: "You can hold one original at a time. Switch your hold to this piece?" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-3 flex flex-wrap gap-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => {
+            setConflict(null);
+            reserve(true);
+          }, className: "h-10 px-4 rounded-full bg-ink text-white font-bold", children: "Switch to this piece" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${conflict.heldSlug}/checkout`, className: "inline-flex items-center h-10 px-4 rounded-full border border-gray-300 font-bold hover:border-ink", children: "Go to my held piece" })
+        ] })
+      ] })
+    ] }) }),
+    !preview && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-3", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SaveButton.default, { type: "painting", id: p.id, saved, className: "dm-heart--block" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "mt-6 pt-6 border-t border-gray-100 space-y-3 text-sm text-gray-700", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shield text-brand mt-0.5 w-4", "aria-hidden": "true" }),
+        "Secure payment: UPI, cards and NetBanking (Razorpay) or PayPal"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-truck text-brand mt-0.5 w-4", "aria-hidden": "true" }),
+        "Insured, tracked shipping \xB7 India 5\u20138 days \xB7 worldwide 10\u201315 days"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-comments-o text-brand mt-0.5 w-4", "aria-hidden": "true" }),
+        "Questions? ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/contact", className: "font-bold underline", children: "Ask the studio" }),
+        " before you buy"
+      ] })
+    ] })
+  ] });
 }
 function MarketplaceShow() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    p = _usePage$props.painting,
-    hold = _usePage$props.hold,
-    _usePage$props$holds = _usePage$props.holds,
-    holds = _usePage$props$holds === void 0 ? [] : _usePage$props$holds,
-    _usePage$props$relate = _usePage$props.related,
-    related = _usePage$props$relate === void 0 ? [] : _usePage$props$relate,
-    serverNow = _usePage$props.serverNow,
-    preview = _usePage$props.preview,
-    notice = _usePage$props.notice;
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('room'),
-    _useState8 = _slicedToArray(_useState7, 2),
-    tab = _useState8[0],
-    setTab = _useState8[1];
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    title: "".concat(p.title, " by ").concat(p.artist_name),
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-      className: "tw",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-        className: "ac-wide pt-6",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("nav", {
-          "aria-label": "Breadcrumb",
-          className: "text-sm text-gray-500",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-            href: "/",
-            className: "hover:text-ink",
-            children: "Home"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("span", {
-            className: "mx-2",
-            children: "/"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-            href: "/marketplace",
-            className: "hover:text-ink",
-            children: "Marketplace"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("span", {
-            className: "mx-2",
-            children: "/"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-            href: "/marketplace?source=".concat(p.source === 'STUDENT' ? 'student' : 'studio'),
-            className: "hover:text-ink",
-            children: p.source === 'STUDENT' ? 'Student originals' : 'Studio originals'
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("span", {
-            className: "mx-2",
-            children: "/"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("span", {
-            className: "text-ink font-semibold",
-            children: p.title
-          })]
-        }), notice === 'expired' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-          className: "mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900",
-          role: "alert",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("strong", {
-            children: "There's no active hold on this piece for you."
-          }), " Holds last 15 minutes. If it's still available, reserve it again below."]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("section", {
-        className: "ac-wide py-8 grid grid-cols-1 lg:grid-cols-12 gap-10",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-          className: "lg:col-span-7",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_Components_Marketplace_ZoomViewer__WEBPACK_IMPORTED_MODULE_4__["default"], {
-            images: p.images,
-            title: p.title
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("aside", {
-          className: "lg:col-span-5",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-            className: "lg:sticky lg:top-24",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(BuyBox, {
-              p: p,
-              hold: hold,
-              serverNow: serverNow,
-              preview: preview
-            })
-          })
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("section", {
-        className: "ac-wide pb-8",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-          className: "flex gap-2 border-b border-gray-200 overflow-x-auto",
-          role: "tablist",
-          children: [['room', 'View in a room', 'fa-home'], ['specs', 'Specifications', 'fa-th-list'], ['shipping', 'Shipping & care', 'fa-truck']].map(function (_ref3) {
-            var _ref4 = _slicedToArray(_ref3, 3),
-              k = _ref4[0],
-              l = _ref4[1],
-              i = _ref4[2];
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("button", {
-              type: "button",
-              role: "tab",
-              "aria-selected": tab === k,
-              onClick: function onClick() {
-                return setTab(k);
-              },
-              className: "whitespace-nowrap px-4 py-3 text-base font-bold border-b-2 -mb-px ".concat(tab === k ? 'border-ink text-ink' : 'border-transparent text-gray-500 hover:text-ink'),
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-                className: "fa ".concat(i, " mr-2"),
-                "aria-hidden": "true"
-              }), l]
-            }, k);
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-          className: "pt-8",
-          children: [tab === 'room' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-            className: "max-w-4xl",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_Components_Marketplace_RoomView__WEBPACK_IMPORTED_MODULE_5__["default"], {
-              painting: p
-            })
-          }), tab === 'specs' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("dl", {
-            className: "max-w-3xl",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Medium",
-              value: p.medium
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Surface",
-              value: p.surface
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Dimensions",
-              value: "".concat((0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.dims)(p), " \xB7 ").concat((0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.dimsCm)(p)),
-              hint: Number(p.depth_inches) > 0 ? "Depth ".concat((0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.num)(p.depth_inches, 2), " in (").concat((0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.num)(p.depth_cm), " cm)") : null
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Framing",
-              value: p.framing
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Year",
-              value: p.year_created
-            }), p.subject && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Subject",
-              value: p.subject
-            }), p.style_tags && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Style",
-              value: p.style_tags
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Signature",
-              value: p.is_signed ? 'Hand-signed by the artist' : 'Unsigned'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Authenticity",
-              value: p.has_certificate ? 'Certificate of authenticity included' : 'Not included'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Edition",
-              value: "1 of 1 \xB7 original artwork, not a print"
-            }), p.weight_kg && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(Spec, {
-              label: "Artwork weight",
-              value: "".concat((0,_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.num)(p.weight_kg, 2), " kg")
-            })]
-          }), tab === 'shipping' && p.shipping && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-            className: "max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-6",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-              className: "rounded-2xl border border-gray-200 p-6",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("h3", {
-                className: "text-lg font-extrabold text-ink",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-                  className: "fa fa-map-marker text-brand mr-2",
-                  "aria-hidden": "true"
-                }), "Within India"]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-                className: "mt-2 text-gray-600",
-                children: p.shipping.india
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-              className: "rounded-2xl border border-gray-200 p-6",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("h3", {
-                className: "text-lg font-extrabold text-ink",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-                  className: "fa fa-globe text-brand mr-2",
-                  "aria-hidden": "true"
-                }), "International"]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-                className: "mt-2 text-gray-600",
-                children: p.shipping.international
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-              className: "rounded-2xl border border-gray-200 p-6 sm:col-span-2",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("h3", {
-                className: "text-lg font-extrabold text-ink",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-                  className: "fa fa-cube text-brand mr-2",
-                  "aria-hidden": "true"
-                }), "Packing & freight compliance"]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-                className: "mt-2 text-gray-600",
-                children: p.shipping.compliance
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-                className: "mt-3 text-sm text-gray-500 font-mono",
-                children: ["Packed \u2248 ", p.shipping.packed_size_in, " in \xB7 ", p.shipping.packed_weight_kg, " kg"]
-              })]
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("section", {
-        className: "bg-gray-50 border-y border-gray-200 mt-8",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-          className: "ac-wide py-16 grid grid-cols-1 lg:grid-cols-12 gap-10",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-            className: "lg:col-span-4",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-              className: "font-mono text-xs uppercase tracking-widest text-brand",
-              children: "The story"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("h2", {
-              className: "mt-2 text-3xl font-black tracking-tight text-ink",
-              children: "Inspiration & creative notes"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-              className: "mt-4 text-gray-600",
-              children: ["In ", p.artist_name, "'s own words."]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-            className: "lg:col-span-8",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-              className: "text-xl leading-relaxed text-gray-800",
-              children: p.description
-            }), p.artist_notes && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("blockquote", {
-              className: "mt-8 border-l-4 border-brand pl-6",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
-                className: "text-2xl leading-relaxed font-semibold text-ink",
-                style: {
-                  fontFamily: 'Georgia, serif'
-                },
-                children: ["\u201C", p.artist_notes, "\u201D"]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("footer", {
-                className: "mt-3 text-sm text-gray-500",
-                children: ["\u2014 ", p.artist_name]
-              })]
-            })]
-          })]
-        })
-      }), related.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("section", {
-        className: "ac-wide py-16",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-          className: "flex items-end justify-between gap-4 mb-8",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("h2", {
-            className: "text-3xl font-black tracking-tight text-ink",
-            children: "You may also love"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("a", {
-            href: "/marketplace",
-            className: "font-bold text-ink hover:text-brand",
-            children: ["All originals ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("i", {
-              className: "fa fa-arrow-right text-sm",
-              "aria-hidden": "true"
-            })]
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-          className: "mk-masonry",
-          children: related.map(function (r) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_Components_Marketplace_ArtCard__WEBPACK_IMPORTED_MODULE_6__["default"], {
-              p: r,
-              serverNow: serverNow
-            }, r.id);
-          })
-        })]
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-      className: "tw",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_Components_Marketplace_shared__WEBPACK_IMPORTED_MODULE_7__.HoldBanner, {
-        holds: holds,
-        serverNow: serverNow,
-        exceptSlug: p.slug
-      })
-    })]
-  });
+  const { painting: p, hold, holds = [], related = [], serverNow, preview, notice } = (0, import_inertia_react.usePage)().props;
+  const [tab, setTab] = (0, import_react.useState)("room");
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: `${p.title} by ${p.artist_name}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "tw", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide pt-6", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { "aria-label": "Breadcrumb", className: "text-sm text-gray-500", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", className: "hover:text-ink", children: "Home" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mx-2", children: "/" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "hover:text-ink", children: "Marketplace" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mx-2", children: "/" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace?source=${p.source === "STUDENT" ? "student" : "studio"}`, className: "hover:text-ink", children: p.source === "STUDENT" ? "Student originals" : "Studio originals" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mx-2", children: "/" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-ink font-semibold", children: p.title })
+        ] }),
+        notice === "expired" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900", role: "alert", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "There's no active hold on this piece for you." }),
+          " Holds last 15 minutes. If it's still available, reserve it again below."
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide py-8 grid grid-cols-1 lg:grid-cols-12 gap-10", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lg:col-span-7", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ZoomViewer.default, { images: p.images, title: p.title }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "lg:col-span-5", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lg:sticky lg:top-24", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuyBox, { p, hold, serverNow, preview }) }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide pb-8", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex gap-2 border-b border-gray-200 overflow-x-auto", role: "tablist", children: [["room", "View in a room", "fa-home"], ["specs", "Specifications", "fa-th-list"], ["shipping", "Shipping & care", "fa-truck"]].map(([k, l, i]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            type: "button",
+            role: "tab",
+            "aria-selected": tab === k,
+            onClick: () => setTab(k),
+            className: `whitespace-nowrap px-4 py-3 text-base font-bold border-b-2 -mb-px ${tab === k ? "border-ink text-ink" : "border-transparent text-gray-500 hover:text-ink"}`,
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${i} mr-2`, "aria-hidden": "true" }),
+              l
+            ]
+          },
+          k
+        )) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pt-8", children: [
+          tab === "room" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "max-w-4xl", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_RoomView.default, { painting: p }) }),
+          tab === "specs" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "max-w-3xl", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Medium", value: p.medium }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Surface", value: p.surface }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Dimensions", value: `${(0, import_shared.dims)(p)} \xB7 ${(0, import_shared.dimsCm)(p)}`, hint: Number(p.depth_inches) > 0 ? `Depth ${(0, import_shared.num)(p.depth_inches, 2)} in (${(0, import_shared.num)(p.depth_cm)} cm)` : null }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Framing", value: p.framing }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Year", value: p.year_created }),
+            p.subject && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Subject", value: p.subject }),
+            p.style_tags && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Style", value: p.style_tags }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Signature", value: p.is_signed ? "Hand-signed by the artist" : "Unsigned" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Authenticity", value: p.has_certificate ? "Certificate of authenticity included" : "Not included" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Edition", value: "1 of 1 \xB7 original artwork, not a print" }),
+            p.weight_kg && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Artwork weight", value: `${(0, import_shared.num)(p.weight_kg, 2)} kg` })
+          ] }),
+          tab === "shipping" && p.shipping && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-6", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border border-gray-200 p-6", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { className: "text-lg font-extrabold text-ink", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-map-marker text-brand mr-2", "aria-hidden": "true" }),
+                "Within India"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: p.shipping.india })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border border-gray-200 p-6", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { className: "text-lg font-extrabold text-ink", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-globe text-brand mr-2", "aria-hidden": "true" }),
+                "International"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: p.shipping.international })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border border-gray-200 p-6 sm:col-span-2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { className: "text-lg font-extrabold text-ink", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-cube text-brand mr-2", "aria-hidden": "true" }),
+                "Packing & freight compliance"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: p.shipping.compliance }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-3 text-sm text-gray-500 font-mono", children: [
+                "Packed \u2248 ",
+                p.shipping.packed_size_in,
+                " in \xB7 ",
+                p.shipping.packed_weight_kg,
+                " kg"
+              ] })
+            ] })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "bg-gray-50 border-y border-gray-200 mt-8", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide py-16 grid grid-cols-1 lg:grid-cols-12 gap-10", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lg:col-span-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs uppercase tracking-widest text-brand", children: "The story" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-2 text-3xl font-black tracking-tight text-ink", children: "Inspiration & creative notes" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-4 text-gray-600", children: [
+            "In ",
+            p.artist_name,
+            "'s own words."
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lg:col-span-8", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-xl leading-relaxed text-gray-800", children: p.description }),
+          p.artist_notes && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("blockquote", { className: "mt-8 border-l-4 border-brand pl-6", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "text-2xl leading-relaxed font-semibold text-ink", style: { fontFamily: "Georgia, serif" }, children: [
+              "\u201C",
+              p.artist_notes,
+              "\u201D"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("footer", { className: "mt-3 text-sm text-gray-500", children: [
+              "\u2014 ",
+              p.artist_name
+            ] })
+          ] })
+        ] })
+      ] }) }),
+      related.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide py-16", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-end justify-between gap-4 mb-8", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-3xl font-black tracking-tight text-ink", children: "You may also love" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/marketplace", className: "font-bold text-ink hover:text-brand", children: [
+            "All originals ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right text-sm", "aria-hidden": "true" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mk-masonry", children: related.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ArtCard.default, { p: r, serverNow }, r.id)) })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tw", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.HoldBanner, { holds, serverNow, exceptSlug: p.slug }) })
+  ] });
 }
+
 
 /***/ }),
 
@@ -23497,356 +24492,167 @@ function LanguagePreference(props) {
 /***/ }),
 
 /***/ "./resources/js/Pages/Students/LessonTask.js":
-/*!***************************************************!*\
-  !*** ./resources/js/Pages/Students/LessonTask.js ***!
-  \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ LessonTask)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia */ "../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
-/* harmony import */ var _Layouts_Authenticated__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Layouts/Authenticated */ "./resources/js/Layouts/Authenticated.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Students_StudentHeader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Students/StudentHeader */ "./resources/js/Components/Students/StudentHeader.js");
-/* harmony import */ var _Components_Students_StudentNavigation__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/Components/Students/StudentNavigation */ "./resources/js/Components/Students/StudentNavigation.js");
-/* harmony import */ var _Components_Students_CourseNavigation__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/Components/Students/CourseNavigation */ "./resources/js/Components/Students/CourseNavigation.js");
-/* harmony import */ var react_simple_wysiwyg__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-simple-wysiwyg */ "../../febuild/node_modules/react-simple-wysiwyg/lib/index.es.mjs");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-
-
-
-
-
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var LessonTask_exports = {};
+__export(LessonTask_exports, {
+  default: () => LessonTask
+});
+module.exports = __toCommonJS(LessonTask_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_Authenticated = __toESM(__webpack_require__("./resources/js/Layouts/Authenticated.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_StudentHeader = __toESM(__webpack_require__("./resources/js/Components/Students/StudentHeader.js"));
+var import_StudentNavigation = __toESM(__webpack_require__("./resources/js/Components/Students/StudentNavigation.js"));
+var import_CourseNavigation = __toESM(__webpack_require__("./resources/js/Components/Students/CourseNavigation.js"));
+var import_inertia_react2 = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_react_simple_wysiwyg = __webpack_require__("../../febuild/node_modules/react-simple-wysiwyg/lib/index.es.mjs");
 function LessonTask(props) {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_3__.usePage)().props,
-    taskDetails = _usePage$props.taskDetails,
-    lessonDetails = _usePage$props.lessonDetails,
-    lessonNav = _usePage$props.lessonNav,
-    messages = _usePage$props.messages;
-  var auth = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_3__.usePage)().props.auth;
-  // console.log(lessonDetails);
-  // console.log(taskDetails);
-  // const { data, setData, post, progress, reset } = useForm({
-  //     reply: '',
-  // })
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
-    _useState2 = _slicedToArray(_useState, 2),
-    values = _useState2[0],
-    setValues = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
-    _useState4 = _slicedToArray(_useState3, 2),
-    images = _useState4[0],
-    setImages = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
-    _useState6 = _slicedToArray(_useState5, 2),
-    imageURLS = _useState6[0],
-    setImageURLs = _useState6[1];
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+  const { taskDetails, lessonDetails, lessonNav, messages } = (0, import_inertia_react.usePage)().props;
+  const { auth, courseLinks } = (0, import_inertia_react.usePage)().props;
+  const links = courseLinks || {};
+  const [values, setValues] = (0, import_react.useState)("");
+  const [images, setImages] = (0, import_react.useState)([]);
+  const [imageURLS, setImageURLs] = (0, import_react.useState)([]);
+  (0, import_react.useEffect)(() => {
     if (images.length < 1) return;
-    var newImageUrls = [];
-    images.forEach(function (image) {
-      return newImageUrls.push(URL.createObjectURL(image));
-    });
+    const newImageUrls = [];
+    images.forEach((image) => newImageUrls.push(URL.createObjectURL(image)));
     setImageURLs(newImageUrls);
   }, [images]);
   function onImageChange(e) {
-    setImages(_toConsumableArray(e.target.files));
+    setImages([...e.target.files]);
   }
   function handleSubmit(e) {
     e.preventDefault();
-    _inertiajs_inertia__WEBPACK_IMPORTED_MODULE_1__.Inertia.post(route('user.course.module.lesson.task.save'), {
+    import_inertia.Inertia.post(route("user.course.module.lesson.task.save"), {
       "reply": values,
       "images": images,
       "task_id": taskDetails.id,
       "from_id": auth.user.id
     });
   }
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_Components_Students_StudentHeader__WEBPACK_IMPORTED_MODULE_4__["default"], {
-      auth: props.auth
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_Layouts_Authenticated__WEBPACK_IMPORTED_MODULE_2__["default"], {
-      auth: props.auth,
-      errors: props.errors,
-      header: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("h2", {
-        className: "font-semibold text-xl text-gray-800 leading-tight",
-        children: "Dashboard"
-      }),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_3__.Head, {
-        title: "Course Home"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-        className: "container-fluid",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-          className: "row",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-            className: "col-md-2 px-0 sidebar coursesidebar",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-              className: "courseTitle",
-              children: [lessonNav.course_title, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("button", {
-                className: "navbar-toggler d-md-none collapsed",
-                type: "button",
-                "data-bs-toggle": "collapse",
-                "data-bs-target": "#sidebarMenu",
-                "aria-controls": "sidebarMenu",
-                "aria-expanded": "false",
-                "aria-label": "Toggle Navigation",
-                children: [" ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("span", {
-                  className: "navbar-toggler-icon"
-                }), " "]
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("nav", {
-              id: "sidebarMenu",
-              className: "w-100 d-md-block collapse",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-                className: " position-sticky",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("ul", {
-                  className: "coursenav",
-                  children: lessonNav.course_module_lesson.length != 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("li", {
-                    className: "dropdown",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("button", {
-                      className: "accordion-button",
-                      type: "button",
-                      "data-bs-toggle": "collapse",
-                      "data-bs-target": "#collapseOne",
-                      "aria-expanded": "true",
-                      "aria-controls": "collapseOne",
-                      children: lessonNav.course_module_title
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-                      id: "collapseOne",
-                      className: "accordion-collapse collapse show",
-                      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("ul", {
-                        children: lessonNav.course_module_lesson.map(function (lesson, i) {
-                          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
-                            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("a", {
-                              href: route('user.course.module.lesson', lesson.module_id),
-                              children: [i + 1, ". ", lesson.lesson_title]
-                            })
-                          });
-                        })
-                      })
-                    })]
-                  })
-                })
-              })
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("main", {
-            className: "col-md-10 px-0 ms-sm-auto rightsidebar",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-              className: "siteBreadcrumb",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("nav", {
-                "aria-label": "breadcrumb",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("ol", {
-                  className: "breadcrumb",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
-                    className: "breadcrumb-item",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-                      href: route('user.dashboard'),
-                      children: "My Classroom"
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
-                    className: "breadcrumb-item",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-                      href: route('user.courses'),
-                      children: "Course"
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
-                    className: "breadcrumb-item",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-                      href: route('user.course.home', lessonNav.course_id),
-                      children: lessonNav.course_title
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
-                    className: "breadcrumb-item",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-                      href: route('user.course.syllabus', lessonNav.course_id),
-                      children: "Syllabus"
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
-                    className: "breadcrumb-item",
-                    "aria-current": "page",
-                    children: "Modules"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
-                    className: "breadcrumb-item active",
-                    "aria-current": "page",
-                    children: lessonNav.course_module_title
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
-                    className: "breadcrumb-item",
-                    "aria-current": "page",
-                    children: lessonDetails.lesson_title
-                  })]
-                })
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-              className: "aboutCourse p30",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-                className: "row align-items-center",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-                  className: "col-md-10 px-0 pe-5",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("h2", {
-                    children: ["Lesson 1: ", lessonDetails.lesson_title]
-                  })
-                })
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-              className: "taskPage p30",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                className: "taskLists",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                  className: "row",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                    className: "user_left",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("img", {
-                      src: "/storage/uploads/teachers/".concat(taskDetails.admin_id, "/").concat(taskDetails.taskTeacherPhoto),
-                      alt: "".concat(taskDetails.taskTeacherAvatar)
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("h3", {
-                      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-                        target: "_blank",
-                        href: taskDetails.taskTeacherProfileUrl,
-                        children: taskDetails.taskTeacherAvatar
-                      })
-                    })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                    className: "task_right",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("h4", {
-                      children: ["Task: ", taskDetails.task_title]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-                      children: taskDetails.task_description
-                    })]
-                  })]
-                }), messages.length != 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.Fragment, {
-                  children: messages.message.map(function (message, i) {
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                      className: "row",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                        className: "user_left",
-                        children: [message.from_data.profile_photo !== false && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("img", {
-                          src: "".concat(message.from_data.profile_photo),
-                          alt: "".concat(message.from_data.avatar)
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("h3", {
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("a", {
-                            target: "_blank",
-                            href: message.from_data.profile_url,
-                            children: message.from_data.avatar
-                          })
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                        "class": "task_right",
-                        children: [message.from_type == 'Student' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("label", {
-                          "class": "underreview",
-                          children: message.review_status
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-                          children: message.reply
-                        }), message.reply_photos.length != 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                          "class": "uploadedmedia",
-                          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("h5", {
-                            children: "Uploaded Media"
-                          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("ul", {
-                            children: message.reply_photos.map(function (reply_photo, i) {
-                              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
-                                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("img", {
-                                  src: "/storage/uploads/courses/task/".concat(reply_photo.student_task_id, "/").concat(reply_photo.photo_name),
-                                  alt: "".concat(reply_photo.photo_name),
-                                  width: "121",
-                                  height: "81"
-                                })
-                              });
-                            })
-                          })]
-                        })]
-                      })]
-                    });
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("form", {
-                  onSubmit: handleSubmit,
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("input", {
-                    type: "hidden",
-                    name: "task_id",
-                    value: taskDetails.id
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("input", {
-                    type: "hidden",
-                    name: "from_id",
-                    value: auth.user.id
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                    className: "row",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                      className: "user_left",
-                      children: [messages.student_data.profile_photo !== false && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("img", {
-                        src: "".concat(messages.student_data.profile_photo),
-                        alt: "".concat(messages.student_data.name)
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("h3", {
-                        children: messages.student_data.avatar
-                      })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                      className: "task_right",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-                        className: "wyswigeditor",
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(react_simple_wysiwyg__WEBPACK_IMPORTED_MODULE_7__.DefaultEditor, {
-                          value: values,
-                          id: "reply",
-                          name: "reply",
-                          onChange: function onChange(e) {
-                            setValues(e.target.value);
-                          }
-                        })
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("div", {
-                        className: "fileUpload",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("input", {
-                          type: "file",
-                          id: "input-file",
-                          className: "file-upload",
-                          multiple: true,
-                          accept: "image/*",
-                          onChange: onImageChange
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("label", {
-                          children: [imageURLS.length == 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.Fragment, {
-                            children: ["Upload ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("small", {
-                              children: "only jpg, png, mp4, mpeg with max size of 25 MB"
-                            })]
-                          }), imageURLS.map(function (imageSrc) {
-                            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("img", {
-                              src: imageSrc,
-                              alt: "not fount",
-                              width: "250px"
-                            });
-                          })]
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
-                        className: "botmActn text-end",
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("button", {
-                          type: "submit",
-                          className: "btn btn-primary righticon",
-                          children: "Submit"
-                        })
-                      })]
-                    })]
-                  })]
-                })]
-              })
-            })]
-          })]
-        })
-      })]
-    })]
-  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudentHeader.default, { auth: props.auth }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      import_Authenticated.default,
+      {
+        auth: props.auth,
+        errors: props.errors,
+        header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "font-semibold text-xl text-gray-800 leading-tight", children: "Dashboard" }),
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: `${taskDetails.task_title || "Task"} \xB7 ${links.courseTitle || "Course"}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-task", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-task__head", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ac-eyebrow", children: [
+                "Practice task",
+                links.lessonTitle ? ` \xB7 ${links.lessonTitle}` : ""
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: taskDetails.task_title || "Task" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cl-task__links", children: [
+                links.lesson && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: links.lesson, className: "dm-btn dm-btn--line", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-left", "aria-hidden": "true" }),
+                  "\xA0 Back to the lesson"
+                ] }),
+                links.overview && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: links.overview, className: "dm-linkbtn", children: "Course overview" })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "taskPage p30", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "taskLists", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "user_left", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: `/storage/uploads/teachers/${taskDetails.admin_id}/${taskDetails.taskTeacherPhoto}`, alt: `${taskDetails.taskTeacherAvatar}` }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { target: "_blank", href: taskDetails.taskTeacherProfileUrl, children: taskDetails.taskTeacherAvatar }) })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "task_right", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", { children: [
+                    "Task: ",
+                    taskDetails.task_title
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: taskDetails.task_description })
+                ] })
+              ] }),
+              messages.length != 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: messages.message.map((message, i) => {
+                return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "row", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "user_left", children: [
+                    message.from_data.profile_photo !== false && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: `${message.from_data.profile_photo}`, alt: `${message.from_data.avatar}` }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { target: "_blank", href: message.from_data.profile_url, children: message.from_data.avatar }) })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { class: "task_right", children: [
+                    message.from_type == "Student" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { class: "underreview", children: message.review_status }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: message.reply }),
+                    message.reply_photos.length != 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { class: "uploadedmedia", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h5", { children: "Uploaded Media" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { children: message.reply_photos.map((reply_photo, i2) => {
+                        return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: `/storage/uploads/courses/task/${reply_photo.student_task_id}/${reply_photo.photo_name}`, alt: `${reply_photo.photo_name}`, width: `121`, height: `81` }) });
+                      }) })
+                    ] })
+                  ] })
+                ] });
+              }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: handleSubmit, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: `hidden`, name: `task_id`, value: taskDetails.id }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: `hidden`, name: `from_id`, value: auth.user.id }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "row", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "user_left", children: [
+                    messages.student_data.profile_photo !== false && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: `${messages.student_data.profile_photo}`, alt: `${messages.student_data.name}` }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: messages.student_data.avatar })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "task_right", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "wyswigeditor", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.DefaultEditor, { value: values, id: `reply`, name: `reply`, onChange: (e) => {
+                      setValues(e.target.value);
+                    } }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "fileUpload", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "file", id: "input-file", className: "file-upload", multiple: true, accept: "image/*", onChange: onImageChange }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+                        imageURLS.length == 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                          "Upload ",
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "only jpg, png, mp4, mpeg with max size of 25 MB" })
+                        ] }),
+                        imageURLS.map((imageSrc) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: imageSrc, alt: "not fount", width: "250px" }))
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "botmActn text-end", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "btn btn-primary righticon", children: "Submit" }) })
+                  ] })
+                ] })
+              ] })
+            ] }) }) }) })
+          ] })
+        ]
+      }
+    )
+  ] });
 }
+
 
 /***/ }),
 
@@ -23964,8 +24770,6 @@ function LinkedAccounts(props) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { className: "col-md-10 px-0 ms-sm-auto rightsidebar", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "accountPage p30", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_MyAccountNavigation.default, { auth: props.auth }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "accountDtl sec", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Login & security" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sec-lede", children: "Choose how you sign in. Everything here belongs to one account, however you log in." }),
             msg && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `ac-alert ${msg.ok ? "ac-alert--ok" : "ac-alert--error"}`, role: "status", children: msg.text }),
             reauth && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-alert ac-alert--error", children: [
               "For your security, sign in again before changing your sign-in methods.",
@@ -24982,73 +25786,65 @@ function Notifications(props) {
 /***/ }),
 
 /***/ "./resources/js/Pages/Students/OrderHistory.js":
-/*!*****************************************************!*\
-  !*** ./resources/js/Pages/Students/OrderHistory.js ***!
-  \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ OrderHistory)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _Layouts_Authenticated__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/Layouts/Authenticated */ "./resources/js/Layouts/Authenticated.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Students_StudentHeader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Students/StudentHeader */ "./resources/js/Components/Students/StudentHeader.js");
-/* harmony import */ var _Components_Students_StudentNavigation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Students/StudentNavigation */ "./resources/js/Components/Students/StudentNavigation.js");
-/* harmony import */ var _Components_Students_MyAccountNavigation__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/Components/Students/MyAccountNavigation */ "./resources/js/Components/Students/MyAccountNavigation.js");
-/* harmony import */ var react_data_table_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-data-table-component */ "../../febuild/node_modules/react-data-table-component/dist/index.cjs.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-
-
-
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var OrderHistory_exports = {};
+__export(OrderHistory_exports, {
+  default: () => OrderHistory
+});
+module.exports = __toCommonJS(OrderHistory_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_Authenticated = __toESM(__webpack_require__("./resources/js/Layouts/Authenticated.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_StudentHeader = __toESM(__webpack_require__("./resources/js/Components/Students/StudentHeader.js"));
+var import_StudentNavigation = __toESM(__webpack_require__("./resources/js/Components/Students/StudentNavigation.js"));
+var import_MyAccountNavigation = __toESM(__webpack_require__("./resources/js/Components/Students/MyAccountNavigation.js"));
+var import_react_data_table_component = __toESM(__webpack_require__("../../febuild/node_modules/react-data-table-component/dist/index.cjs.js"));
 function OrderHistory(props) {
-  var orderHistory = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.usePage)().props.orderHistory;
-  var ExpandedComponent = function ExpandedComponent(_ref) {
-    var data = _ref.data;
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("pre", {
-      children: JSON.stringify(data, null, 2)
-    });
-  };
-  var columns = [{
-    name: 'Order ID',
-    selector: function selector(row) {
-      return row.order_number;
-    }
-  }, {
-    name: 'Course title',
-    selector: function selector(row) {
-      return row.title;
-    }
-  }, {
-    name: 'Amount',
-    selector: function selector(row) {
-      return row.price;
-    }
-  }, {
-    name: 'Currency',
-    selector: function selector(row) {
-      return row.price_type;
-    }
-  }, {
-    name: 'Order Date',
-    selector: function selector(row) {
-      return row.order_date;
-    }
-  }, {
-    name: 'Payment Method',
-    selector: function selector(row) {
-      return row.payment_option;
-    }
-  }];
-  var data = [];
-  orderHistory.map(function (order, i) {
+  const { orderHistory, originals = [], commissions = [] } = (0, import_inertia_react.usePage)().props;
+  const money = (a, c) => a == null ? "" : `${c === "USD" ? "$" : "\u20B9"}${Number(a).toLocaleString(c === "USD" ? "en-US" : "en-IN")}`;
+  const nice = (v) => String(v || "").replace(/_/g, " ").toLowerCase().replace(/^./, (x) => x.toUpperCase());
+  const day = (v) => v ? String(v).slice(0, 10) : "";
+  const ExpandedComponent = ({ data: data2 }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: JSON.stringify(data2, null, 2) });
+  const columns = [
+    { name: "Order ID", selector: (row) => row.order_number },
+    { name: "Course title", selector: (row) => row.title },
+    { name: "Amount", selector: (row) => row.price },
+    { name: "Currency", selector: (row) => row.price_type },
+    { name: "Order Date", selector: (row) => row.order_date },
+    { name: "Payment Method", selector: (row) => row.payment_option }
+  ];
+  const data = [];
+  orderHistory.map((order, i) => {
     data.push({
       order_number: order.order_number,
       title: order.title,
@@ -25058,53 +25854,95 @@ function OrderHistory(props) {
       payment_option: order.payment_option
     });
   });
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Components_Students_StudentHeader__WEBPACK_IMPORTED_MODULE_3__["default"], {
-      auth: props.auth
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_Layouts_Authenticated__WEBPACK_IMPORTED_MODULE_1__["default"], {
-      auth: props.auth,
-      errors: props.errors,
-      header: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("h2", {
-        className: "font-semibold text-xl text-gray-800 leading-tight",
-        children: "Dashboard"
-      }),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.Head, {
-        title: "Order History"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
-        className: "container-fluid",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-          className: "row",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Components_Students_StudentNavigation__WEBPACK_IMPORTED_MODULE_4__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("main", {
-            className: "col-md-10 px-0 ms-sm-auto rightsidebar",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-              className: "accountPage p30",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Components_Students_MyAccountNavigation__WEBPACK_IMPORTED_MODULE_5__["default"], {
-                auth: props.auth
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
-                className: "accountDtl",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                  className: "accountEdit",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("h3", {
-                    children: "Order History"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_data_table_component__WEBPACK_IMPORTED_MODULE_6__["default"], {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudentHeader.default, { auth: props.auth }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      import_Authenticated.default,
+      {
+        auth: props.auth,
+        errors: props.errors,
+        header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "font-semibold text-xl text-gray-800 leading-tight", children: "Dashboard" }),
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: "Order History" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "container-fluid", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudentNavigation.default, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { className: "col-md-10 px-0 ms-sm-auto rightsidebar", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "accountPage p30", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_MyAccountNavigation.default, { auth: props.auth }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "accountDtl", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "accountEdit", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Order History" }),
+                (orderHistory.length > 0 || originals.length === 0 && commissions.length === 0) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { className: "oh-sub", children: "Courses & workshops" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                  import_react_data_table_component.default,
+                  {
                     pagination: true,
-                    columns: columns,
-                    data: data,
+                    columns,
+                    data,
                     expandableRows: true,
                     expandableRowsComponent: ExpandedComponent,
-                    expandableRowExpanded: function expandableRowExpanded() {
-                      return !true;
-                    }
-                  })]
-                })
-              })]
-            })
-          })]
-        })
-      })]
-    })]
-  });
+                    expandableRowExpanded: () => false
+                  }
+                ),
+                originals.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { className: "oh-sub", children: "Original artworks" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "oh-table", role: "region", "aria-label": "Original artwork orders", tabIndex: 0, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Order ID" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Artwork" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Amount" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Date" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Status" })
+                    ] }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: originals.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/orders/${o.order_id}`, children: o.order_id }) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${o.slug}`, children: o.title }),
+                        o.artist_name ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "dm-muted", children: [
+                          " \xB7 ",
+                          o.artist_name
+                        ] }) : null
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: money(o.amount, o.currency) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: day(o.created_at) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { children: [
+                        nice(o.status),
+                        o.tracking_number ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "dm-muted", children: [
+                          " \xB7 ",
+                          o.courier,
+                          " ",
+                          o.tracking_number
+                        ] }) : null
+                      ] })
+                    ] }, o.order_id)) })
+                  ] }) })
+                ] }),
+                commissions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { className: "oh-sub", children: "Commissioned art" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "oh-table", role: "region", "aria-label": "Commission orders", tabIndex: 0, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Order ID" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Type" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Amount" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Date" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Status" })
+                    ] }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: commissions.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: o.order_id }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: nice(o.fulfillment_type) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: money(o.total_price, o.currency) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: day(o.created_at) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: nice(o.order_status) })
+                    ] }, o.order_id)) })
+                  ] }) })
+                ] })
+              ] }) })
+            ] }) })
+          ] }) })
+        ]
+      }
+    )
+  ] });
 }
+
 
 /***/ }),
 
@@ -25119,1566 +25957,945 @@ function OrderHistory(props) {
 /***/ }),
 
 /***/ "./resources/js/Pages/Studio/Certificates.js":
-/*!***************************************************!*\
-  !*** ./resources/js/Pages/Studio/Certificates.js ***!
-  \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Certificates)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Studio/StudioLayout */ "./resources/js/Components/Studio/StudioLayout.js");
-/* harmony import */ var _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Studio/Journey */ "./resources/js/Components/Studio/Journey.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-function Requirement(_ref) {
-  var ok = _ref.ok,
-    label = _ref.label,
-    detail = _ref.detail,
-    action = _ref.action;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("li", {
-    className: "flex items-start gap-3 py-2",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-      className: "mt-0.5 flex-none w-6 h-6 rounded-full flex items-center justify-center text-xs ".concat(ok ? 'bg-green-600 text-white' : 'border-2 border-gray-300 text-gray-400'),
-      children: ok ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-        className: "fa fa-check",
-        "aria-hidden": "true"
-      }) : null
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-      className: "flex-1",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-        className: "block font-bold ".concat(ok ? 'text-ink' : 'text-gray-800'),
-        children: label
-      }), detail && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-        className: "block text-sm text-gray-500",
-        children: detail
-      })]
-    }), !ok && action]
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Certificates_exports = {};
+__export(Certificates_exports, {
+  default: () => Certificates
+});
+module.exports = __toCommonJS(Certificates_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
+var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
+function Requirement({ ok, label, detail, action }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex items-start gap-3 py-2", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mt-0.5 flex-none w-6 h-6 rounded-full flex items-center justify-center text-xs ${ok ? "bg-green-600 text-white" : "border-2 border-gray-300 text-gray-400"}`, children: ok ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }) : null }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "flex-1", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `block font-bold ${ok ? "text-ink" : "text-gray-800"}`, children: label }),
+      detail && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block text-sm text-gray-500", children: detail })
+    ] }),
+    !ok && action
+  ] });
 }
-function CertificateCard(_ref2) {
-  var c = _ref2.c,
-    verifyBase = _ref2.verifyBase;
-  var total = Number(c.total_lessons || 0);
-  var done = Number(c.completed_lessons || 0);
-  var pct = total === 0 ? 100 : Math.round(done / total * 100);
-  var cert = c.certificate;
-  var earned = c.eligible || cert;
-  var download = "/dashboard/certificates/".concat(c.course_id, "/download");
-  var issued = cert ? new Date(String(cert.issued_at).replace(' ', 'T')) : new Date();
-  var linkedIn = cert ? 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME' + "&name=".concat(encodeURIComponent(c.title), "&organizationName=ArtistikCity&issueYear=").concat(issued.getFullYear(), "&issueMonth=").concat(issued.getMonth() + 1) + "&certUrl=".concat(encodeURIComponent(verifyBase + cert.certificate_no), "&certId=").concat(encodeURIComponent(cert.certificate_no)) : null;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("article", {
-    className: "rounded-2xl border bg-white overflow-hidden ".concat(earned ? 'border-ink' : 'border-gray-200'),
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "flex flex-col sm:flex-row",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-        className: "sm:w-48 h-36 sm:h-auto bg-gray-100 bg-cover bg-center flex-none",
-        style: {
-          backgroundImage: c.photo ? "url(/storage/uploads/courses/".concat(c.course_id, "/").concat(c.photo, ")") : undefined
-        }
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "flex-1 p-6",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "flex flex-wrap items-start justify-between gap-3",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-              className: "font-mono text-xs uppercase tracking-widest text-gray-500",
-              children: String(c.course_type_id) === '2' ? 'Workshop' : 'Course'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
-              className: "text-xl font-black tracking-tight text-ink",
-              children: c.title
-            })]
-          }), cert ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-            className: "rounded-full bg-ink text-white px-3 py-1 text-xs font-bold",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa fa-certificate mr-1",
-              "aria-hidden": "true"
-            }), "Certified"]
-          }) : earned ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-            className: "rounded-full bg-green-100 text-green-800 px-3 py-1 text-xs font-bold",
-            children: "Ready to claim"
-          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-            className: "rounded-full bg-gray-100 text-gray-700 px-3 py-1 text-xs font-bold",
-            children: "In progress"
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
-          className: "mt-3 divide-y divide-gray-100",
-          "aria-label": "Certificate requirements",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Requirement, {
+function CertificateCard({ c, verifyBase }) {
+  const total = Number(c.total_lessons || 0);
+  const done = Number(c.completed_lessons || 0);
+  const pct = total === 0 ? 100 : Math.round(done / total * 100);
+  const cert = c.certificate;
+  const earned = c.eligible || cert;
+  const download = `/dashboard/certificates/${c.course_id}/download`;
+  const issued = cert ? new Date(String(cert.issued_at).replace(" ", "T")) : /* @__PURE__ */ new Date();
+  const linkedIn = cert ? `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(c.title)}&organizationName=ArtistikCity&issueYear=${issued.getFullYear()}&issueMonth=${issued.getMonth() + 1}&certUrl=${encodeURIComponent(verifyBase + cert.certificate_no)}&certId=${encodeURIComponent(cert.certificate_no)}` : null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("article", { className: `rounded-2xl border bg-white overflow-hidden ${earned ? "border-ink" : "border-gray-200"}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex flex-col sm:flex-row", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sm:w-48 h-36 sm:h-auto bg-gray-100 bg-cover bg-center flex-none", style: { backgroundImage: c.photo ? `url(/storage/uploads/courses/${c.course_id}/${c.photo})` : void 0 } }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex-1 p-6", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex flex-wrap items-start justify-between gap-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs uppercase tracking-widest text-gray-500", children: String(c.course_type_id) === "2" ? "Workshop" : "Course" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "text-xl font-black tracking-tight text-ink", children: c.title })
+        ] }),
+        cert ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "rounded-full bg-ink text-white px-3 py-1 text-xs font-bold", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate mr-1", "aria-hidden": "true" }),
+          "Certified"
+        ] }) : earned ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "rounded-full bg-green-100 text-green-800 px-3 py-1 text-xs font-bold", children: "Ready to claim" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "rounded-full bg-gray-100 text-gray-700 px-3 py-1 text-xs font-bold", children: "In progress" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "mt-3 divide-y divide-gray-100", "aria-label": "Certificate requirements", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          Requirement,
+          {
             ok: c.lessons_ok,
-            label: total === 0 ? 'Lessons' : "Complete all lessons (".concat(done, "/").concat(total, ")"),
-            detail: total === 0 ? 'No lessons published for this course' : null,
-            action: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: "/dashboard/classroom/".concat(c.course_id),
-              className: "text-sm font-bold underline whitespace-nowrap",
-              children: "Continue"
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Requirement, {
+            label: total === 0 ? "Lessons" : `Complete all lessons (${done}/${total})`,
+            detail: total === 0 ? "No lessons published for this course" : null,
+            action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/classroom/${c.course_id}`, className: "text-sm font-bold underline whitespace-nowrap", children: "Continue" })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          Requirement,
+          {
             ok: c.milestone_ok,
             label: "Get one assignment approved",
-            detail: c.milestone_ok ? "".concat(c.approved_works, " approved") : Number(c.pending_works) > 0 ? "".concat(c.pending_works, " waiting for review") : 'No approved work yet',
-            action: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: "/dashboard/submissions?course=".concat(c.course_id),
-              className: "text-sm font-bold underline whitespace-nowrap",
-              children: "Submit"
-            })
-          })]
-        }), total > 0 && !c.lessons_ok && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-          className: "mt-2 h-1.5 rounded-full bg-gray-100 overflow-hidden",
-          "aria-hidden": "true",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-            className: "h-full bg-brand",
-            style: {
-              width: "".concat(pct, "%")
-            }
-          })
-        }), earned ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "mt-5 flex flex-wrap items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-            href: download,
-            className: "inline-flex items-center h-11 px-5 rounded-full bg-brand text-white font-bold hover:bg-brand-dark",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa fa-download mr-2",
-              "aria-hidden": "true"
-            }), cert ? 'Download certificate' : 'Claim & download certificate']
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-            href: "".concat(download, "?inline=1"),
-            target: "_blank",
-            rel: "noopener",
-            className: "inline-flex items-center h-11 px-5 rounded-full border border-gray-300 font-bold hover:border-ink",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa fa-print mr-2",
-              "aria-hidden": "true"
-            }), "View & print"]
-          }), cert && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-            href: "/certificates/verify/".concat(cert.certificate_no),
-            target: "_blank",
-            rel: "noopener",
-            className: "inline-flex items-center h-11 px-4 rounded-full font-bold text-gray-700 hover:text-ink",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa fa-shield mr-2",
-              "aria-hidden": "true"
-            }), "Verify"]
-          }), linkedIn && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-            href: linkedIn,
-            target: "_blank",
-            rel: "noopener",
-            className: "inline-flex items-center h-11 px-4 rounded-full font-bold text-gray-700 hover:text-ink",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa fa-linkedin-square mr-2",
-              "aria-hidden": "true"
-            }), "Add to LinkedIn"]
-          }), cert && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
-            className: "w-full mt-1 font-mono text-xs text-gray-500",
-            children: ["No. ", cert.certificate_no, " \xB7 issued ", (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__.shortDate)(cert.issued_at)]
-          })]
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
-          className: "mt-4 text-sm text-gray-500",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-            className: "fa fa-lock mr-2",
-            "aria-hidden": "true"
-          }), "Your certificate unlocks when both steps are done."]
-        })]
-      })]
-    })
-  });
+            detail: c.milestone_ok ? `${c.approved_works} approved` : Number(c.pending_works) > 0 ? `${c.pending_works} waiting for review` : "No approved work yet",
+            action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/submissions?course=${c.course_id}`, className: "text-sm font-bold underline whitespace-nowrap", children: "Submit" })
+          }
+        )
+      ] }),
+      total > 0 && !c.lessons_ok && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-2 h-1.5 rounded-full bg-gray-100 overflow-hidden", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-full bg-brand", style: { width: `${pct}%` } }) }),
+      earned ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-5 flex flex-wrap items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: download, className: "inline-flex items-center h-11 px-5 rounded-full bg-brand text-white font-bold hover:bg-brand-dark", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-download mr-2", "aria-hidden": "true" }),
+          cert ? "Download certificate" : "Claim & download certificate"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `${download}?inline=1`, target: "_blank", rel: "noopener", className: "inline-flex items-center h-11 px-5 rounded-full border border-gray-300 font-bold hover:border-ink", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-print mr-2", "aria-hidden": "true" }),
+          "View & print"
+        ] }),
+        cert && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/certificates/verify/${cert.certificate_no}`, target: "_blank", rel: "noopener", className: "inline-flex items-center h-11 px-4 rounded-full font-bold text-gray-700 hover:text-ink", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shield mr-2", "aria-hidden": "true" }),
+          "Verify"
+        ] }),
+        linkedIn && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: linkedIn, target: "_blank", rel: "noopener", className: "inline-flex items-center h-11 px-4 rounded-full font-bold text-gray-700 hover:text-ink", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-linkedin-square mr-2", "aria-hidden": "true" }),
+          "Add to LinkedIn"
+        ] }),
+        cert && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "w-full mt-1 font-mono text-xs text-gray-500", children: [
+          "No. ",
+          cert.certificate_no,
+          " \xB7 issued ",
+          (0, import_Journey.shortDate)(cert.issued_at)
+        ] })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-4 text-sm text-gray-500", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock mr-2", "aria-hidden": "true" }),
+        "Your certificate unlocks when both steps are done."
+      ] })
+    ] })
+  ] }) });
 }
-function PortfolioBuilder(_ref3) {
-  var credentials = _ref3.credentials,
-    stats = _ref3.stats;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
-    _useState2 = _slicedToArray(_useState, 2),
-    approvedOnly = _useState2[0],
-    setApprovedOnly = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
-    _useState4 = _slicedToArray(_useState3, 2),
-    curriculum = _useState4[0],
-    setCurriculum = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
-    _useState6 = _slicedToArray(_useState5, 2),
-    comments = _useState6[0],
-    setComments = _useState6[1];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(credentials.map(function (c) {
-      return String(c.course_id);
-    })),
-    _useState8 = _slicedToArray(_useState7, 2),
-    courses = _useState8[0],
-    setCourses = _useState8[1];
-  var toggleCourse = function toggleCourse(id) {
-    return setCourses(function (list) {
-      return list.includes(id) ? list.filter(function (x) {
-        return x !== id;
-      }) : [].concat(_toConsumableArray(list), [id]);
-    });
-  };
-  var qs = new URLSearchParams({
-    approvedOnly: approvedOnly ? '1' : '0',
-    curriculum: curriculum ? '1' : '0',
-    comments: comments ? '1' : '0',
-    courses: courses.join(',')
-  }).toString();
-  var href = "/dashboard/portfolio/report?".concat(qs);
-  var none = credentials.length > 0 && courses.length === 0;
-  var Toggle = function Toggle(_ref4) {
-    var checked = _ref4.checked,
-      _onChange = _ref4.onChange,
-      label = _ref4.label,
-      hint = _ref4.hint;
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("label", {
-      className: "flex items-start gap-3 py-2 cursor-pointer",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
-        type: "checkbox",
-        checked: checked,
-        onChange: function onChange(e) {
-          return _onChange(e.target.checked);
-        },
-        className: "mt-1 h-5 w-5 rounded text-brand border-gray-300 focus:ring-brand"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-          className: "block font-bold text-ink",
-          children: label
-        }), hint && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-          className: "block text-sm text-gray-500",
-          children: hint
-        })]
-      })]
-    });
-  };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("section", {
-    className: "rounded-2xl border border-gray-200 bg-white overflow-hidden",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "grid grid-cols-1 lg:grid-cols-5",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "lg:col-span-2 bg-ink text-white p-8 relative overflow-hidden",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-          className: "absolute inset-0 opacity-40",
-          style: {
-            background: 'radial-gradient(circle at 90% 10%, #e5156b 0, transparent 55%)'
-          },
-          "aria-hidden": "true"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "relative",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-            className: "font-mono text-xs tracking-widest uppercase text-pink-300",
-            children: "PDF report"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
-            className: "mt-2 text-3xl font-black tracking-tight text-white",
-            children: "Portfolio report"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-            className: "mt-2 text-gray-300",
-            children: "A detailed, print-ready portfolio: cover page, every course with its curriculum and your progress, each artwork with instructor comments, and your certificate numbers."
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-            className: "mt-6 grid grid-cols-3 gap-3",
-            children: [[credentials.length, 'Courses'], [stats.lessons, 'Lessons'], [approvedOnly ? stats.approved : stats.total, 'Artworks']].map(function (_ref5) {
-              var _ref6 = _slicedToArray(_ref5, 2),
-                v = _ref6[0],
-                l = _ref6[1];
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-                className: "border-t border-gray-600 pt-2",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-                  className: "text-2xl font-black",
-                  children: v
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-                  className: "font-mono text-xs uppercase tracking-widest text-gray-400",
-                  children: l
-                })]
-              }, l);
-            })
-          })]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "lg:col-span-3 p-8",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
-          className: "text-lg font-black tracking-tight text-ink",
-          children: "What to include"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Toggle, {
-            checked: curriculum,
-            onChange: setCurriculum,
-            label: "Course curriculum",
-            hint: "Units and lessons, with the ones you completed ticked"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Toggle, {
-            checked: comments,
-            onChange: setComments,
-            label: "Instructor comments",
-            hint: "Reviewer notes printed under each artwork"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(Toggle, {
-            checked: approvedOnly,
-            onChange: setApprovedOnly,
-            label: "Approved artworks only",
-            hint: "Untick to include work in review or needing changes"
-          })]
-        }), credentials.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("fieldset", {
-          className: "mt-4",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("legend", {
-            className: "font-bold text-ink",
-            children: "Courses"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-            className: "mt-2 flex flex-wrap gap-2",
-            children: credentials.map(function (c) {
-              var on = courses.includes(String(c.course_id));
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("button", {
-                type: "button",
-                "aria-pressed": on,
-                onClick: function onClick() {
-                  return toggleCourse(String(c.course_id));
-                },
-                className: "h-9 px-4 rounded-full text-sm font-bold border ".concat(on ? 'bg-ink text-white border-ink' : 'bg-white text-gray-600 border-gray-300'),
-                children: [on && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                  className: "fa fa-check mr-1",
-                  "aria-hidden": "true"
-                }), c.title]
-              }, c.course_id);
-            })
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "mt-6 flex flex-wrap gap-3",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-            href: none ? undefined : href,
-            "aria-disabled": none,
-            className: "inline-flex items-center h-12 px-6 rounded-full font-bold ".concat(none ? 'bg-gray-300 text-white pointer-events-none' : 'bg-brand text-white hover:bg-brand-dark'),
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa fa-file-pdf-o mr-2",
-              "aria-hidden": "true"
-            }), "Download portfolio PDF"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-            href: none ? undefined : "".concat(href, "&inline=1"),
-            target: "_blank",
-            rel: "noopener",
-            className: "inline-flex items-center h-12 px-6 rounded-full border font-bold ".concat(none ? 'border-gray-200 text-gray-300 pointer-events-none' : 'border-gray-300 hover:border-ink'),
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa fa-print mr-2",
-              "aria-hidden": "true"
-            }), "Open to print"]
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-          className: "mt-3 text-xs text-gray-500",
-          children: "Generated fresh each time, so it always reflects your latest reviews and certificates."
-        })]
-      })]
-    })
-  });
+function PortfolioBuilder({ credentials, stats }) {
+  const [approvedOnly, setApprovedOnly] = (0, import_react.useState)(true);
+  const [curriculum, setCurriculum] = (0, import_react.useState)(true);
+  const [comments, setComments] = (0, import_react.useState)(true);
+  const [courses, setCourses] = (0, import_react.useState)(credentials.map((c) => String(c.course_id)));
+  const toggleCourse = (id) => setCourses((list) => list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
+  const qs = new URLSearchParams({ approvedOnly: approvedOnly ? "1" : "0", curriculum: curriculum ? "1" : "0", comments: comments ? "1" : "0", courses: courses.join(",") }).toString();
+  const href = `/dashboard/portfolio/report?${qs}`;
+  const none = credentials.length > 0 && courses.length === 0;
+  const Toggle = ({ checked, onChange, label, hint }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "flex items-start gap-3 py-2 cursor-pointer", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked, onChange: (e) => onChange(e.target.checked), className: "mt-1 h-5 w-5 rounded text-brand border-gray-300 focus:ring-brand" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block font-bold text-ink", children: label }),
+      hint && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block text-sm text-gray-500", children: hint })
+    ] })
+  ] });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "rounded-2xl border border-gray-200 bg-white overflow-hidden", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "grid grid-cols-1 lg:grid-cols-5", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lg:col-span-2 bg-ink text-white p-8 relative overflow-hidden", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 opacity-40", style: { background: "radial-gradient(circle at 90% 10%, #e5156b 0, transparent 55%)" }, "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "relative", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-300", children: "PDF report" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-2 text-3xl font-black tracking-tight text-white", children: "Portfolio report" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-300", children: "A detailed, print-ready portfolio: cover page, every course with its curriculum and your progress, each artwork with instructor comments, and your certificate numbers." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-6 grid grid-cols-3 gap-3", children: [[credentials.length, "Courses"], [stats.lessons, "Lessons"], [approvedOnly ? stats.approved : stats.total, "Artworks"]].map(([v, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "border-t border-gray-600 pt-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-2xl font-black", children: v }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs uppercase tracking-widest text-gray-400", children: l })
+        ] }, l)) })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lg:col-span-3 p-8", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "text-lg font-black tracking-tight text-ink", children: "What to include" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Toggle, { checked: curriculum, onChange: setCurriculum, label: "Course curriculum", hint: "Units and lessons, with the ones you completed ticked" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Toggle, { checked: comments, onChange: setComments, label: "Instructor comments", hint: "Reviewer notes printed under each artwork" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Toggle, { checked: approvedOnly, onChange: setApprovedOnly, label: "Approved artworks only", hint: "Untick to include work in review or needing changes" })
+      ] }),
+      credentials.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "mt-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "font-bold text-ink", children: "Courses" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-2 flex flex-wrap gap-2", children: credentials.map((c) => {
+          const on = courses.includes(String(c.course_id));
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+            "button",
+            {
+              type: "button",
+              "aria-pressed": on,
+              onClick: () => toggleCourse(String(c.course_id)),
+              className: `h-9 px-4 rounded-full text-sm font-bold border ${on ? "bg-ink text-white border-ink" : "bg-white text-gray-600 border-gray-300"}`,
+              children: [
+                on && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check mr-1", "aria-hidden": "true" }),
+                c.title
+              ]
+            },
+            c.course_id
+          );
+        }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-6 flex flex-wrap gap-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: none ? void 0 : href, "aria-disabled": none, className: `inline-flex items-center h-12 px-6 rounded-full font-bold ${none ? "bg-gray-300 text-white pointer-events-none" : "bg-brand text-white hover:bg-brand-dark"}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o mr-2", "aria-hidden": "true" }),
+          "Download portfolio PDF"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: none ? void 0 : `${href}&inline=1`, target: "_blank", rel: "noopener", className: `inline-flex items-center h-12 px-6 rounded-full border font-bold ${none ? "border-gray-200 text-gray-300 pointer-events-none" : "border-gray-300 hover:border-ink"}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-print mr-2", "aria-hidden": "true" }),
+          "Open to print"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 text-xs text-gray-500", children: "Generated fresh each time, so it always reflects your latest reviews and certificates." })
+    ] })
+  ] }) });
 }
 function Certificates() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    _usePage$props$creden = _usePage$props.credentials,
-    credentials = _usePage$props$creden === void 0 ? [] : _usePage$props$creden,
-    _usePage$props$stats = _usePage$props.stats,
-    stats = _usePage$props$stats === void 0 ? {} : _usePage$props$stats,
-    _usePage$props$stage = _usePage$props.stage,
-    stage = _usePage$props$stage === void 0 ? 4 : _usePage$props$stage,
-    _usePage$props$verify = _usePage$props.verifyBase,
-    verifyBase = _usePage$props$verify === void 0 ? '' : _usePage$props$verify;
-  var earned = credentials.filter(function (c) {
-    return c.eligible || c.certificate;
-  }).length;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(_Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: "Certificates & reports",
-    subtitle: "Earn a verifiable certificate for each course and download a printable portfolio of your work.",
-    active: "/dashboard/certificates",
-    stage: stage,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(PortfolioBuilder, {
-      credentials: credentials,
-      stats: stats
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("section", {
-      className: "mt-12",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-        className: "flex flex-wrap items-end justify-between gap-4",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
-            className: "text-2xl font-black tracking-tight text-ink",
-            children: "Course certificates"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
-            className: "text-gray-600",
-            children: [earned, " of ", credentials.length, " earned \xB7 complete all lessons and get one assignment approved to unlock each one."]
-          })]
-        })
-      }), credentials.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "mt-6 rounded-2xl border-2 border-dashed border-gray-300 p-10 text-center",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-          className: "text-xl font-extrabold text-ink",
-          children: "No courses yet"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-          className: "mt-2 text-gray-600",
-          children: "Choose a track to start working towards your first certificate."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: "/courses?type=all",
-          className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold",
-          children: "Browse courses"
-        })]
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-        className: "mt-6 space-y-5",
-        children: credentials.map(function (c) {
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(CertificateCard, {
-            c: c,
-            verifyBase: verifyBase
-          }, c.id);
-        })
-      })]
-    })]
-  });
+  const { credentials = [], stats = {}, stage = 4, verifyBase = "" } = (0, import_inertia_react.usePage)().props;
+  const earned = credentials.filter((c) => c.eligible || c.certificate).length;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_StudioLayout.default, { title: "Certificates & reports", subtitle: "Earn a verifiable certificate for each course and download a printable portfolio of your work.", active: "/dashboard/certificates", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortfolioBuilder, { credentials, stats }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "mt-12", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex flex-wrap items-end justify-between gap-4", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-2xl font-black tracking-tight text-ink", children: "Course certificates" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "text-gray-600", children: [
+          earned,
+          " of ",
+          credentials.length,
+          " earned \xB7 complete all lessons and get one assignment approved to unlock each one."
+        ] })
+      ] }) }),
+      credentials.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-6 rounded-2xl border-2 border-dashed border-gray-300 p-10 text-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-xl font-extrabold text-ink", children: "No courses yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: "Choose a course to start working towards your first certificate." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold", children: "Browse courses" })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-6 space-y-5", children: credentials.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CertificateCard, { c, verifyBase }, c.id)) })
+    ] })
+  ] });
 }
+
 
 /***/ }),
 
 /***/ "./resources/js/Pages/Studio/Classroom.js":
-/*!************************************************!*\
-  !*** ./resources/js/Pages/Studio/Classroom.js ***!
-  \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Classroom)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "../../febuild/node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Studio/StudioLayout */ "./resources/js/Components/Studio/StudioLayout.js");
-/* harmony import */ var _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Studio/Journey */ "./resources/js/Components/Studio/Journey.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-
-
-
-
-
-
-var strip = function strip(h) {
-  return String(h || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
 };
-var embed = function embed(url) {
-  var m = String(url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  return m ? "https://www.youtube-nocookie.com/embed/".concat(m[1], "?rel=0") : null;
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Classroom_exports = {};
+__export(Classroom_exports, {
+  default: () => Classroom
+});
+module.exports = __toCommonJS(Classroom_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
+var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
+const strip = (h) => String(h || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+const embed = (url) => {
+  const m = String(url || "").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+  return m ? `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0` : null;
 };
 function Classroom() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    course = _usePage$props.course,
-    enrolled = _usePage$props.enrolled,
-    _usePage$props$module = _usePage$props.modules,
-    modules = _usePage$props$module === void 0 ? [] : _usePage$props$module,
-    _usePage$props$comple = _usePage$props.completed,
-    initialDone = _usePage$props$comple === void 0 ? [] : _usePage$props$comple,
-    _usePage$props$progre = _usePage$props.progress,
-    initialProgress = _usePage$props$progre === void 0 ? 0 : _usePage$props$progre,
-    _usePage$props$videos = _usePage$props.videos,
-    videos = _usePage$props$videos === void 0 ? [] : _usePage$props$videos,
-    _usePage$props$submis = _usePage$props.submissions,
-    submissions = _usePage$props$submis === void 0 ? [] : _usePage$props$submis;
-  var lessons = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
-    return modules.flatMap(function (m, mi) {
-      return (m.lessons || []).map(function (l, li) {
-        return _objectSpread(_objectSpread({}, l), {}, {
-          unit: mi + 1,
-          n: li + 1,
-          moduleTitle: m.module_title
-        });
-      });
-    });
-  }, [modules]);
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(new Set(initialDone.map(String))),
-    _useState2 = _slicedToArray(_useState, 2),
-    done = _useState2[0],
-    setDone = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(Number(initialProgress || 0)),
-    _useState4 = _slicedToArray(_useState3, 2),
-    progress = _useState4[0],
-    setProgress = _useState4[1];
-  var firstOpen = lessons.find(function (l) {
-    return !done.has(String(l.id));
-  }) || lessons[0];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(firstOpen ? firstOpen.id : null),
-    _useState6 = _slicedToArray(_useState5, 2),
-    activeId = _useState6[0],
-    setActiveId = _useState6[1];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState8 = _slicedToArray(_useState7, 2),
-    busy = _useState8[0],
-    setBusy = _useState8[1];
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState0 = _slicedToArray(_useState9, 2),
-    error = _useState0[0],
-    setError = _useState0[1];
-  var active = lessons.find(function (l) {
-    return l.id === activeId;
-  });
-  var idx = lessons.findIndex(function (l) {
-    return l.id === activeId;
-  });
-  var video = videos[idx] || videos[0];
-  var src = video ? embed(video.video_url) : null;
+  const { course, enrolled, orderId, modules = [], completed: initialDone = [], progress: initialProgress = 0, videos = [], submissions = [] } = (0, import_inertia_react.usePage)().props;
+  const lessons = (0, import_react.useMemo)(() => modules.flatMap((m, mi) => (m.lessons || []).map((l, li) => __spreadProps(__spreadValues({}, l), { unit: mi + 1, n: li + 1, moduleTitle: m.module_title }))), [modules]);
+  const [done, setDone] = (0, import_react.useState)(new Set(initialDone.map(String)));
+  const [progress, setProgress] = (0, import_react.useState)(Number(initialProgress || 0));
+  const firstOpen = lessons.find((l) => !done.has(String(l.id))) || lessons[0];
+  const [activeId, setActiveId] = (0, import_react.useState)(firstOpen ? firstOpen.id : null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [error, setError] = (0, import_react.useState)(null);
+  const active = lessons.find((l) => l.id === activeId);
+  const idx = lessons.findIndex((l) => l.id === activeId);
+  const video = videos[idx] || videos[0];
+  const src = video ? embed(video.video_url) : null;
   if (!enrolled) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_3__["default"], {
-      title: course.title,
-      active: "/dashboard",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-          className: "text-2xl font-black text-ink",
-          children: "This classroom is for enrolled students"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-          className: "mt-2 text-gray-600",
-          children: "Enroll in the course to unlock lessons, assignments and your portfolio."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-          href: "/course/".concat(course.slug),
-          className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold",
-          children: "View course"
-        })]
-      })
-    });
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudioLayout.default, { title: course.title, active: "/user/my-courses", crumbs: [{ href: "/user/my-courses", label: "My courses" }], children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-2xl font-black text-ink", children: "This classroom is for enrolled students" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: "Enroll in the course to unlock lessons, assignments and your portfolio." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/course/${course.slug}`, className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold", children: "View course" })
+    ] }) });
   }
-  var complete = function complete() {
+  const complete = () => {
     if (!active) return;
     setBusy(true);
     setError(null);
-    axios__WEBPACK_IMPORTED_MODULE_2___default().post("/api/classroom/".concat(course.id, "/lessons/").concat(active.id, "/complete")).then(function (r) {
+    import_axios.default.post(`/api/classroom/${course.id}/lessons/${active.id}/complete`).then((r) => {
       setProgress(r.data.progress);
       setDone(new Set((r.data.completed || []).map(String)));
-      var nextLesson = lessons[idx + 1];
+      const nextLesson = lessons[idx + 1];
       if (nextLesson) setActiveId(nextLesson.id);
-    })["catch"](function (e) {
-      return setError(e.response && e.response.data && e.response.data.message || 'Could not save your progress.');
-    })["finally"](function () {
-      return setBusy(false);
-    });
+    }).catch((e) => setError(e.response && e.response.data && e.response.data.message || "Could not save your progress.")).finally(() => setBusy(false));
   };
-  var approved = submissions.some(function (x) {
-    return x.admin_status === 'Approved';
-  });
-  var pending = submissions.some(function (x) {
-    return x.admin_status === 'Pending Review';
-  });
-  var finished = Number(progress) >= 100;
-  var stageNow = !enrolled ? 3 : approved ? finished ? 7 : 6 : finished || pending ? 5 : 4;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    title: course.title,
-    subtitle: course.teacher_name ? "With ".concat(course.teacher_name) : null,
-    active: "/dashboard",
-    stage: stageNow,
-    actions: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-      className: "tw",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "w-64",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-          className: "flex justify-between text-sm font-bold",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-            children: "Course progress"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-            children: [progress, "%"]
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-          className: "mt-1.5 h-2.5 rounded-full bg-gray-200 overflow-hidden",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-            className: "h-full bg-brand transition-all",
-            style: {
-              width: "".concat(progress, "%")
+  const approved = submissions.some((x) => x.admin_status === "Approved");
+  const pending = submissions.some((x) => x.admin_status === "Pending Review");
+  const finished = Number(progress) >= 100;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_StudioLayout.default,
+    {
+      title: course.title,
+      subtitle: course.teacher_name ? `With ${course.teacher_name}` : null,
+      active: "/user/my-courses",
+      crumbs: [{ href: "/user/my-courses", label: "My courses" }],
+      actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tw", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "w-64", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex justify-between text-sm font-bold", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Course progress" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            progress,
+            "%"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-1.5 h-2.5 rounded-full bg-gray-200 overflow-hidden", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-full bg-brand transition-all", style: { width: `${progress}%` } }) }),
+        orderId ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/user/course/${orderId}`, className: "mt-3 inline-flex items-center gap-2 text-sm font-bold text-ink underline", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-calendar", "aria-hidden": "true" }),
+          "Schedule, modules & tasks"
+        ] }) : null
+      ] }) }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "grid grid-cols-12 gap-8", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "col-span-12 lg:col-span-8", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "relative rounded-2xl overflow-hidden bg-ink", style: { aspectRatio: "16 / 9" }, children: src ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", { title: video.video_title || (active == null ? void 0 : active.lesson_title), src, className: "absolute inset-0 w-full h-full", allow: "encrypted-media; picture-in-picture", allowFullScreen: true }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+            "div",
+            {
+              className: "absolute inset-0 flex flex-col items-center justify-center text-center text-white p-8",
+              style: { background: course.photo ? `linear-gradient(rgba(17,17,17,.65),rgba(17,17,17,.85)), url(/storage/uploads/courses/${course.id}/${course.photo}) center/cover` : void 0 },
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-20 h-20 rounded-full bg-white bg-opacity-90 text-ink flex items-center justify-center text-3xl pl-1", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play", "aria-hidden": "true" }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-4 font-mono text-xs tracking-widest uppercase text-gray-300", children: [
+                  "Unit ",
+                  active == null ? void 0 : active.unit,
+                  " \xB7 Lesson ",
+                  active == null ? void 0 : active.n
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-1 text-2xl font-black tracking-tight", children: (active == null ? void 0 : active.lesson_title) || "Lesson" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-sm text-gray-300", children: "The lesson recording appears here after the live session." })
+              ]
             }
-          })
-        })]
-      })
-    }),
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "grid grid-cols-12 gap-8",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "col-span-12 lg:col-span-8",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-          className: "relative rounded-2xl overflow-hidden bg-ink",
-          style: {
-            aspectRatio: '16 / 9'
-          },
-          children: src ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("iframe", {
-            title: video.video_title || (active === null || active === void 0 ? void 0 : active.lesson_title),
-            src: src,
-            className: "absolute inset-0 w-full h-full",
-            allow: "encrypted-media; picture-in-picture",
-            allowFullScreen: true
-          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "absolute inset-0 flex flex-col items-center justify-center text-center text-white p-8",
-            style: {
-              background: course.photo ? "linear-gradient(rgba(17,17,17,.65),rgba(17,17,17,.85)), url(/storage/uploads/courses/".concat(course.id, "/").concat(course.photo, ") center/cover") : undefined
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-              className: "w-20 h-20 rounded-full bg-white bg-opacity-90 text-ink flex items-center justify-center text-3xl pl-1",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-                className: "fa fa-play",
-                "aria-hidden": "true"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-              className: "mt-4 font-mono text-xs tracking-widest uppercase text-gray-300",
-              children: ["Unit ", active === null || active === void 0 ? void 0 : active.unit, " \xB7 Lesson ", active === null || active === void 0 ? void 0 : active.n]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-              className: "mt-1 text-2xl font-black tracking-tight",
-              children: (active === null || active === void 0 ? void 0 : active.lesson_title) || 'Lesson'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-              className: "mt-2 text-sm text-gray-300",
-              children: "The lesson recording appears here after the live session."
-            })]
-          })
-        }), active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("article", {
-          className: "mt-6",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-            className: "font-mono text-xs tracking-widest uppercase text-gray-500",
-            children: ["Unit ", active.unit, " \xB7 ", active.moduleTitle]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h2", {
-            className: "mt-1 text-3xl font-black tracking-tight text-ink",
-            children: active.lesson_title
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-            className: "mt-4 ac-rich text-lg",
-            dangerouslySetInnerHTML: {
-              __html: active.lesson_description || '<p>Follow along with the demonstration and practise the exercise.</p>'
-            }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "mt-6 flex flex-wrap gap-3",
-            children: [done.has(String(active.id)) ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-              className: "inline-flex items-center h-12 px-6 rounded-full bg-green-100 text-green-800 font-bold",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-                className: "fa fa-check mr-2",
-                "aria-hidden": "true"
-              }), "Lesson completed"]
-            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("button", {
-              type: "button",
-              onClick: complete,
-              disabled: busy,
-              className: "inline-flex items-center h-12 px-6 rounded-full bg-ink text-white font-bold hover:bg-gray-800 disabled:bg-gray-400",
-              children: busy ? 'Saving…' : 'Mark lesson complete'
-            }), active.lesson_pdf && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("a", {
-              href: "/storage/uploads/lessons/".concat(active.lesson_pdf),
-              className: "inline-flex items-center h-12 px-6 rounded-full border border-gray-300 font-bold hover:border-ink",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-                className: "fa fa-file-pdf-o mr-2",
-                "aria-hidden": "true"
-              }), "Study material"]
-            })]
-          }), error && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            role: "alert",
-            className: "mt-3 text-sm font-semibold text-red-600",
-            children: error
-          })]
-        }), approved && finished ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("section", {
-          className: "mt-10 rounded-2xl p-8 text-white relative overflow-hidden",
-          style: {
-            background: 'linear-gradient(120deg,#111,#3b0a24 60%,#e5156b)'
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            className: "font-mono text-xs tracking-widest uppercase text-pink-200",
-            children: "Course complete \xB7 Step 07"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h3", {
-            className: "mt-2 text-3xl font-black tracking-tight text-white",
-            children: "You've earned your certificate"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            className: "mt-2 text-lg text-gray-200 max-w-xl",
-            children: "Every lesson is done and your milestone is approved. Download your ArtistikCity certificate and a printable portfolio of this course."
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "mt-6 flex flex-wrap gap-3",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("a", {
-              href: "/dashboard/certificates",
-              className: "inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-black hover:bg-brand-dark",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-                className: "fa fa-certificate mr-2",
-                "aria-hidden": "true"
-              }), "Get my certificate"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-              href: "/dashboard/portfolio",
-              className: "inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink",
-              children: "Sell from my portfolio"
-            })]
-          })]
-        }) : approved ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("section", {
-          className: "mt-10 rounded-2xl border border-green-200 bg-green-50 p-8",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            className: "font-mono text-xs tracking-widest uppercase text-green-800",
-            children: "Milestone approved"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h3", {
-            className: "mt-2 text-2xl font-black tracking-tight text-ink",
-            children: "Great work. Finish the remaining lessons to earn your certificate."
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-            className: "mt-2 text-gray-700",
-            children: [lessons.length - done.size, " lesson", lessons.length - done.size === 1 ? '' : 's', " to go. Your approved piece is already in your portfolio."]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-            href: "/dashboard/portfolio",
-            className: "mt-5 inline-flex items-center h-11 px-6 rounded-full bg-ink text-white font-bold",
-            children: "Open portfolio"
-          })]
-        }) : pending ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("section", {
-          className: "mt-10 rounded-2xl border border-yellow-200 bg-yellow-50 p-8",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            className: "font-mono text-xs tracking-widest uppercase text-yellow-800",
-            children: "Milestone \xB7 in review"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h3", {
-            className: "mt-2 text-2xl font-black tracking-tight text-ink",
-            children: "Your assignment is with your instructor"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-            className: "mt-2 text-gray-700",
-            children: ["\u201C", submissions.find(function (x) {
-              return x.admin_status === 'Pending Review';
-            }).title, "\u201D is waiting for review. You'll see their notes in Submissions. Keep going with the lessons meanwhile."]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-            href: "/dashboard/submissions?course=".concat(course.id),
-            className: "mt-5 inline-flex items-center h-11 px-6 rounded-full bg-ink text-white font-bold",
-            children: "View submissions"
-          })]
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("section", {
-          className: "mt-10 rounded-2xl p-8 text-white relative overflow-hidden",
-          style: {
-            background: 'linear-gradient(120deg,#e5156b,#b80f55 55%,#111)'
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            className: "font-mono text-xs tracking-widest uppercase text-pink-100",
-            children: "Milestone \xB7 Step 05"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h3", {
-            className: "mt-2 text-3xl font-black tracking-tight text-white",
-            children: finished ? 'All lessons done. Submit your milestone' : 'Ready to pass this module milestone?'
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            className: "mt-2 text-lg text-pink-50 max-w-xl",
-            children: "Upload your assignment for a personal review. Approved work goes straight into your portfolio, and you can sell it."
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("a", {
-            href: "/dashboard/submissions?course=".concat(course.id),
-            className: "mt-6 inline-flex items-center h-12 px-7 rounded-full bg-white text-ink font-black hover:bg-gray-100",
-            children: ["Submit assignment ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-              className: "fa fa-arrow-right ml-2",
-              "aria-hidden": "true"
-            })]
-          }), submissions.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-            className: "mt-4 text-sm text-pink-50",
-            children: ["Your latest: ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("strong", {
-              children: submissions[0].title
-            }), " \xB7 ", (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__.statusStyle)(submissions[0].admin_status).label]
-          })]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("aside", {
-        className: "col-span-12 lg:col-span-4",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-          className: "lg:sticky lg:top-24 rounded-2xl border border-gray-200 bg-white",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "p-5 border-b border-gray-100",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h2", {
-              className: "text-xl font-black tracking-tight text-ink",
-              children: "Syllabus"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-              className: "font-mono text-xs uppercase tracking-widest text-gray-500",
-              children: [done.size, "/", lessons.length, " lessons complete"]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "max-h-[70vh] overflow-y-auto",
-            children: [modules.length === 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-              className: "p-5 text-gray-600",
-              children: "The syllabus will appear here when the batch starts."
-            }), modules.map(function (m, mi) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-                className: "border-b border-gray-100 last:border-b-0",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-                  className: "px-5 pt-4 pb-2 font-mono text-xs uppercase tracking-widest text-gray-500",
-                  children: ["Unit ", mi + 1, " \xB7 ", m.module_title]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("ol", {
-                  children: (m.lessons || []).map(function (l, li) {
-                    var isDone = done.has(String(l.id));
-                    var isActive = l.id === activeId;
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("li", {
-                      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("button", {
-                        type: "button",
-                        onClick: function onClick() {
-                          return setActiveId(l.id);
-                        },
-                        "aria-current": isActive ? 'true' : undefined,
-                        className: "w-full text-left flex items-start gap-3 px-5 py-3 ".concat(isActive ? 'bg-brand-soft' : 'hover:bg-gray-50'),
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                          className: "mt-0.5 flex-none w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ".concat(isDone ? 'bg-green-600 text-white' : isActive ? 'bg-brand text-white' : 'border border-gray-300 text-gray-500'),
-                          children: isDone ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-                            className: "fa fa-check",
-                            "aria-hidden": "true"
-                          }) : li + 1
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-                          className: "flex-1 min-w-0",
-                          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                            className: "block font-bold ".concat(isActive ? 'text-ink' : 'text-gray-800'),
-                            children: l.lesson_title
-                          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                            className: "block text-sm text-gray-500 truncate",
-                            children: strip(l.lesson_description).slice(0, 60)
-                          })]
-                        })]
-                      })
-                    }, l.id);
-                  })
-                })]
-              }, m.id);
-            })]
-          })]
-        })
-      })]
-    })
-  });
+          ) }),
+          active && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "mt-6", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-mono text-xs tracking-widest uppercase text-gray-500", children: [
+              "Unit ",
+              active.unit,
+              " \xB7 ",
+              active.moduleTitle
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-1 text-3xl font-black tracking-tight text-ink", children: active.lesson_title }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-4 ac-rich text-lg", dangerouslySetInnerHTML: { __html: active.lesson_description || "<p>Follow along with the demonstration and practise the exercise.</p>" } }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-6 flex flex-wrap gap-3", children: [
+              done.has(String(active.id)) ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "inline-flex items-center h-12 px-6 rounded-full bg-green-100 text-green-800 font-bold", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check mr-2", "aria-hidden": "true" }),
+                "Lesson completed"
+              ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: complete, disabled: busy, className: "inline-flex items-center h-12 px-6 rounded-full bg-ink text-white font-bold hover:bg-gray-800 disabled:bg-gray-400", children: busy ? "Saving\u2026" : "Mark lesson complete" }),
+              active.lesson_pdf && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/storage/uploads/lessons/${active.lesson_pdf}`, className: "inline-flex items-center h-12 px-6 rounded-full border border-gray-300 font-bold hover:border-ink", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o mr-2", "aria-hidden": "true" }),
+                "Study material"
+              ] })
+            ] }),
+            error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { role: "alert", className: "mt-3 text-sm font-semibold text-red-600", children: error })
+          ] }),
+          approved && finished ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "mt-10 rounded-2xl p-8 text-white relative overflow-hidden", style: { background: "linear-gradient(120deg,#111,#3b0a24 60%,#e5156b)" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-200", children: "Course complete \xB7 Step 07" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-2 text-3xl font-black tracking-tight text-white", children: "You've earned your certificate" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-lg text-gray-200 max-w-xl", children: "Every lesson is done and your milestone is approved. Download your ArtistikCity certificate and a printable portfolio of this course." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-6 flex flex-wrap gap-3", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/dashboard/certificates", className: "inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-black hover:bg-brand-dark", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate mr-2", "aria-hidden": "true" }),
+                "Get my certificate"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/portfolio", className: "inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink", children: "Sell from my portfolio" })
+            ] })
+          ] }) : approved ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "mt-10 rounded-2xl border border-green-200 bg-green-50 p-8", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-green-800", children: "Milestone approved" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-2 text-2xl font-black tracking-tight text-ink", children: "Great work. Finish the remaining lessons to earn your certificate." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-2 text-gray-700", children: [
+              lessons.length - done.size,
+              " lesson",
+              lessons.length - done.size === 1 ? "" : "s",
+              " to go. Your approved piece is already in your portfolio."
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/portfolio", className: "mt-5 inline-flex items-center h-11 px-6 rounded-full bg-ink text-white font-bold", children: "Open portfolio" })
+          ] }) : pending ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "mt-10 rounded-2xl border border-yellow-200 bg-yellow-50 p-8", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-yellow-800", children: "Milestone \xB7 in review" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-2 text-2xl font-black tracking-tight text-ink", children: "Your assignment is with your instructor" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-2 text-gray-700", children: [
+              "\u201C",
+              submissions.find((x) => x.admin_status === "Pending Review").title,
+              "\u201D is waiting for review. You'll see their notes in Submissions. Keep going with the lessons meanwhile."
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/submissions?course=${course.id}`, className: "mt-5 inline-flex items-center h-11 px-6 rounded-full bg-ink text-white font-bold", children: "View submissions" })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "mt-10 rounded-2xl p-8 text-white relative overflow-hidden", style: { background: "linear-gradient(120deg,#e5156b,#b80f55 55%,#111)" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-100", children: "Milestone \xB7 Step 05" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-2 text-3xl font-black tracking-tight text-white", children: finished ? "All lessons done. Submit your milestone" : "Ready to pass this module milestone?" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-lg text-pink-50 max-w-xl", children: "Upload your assignment for a personal review. Approved work goes straight into your portfolio, and you can sell it." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/dashboard/submissions?course=${course.id}`, className: "mt-6 inline-flex items-center h-12 px-7 rounded-full bg-white text-ink font-black hover:bg-gray-100", children: [
+              "Submit assignment ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right ml-2", "aria-hidden": "true" })
+            ] }),
+            submissions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-4 text-sm text-pink-50", children: [
+              "Your latest: ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: submissions[0].title }),
+              " \xB7 ",
+              (0, import_Journey.statusStyle)(submissions[0].admin_status).label
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "col-span-12 lg:col-span-4", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lg:sticky lg:top-24 rounded-2xl border border-gray-200 bg-white", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "p-5 border-b border-gray-100", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-xl font-black tracking-tight text-ink", children: "Syllabus" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-mono text-xs uppercase tracking-widest text-gray-500", children: [
+              done.size,
+              "/",
+              lessons.length,
+              " lessons complete"
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "max-h-[70vh] overflow-y-auto", children: [
+            modules.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "p-5 text-gray-600", children: "The syllabus will appear here when the batch starts." }),
+            modules.map((m, mi) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "border-b border-gray-100 last:border-b-0", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "px-5 pt-4 pb-2 font-mono text-xs uppercase tracking-widest text-gray-500", children: [
+                "Unit ",
+                mi + 1,
+                " \xB7 ",
+                m.module_title
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: (m.lessons || []).map((l, li) => {
+                const isDone = done.has(String(l.id));
+                const isActive = l.id === activeId;
+                return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => setActiveId(l.id),
+                    "aria-current": isActive ? "true" : void 0,
+                    className: `w-full text-left flex items-start gap-3 px-5 py-3 ${isActive ? "bg-brand-soft" : "hover:bg-gray-50"}`,
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mt-0.5 flex-none w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isDone ? "bg-green-600 text-white" : isActive ? "bg-brand text-white" : "border border-gray-300 text-gray-500"}`, children: isDone ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }) : li + 1 }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "flex-1 min-w-0", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `block font-bold ${isActive ? "text-ink" : "text-gray-800"}`, children: l.lesson_title }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block text-sm text-gray-500 truncate", children: strip(l.lesson_description).slice(0, 60) })
+                      ] })
+                    ]
+                  }
+                ) }, l.id);
+              }) })
+            ] }, m.id))
+          ] })
+        ] }) })
+      ] })
+    }
+  );
 }
+
 
 /***/ }),
 
 /***/ "./resources/js/Pages/Studio/Home.js":
-/*!*******************************************!*\
-  !*** ./resources/js/Pages/Studio/Home.js ***!
-  \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Home)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Studio/StudioLayout */ "./resources/js/Components/Studio/StudioLayout.js");
-/* harmony import */ var _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Studio/Journey */ "./resources/js/Components/Studio/Journey.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Home_exports = {};
+__export(Home_exports, {
+  default: () => Home
+});
+module.exports = __toCommonJS(Home_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
+var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
 function Home() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    _usePage$props$enroll = _usePage$props.enrollments,
-    enrollments = _usePage$props$enroll === void 0 ? [] : _usePage$props$enroll,
-    _usePage$props$submis = _usePage$props.submissions,
-    submissions = _usePage$props$submis === void 0 ? [] : _usePage$props$submis,
-    _usePage$props$stage = _usePage$props.stage,
-    stage = _usePage$props$stage === void 0 ? 3 : _usePage$props$stage,
-    auth = _usePage$props.auth,
-    _usePage$props$certif = _usePage$props.certificatesReady,
-    certificatesReady = _usePage$props$certif === void 0 ? 0 : _usePage$props$certif;
-  var name = auth && auth.user ? auth.user.name.split(' ')[0] : 'artist';
-  var next = _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__.JOURNEY[Math.min(stage, _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__.JOURNEY.length) - 1];
-  var approved = submissions.filter(function (s) {
-    return s.admin_status === 'Approved';
-  }).length;
-  var pending = submissions.filter(function (s) {
-    return s.admin_status === 'Pending Review';
-  }).length;
-  var listed = submissions.filter(function (s) {
-    return s.is_listed_for_sale;
-  }).length;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(_Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: "My studio",
-    subtitle: "Welcome back, ".concat(name, ". Here's where you are on your creative journey."),
-    active: "/dashboard",
-    stage: stage,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "grid grid-cols-1 lg:grid-cols-3 gap-6",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "lg:col-span-2 rounded-2xl bg-ink text-white p-8 relative overflow-hidden",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-          className: "absolute inset-0 opacity-40",
-          style: {
-            background: 'radial-gradient(circle at 90% 10%, #e5156b 0, transparent 50%)'
-          },
-          "aria-hidden": "true"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "relative",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
-            className: "font-mono text-xs tracking-widest uppercase text-pink-300",
-            children: ["Next step \xB7 ", next.n]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
-            className: "mt-2 text-3xl font-black tracking-tight text-white",
-            children: next.title
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-            className: "mt-2 text-lg text-gray-300 max-w-xl",
-            children: next.text
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-            href: next.href,
-            className: "mt-6 inline-flex items-center h-12 px-6 rounded-full bg-brand text-white font-bold hover:bg-brand-dark",
-            children: [next.cta, " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa fa-arrow-right ml-2",
-              "aria-hidden": "true"
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-        className: "grid grid-cols-2 gap-4",
-        children: [['Courses', enrollments.length, 'fa-graduation-cap'], ['In review', pending, 'fa-clock-o'], ['Approved', approved, 'fa-check-circle'], ['For sale', listed, 'fa-tag']].map(function (_ref) {
-          var _ref2 = _slicedToArray(_ref, 3),
-            label = _ref2[0],
-            value = _ref2[1],
-            icon = _ref2[2];
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-            className: "rounded-2xl border border-gray-200 bg-white p-5",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa ".concat(icon, " text-brand"),
-              "aria-hidden": "true"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-              className: "mt-3 text-3xl font-black tracking-tight text-ink",
-              children: value
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-              className: "font-mono text-xs uppercase tracking-widest text-gray-500",
-              children: label
-            })]
-          }, label);
-        })
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("section", {
-      className: "mt-6 rounded-2xl border border-gray-200 bg-white p-5 flex flex-col md:flex-row md:items-center gap-4",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-        className: "w-12 h-12 flex-none rounded-full bg-brand-soft text-brand flex items-center justify-center text-xl",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-          className: "fa fa-certificate",
-          "aria-hidden": "true"
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "flex-1",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-          className: "font-extrabold text-ink",
-          children: certificatesReady > 0 ? "".concat(certificatesReady, " certificate").concat(certificatesReady > 1 ? 's' : '', " ready to download") : 'Certificates & portfolio report'
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-          className: "text-sm text-gray-600",
-          children: certificatesReady > 0 ? 'Download your ArtistikCity certificates and a printable PDF portfolio of your work.' : "Track what\u2019s left to earn each course certificate, and download your PDF portfolio any time."
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: "/dashboard/certificates",
-        className: "inline-flex items-center justify-center h-11 px-5 rounded-full bg-ink text-white font-bold hover:bg-gray-800",
-        children: "Open certificates & reports"
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("section", {
-      className: "mt-12",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "flex items-end justify-between gap-4",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
-          className: "text-2xl font-black tracking-tight text-ink",
-          children: "My classrooms"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: "/courses?type=all",
-          className: "font-bold underline",
-          children: "Find another course"
-        })]
-      }), enrollments.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "mt-6 rounded-2xl border-2 border-dashed border-gray-300 p-10 text-center",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-          className: "text-xl font-extrabold text-ink",
-          children: "You haven't joined a course yet"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-          className: "mt-2 text-gray-600",
-          children: "Choose a track to unlock your classroom, assignments and portfolio."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: "/courses?type=all",
-          className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold",
-          children: "Choose a track"
-        })]
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-        className: "mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6",
-        children: enrollments.map(function (e) {
-          var pct = Number(e.progress_percentage || 0);
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("article", {
-            className: "rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg transition",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-              className: "relative h-40 overflow-hidden",
-              style: {
-                background: 'linear-gradient(135deg,#111,#3b0a24 60%,#e5156b)'
-              },
-              children: [e.photo && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("img", {
-                src: "/storage/uploads/courses/".concat(e.course_id, "/").concat(e.photo),
-                alt: "",
-                className: "absolute inset-0 w-full h-full object-cover",
-                onError: function onError(ev) {
-                  ev.currentTarget.style.display = 'none';
-                }
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-                className: "absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-bold ".concat(pct >= 100 ? 'bg-green-600 text-white' : pct > 0 ? 'bg-white text-ink' : 'bg-brand text-white'),
-                children: pct >= 100 ? 'Completed' : pct > 0 ? 'In progress' : 'Not started'
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-              className: "p-5",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
-                className: "font-mono text-xs uppercase tracking-widest text-gray-500",
-                children: [String(e.course_type_id) === '2' ? 'Workshop' : 'Course', Number(e.submissions) > 0 ? " \xB7 ".concat(e.submissions, " submission").concat(Number(e.submissions) === 1 ? '' : 's') : '']
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
-                className: "mt-1 text-lg font-extrabold text-ink",
-                children: e.title
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-                className: "mt-4",
-                "aria-label": "Progress ".concat(pct, "%"),
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-                  className: "flex justify-between text-sm",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-                    className: "text-gray-600",
-                    children: [e.completed_lessons, "/", e.total_lessons, " lessons"]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-                    className: "font-bold text-ink",
-                    children: [pct, "%"]
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-                  className: "mt-1.5 h-2 rounded-full bg-gray-100 overflow-hidden",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-                    className: "h-full bg-brand",
-                    style: {
-                      width: "".concat(pct, "%")
-                    }
-                  })
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-                className: "mt-5 grid grid-cols-2 gap-2",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                  href: "/dashboard/classroom/".concat(e.course_id),
-                  className: "inline-flex justify-center items-center h-11 rounded-full bg-ink text-white text-sm font-bold hover:bg-gray-800",
-                  children: pct >= 100 ? 'Revisit lessons' : pct > 0 ? 'Continue' : 'Start learning'
-                }), pct >= 100 && Number(certificatesReady) > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-                  href: "/dashboard/certificates",
-                  className: "inline-flex justify-center items-center h-11 rounded-full bg-brand text-white text-sm font-bold hover:bg-brand-dark",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                    className: "fa fa-certificate mr-2",
-                    "aria-hidden": "true"
-                  }), "Certificate"]
-                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-                  href: "/dashboard/submissions?course=".concat(e.course_id),
-                  className: "inline-flex justify-center items-center h-11 rounded-full border border-gray-300 text-sm font-bold hover:border-ink",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                    className: "fa fa-upload mr-2",
-                    "aria-hidden": "true"
-                  }), "Submit work"]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: "/user/my-courses",
-                className: "mt-3 block text-center text-sm font-semibold text-gray-500 hover:text-ink",
-                children: "Schedule, modules & tasks"
-              })]
-            })]
-          }, e.id);
-        })
-      })]
-    }), submissions.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("section", {
-      className: "mt-12",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "flex items-end justify-between gap-4",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
-          className: "text-2xl font-black tracking-tight text-ink",
-          children: "Latest submissions"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: "/dashboard/portfolio",
-          className: "font-bold underline",
-          children: "Open portfolio"
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("ul", {
-        className: "mt-6 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white",
-        children: submissions.slice(0, 5).map(function (s) {
-          var st = (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__.statusStyle)(s.admin_status);
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("li", {
-            className: "flex items-center gap-4 p-4",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("img", {
-              src: s.file_url,
-              alt: "",
-              className: "w-14 h-14 rounded-lg object-cover bg-gray-100"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-              className: "flex-1 min-w-0",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-                className: "font-bold text-ink truncate",
-                children: s.title
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
-                className: "text-sm text-gray-500 truncate",
-                children: [s.course_title, " \xB7 ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-                  className: "font-mono",
-                  children: (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_3__.shortDate)(s.created_at)
-                })]
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-              className: "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ".concat(st.chip),
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                className: "fa ".concat(st.icon),
-                "aria-hidden": "true"
-              }), st.label]
-            })]
-          }, s.id);
-        })
-      })]
-    })]
-  });
+  const { enrollments = [], submissions = [], stage = 3, auth, certificatesReady = 0 } = (0, import_inertia_react.usePage)().props;
+  const name = auth && auth.user ? auth.user.name.split(" ")[0] : "artist";
+  const next = import_Journey.JOURNEY[Math.min(stage, import_Journey.JOURNEY.length) - 1];
+  const approved = submissions.filter((s) => s.admin_status === "Approved").length;
+  const pending = submissions.filter((s) => s.admin_status === "Pending Review").length;
+  const listed = submissions.filter((s) => s.is_listed_for_sale).length;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_StudioLayout.default, { title: "My studio", subtitle: `Welcome back, ${name}. Here's where you are on your creative journey.`, active: "/dashboard", stage, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-6", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lg:col-span-2 rounded-2xl bg-ink text-white p-8 relative overflow-hidden", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 opacity-40", style: { background: "radial-gradient(circle at 90% 10%, #e5156b 0, transparent 50%)" }, "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "relative", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-300", children: [
+            "Next step \xB7 ",
+            next.n
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { className: "mt-2 text-3xl font-black tracking-tight text-white", children: [
+            next.title,
+            next.subtitle ? ` \u2013 ${next.subtitle}` : ""
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-lg text-gray-300 max-w-xl", children: next.text }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: next.href, className: "mt-6 inline-flex items-center h-12 px-6 rounded-full bg-brand text-white font-bold hover:bg-brand-dark", children: [
+            next.cta,
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right ml-2", "aria-hidden": "true" })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "grid grid-cols-2 gap-4", children: [
+        ["Courses", enrollments.length, "fa-graduation-cap"],
+        ["In review", pending, "fa-clock-o"],
+        ["Approved", approved, "fa-check-circle"],
+        ["For sale", listed, "fa-tag"]
+      ].map(([label, value, icon]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border border-gray-200 bg-white p-5", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon} text-brand`, "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 text-3xl font-black tracking-tight text-ink", children: value }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs uppercase tracking-widest text-gray-500", children: label })
+      ] }, label)) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "mt-6 rounded-2xl border border-gray-200 bg-white p-5 flex flex-col md:flex-row md:items-center gap-4", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-12 h-12 flex-none rounded-full bg-brand-soft text-brand flex items-center justify-center text-xl", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate", "aria-hidden": "true" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex-1", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-extrabold text-ink", children: certificatesReady > 0 ? `${certificatesReady} certificate${certificatesReady > 1 ? "s" : ""} ready to download` : "Certificates & portfolio report" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-sm text-gray-600", children: certificatesReady > 0 ? "Download your ArtistikCity certificates and a printable PDF portfolio of your work." : "Track what\u2019s left to earn each course certificate, and download your PDF portfolio any time." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/certificates", className: "inline-flex items-center justify-center h-11 px-5 rounded-full bg-ink text-white font-bold hover:bg-gray-800", children: "Open certificates & reports" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "mt-12", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-end justify-between gap-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-2xl font-black tracking-tight text-ink", children: "My classrooms" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "font-bold underline", children: "Find another course" })
+      ] }),
+      enrollments.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-6 rounded-2xl border-2 border-dashed border-gray-300 p-10 text-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-xl font-extrabold text-ink", children: "You haven't joined a course yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: "Choose a course to unlock your classroom, assignments and portfolio." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold", children: "Choose a course" })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6", children: enrollments.map((e) => {
+        const pct = Number(e.progress_percentage || 0);
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg transition", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "relative h-40 overflow-hidden", style: { background: "linear-gradient(135deg,#111,#3b0a24 60%,#e5156b)" }, children: [
+            e.photo && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: `/storage/uploads/courses/${e.course_id}/${e.photo}`, alt: "", className: "absolute inset-0 w-full h-full object-cover", onError: (ev) => {
+              ev.currentTarget.style.display = "none";
+            } }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-bold ${pct >= 100 ? "bg-green-600 text-white" : pct > 0 ? "bg-white text-ink" : "bg-brand text-white"}`, children: pct >= 100 ? "Completed" : pct > 0 ? "In progress" : "Not started" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "p-5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-mono text-xs uppercase tracking-widest text-gray-500", children: [
+              String(e.course_type_id) === "2" ? "Workshop" : "Course",
+              Number(e.submissions) > 0 ? ` \xB7 ${e.submissions} submission${Number(e.submissions) === 1 ? "" : "s"}` : ""
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-1 text-lg font-extrabold text-ink", children: e.title }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4", "aria-label": `Progress ${pct}%`, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex justify-between text-sm", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "text-gray-600", children: [
+                  e.completed_lessons,
+                  "/",
+                  e.total_lessons,
+                  " lessons"
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "font-bold text-ink", children: [
+                  pct,
+                  "%"
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-1.5 h-2 rounded-full bg-gray-100 overflow-hidden", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-full bg-brand", style: { width: `${pct}%` } }) })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-5 grid grid-cols-2 gap-2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/classroom/${e.course_id}`, className: "inline-flex justify-center items-center h-11 rounded-full bg-ink text-white text-sm font-bold hover:bg-gray-800", children: pct >= 100 ? "Revisit lessons" : pct > 0 ? "Continue" : "Start learning" }),
+              pct >= 100 && Number(certificatesReady) > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/dashboard/certificates", className: "inline-flex justify-center items-center h-11 rounded-full bg-brand text-white text-sm font-bold hover:bg-brand-dark", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate mr-2", "aria-hidden": "true" }),
+                "Certificate"
+              ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/dashboard/submissions?course=${e.course_id}`, className: "inline-flex justify-center items-center h-11 rounded-full border border-gray-300 text-sm font-bold hover:border-ink", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-upload mr-2", "aria-hidden": "true" }),
+                "Submit work"
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/user/my-courses", className: "mt-3 block text-center text-sm font-semibold text-gray-500 hover:text-ink", children: "Schedule, modules & tasks" })
+          ] })
+        ] }, e.id);
+      }) })
+    ] }),
+    submissions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "mt-12", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-end justify-between gap-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-2xl font-black tracking-tight text-ink", children: "Latest submissions" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/portfolio", className: "font-bold underline", children: "Open portfolio" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "mt-6 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white", children: submissions.slice(0, 5).map((s) => {
+        const st = (0, import_Journey.statusStyle)(s.admin_status);
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex items-center gap-4 p-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: s.file_url, alt: "", className: "w-14 h-14 rounded-lg object-cover bg-gray-100" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex-1 min-w-0", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-bold text-ink truncate", children: s.title }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "text-sm text-gray-500 truncate", children: [
+              s.course_title,
+              " \xB7 ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono", children: (0, import_Journey.shortDate)(s.created_at) })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${st.chip}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${st.icon}`, "aria-hidden": "true" }),
+            st.label
+          ] })
+        ] }, s.id);
+      }) })
+    ] })
+  ] });
 }
+
 
 /***/ }),
 
 /***/ "./resources/js/Pages/Studio/Portfolio.js":
-/*!************************************************!*\
-  !*** ./resources/js/Pages/Studio/Portfolio.js ***!
-  \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Portfolio)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "../../febuild/node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Studio/StudioLayout */ "./resources/js/Components/Studio/StudioLayout.js");
-/* harmony import */ var _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Studio/Journey */ "./resources/js/Components/Studio/Journey.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-
-var LISTING = {
-  DRAFT: {
-    label: 'Draft · not live',
-    chip: 'bg-gray-100 text-gray-700 border-gray-200',
-    icon: 'fa-pencil'
-  },
-  PENDING_REVIEW: {
-    label: 'In moderator review',
-    chip: 'bg-blue-50 text-blue-800 border-blue-200',
-    icon: 'fa-hourglass-half'
-  },
-  AVAILABLE: {
-    label: 'Live in the marketplace',
-    chip: 'bg-green-50 text-green-800 border-green-200',
-    icon: 'fa-check-circle'
-  },
-  RESERVED: {
-    label: 'A collector is checking out',
-    chip: 'bg-yellow-50 text-yellow-800 border-yellow-200',
-    icon: 'fa-lock'
-  },
-  SOLD: {
-    label: 'Sold',
-    chip: 'bg-ink text-white border-ink',
-    icon: 'fa-trophy'
-  }
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
 };
-function SellPanel(_ref) {
-  var item = _ref.item,
-    listing = _ref.listing,
-    onWithdrawn = _ref.onWithdrawn;
-  var approved = item.admin_status === 'Approved';
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState2 = _slicedToArray(_useState, 2),
-    busy = _useState2[0],
-    setBusy = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState4 = _slicedToArray(_useState3, 2),
-    msg = _useState4[0],
-    setMsg = _useState4[1];
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Portfolio_exports = {};
+__export(Portfolio_exports, {
+  default: () => Portfolio
+});
+module.exports = __toCommonJS(Portfolio_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
+var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
+const LISTING = {
+  DRAFT: { label: "Draft \xB7 not live", chip: "bg-gray-100 text-gray-700 border-gray-200", icon: "fa-pencil" },
+  PENDING_REVIEW: { label: "In moderator review", chip: "bg-blue-50 text-blue-800 border-blue-200", icon: "fa-hourglass-half" },
+  AVAILABLE: { label: "Live in the marketplace", chip: "bg-green-50 text-green-800 border-green-200", icon: "fa-check-circle" },
+  RESERVED: { label: "A collector is checking out", chip: "bg-yellow-50 text-yellow-800 border-yellow-200", icon: "fa-lock" },
+  SOLD: { label: "Sold", chip: "bg-ink text-white border-ink", icon: "fa-trophy" }
+};
+function SellPanel({ item, listing, onWithdrawn }) {
+  const approved = item.admin_status === "Approved";
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [msg, setMsg] = (0, import_react.useState)(null);
   if (!approved) return null;
   if (!listing) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "mt-4 pt-4 border-t border-gray-100",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("a", {
-        href: "/dashboard/portfolio/sell/".concat(item.id),
-        className: "flex items-center justify-center gap-2 h-11 rounded-full bg-ink text-white font-bold hover:bg-gray-800",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-          className: "fa fa-tag",
-          "aria-hidden": "true"
-        }), "Sell as a 1-of-1 original"]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-        className: "mt-2 text-xs text-gray-500 text-center",
-        children: "Set the story, size and price. A moderator reviews it before it goes live."
-      })]
-    });
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4 pt-4 border-t border-gray-100", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/dashboard/portfolio/sell/${item.id}`, className: "flex items-center justify-center gap-2 h-11 rounded-full bg-ink text-white font-bold hover:bg-gray-800", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-tag", "aria-hidden": "true" }),
+        "Sell as a 1-of-1 original"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-xs text-gray-500 text-center", children: "Set the story, size and price. A moderator reviews it before it goes live." })
+    ] });
   }
-  var st = LISTING[listing.stock_status] || LISTING.DRAFT;
-  var rejected = listing.stock_status === 'DRAFT' && listing.review_notes && listing.review_notes !== 'Approved.';
-  var withdraw = function withdraw() {
+  const st = LISTING[listing.stock_status] || LISTING.DRAFT;
+  const rejected = listing.stock_status === "DRAFT" && listing.review_notes && listing.review_notes !== "Approved.";
+  const withdraw = () => {
     setBusy(true);
-    axios__WEBPACK_IMPORTED_MODULE_2___default().post("/api/v1/marketplace/student/paintings/".concat(listing.id, "/withdraw")).then(function (r) {
+    import_axios.default.post(`/api/v1/marketplace/student/paintings/${listing.id}/withdraw`).then((r) => {
       setMsg(r.data.message);
       onWithdrawn(listing.id);
-    })["catch"](function (e) {
-      return setMsg(e.response && e.response.data && e.response.data.message || 'Could not withdraw.');
-    })["finally"](function () {
-      return setBusy(false);
-    });
+    }).catch((e) => setMsg(e.response && e.response.data && e.response.data.message || "Could not withdraw.")).finally(() => setBusy(false));
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-    className: "mt-4 pt-4 border-t border-gray-100",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "flex items-center justify-between gap-2",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-        className: "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ".concat(st.chip),
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-          className: "fa ".concat(st.icon),
-          "aria-hidden": "true"
-        }), st.label]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-        className: "font-mono font-bold text-ink",
-        children: (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__.inr)(listing.final_price)
-      })]
-    }), rejected && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-      className: "mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("strong", {
-        children: "Moderator notes:"
-      }), " ", listing.review_notes]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "mt-3 flex flex-wrap gap-2",
-      children: [['DRAFT', 'PENDING_REVIEW', 'AVAILABLE'].includes(listing.stock_status) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-        href: "/dashboard/portfolio/sell/".concat(item.id),
-        className: "inline-flex items-center h-10 px-4 rounded-full bg-ink text-white text-sm font-bold",
-        children: listing.stock_status === 'DRAFT' ? rejected ? 'Fix & resubmit' : 'Finish listing' : 'Edit listing'
-      }), ['AVAILABLE', 'RESERVED', 'SOLD'].includes(listing.stock_status) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-        href: "/marketplace/".concat(listing.slug),
-        className: "inline-flex items-center h-10 px-4 rounded-full border border-gray-300 text-sm font-bold hover:border-ink",
-        children: "View in marketplace"
-      }), ['AVAILABLE', 'PENDING_REVIEW'].includes(listing.stock_status) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("button", {
-        type: "button",
-        onClick: withdraw,
-        disabled: busy,
-        className: "inline-flex items-center h-10 px-4 rounded-full text-sm font-bold text-gray-600 hover:text-red-600",
-        children: "Withdraw"
-      })]
-    }), msg && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-      className: "mt-2 text-sm font-semibold text-gray-700",
-      role: "status",
-      children: msg
-    })]
-  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4 pt-4 border-t border-gray-100", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-center justify-between gap-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${st.chip}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${st.icon}`, "aria-hidden": "true" }),
+        st.label
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono font-bold text-ink", children: (0, import_Journey.inr)(listing.final_price) })
+    ] }),
+    rejected && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Moderator notes:" }),
+      " ",
+      listing.review_notes
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-3 flex flex-wrap gap-2", children: [
+      ["DRAFT", "PENDING_REVIEW", "AVAILABLE"].includes(listing.stock_status) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/portfolio/sell/${item.id}`, className: "inline-flex items-center h-10 px-4 rounded-full bg-ink text-white text-sm font-bold", children: listing.stock_status === "DRAFT" ? rejected ? "Fix & resubmit" : "Finish listing" : "Edit listing" }),
+      ["AVAILABLE", "RESERVED", "SOLD"].includes(listing.stock_status) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${listing.slug}`, className: "inline-flex items-center h-10 px-4 rounded-full border border-gray-300 text-sm font-bold hover:border-ink", children: "View in marketplace" }),
+      ["AVAILABLE", "PENDING_REVIEW"].includes(listing.stock_status) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: withdraw, disabled: busy, className: "inline-flex items-center h-10 px-4 rounded-full text-sm font-bold text-gray-600 hover:text-red-600", children: "Withdraw" })
+    ] }),
+    msg && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-sm font-semibold text-gray-700", role: "status", children: msg })
+  ] });
 }
-function ArtworkCard(_ref2) {
-  var item = _ref2.item,
-    listing = _ref2.listing,
-    onWithdrawn = _ref2.onWithdrawn;
-  var st = (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__.statusStyle)(item.admin_status);
-  var forSale = listing && ['AVAILABLE', 'RESERVED'].includes(listing.stock_status);
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("article", {
-    className: "rounded-2xl border border-gray-200 bg-white overflow-hidden flex flex-col",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "relative bg-gray-100",
-      style: {
-        aspectRatio: '4 / 3'
-      },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("img", {
-        src: item.file_url,
-        alt: item.title,
-        className: "absolute inset-0 w-full h-full object-cover ".concat(item.admin_status === 'Pending Review' ? 'opacity-70' : '')
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-        className: "absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ".concat(st.chip),
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-          className: "fa ".concat(st.icon),
-          "aria-hidden": "true"
-        }), st.label]
-      }), forSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-        className: "absolute top-3 right-3 rounded-full bg-ink text-white px-3 py-1 text-xs font-bold",
-        children: ["For sale \xB7 ", (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__.inr)(listing.final_price)]
-      }), listing && listing.stock_status === 'SOLD' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-        className: "absolute top-3 right-3 rounded-full bg-brand text-white px-3 py-1 text-xs font-bold",
-        children: "Sold"
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "p-5 flex-1 flex flex-col",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h3", {
-        className: "text-lg font-extrabold text-ink",
-        children: item.title
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-        className: "text-sm text-gray-500",
-        children: [item.course_title, " \xB7 ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-          className: "font-mono",
-          children: (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__.shortDate)(item.created_at)
-        })]
-      }), item.admin_status === 'Pending Review' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-900 flex gap-2",
-        role: "status",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-          className: "relative flex h-3 w-3 mt-1 flex-none",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-            className: "animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-            className: "relative inline-flex rounded-full h-3 w-3 bg-yellow-500"
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("strong", {
-            children: "Locked while in review."
-          }), " Selling unlocks once a reviewer approves this piece."]
-        })]
-      }), item.admin_status === 'Rejected' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("strong", {
-          children: "Changes requested:"
-        }), " ", item.reviewer_feedback || 'See your reviewer’s notes.', /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-          href: "/dashboard/submissions",
-          className: "block mt-2 font-bold underline",
-          children: "Submit a new version"
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-        className: "flex-1"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(SellPanel, {
-        item: item,
-        listing: listing,
-        onWithdrawn: onWithdrawn
-      })]
-    })]
-  });
+function ArtworkCard({ item, listing, onWithdrawn }) {
+  const st = (0, import_Journey.statusStyle)(item.admin_status);
+  const forSale = listing && ["AVAILABLE", "RESERVED"].includes(listing.stock_status);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "rounded-2xl border border-gray-200 bg-white overflow-hidden flex flex-col", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "relative bg-gray-100", style: { aspectRatio: "4 / 3" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: item.file_url, alt: item.title, className: `absolute inset-0 w-full h-full object-cover ${item.admin_status === "Pending Review" ? "opacity-70" : ""}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${st.chip}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${st.icon}`, "aria-hidden": "true" }),
+        st.label
+      ] }),
+      forSale && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "absolute top-3 right-3 rounded-full bg-ink text-white px-3 py-1 text-xs font-bold", children: [
+        "For sale \xB7 ",
+        (0, import_Journey.inr)(listing.final_price)
+      ] }),
+      listing && listing.stock_status === "SOLD" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "absolute top-3 right-3 rounded-full bg-brand text-white px-3 py-1 text-xs font-bold", children: "Sold" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "p-5 flex-1 flex flex-col", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "text-lg font-extrabold text-ink", children: item.title }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "text-sm text-gray-500", children: [
+        item.course_title,
+        " \xB7 ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono", children: (0, import_Journey.shortDate)(item.created_at) })
+      ] }),
+      item.admin_status === "Pending Review" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-900 flex gap-2", role: "status", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "relative flex h-3 w-3 mt-1 flex-none", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "relative inline-flex rounded-full h-3 w-3 bg-yellow-500" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Locked while in review." }),
+          " Selling unlocks once a reviewer approves this piece."
+        ] })
+      ] }),
+      item.admin_status === "Rejected" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Changes requested:" }),
+        " ",
+        item.reviewer_feedback || "See your reviewer\u2019s notes.",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/submissions", className: "block mt-2 font-bold underline", children: "Submit a new version" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex-1" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SellPanel, { item, listing, onWithdrawn })
+    ] })
+  ] });
 }
 function Portfolio() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    _usePage$props$submis = _usePage$props.submissions,
-    submissions = _usePage$props$submis === void 0 ? [] : _usePage$props$submis,
-    _usePage$props$listin = _usePage$props.listings,
-    listings = _usePage$props$listin === void 0 ? [] : _usePage$props$listin;
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(submissions),
-    _useState6 = _slicedToArray(_useState5, 1),
-    items = _useState6[0];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(listings),
-    _useState8 = _slicedToArray(_useState7, 2),
-    listed = _useState8[0],
-    setListed = _useState8[1];
-  var bySub = {};
-  listed.forEach(function (l) {
+  const { submissions = [], listings = [] } = (0, import_inertia_react.usePage)().props;
+  const [items] = (0, import_react.useState)(submissions);
+  const [listed, setListed] = (0, import_react.useState)(listings);
+  const bySub = {};
+  listed.forEach((l) => {
     bySub[String(l.submission_id)] = l;
   });
-  var saleOf = function saleOf(s) {
-    return bySub[String(s.id)];
-  };
-  var onWithdrawn = function onWithdrawn(id) {
-    return setListed(function (ls) {
-      return ls.map(function (l) {
-        return l.id === id ? _objectSpread(_objectSpread({}, l), {}, {
-          stock_status: 'DRAFT'
-        }) : l;
-      });
-    });
-  };
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('all'),
-    _useState0 = _slicedToArray(_useState9, 2),
-    filter = _useState0[0],
-    setFilter = _useState0[1];
-  var shown = items.filter(function (s) {
-    return filter === 'all' || (filter === 'sale' ? !!saleOf(s) : s.admin_status === filter);
-  });
-  var counts = {
+  const saleOf = (s) => bySub[String(s.id)];
+  const onWithdrawn = (id) => setListed((ls) => ls.map((l) => l.id === id ? __spreadProps(__spreadValues({}, l), { stock_status: "DRAFT" }) : l));
+  const [filter, setFilter] = (0, import_react.useState)("all");
+  const shown = items.filter((s) => filter === "all" || (filter === "sale" ? !!saleOf(s) : s.admin_status === filter));
+  const counts = {
     all: items.length,
-    Approved: items.filter(function (s) {
-      return s.admin_status === 'Approved';
-    }).length,
-    'Pending Review': items.filter(function (s) {
-      return s.admin_status === 'Pending Review';
-    }).length,
-    sale: items.filter(function (s) {
-      return !!saleOf(s);
-    }).length
+    Approved: items.filter((s) => s.admin_status === "Approved").length,
+    "Pending Review": items.filter((s) => s.admin_status === "Pending Review").length,
+    sale: items.filter((s) => !!saleOf(s)).length
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(_Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    title: "Portfolio & shop",
-    subtitle: "Your curated body of work. Approved pieces can be sold as 1-of-1 originals in the ArtistikCity Marketplace; pieces in review stay locked until they're approved.",
-    active: "/dashboard/portfolio",
-    stage: 6,
-    actions: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-      href: "/marketplace?source=student",
-      className: "dm-btn dm-btn--line",
-      children: "Student originals in the marketplace"
-    }),
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-      className: "flex flex-wrap gap-2",
-      role: "tablist",
-      children: [['all', 'All work'], ['Approved', 'Approved'], ['Pending Review', 'In review'], ['sale', 'Marketplace listings']].map(function (_ref3) {
-        var _ref4 = _slicedToArray(_ref3, 2),
-          k = _ref4[0],
-          label = _ref4[1];
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("button", {
-          type: "button",
-          role: "tab",
-          "aria-selected": filter === k,
-          onClick: function onClick() {
-            return setFilter(k);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_StudioLayout.default,
+    {
+      title: "Portfolio & shop",
+      subtitle: "Your curated body of work. Approved pieces can be sold as 1-of-1 originals in the ArtistikCity Marketplace; pieces in review stay locked until they're approved.",
+      active: "/dashboard/portfolio",
+      actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace?source=student", className: "dm-btn dm-btn--line", children: "Student originals in the marketplace" }),
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex flex-wrap gap-2", role: "tablist", children: [["all", "All work"], ["Approved", "Approved"], ["Pending Review", "In review"], ["sale", "Marketplace listings"]].map(([k, label]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            type: "button",
+            role: "tab",
+            "aria-selected": filter === k,
+            onClick: () => setFilter(k),
+            className: `h-10 px-4 rounded-full text-sm font-bold border ${filter === k ? "bg-ink text-white border-ink" : "bg-white text-gray-700 border-gray-300 hover:border-ink"}`,
+            children: [
+              label,
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono opacity-70", children: counts[k] })
+            ]
           },
-          className: "h-10 px-4 rounded-full text-sm font-bold border ".concat(filter === k ? 'bg-ink text-white border-ink' : 'bg-white text-gray-700 border-gray-300 hover:border-ink'),
-          children: [label, " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-            className: "font-mono opacity-70",
-            children: counts[k]
-          })]
-        }, k);
-      })
-    }), shown.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "mt-8 rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-        className: "text-xl font-extrabold text-ink",
-        children: "Nothing here yet"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-        className: "mt-2 text-gray-600",
-        children: "Submit an assignment to start building your portfolio."
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-        href: "/dashboard/submissions",
-        className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold",
-        children: "Submit work"
-      })]
-    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-      className: "mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6",
-      children: shown.map(function (s) {
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(ArtworkCard, {
-          item: s,
-          listing: saleOf(s),
-          onWithdrawn: onWithdrawn
-        }, s.id);
-      })
-    })]
-  });
+          k
+        )) }),
+        shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-8 rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-xl font-extrabold text-ink", children: "Nothing here yet" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: "Submit an assignment to start building your portfolio." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/submissions", className: "mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold", children: "Submit work" })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6", children: shown.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArtworkCard, { item: s, listing: saleOf(s), onWithdrawn }, s.id)) })
+      ]
+    }
+  );
 }
+
 
 /***/ }),
 
 /***/ "./resources/js/Pages/Studio/SellOriginal.js":
-/*!***************************************************!*\
-  !*** ./resources/js/Pages/Studio/SellOriginal.js ***!
-  \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ SellOriginal)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Studio/StudioLayout */ "./resources/js/Components/Studio/StudioLayout.js");
-/* harmony import */ var _Components_Marketplace_ListingWizard__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Marketplace/ListingWizard */ "./resources/js/Components/Marketplace/ListingWizard.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SellOriginal_exports = {};
+__export(SellOriginal_exports, {
+  default: () => SellOriginal
+});
+module.exports = __toCommonJS(SellOriginal_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
+var import_ListingWizard = __toESM(__webpack_require__("./resources/js/Components/Marketplace/ListingWizard.js"));
 function SellOriginal() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    submission = _usePage$props.submission,
-    painting = _usePage$props.painting,
-    artistName = _usePage$props.artistName,
-    blocked = _usePage$props.blocked;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState2 = _slicedToArray(_useState, 2),
-    done = _useState2[0],
-    setDone = _useState2[1];
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: "Sell an original",
-    active: "/dashboard/portfolio",
-    stage: 6,
-    subtitle: "List approved coursework in the ArtistikCity Marketplace as a 1-of-1 original. A moderator checks every listing before it goes live.",
-    actions: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-      href: "/dashboard/portfolio",
-      className: "dm-btn dm-btn--line",
-      children: "Back to portfolio"
-    }),
-    children: blocked ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "rounded-2xl border border-yellow-200 bg-yellow-50 p-8 text-yellow-900",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-        className: "text-lg font-bold",
-        children: blocked
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: "/dashboard/portfolio",
-        className: "mt-4 inline-flex h-11 items-center px-5 rounded-full bg-ink text-white font-bold",
-        children: "Back to portfolio"
-      })]
-    }) : done ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "max-w-xl rounded-2xl border border-gray-200 bg-white p-10 text-center mx-auto",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-        className: "inline-flex w-14 h-14 rounded-full bg-green-100 text-green-700 items-center justify-center text-2xl",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-          className: "fa ".concat(done.status === 'PENDING_REVIEW' ? 'fa-paper-plane' : 'fa-check'),
-          "aria-hidden": "true"
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
-        className: "mt-4 text-2xl font-black text-ink",
-        children: done.status === 'PENDING_REVIEW' ? 'Sent for review' : 'Draft saved'
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-        className: "mt-2 text-gray-600",
-        children: done.message
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "mt-6 flex flex-wrap justify-center gap-3",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: "/dashboard/portfolio",
-          className: "inline-flex h-11 items-center px-5 rounded-full bg-ink text-white font-bold",
-          children: "Back to portfolio"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: "/dashboard/portfolio/sell/".concat(submission.id),
-          className: "inline-flex h-11 items-center px-5 rounded-full border border-gray-300 font-bold hover:border-ink",
-          children: "Keep editing"
-        })]
-      })]
-    }) : painting && ['RESERVED', 'SOLD'].includes(painting.raw_status) ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "rounded-2xl border border-gray-200 bg-white p-8",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-        className: "text-lg font-bold text-ink",
-        children: painting.raw_status === 'SOLD' ? 'Congratulations, this original has sold!' : 'A collector is checking out right now.'
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-        className: "mt-2 text-gray-600",
-        children: painting.raw_status === 'SOLD' ? 'The studio will pack and ship it. Sold listings can\'t be edited.' : 'It\'s held for up to 15 minutes. You can edit it again if the hold ends without a sale.'
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-        href: "/marketplace/".concat(painting.slug),
-        className: "mt-4 inline-flex h-11 items-center px-5 rounded-full bg-ink text-white font-bold",
-        children: "View in marketplace"
-      })]
-    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Marketplace_ListingWizard__WEBPACK_IMPORTED_MODULE_3__["default"], {
-      painting: painting,
-      mode: "student",
-      artistName: artistName,
-      defaults: {
-        title: submission.title,
-        description: submission.description || '',
-        imageUrl: submission.file_url,
-        year: new Date(String(submission.created_at).replace(' ', 'T')).getFullYear() || undefined
-      },
-      extra: {
-        submissionId: submission.id
-      },
-      endpoints: {
-        upload: '/api/v1/marketplace/student/images',
-        create: '/api/v1/marketplace/student/paintings',
-        update: function update(id) {
-          return "/api/v1/marketplace/student/paintings/".concat(id);
+  const { submission, painting, artistName, blocked } = (0, import_inertia_react.usePage)().props;
+  const [done, setDone] = (0, import_react.useState)(null);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_StudioLayout.default,
+    {
+      title: "Sell an original",
+      active: "/dashboard/portfolio",
+      subtitle: "List approved coursework in the ArtistikCity Marketplace as a 1-of-1 original. A moderator checks every listing before it goes live.",
+      actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/portfolio", className: "dm-btn dm-btn--line", children: "Back to portfolio" }),
+      children: blocked ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border border-yellow-200 bg-yellow-50 p-8 text-yellow-900", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-lg font-bold", children: blocked }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/portfolio", className: "mt-4 inline-flex h-11 items-center px-5 rounded-full bg-ink text-white font-bold", children: "Back to portfolio" })
+      ] }) : done ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "max-w-xl rounded-2xl border border-gray-200 bg-white p-10 text-center mx-auto", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "inline-flex w-14 h-14 rounded-full bg-green-100 text-green-700 items-center justify-center text-2xl", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${done.status === "PENDING_REVIEW" ? "fa-paper-plane" : "fa-check"}`, "aria-hidden": "true" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-4 text-2xl font-black text-ink", children: done.status === "PENDING_REVIEW" ? "Sent for review" : "Draft saved" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: done.message }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-6 flex flex-wrap justify-center gap-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/portfolio", className: "inline-flex h-11 items-center px-5 rounded-full bg-ink text-white font-bold", children: "Back to portfolio" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/portfolio/sell/${submission.id}`, className: "inline-flex h-11 items-center px-5 rounded-full border border-gray-300 font-bold hover:border-ink", children: "Keep editing" })
+        ] })
+      ] }) : painting && ["RESERVED", "SOLD"].includes(painting.raw_status) ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border border-gray-200 bg-white p-8", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-lg font-bold text-ink", children: painting.raw_status === "SOLD" ? "Congratulations, this original has sold!" : "A collector is checking out right now." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: painting.raw_status === "SOLD" ? "The studio will pack and ship it. Sold listings can't be edited." : "It's held for up to 15 minutes. You can edit it again if the hold ends without a sale." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${painting.slug}`, className: "mt-4 inline-flex h-11 items-center px-5 rounded-full bg-ink text-white font-bold", children: "View in marketplace" })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_ListingWizard.default,
+        {
+          painting,
+          mode: "student",
+          artistName,
+          defaults: { title: submission.title, description: submission.description || "", imageUrl: submission.file_url, year: new Date(String(submission.created_at).replace(" ", "T")).getFullYear() || void 0 },
+          extra: { submissionId: submission.id },
+          endpoints: { upload: "/api/v1/marketplace/student/images", create: "/api/v1/marketplace/student/paintings", update: (id) => `/api/v1/marketplace/student/paintings/${id}` },
+          onSaved: setDone
         }
-      },
-      onSaved: setDone
-    })
-  });
+      )
+    }
+  );
 }
+
 
 /***/ }),
 
@@ -26860,347 +27077,177 @@ function Shop() {
 /***/ }),
 
 /***/ "./resources/js/Pages/Studio/Submissions.js":
-/*!**************************************************!*\
-  !*** ./resources/js/Pages/Studio/Submissions.js ***!
-  \**************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Submissions)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "../../febuild/node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Studio/StudioLayout */ "./resources/js/Components/Studio/StudioLayout.js");
-/* harmony import */ var _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Studio/Journey */ "./resources/js/Components/Studio/Journey.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Submissions_exports = {};
+__export(Submissions_exports, {
+  default: () => Submissions
+});
+module.exports = __toCommonJS(Submissions_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
+var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
 function Submissions() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    _usePage$props$enroll = _usePage$props.enrollments,
-    enrollments = _usePage$props$enroll === void 0 ? [] : _usePage$props$enroll,
-    _usePage$props$submis = _usePage$props.submissions,
-    initial = _usePage$props$submis === void 0 ? [] : _usePage$props$submis,
-    selectedCourse = _usePage$props.selectedCourse;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(initial),
-    _useState2 = _slicedToArray(_useState, 2),
-    items = _useState2[0],
-    setItems = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(selectedCourse || (enrollments[0] ? String(enrollments[0].course_id) : '')),
-    _useState4 = _slicedToArray(_useState3, 2),
-    courseId = _useState4[0],
-    setCourseId = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
-    _useState6 = _slicedToArray(_useState5, 2),
-    title = _useState6[0],
-    setTitle = _useState6[1];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
-    _useState8 = _slicedToArray(_useState7, 2),
-    description = _useState8[0],
-    setDescription = _useState8[1];
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState0 = _slicedToArray(_useState9, 2),
-    file = _useState0[0],
-    setFile = _useState0[1];
-  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState10 = _slicedToArray(_useState1, 2),
-    preview = _useState10[0],
-    setPreview = _useState10[1];
-  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState12 = _slicedToArray(_useState11, 2),
-    progress = _useState12[0],
-    setProgress = _useState12[1];
-  var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState14 = _slicedToArray(_useState13, 2),
-    message = _useState14[0],
-    setMessage = _useState14[1];
-  var inputRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  var pick = function pick(f) {
+  const { enrollments = [], submissions: initial = [], selectedCourse } = (0, import_inertia_react.usePage)().props;
+  const [items, setItems] = (0, import_react.useState)(initial);
+  const [courseId, setCourseId] = (0, import_react.useState)(selectedCourse || (enrollments[0] ? String(enrollments[0].course_id) : ""));
+  const [title, setTitle] = (0, import_react.useState)("");
+  const [description, setDescription] = (0, import_react.useState)("");
+  const [file, setFile] = (0, import_react.useState)(null);
+  const [preview, setPreview] = (0, import_react.useState)(null);
+  const [progress, setProgress] = (0, import_react.useState)(null);
+  const [message, setMessage] = (0, import_react.useState)(null);
+  const inputRef = (0, import_react.useRef)(null);
+  const pick = (f) => {
     setMessage(null);
     if (!f) return;
     if (!/^image\/(jpeg|png)$/.test(f.type)) {
-      setMessage({
-        type: 'error',
-        text: 'Please choose a JPG or PNG image.'
-      });
+      setMessage({ type: "error", text: "Please choose a JPG or PNG image." });
       return;
     }
     if (f.size > 15 * 1024 * 1024) {
-      setMessage({
-        type: 'error',
-        text: 'That image is larger than 15 MB.'
-      });
+      setMessage({ type: "error", text: "That image is larger than 15 MB." });
       return;
     }
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
-  var submit = function submit(e) {
+  const submit = (e) => {
     e.preventDefault();
     setMessage(null);
-    if (!courseId) return setMessage({
-      type: 'error',
-      text: 'Choose the course this assignment is for.'
-    });
-    if (title.trim().length < 2) return setMessage({
-      type: 'error',
-      text: 'Give your artwork a title.'
-    });
-    if (!file) return setMessage({
-      type: 'error',
-      text: 'Attach a photo of your artwork.'
-    });
-    var form = new FormData();
-    form.append('courseId', courseId);
-    form.append('title', title.trim());
-    form.append('description', description.trim());
-    form.append('file', file);
+    if (!courseId) return setMessage({ type: "error", text: "Choose the course this assignment is for." });
+    if (title.trim().length < 2) return setMessage({ type: "error", text: "Give your artwork a title." });
+    if (!file) return setMessage({ type: "error", text: "Attach a photo of your artwork." });
+    const form = new FormData();
+    form.append("courseId", courseId);
+    form.append("title", title.trim());
+    form.append("description", description.trim());
+    form.append("file", file);
     setProgress(0);
-    axios__WEBPACK_IMPORTED_MODULE_2___default().post('/api/submissions/upload', form, {
-      onUploadProgress: function onUploadProgress(ev) {
-        return ev.total && setProgress(Math.round(ev.loaded / ev.total * 100));
-      }
-    }).then(function (r) {
-      var course = enrollments.find(function (x) {
-        return String(x.course_id) === String(courseId);
-      });
-      setItems([{
-        id: r.data.id,
-        title: title.trim(),
-        description: description,
-        file_url: r.data.fileUrl,
-        admin_status: 'Pending Review',
-        course_title: course ? course.title : '',
-        created_at: new Date().toISOString()
-      }].concat(_toConsumableArray(items)));
-      setTitle('');
-      setDescription('');
+    import_axios.default.post("/api/submissions/upload", form, { onUploadProgress: (ev) => ev.total && setProgress(Math.round(ev.loaded / ev.total * 100)) }).then((r) => {
+      const course = enrollments.find((x) => String(x.course_id) === String(courseId));
+      setItems([{ id: r.data.id, title: title.trim(), description, file_url: r.data.fileUrl, admin_status: "Pending Review", course_title: course ? course.title : "", created_at: (/* @__PURE__ */ new Date()).toISOString() }, ...items]);
+      setTitle("");
+      setDescription("");
       setFile(null);
       setPreview(null);
-      setMessage({
-        type: 'ok',
-        text: 'Submitted! Your reviewer will get back to you with feedback soon.'
-      });
-    })["catch"](function (err) {
-      return setMessage({
-        type: 'error',
-        text: err.response && err.response.data && err.response.data.message || 'Upload failed. Please try again.'
-      });
-    })["finally"](function () {
-      return setProgress(null);
-    });
+      setMessage({ type: "ok", text: "Submitted! Your reviewer will get back to you with feedback soon." });
+    }).catch((err) => setMessage({ type: "error", text: err.response && err.response.data && err.response.data.message || "Upload failed. Please try again." })).finally(() => setProgress(null));
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Studio_StudioLayout__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    title: "Submissions",
-    subtitle: "Upload your assignment milestones for review. Approved pieces go straight into your portfolio.",
-    active: "/dashboard/submissions",
-    stage: 5,
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "grid grid-cols-1 lg:grid-cols-5 gap-8",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("form", {
-        onSubmit: submit,
-        className: "lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 space-y-5 self-start",
-        noValidate: true,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h2", {
-          className: "text-2xl font-black tracking-tight text-ink",
-          children: "New submission"
-        }), enrollments.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-          className: "rounded-xl bg-yellow-50 border border-yellow-200 p-4 text-yellow-900",
-          children: ["Enroll in a course to submit assignments. ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-            href: "/courses?type=all",
-            className: "font-bold underline",
-            children: "Browse courses"
-          })]
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("label", {
-              htmlFor: "course",
-              className: "block text-sm font-bold text-ink",
-              children: "Course"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("select", {
-              id: "course",
-              value: courseId,
-              onChange: function onChange(e) {
-                return setCourseId(e.target.value);
-              },
-              className: "mt-1.5 w-full h-11 rounded-lg border-gray-300 focus:border-brand focus:ring-brand",
-              children: enrollments.map(function (e) {
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("option", {
-                  value: e.course_id,
-                  children: e.title
-                }, e.course_id);
-              })
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("label", {
-              htmlFor: "title",
-              className: "block text-sm font-bold text-ink",
-              children: "Artwork title"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("input", {
-              id: "title",
-              value: title,
-              maxLength: "200",
-              onChange: function onChange(e) {
-                return setTitle(e.target.value);
-              },
-              placeholder: "e.g. Monsoon over the Western Ghats",
-              className: "mt-1.5 w-full h-11 rounded-lg border-gray-300 focus:border-brand focus:ring-brand"
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("label", {
-              htmlFor: "desc",
-              className: "block text-sm font-bold text-ink",
-              children: ["Notes for your reviewer ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                className: "font-normal text-gray-500",
-                children: "(optional)"
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("textarea", {
-              id: "desc",
-              rows: "4",
-              maxLength: "4000",
-              value: description,
-              onChange: function onChange(e) {
-                return setDescription(e.target.value);
-              },
-              placeholder: "Materials used, what you tried, where you'd like feedback\u2026",
-              className: "mt-1.5 w-full rounded-lg border-gray-300 focus:border-brand focus:ring-brand"
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-              className: "block text-sm font-bold text-ink",
-              children: "Artwork photo"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("button", {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudioLayout.default, { title: "Submissions", subtitle: "Upload your assignment milestones for review. Approved pieces go straight into your portfolio.", active: "/dashboard/submissions", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "grid grid-cols-1 lg:grid-cols-5 gap-8", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: submit, className: "lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 space-y-5 self-start", noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-2xl font-black tracking-tight text-ink", children: "New submission" }),
+      enrollments.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "rounded-xl bg-yellow-50 border border-yellow-200 p-4 text-yellow-900", children: [
+        "Enroll in a course to submit assignments. ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "font-bold underline", children: "Browse courses" })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "course", className: "block text-sm font-bold text-ink", children: "Course" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { id: "course", value: courseId, onChange: (e) => setCourseId(e.target.value), className: "mt-1.5 w-full h-11 rounded-lg border-gray-300 focus:border-brand focus:ring-brand", children: enrollments.map((e) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: e.course_id, children: e.title }, e.course_id)) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "title", className: "block text-sm font-bold text-ink", children: "Artwork title" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "title", value: title, maxLength: "200", onChange: (e) => setTitle(e.target.value), placeholder: "e.g. Monsoon over the Western Ghats", className: "mt-1.5 w-full h-11 rounded-lg border-gray-300 focus:border-brand focus:ring-brand" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { htmlFor: "desc", className: "block text-sm font-bold text-ink", children: [
+            "Notes for your reviewer ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-normal text-gray-500", children: "(optional)" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "desc", rows: "4", maxLength: "4000", value: description, onChange: (e) => setDescription(e.target.value), placeholder: "Materials used, what you tried, where you'd like feedback\u2026", className: "mt-1.5 w-full rounded-lg border-gray-300 focus:border-brand focus:ring-brand" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block text-sm font-bold text-ink", children: "Artwork photo" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
               type: "button",
-              onClick: function onClick() {
-                return inputRef.current && inputRef.current.click();
-              },
-              onDragOver: function onDragOver(e) {
-                return e.preventDefault();
-              },
-              onDrop: function onDrop(e) {
+              onClick: () => inputRef.current && inputRef.current.click(),
+              onDragOver: (e) => e.preventDefault(),
+              onDrop: (e) => {
                 e.preventDefault();
                 pick(e.dataTransfer.files[0]);
               },
               className: "mt-1.5 w-full rounded-xl border-2 border-dashed border-gray-300 hover:border-brand bg-gray-50 p-4 text-center",
-              children: preview ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("img", {
-                src: preview,
-                alt: "Selected artwork",
-                className: "mx-auto max-h-56 rounded-lg"
-              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-                className: "block py-6 text-gray-600",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-                  className: "fa fa-cloud-upload text-3xl text-brand",
-                  "aria-hidden": "true"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                  className: "block mt-2 font-bold text-ink",
-                  children: "Drop a photo or click to browse"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                  className: "block text-sm",
-                  children: "JPG or PNG, up to 15 MB"
-                })]
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("input", {
-              ref: inputRef,
-              type: "file",
-              accept: "image/jpeg,image/png",
-              className: "sr-only",
-              "aria-label": "Artwork photo",
-              onChange: function onChange(e) {
-                return pick(e.target.files[0]);
-              }
-            })]
-          }), progress !== null && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-            className: "h-2 rounded-full bg-gray-200 overflow-hidden",
-            role: "progressbar",
-            "aria-valuenow": progress,
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-              className: "h-full bg-brand",
-              style: {
-                width: "".concat(progress, "%")
-              }
-            })
-          }), message && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            role: "alert",
-            className: "rounded-lg px-4 py-3 text-sm font-semibold ".concat(message.type === 'ok' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-700'),
-            children: message.text
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("button", {
-            type: "submit",
-            disabled: progress !== null,
-            className: "w-full h-12 rounded-full bg-brand text-white font-bold hover:bg-brand-dark disabled:bg-gray-400",
-            children: "Submit for review"
-          })]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("section", {
-        className: "lg:col-span-3",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h2", {
-          className: "text-2xl font-black tracking-tight text-ink",
-          children: "Review history"
-        }), items.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-          className: "mt-4 text-gray-600",
-          children: "No submissions yet. Your first milestone will appear here."
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("ul", {
-          className: "mt-4 space-y-4",
-          children: items.map(function (s) {
-            var st = (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__.statusStyle)(s.admin_status);
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("li", {
-              className: "flex gap-4 rounded-2xl border border-gray-200 bg-white p-4",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("img", {
-                src: s.file_url,
-                alt: s.title,
-                className: "w-28 h-28 rounded-xl object-cover bg-gray-100 flex-none"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-                className: "flex-1 min-w-0",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-                  className: "flex flex-wrap items-center justify-between gap-2",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-                    className: "text-lg font-extrabold text-ink",
-                    children: s.title
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-                    className: "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ".concat(st.chip),
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-                      className: "fa ".concat(st.icon),
-                      "aria-hidden": "true"
-                    }), st.label]
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-                  className: "text-sm text-gray-500",
-                  children: [s.course_title, " \xB7 ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                    className: "font-mono",
-                    children: (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__.shortDate)(s.created_at)
-                  })]
-                }), s.reviewer_feedback && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("blockquote", {
-                  className: "mt-3 rounded-lg border-l-4 px-3 py-2 text-sm ".concat(s.admin_status === 'Rejected' ? 'border-red-400 bg-red-50 text-red-900' : 'border-green-500 bg-green-50 text-green-900'),
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-                    className: "font-bold",
-                    children: [s.reviewer_name || 'Reviewer', ":"]
-                  }), " ", s.reviewer_feedback]
-                })]
-              })]
-            }, s.id);
-          })
-        })]
-      })]
-    })
-  });
+              children: preview ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: preview, alt: "Selected artwork", className: "mx-auto max-h-56 rounded-lg" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "block py-6 text-gray-600", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-cloud-upload text-3xl text-brand", "aria-hidden": "true" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block mt-2 font-bold text-ink", children: "Drop a photo or click to browse" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block text-sm", children: "JPG or PNG, up to 15 MB" })
+              ] })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { ref: inputRef, type: "file", accept: "image/jpeg,image/png", className: "sr-only", "aria-label": "Artwork photo", onChange: (e) => pick(e.target.files[0]) })
+        ] }),
+        progress !== null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-2 rounded-full bg-gray-200 overflow-hidden", role: "progressbar", "aria-valuenow": progress, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-full bg-brand", style: { width: `${progress}%` } }) }),
+        message && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { role: "alert", className: `rounded-lg px-4 py-3 text-sm font-semibold ${message.type === "ok" ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-700"}`, children: message.text }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", disabled: progress !== null, className: "w-full h-12 rounded-full bg-brand text-white font-bold hover:bg-brand-dark disabled:bg-gray-400", children: "Submit for review" })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "lg:col-span-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-2xl font-black tracking-tight text-ink", children: "Review history" }),
+      items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-4 text-gray-600", children: "No submissions yet. Your first milestone will appear here." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "mt-4 space-y-4", children: items.map((s) => {
+        const st = (0, import_Journey.statusStyle)(s.admin_status);
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-4 rounded-2xl border border-gray-200 bg-white p-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: s.file_url, alt: s.title, className: "w-28 h-28 rounded-xl object-cover bg-gray-100 flex-none" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex-1 min-w-0", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex flex-wrap items-center justify-between gap-2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-lg font-extrabold text-ink", children: s.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${st.chip}`, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${st.icon}`, "aria-hidden": "true" }),
+                st.label
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "text-sm text-gray-500", children: [
+              s.course_title,
+              " \xB7 ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono", children: (0, import_Journey.shortDate)(s.created_at) })
+            ] }),
+            s.reviewer_feedback && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("blockquote", { className: `mt-3 rounded-lg border-l-4 px-3 py-2 text-sm ${s.admin_status === "Rejected" ? "border-red-400 bg-red-50 text-red-900" : "border-green-500 bg-green-50 text-green-900"}`, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "font-bold", children: [
+                s.reviewer_name || "Reviewer",
+                ":"
+              ] }),
+              " ",
+              s.reviewer_feedback
+            ] })
+          ] })
+        ] }, s.id);
+      }) })
+    ] })
+  ] }) });
 }
+
 
 /***/ }),
 
@@ -102087,6 +102134,20 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Course/Learn": "./resources/js/Pages/Course/Learn.js",
+	"./Course/Learn.js": "./resources/js/Pages/Course/Learn.js",
+	"./Course/Overview": "./resources/js/Pages/Course/Overview.js",
+	"./Course/Overview.js": "./resources/js/Pages/Course/Overview.js",
+	"./Checkout/Result": "./resources/js/Pages/Checkout/Result.js",
+	"./Checkout/Result.js": "./resources/js/Pages/Checkout/Result.js",
+	"./Checkout/Course": "./resources/js/Pages/Checkout/Course.js",
+	"./Checkout/Course.js": "./resources/js/Pages/Checkout/Course.js",
+	"./Studio/Courses": "./resources/js/Pages/Studio/Courses.js",
+	"./Studio/Courses.js": "./resources/js/Pages/Studio/Courses.js",
+	"./Account/Orders": "./resources/js/Pages/Account/Orders.js",
+	"./Account/Orders.js": "./resources/js/Pages/Account/Orders.js",
+	"./Students/Wishlist": "./resources/js/Pages/Students/Wishlist.js",
+	"./Students/Wishlist.js": "./resources/js/Pages/Students/Wishlist.js",
 	"./Auth/MagicLink": "./resources/js/Pages/Auth/MagicLink.js",
 	"./Auth/MagicLink.js": "./resources/js/Pages/Auth/MagicLink.js",
 	"./Admin/Commissions": "./resources/js/Pages/Admin/Commissions.js",

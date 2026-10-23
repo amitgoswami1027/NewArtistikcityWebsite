@@ -10,6 +10,7 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP VIEW IF EXISTS courses_workshops;
+DROP TABLE IF EXISTS wishlist_items;
 DROP TABLE IF EXISTS marketplace_orders;
 DROP TABLE IF EXISTS cart_reservations;
 DROP TABLE IF EXISTS painting_images;
@@ -511,6 +512,7 @@ CREATE TABLE orders (
     price             VARCHAR(50) NULL,
     payment_option    VARCHAR(50) NULL,
     payment_id        VARCHAR(255) NULL,
+    gateway_ref       VARCHAR(255) NULL,           -- Razorpay / PayPal order id created for this order
     payment_status    TINYINT NOT NULL DEFAULT 0,  -- 0 = not paid, 1 = success, 2 = failed
     payment_details   LONGTEXT NULL,
     issue_certificate TINYINT NOT NULL DEFAULT 0,  -- 0 = not issued, 1 = issued
@@ -518,6 +520,8 @@ CREATE TABLE orders (
     created_at        DATETIME NULL,
     updated_at        DATETIME NULL
 );
+CREATE INDEX orders_gateway_ref_index ON orders (gateway_ref);
+CREATE INDEX orders_user_course_index ON orders (user_id, course_id);
 
 CREATE TABLE payment_logs (
     id              BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -542,6 +546,17 @@ CREATE TABLE cart_items (
     price      VARCHAR(50) NULL,
     created_at DATETIME NULL,
     updated_at DATETIME NULL
+);
+
+-- Things a student saved for later: a course/workshop or a marketplace original.
+CREATE TABLE wishlist_items (
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    user_id    BIGINT      NOT NULL,
+    item_type  VARCHAR(20) NOT NULL CHECK (item_type IN ('course', 'painting')),
+    item_id    BIGINT      NOT NULL,
+    created_at DATETIME    NOT NULL,
+    CONSTRAINT wishlist_items_unique UNIQUE (user_id, item_type, item_id),
+    CONSTRAINT wishlist_items_user_id_foreign FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE user_addresses (

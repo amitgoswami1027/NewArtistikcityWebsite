@@ -8,7 +8,7 @@ export default function SellOriginal() {
     const [done, setDone] = useState(null);
 
     return (
-        <StudioLayout title="Sell an original" active="/dashboard/portfolio" stage={6}
+        <StudioLayout title="Sell an original" active="/dashboard/portfolio"
                       subtitle="List approved coursework in the ArtistikCity Marketplace as a 1-of-1 original. A moderator checks every listing before it goes live."
                       actions={<a href="/dashboard/portfolio" className="dm-btn dm-btn--line">Back to portfolio</a>}>
             {blocked ? (

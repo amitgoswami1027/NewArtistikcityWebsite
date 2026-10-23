@@ -67,9 +67,12 @@ public class MarketplaceController {
     private final MarketplaceRepository repo;
     private final MarketplaceService market;
     private final CommissionPayments payments;
+    private final com.artistikcity.web.user.WishlistService wishlist;
 
     public MarketplaceController(Inertia inertia, Json json, Auth auth, Redirects redirect, Environment env, Mailer mailer,
-                                 MarketplaceRepository repo, MarketplaceService market, CommissionPayments payments) {
+                                 MarketplaceRepository repo, MarketplaceService market, CommissionPayments payments,
+                                 com.artistikcity.web.user.WishlistService wishlist) {
+        this.wishlist = wishlist;
         this.inertia = inertia;
         this.json = json;
         this.auth = auth;
@@ -130,6 +133,7 @@ public class MarketplaceController {
         props.put("related", repo.related(id, String.valueOf(p.get("artist_name")), 4).stream().map(MarketplaceViews::card).toList());
         props.put("serverNow", System.currentTimeMillis());
         props.put("notice", request.getParameter("hold"));
+        props.put("saved", wishlist.isSaved(auth.userId(request), com.artistikcity.web.user.WishlistService.PAINTING, id));
         return inertia.render(request, "Marketplace/Show", props);
     }
 

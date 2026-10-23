@@ -5,7 +5,7 @@ import { Field, SocialButtons, StrengthMeter } from '@/Components/Auth/AuthField
 import { MagicLinkForm, MethodTabs, PhoneOtpForm } from '@/Components/Auth/SignInMethods';
 
 /** Join: Google / Facebook, phone (SMS code), or e-mail (password or passwordless link). */
-export default function Register({ providers, defaultCountryCode, otpDevMode }) {
+export default function Register({ providers, defaultCountryCode, otpDevMode, socialSetupHint }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '', email: '', password: '', password_confirmation: '', newsletter_signup: true, remember: true,
     });
@@ -33,7 +33,7 @@ export default function Register({ providers, defaultCountryCode, otpDevMode }) 
                 <span><i className="fa fa-check"></i>Artist profile</span>
             </div>
 
-            <SocialButtons verb="Sign up" providers={providers} />
+            <SocialButtons verb="Sign up" providers={providers} setupHint={socialSetupHint} />
             <div className="dm-or">or</div>
             <MethodTabs value={tab} onChange={setTab} tabs={[
                 { id: 'email', label: 'Email', icon: 'fa-envelope-o' },

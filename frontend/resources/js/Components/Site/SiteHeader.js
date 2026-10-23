@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { usePage, InertiaLink } from '@inertiajs/inertia-react';
 import axios from 'axios';
 import { API_URL } from '@/Components/Constants';
+import { accountNav } from '@/Components/Account/nav';
 
 export const AGE_GROUPS = ['Sub-junior - 8 to 12 yrs', 'Junior - 12 to 15 yrs', 'Adult - 16 yrs and above'];
 
@@ -15,8 +16,45 @@ export function loginUrl() {
     return route('login') + (here && here !== '/' && !here.startsWith('/login') && !here.startsWith('/join') ? '?return_to=' + encodeURIComponent(here) : '');
 }
 
+function MenuLinks({ links, here, onPick }) {
+    return links.map((l) => (
+        <a key={l.href} href={l.href} role="menuitem" onClick={onPick} aria-current={here === l.href ? 'page' : undefined}>
+            <i className={`fa ${l.icon}`} aria-hidden="true"></i>
+            <span>{l.label}</span>
+            {l.count > 0 && <span className="dm-menu__count">{l.count}</span>}
+        </a>
+    ));
+}
+
+/** Small dropdown used by the account side of the header. Closes on outside click and Escape. */
+function HeaderMenu({ id, button, buttonClass, label, align = 'left', children }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+    useEffect(() => {
+        if (!open) return undefined;
+        const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+        document.addEventListener('mousedown', onDoc);
+        window.addEventListener('keydown', onKey);
+        return () => { document.removeEventListener('mousedown', onDoc); window.removeEventListener('keydown', onKey); };
+    }, [open]);
+    return (
+        <div className="dm-menuwrap" ref={ref}>
+            <button type="button" className={`${buttonClass || ''} ${open ? 'is-open' : ''}`} aria-haspopup="menu" aria-expanded={open}
+                    aria-controls={id} aria-label={label} onClick={() => setOpen(!open)}>
+                {button}
+            </button>
+            {open && (
+                <div id={id} className={`dm-menu dm-menu--${align}`} role="menu">
+                    {typeof children === 'function' ? children(() => setOpen(false)) : children}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function SiteHeader({ showCategories = false, activeMedium = null }) {
-    const { auth } = usePage().props;
+    const { auth, nav } = usePage().props;
     const user = auth && auth.user;
     const [mediums, setMediums] = useState([]);
     const [open, setOpen] = useState(false);
@@ -45,6 +83,7 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
     const search = (e) => { e.preventDefault(); window.location.href = catalogUrl({ q: query }); };
     const here = typeof window !== 'undefined' ? window.location.pathname : '';
     const initials = user && user.name ? user.name.trim().charAt(0).toUpperCase() : 'A';
+    const account = user ? accountNav(nav) : [];
 
     return (
         <>
@@ -96,9 +135,23 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                     <nav className="dm-links dm-links--account" aria-label="Account">
                         {user ? (
                             <>
-                                <a href="/dashboard">My studio</a>
+                                <a href="/dashboard" aria-current={/^\/(dashboard|user\/(my-courses|course|workshop))/.test(here) ? 'page' : undefined}>My studio</a>
                                 <InertiaLink as="button" method="post" href={route('logout')} className="dm-btn dm-btn--line">Log out</InertiaLink>
-                                <a href={route('user.account')} className="ac-avatar" style={{ marginLeft: 8 }} title={user.name}>{initials}</a>
+                                <HeaderMenu id="menu-account" align="right" buttonClass="ac-avatar dm-avatarbtn" label={`Account menu for ${user.name}`}
+                                            button={initials}>
+                                    {(close) => (
+                                        <>
+                                            <div className="dm-menu__head">
+                                                <span className="ac-avatar" aria-hidden="true">{initials}</span>
+                                                <span>
+                                                    <b>{user.name}</b>
+                                                    {(user.email || user.phone) && <small>{user.email || user.phone}</small>}
+                                                </span>
+                                            </div>
+                                            <MenuLinks links={account} here={here} onPick={close} />
+                                        </>
+                                    )}
+                                </HeaderMenu>
                             </>
                         ) : (
                             <>
@@ -146,8 +199,10 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                     <a href={route('studio.stories')}>Studio Stories</a>
                     {user ? (
                         <>
-                            <a href="/dashboard" className="dm-btn dm-btn--line dm-btn--block">My studio</a>
-                            <InertiaLink as="button" method="post" href={route('logout')} className="dm-btn dm-btn--ink dm-btn--block" style={{ marginTop: 10 }}>Log out</InertiaLink>
+                            <a href="/dashboard" className="dm-btn dm-btn--line dm-btn--block" style={{ marginTop: 16 }}>My studio</a>
+                            <h6>My account</h6>
+                            {account.map((l) => <a key={l.href} href={l.href}>{l.label}{l.count > 0 ? ` (${l.count})` : ''}</a>)}
+                            <InertiaLink as="button" method="post" href={route('logout')} className="dm-btn dm-btn--ink dm-btn--block" style={{ marginTop: 16 }}>Log out</InertiaLink>
                         </>
                     ) : (
                         <>

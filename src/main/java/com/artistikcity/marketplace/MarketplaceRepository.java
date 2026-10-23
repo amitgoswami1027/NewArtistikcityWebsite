@@ -27,7 +27,8 @@ public class MarketplaceRepository {
     /** A listing can be edited only while no collector is holding or has bought it. */
     public static final List<String> EDITABLE = List.of("DRAFT", "PENDING_REVIEW", "AVAILABLE", "ARCHIVED");
 
-    static final String PRIMARY_IMAGE = "(select i.image_url from painting_images i where i.painting_id = p.id order by i.is_primary desc, i.sort_order, i.id limit 1)";
+    public static final String PRIMARY_IMAGE_SQL = "(select i.image_url from painting_images i where i.painting_id = p.id order by i.is_primary desc, i.sort_order, i.id limit 1)";
+    static final String PRIMARY_IMAGE = PRIMARY_IMAGE_SQL;
     static final String CARD_COLUMNS = "p.id, p.slug, p.title, p.medium, p.surface, p.subject, p.style_tags, p.height_inches, p.width_inches, p.depth_inches,"
             + " p.year_created, p.is_framed, p.is_signed, p.has_certificate, p.base_price, p.discount_percentage, p.final_price, p.currency,"
             + " p.stock_status, p.source, p.artist_name, p.is_featured, p.published_at, p.sold_at, p.created_at, p.updated_at, p.version,"

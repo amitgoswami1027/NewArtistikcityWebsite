@@ -18,7 +18,7 @@ export default function Home() {
                     <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 90% 10%, #e5156b 0, transparent 50%)' }} aria-hidden="true"></div>
                     <div className="relative">
                         <p className="font-mono text-xs tracking-widest uppercase text-pink-300">Next step · {next.n}</p>
-                        <h2 className="mt-2 text-3xl font-black tracking-tight text-white">{next.title}</h2>
+                        <h2 className="mt-2 text-3xl font-black tracking-tight text-white">{next.title}{next.subtitle ? ` – ${next.subtitle}` : ''}</h2>
                         <p className="mt-2 text-lg text-gray-300 max-w-xl">{next.text}</p>
                         <a href={next.href} className="mt-6 inline-flex items-center h-12 px-6 rounded-full bg-brand text-white font-bold hover:bg-brand-dark">{next.cta} <i className="fa fa-arrow-right ml-2" aria-hidden="true"></i></a>
                     </div>
@@ -56,8 +56,8 @@ export default function Home() {
                 {enrollments.length === 0 ? (
                     <div className="mt-6 rounded-2xl border-2 border-dashed border-gray-300 p-10 text-center">
                         <p className="text-xl font-extrabold text-ink">You haven't joined a course yet</p>
-                        <p className="mt-2 text-gray-600">Choose a track to unlock your classroom, assignments and portfolio.</p>
-                        <a href="/courses?type=all" className="mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold">Choose a track</a>
+                        <p className="mt-2 text-gray-600">Choose a course to unlock your classroom, assignments and portfolio.</p>
+                        <a href="/courses?type=all" className="mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold">Choose a course</a>
                     </div>
                 ) : (
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

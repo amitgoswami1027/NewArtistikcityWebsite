@@ -84,7 +84,10 @@ public class AuthController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("providers", SocialController.enabledProviders(env));
         m.put("defaultCountryCode", env.getProperty("app.auth.default-country-code", "91"));
-        m.put("otpDevMode", otp.devCodesVisible());
+        m.put("otpDevMode", otp.devCodesVisible(request));
+        Map<String, Boolean> providers = SocialController.enabledProviders(env);
+        // on the developer's own computer, explain why the Google / Facebook buttons are missing
+        m.put("socialSetupHint", !providers.containsValue(true) && OtpService.isLocalRequest(request));
         m.put("status", Flash.get(request, "status"));
         return m;
     }

@@ -4,6 +4,8 @@ import SiteLayout from '@/Components/Site/SiteLayout';
 import CourseCard, { formatCount } from '@/Components/Site/CourseCard';
 import { programImage, programPrice, isWorkshop } from '@/Components/Site/ProgramCard';
 import { catalogUrl } from '@/Components/Site/SiteHeader';
+import { Inertia } from '@inertiajs/inertia';
+import { authPost } from '@/Components/Auth/api';
 
 const asList = (v) => (Array.isArray(v) ? v.filter((x) => x !== null && String(x).trim() !== '') : []);
 const has = (v) => v !== undefined && v !== null && String(v).trim() !== '';
@@ -35,7 +37,7 @@ const PERKS = [
 ];
 
 export default function CourseDetails() {
-    const { course, curriculum = [], projects = [], reviews = [], gallery = [], videos = [], related = [], stats = {}, auth } = usePage().props;
+    const { course, curriculum = [], projects = [], reviews = [], gallery = [], videos = [], related = [], stats = {}, auth, saved: wishlisted } = usePage().props;
     const data = course.data;
     const workshop = isWorkshop(data);
     const kind = workshop ? 'workshop' : 'course';
@@ -61,11 +63,11 @@ export default function CourseDetails() {
     const [reviewCount, setReviewCount] = useState(6);
     const [pageUrl, setPageUrl] = useState('');
     const [copied, setCopied] = useState(false);
-    const [saved, setSaved] = useState(false);
+    const [saved, setSaved] = useState(!!wishlisted);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         setPageUrl(window.location.href);
-        try { setSaved(JSON.parse(localStorage.getItem('ac-saved') || '[]').includes(data.id)); } catch (e) { /* storage unavailable */ }
         const onScroll = () => {
             let current = 'information';
             TABS.forEach((t) => { const el = document.getElementById(t.id); if (el && el.getBoundingClientRect().top < 160) current = t.id; });
@@ -79,13 +81,19 @@ export default function CourseDetails() {
         if (navigator.share) { navigator.share({ title: data.title, url: pageUrl }).catch(() => {}); return; }
         if (navigator.clipboard) navigator.clipboard.writeText(pageUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
     };
-    const toggleSave = () => {
+    // "Save to wish list": stored on the student's account (guests log in first and come back here)
+    const toggleSave = async () => {
+        if (!(auth && auth.user)) {
+            window.location.assign('/login?return_to=' + encodeURIComponent(window.location.pathname));
+            return;
+        }
+        setSaving(true);
         try {
-            const list = JSON.parse(localStorage.getItem('ac-saved') || '[]');
-            const next = list.includes(data.id) ? list.filter((x) => x !== data.id) : [...list, data.id];
-            localStorage.setItem('ac-saved', JSON.stringify(next));
-            setSaved(next.includes(data.id));
-        } catch (e) { setSaved(!saved); }
+            await authPost('/wishlist', { type: 'course', id: data.id, saved: !saved });
+            setSaved(!saved);
+            Inertia.reload({ only: ['nav'], preserveScroll: true, preserveState: true });
+        } catch (e) { /* keep the current state */ }
+        setSaving(false);
     };
 
     const BuyForm = ({ label = 'Enroll now', big = true }) => (
@@ -155,7 +163,7 @@ export default function CourseDetails() {
                                 <span><i className="fa fa-user-o"></i> {formatCount(stats.students)} students</span>
                                 {data.medium && data.medium.name && <span><i className="fa fa-tint"></i> {data.medium.name}</span>}
                                 <button type="button" onClick={share}><i className="fa fa-share-alt"></i> {copied ? 'Link copied' : 'Share'}</button>
-                                <button type="button" onClick={toggleSave}><i className={`fa ${saved ? 'fa-bookmark' : 'fa-bookmark-o'}`}></i> {saved ? 'Saved' : 'Save for later'}</button>
+                                <button type="button" onClick={toggleSave} disabled={saving} aria-pressed={saved}><i className={`fa ${saved ? 'fa-heart' : 'fa-heart-o'}`} style={saved ? { color: 'var(--ac-brand)' } : undefined}></i> {saved ? 'In your wish list' : 'Save to wish list'}</button>
                             </div>
                         </div>
 

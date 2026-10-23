@@ -7,7 +7,7 @@ import { MagicLinkForm, MethodTabs, PasskeyButton, PhoneOtpForm } from '@/Compon
 /**
  * Log in: Google / Facebook, passkey, then e-mail (magic link or password) or phone (SMS code).
  */
-export default function Login({ status, canResetPassword, providers, defaultCountryCode, otpDevMode, errors: pageErrors = {} }) {
+export default function Login({ status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, errors: pageErrors = {} }) {
     const [tab, setTab] = useState(() => (typeof window !== 'undefined' && window.localStorage && safeGet('ac.login.tab')) || 'email');
     const [usePassword, setUsePassword] = useState(() => !!(pageErrors.email || pageErrors.password));
     const [passkeyError, setPasskeyError] = useState(null);
@@ -32,7 +32,7 @@ export default function Login({ status, canResetPassword, providers, defaultCoun
             {verified && <div className="ac-alert ac-alert--ok">Your e-mail is confirmed. Log in to continue.</div>}
             {passkeyError && <div className="ac-alert ac-alert--error" role="alert">{passkeyError}</div>}
 
-            <SocialButtons providers={providers} remember={data.remember} />
+            <SocialButtons providers={providers} remember={data.remember} setupHint={socialSetupHint} />
             <div style={{ marginTop: 10 }}><PasskeyButton verb="Log in" remember={data.remember} onError={setPasskeyError} /></div>
 
             <div className="dm-or">or</div>

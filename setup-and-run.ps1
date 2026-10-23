@@ -255,6 +255,38 @@ $env:PAYMENT_TEST_MODE = 'true'      # local setup: allow simulated payments whe
 Remove-Item Env:SPRING_PROFILES_ACTIVE -ErrorAction SilentlyContinue
 Remove-Item Env:DB_INIT -ErrorAction SilentlyContinue
 
+# .env (optional): KEY=VALUE lines, e.g. GOOGLE_CLIENT_ID, FACEBOOK_CLIENT_SECRET, SMS_PROVIDER, MAIL_HOST.
+# Values already set in this window win. Database settings come from this launcher, not from .env.
+$EnvFile = Join-Path $Root '.env'
+if (Test-Path $EnvFile) {
+    $loaded = @()
+    foreach ($line in Get-Content -Path $EnvFile -Encoding UTF8) {
+        $t = $line.Trim()
+        if (-not $t -or $t.StartsWith('#') -or $t -notmatch '^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$') { continue }
+        $k = $Matches[1]; $v = $Matches[2].Trim()
+        if ($v -match '^"(.*)"$' -or $v -match "^'(.*)'$") { $v = $Matches[1] } else { $v = ($v -replace '\s+#.*$', '') }
+        if ($k -like 'DB_*' -or $k -eq 'MYSQL_ROOT_PASSWORD' -or $k -eq 'SPRING_PROFILES_ACTIVE') { continue }
+        if (-not [string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($k))) { continue }
+        Set-Item -Path "Env:$k" -Value $v
+        $loaded += $k
+    }
+    if ($loaded.Count) { Info ("Settings from .env: " + ($loaded -join ', ')) }
+}
+# local sign-in helpers: a stable OTP_SECRET for this PC, and SMS codes shown on the page while no SMS service
+# is configured (only to a browser on this computer; set SMS_PROVIDER=twilio in .env to send real SMS)
+if (-not $env:OTP_SECRET) {
+    $SecretFile = Join-Path $Tools 'otp-secret.txt'
+    if (-not (Test-Path $SecretFile)) {
+        New-Item -ItemType Directory -Force -Path $Tools | Out-Null
+        $bytes = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+        Set-Content -Path $SecretFile -Value ([Convert]::ToBase64String($bytes)) -NoNewline -Encoding ASCII
+    }
+    $env:OTP_SECRET = (Get-Content -Path $SecretFile -Raw).Trim()
+}
+if (-not $env:SMS_PROVIDER -or $env:SMS_PROVIDER -eq 'log') {
+    if (-not $env:AUTH_EXPOSE_DEV_OTP) { $env:AUTH_EXPOSE_DEV_OTP = 'true' }
+}
+
 if ($Db -eq 'portable') {
     # reuse an 8.4 already unpacked in .tools (any release), newest first
     $have = Get-ChildItem -Path $Tools -Directory -Filter 'mysql-8.4.*-winx64' -ErrorAction SilentlyContinue |

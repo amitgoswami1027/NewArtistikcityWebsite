@@ -5,6 +5,7 @@ import SiteLayout from '@/Components/Site/SiteLayout';
 import ZoomViewer from '@/Components/Marketplace/ZoomViewer';
 import RoomView from '@/Components/Marketplace/RoomView';
 import ArtCard from '@/Components/Marketplace/ArtCard';
+import SaveButton from '@/Components/Wishlist/SaveButton';
 import { Price, TrustBadges, StatusChip, HoldBanner, useCountdown, mmss, dims, dimsCm, num, errorText, Spinner, inr } from '@/Components/Marketplace/shared';
 
 function Spec({ label, value, hint }) {
@@ -17,6 +18,7 @@ function Spec({ label, value, hint }) {
 }
 
 function BuyBox({ p, hold, serverNow, preview }) {
+    const { saved } = usePage().props;
     const [busy, setBusy] = useState(false);
     const [err, setErr] = useState(null);
     const [conflict, setConflict] = useState(null);
@@ -106,6 +108,8 @@ function BuyBox({ p, hold, serverNow, preview }) {
                     </>
                 )}
             </div>
+
+            {!preview && <div className="mt-3"><SaveButton type="painting" id={p.id} saved={saved} className="dm-heart--block" /></div>}
 
             <ul className="mt-6 pt-6 border-t border-gray-100 space-y-3 text-sm text-gray-700">
                 <li className="flex gap-3"><i className="fa fa-shield text-brand mt-0.5 w-4" aria-hidden="true"></i>Secure payment: UPI, cards and NetBanking (Razorpay) or PayPal</li>

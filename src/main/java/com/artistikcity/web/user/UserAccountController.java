@@ -196,20 +196,92 @@ public class UserAccountController {
                 Map.of("myAddress", db.select("select * from user_addresses where user_id = ? and status = 1 order by id", auth.userId(request))));
     }
 
+    /** The old Order History address now opens Your orders. */
     @GetMapping("/user/order-history")
     public ResponseEntity<String> orderHistory(HttpServletRequest request) {
-        List<Row> orders = db.select("select c.title, c.sub_title, o.id, o.order_number, o.created_at as order_created_at, c.id as course_id,"
-                + " c.course_type_id, c.schedule_pdf, o.payment_option, o.billing_name, o.billing_email, o.billing_address, o.billing_city,"
-                + " o.billing_state, o.billing_zipcode, o.billing_country, o.price_type, o.price, o.payment_status, o.issue_certificate, "
-                + CourseService.photoSubquery("o.course_id")
-                + " from orders o join courses c on c.id = o.course_id where o.user_id = ? order by o.id", auth.userId(request));
-        for (Row o : orders) {
-            // DATE_FORMAT(orders.created_at, "%d-%b-%Y")
-            String created = (String) o.remove("order_created_at");
-            o.put("order_date", created == null ? null : java.time.LocalDate.parse(created.substring(0, 10))
-                    .format(java.time.format.DateTimeFormatter.ofPattern("dd-MMM-yyyy", java.util.Locale.ENGLISH)));
+        return redirect.to(request, "/user/orders");
+    }
+
+    /** My account > Your orders: courses / workshops, original artworks and commissions in one list (newest first). */
+    @GetMapping("/user/orders")
+    public ResponseEntity<String> orders(HttpServletRequest request) {
+        long uid = auth.userId(request);
+        List<Map<String, Object>> out = new java.util.ArrayList<>();
+        for (Row o : db.select("select o.id, o.order_number, o.created_at, o.payment_option, o.billing_name, o.billing_email, o.billing_address,"
+                + " o.billing_city, o.billing_state, o.billing_zipcode, o.billing_country, o.price_type, o.price, o.payment_status,"
+                + " c.id as course_id, c.title, c.sub_title, c.slug, c.course_type_id, " + CourseService.photoSubquery("o.course_id")
+                + " from orders o join courses c on c.id = o.course_id where o.user_id = ?", uid)) {
+            int ps = (int) o.lng("payment_status", 0);
+            Map<String, Object> m = new java.util.LinkedHashMap<>();
+            m.put("key", "c" + o.get("id"));
+            m.put("kind", o.lng("course_type_id", 1) == CourseService.TYPE_WORKSHOP ? "workshop" : "course");
+            m.put("number", o.get("order_number"));
+            m.put("title", o.get("title"));
+            m.put("subtitle", o.get("sub_title"));
+            m.put("image", o.get("photo") == null ? null : "/storage/uploads/courses/" + o.get("course_id") + "/" + o.get("photo"));
+            m.put("amount", o.get("price"));
+            m.put("currency", o.str("price_type") == null ? "INR" : o.str("price_type").toUpperCase(java.util.Locale.ROOT));
+            m.put("date", o.get("created_at"));
+            m.put("status", ps == 1 ? "Paid" : ps == 2 ? "Payment failed" : "Payment pending");
+            m.put("payment", o.get("payment_option"));
+            m.put("billing", java.util.stream.Stream.of(o.str("billing_name"), o.str("billing_address"), o.str("billing_city"), o.str("billing_state"),
+                    o.str("billing_zipcode"), o.str("billing_country")).filter(x -> x != null && !x.isBlank()).collect(java.util.stream.Collectors.joining(", ")));
+            m.put("link", ps == 1 ? "/dashboard/classroom/" + o.get("course_id") : "/course/" + o.get("slug"));
+            m.put("linkLabel", ps == 1 ? "Go to course" : "View course");
+            out.add(m);
         }
-        return inertia.renderUser(request, "Students/OrderHistory", Map.of("orderHistory", orders));
+        for (Row o : db.select("select o.order_id, o.created_at, o.status, o.currency, o.amount, o.courier, o.tracking_number, o.gateway,"
+                + " o.buyer_name, o.address_line1, o.address_line2, o.city, o.state, o.postal_code, o.country,"
+                + " p.title, p.slug, p.artist_name, " + com.artistikcity.marketplace.MarketplaceRepository.PRIMARY_IMAGE_SQL + " as image_url"
+                + " from marketplace_orders o join paintings p on p.id = o.painting_id"
+                + " where o.user_id = ? and o.status not in ('PAYMENT_PENDING', 'EXPIRED')", uid)) {
+            Map<String, Object> m = new java.util.LinkedHashMap<>();
+            m.put("key", "m" + o.get("order_id"));
+            m.put("kind", "original");
+            m.put("number", o.get("order_id"));
+            m.put("title", o.get("title"));
+            m.put("subtitle", o.get("artist_name") == null ? null : "by " + o.get("artist_name"));
+            m.put("image", o.get("image_url"));
+            m.put("amount", o.get("amount"));
+            m.put("currency", o.get("currency"));
+            m.put("date", o.get("created_at"));
+            m.put("status", nice(o.str("status")));
+            m.put("payment", nice(o.str("gateway")));
+            m.put("billing", java.util.stream.Stream.of(o.str("buyer_name"), o.str("address_line1"), o.str("address_line2"), o.str("city"), o.str("state"),
+                    o.str("postal_code"), o.str("country")).filter(x -> x != null && !x.isBlank()).collect(java.util.stream.Collectors.joining(", ")));
+            m.put("tracking", o.get("tracking_number") == null ? null : (o.str("courier") == null ? "" : o.str("courier") + " ") + o.get("tracking_number"));
+            m.put("link", "/marketplace/orders/" + o.get("order_id"));
+            m.put("linkLabel", "View order");
+            out.add(m);
+        }
+        for (Row o : db.select("select order_id, created_at, order_status, currency, total_price, fulfillment_type, payment_method"
+                + " from commission_orders where user_id = ? and order_status <> 'PAYMENT_PENDING'", uid)) {
+            Map<String, Object> m = new java.util.LinkedHashMap<>();
+            m.put("key", "k" + o.get("order_id"));
+            m.put("kind", "commission");
+            m.put("number", o.get("order_id"));
+            m.put("title", "Commissioned artwork");
+            m.put("subtitle", nice(o.str("fulfillment_type")));
+            m.put("image", null);
+            m.put("amount", o.get("total_price"));
+            m.put("currency", o.get("currency"));
+            m.put("date", o.get("created_at"));
+            m.put("status", nice(o.str("order_status")));
+            m.put("payment", nice(o.str("payment_method")));
+            m.put("link", null);
+            out.add(m);
+        }
+        out.sort((a, b) -> String.valueOf(b.get("date")).compareTo(String.valueOf(a.get("date"))));
+        return inertia.renderUser(request, "Account/Orders", Map.of("orders", out));
+    }
+
+    /** "PROOF_SENT" -> "Proof sent". */
+    private static String nice(String v) {
+        if (v == null || v.isBlank()) {
+            return null;
+        }
+        String t = v.replace('_', ' ').toLowerCase(java.util.Locale.ROOT);
+        return Character.toUpperCase(t.charAt(0)) + t.substring(1);
     }
 
     // ------------------------------------------------------------ certificates

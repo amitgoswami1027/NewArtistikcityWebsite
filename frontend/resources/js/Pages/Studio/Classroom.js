@@ -11,7 +11,7 @@ const embed = (url) => {
 };
 
 export default function Classroom() {
-    const { course, enrolled, modules = [], completed: initialDone = [], progress: initialProgress = 0, videos = [], submissions = [] } = usePage().props;
+    const { course, enrolled, orderId, modules = [], completed: initialDone = [], progress: initialProgress = 0, videos = [], submissions = [] } = usePage().props;
     const lessons = useMemo(() => modules.flatMap((m, mi) => (m.lessons || []).map((l, li) => ({ ...l, unit: mi + 1, n: li + 1, moduleTitle: m.module_title }))), [modules]);
     const [done, setDone] = useState(new Set(initialDone.map(String)));
     const [progress, setProgress] = useState(Number(initialProgress || 0));
@@ -26,7 +26,7 @@ export default function Classroom() {
 
     if (!enrolled) {
         return (
-            <StudioLayout title={course.title} active="/dashboard">
+            <StudioLayout title={course.title} active="/user/my-courses" crumbs={[{ href: '/user/my-courses', label: 'My courses' }]}>
                 <div className="rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center">
                     <p className="text-2xl font-black text-ink">This classroom is for enrolled students</p>
                     <p className="mt-2 text-gray-600">Enroll in the course to unlock lessons, assignments and your portfolio.</p>
@@ -52,10 +52,9 @@ export default function Classroom() {
     const approved = submissions.some((x) => x.admin_status === 'Approved');
     const pending = submissions.some((x) => x.admin_status === 'Pending Review');
     const finished = Number(progress) >= 100;
-    const stageNow = !enrolled ? 3 : approved ? (finished ? 7 : 6) : finished || pending ? 5 : 4;
     return (
-        <StudioLayout title={course.title} subtitle={course.teacher_name ? `With ${course.teacher_name}` : null} active="/dashboard" stage={stageNow}
-                      actions={<div className="tw"><div className="w-64"><div className="flex justify-between text-sm font-bold"><span>Course progress</span><span>{progress}%</span></div><div className="mt-1.5 h-2.5 rounded-full bg-gray-200 overflow-hidden"><div className="h-full bg-brand transition-all" style={{ width: `${progress}%` }}></div></div></div></div>}>
+        <StudioLayout title={course.title} subtitle={course.teacher_name ? `With ${course.teacher_name}` : null} active="/user/my-courses" crumbs={[{ href: '/user/my-courses', label: 'My courses' }]}
+                      actions={<div className="tw"><div className="w-64"><div className="flex justify-between text-sm font-bold"><span>Course progress</span><span>{progress}%</span></div><div className="mt-1.5 h-2.5 rounded-full bg-gray-200 overflow-hidden"><div className="h-full bg-brand transition-all" style={{ width: `${progress}%` }}></div></div>{orderId ? <a href={`/user/course/${orderId}`} className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-ink underline"><i className="fa fa-calendar" aria-hidden="true"></i>Schedule, modules &amp; tasks</a> : null}</div></div>}>
             <div className="grid grid-cols-12 gap-8">
                 {/* ---------- left: viewport + lesson ---------- */}
                 <div className="col-span-12 lg:col-span-8">

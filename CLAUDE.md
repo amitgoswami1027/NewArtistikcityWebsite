@@ -93,6 +93,22 @@ storage/        uploaded files, served at /storage/**  (storage/certificates is 
   identities live in `linked_accounts`. Merge accounts only through `AccountService`, which applies the verified-e-mail rules.
 - Auth JSON endpoints (`web/AuthApiController`, `/auth/**`) return `{message, errors, retryAfter, reauth}` on failure. Changing
   sign-in methods needs a login younger than 30 minutes (403 `reauth`).
+- **Student areas.** *My studio* is for learning only. It uses `Components/Studio/StudioLayout` with five tabs (My studio, My courses,
+  Submissions, Portfolio & shop, Certificates & reports) and the journey Discover → Join → Choose a course → Learn → Submit → Certify →
+  Showcase (`Components/Studio/Journey.js`; the backend stage is `StudentStudioController.stage`).
+  *My course* is a focused view with no studio tabs (`web/user/CourseLearningController`, frame `Components/Course/CourseShell`):
+  overview `/user/course/{order_id}` (`Pages/Course/Overview`), `/user/course/{order_id}/resume` (next unfinished lesson) and the learning
+  view `/user/course/modules/{module_id}?lesson={id}` (`Pages/Course/Learn`: collapsible syllabus sidebar, prev/next across modules, mark
+  complete via `POST /api/classroom/{courseId}/lessons/{lessonId}/complete`). Every course URL needs a paid order of the signed-in student.
+  Old URLs (`/dashboard/classroom/{id}`, `/user/course/module/lesson/...`, `/user/course/syllabus/...`, `/user/workshop/...`) redirect there.
+  Lesson tasks (`/user/course/module/lesson/task/{id}`) use the same frame via the `courseLinks` prop.
+  *My account* (`Components/Account/AccountLayout`, list in `Components/Account/nav.js`) holds Profile, Your orders (`/user/orders`, page
+  `Account/Orders`), Wish list, Addresses, Login & security, Notifications and Help. `Layouts/Authenticated` picks the shell from the URL.
+  The header "My studio" is a plain link, and the avatar menu lists the account pages, with counts from the shared prop `nav`.
+- The Tailwind CSS (`static/css/commission.css`) is pre-built and only contains the classes already in use, scoped to `.tw`. A new
+  utility class does nothing until the CSS is rebuilt, so new pages use classes that already exist or small custom classes in `ac-theme.css`.
+- Wish list: table `wishlist_items` (type `course` or `painting`), `POST /wishlist {type, id, saved}`, page `/user/wishlist`
+  (`Pages/Students/Wishlist.js`), and the heart button `Components/Wishlist/SaveButton.js`.
 - Use Java time (`LocalDateTime.now()`) for every timestamp, and pass `created_at` explicitly. Don't rely on MySQL `NOW()` or
   column defaults, because the DB server may run in a different time zone than the app.
 - Payments only mark an order paid after a **verified gateway response**. The dev profile / `PAYMENT_TEST_MODE=true`

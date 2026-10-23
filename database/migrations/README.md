@@ -16,6 +16,8 @@ To change the schema of a database that already holds real data:
 | Script | What it does |
 |---|---|
 | `2026-10-23_auth_system.sql` | Sign-in system: `users.password` → `password_hash` (nullable), `phone` → `phone_number` (E.164, unique) + `phone_verified_at`, `is_verified`; moves `provider`/`provider_id` into `linked_accounts`; adds `auth_sessions`, `auth_refresh_tokens`, `auth_otps`, `auth_tokens`, `webauthn_credentials`, `auth_events`; drops `password_resets`. When two accounts shared one phone number, the oldest keeps it. |
+| `2026-10-23_wishlist.sql` | Adds `wishlist_items` (saved courses/workshops and marketplace originals). |
+| `2026-10-24_course_checkout.sql` | Adds `orders.gateway_ref` (the Razorpay / PayPal order id behind each payment) and indexes for the checkout. |
 
 The earlier SQL Server (T-SQL) migrations were removed when the project moved to MySQL. Everything they did is
 already in `schema.sql`, and they remain available in git history.

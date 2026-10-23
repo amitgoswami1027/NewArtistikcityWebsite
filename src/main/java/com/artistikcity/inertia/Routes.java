@@ -91,14 +91,12 @@ public class Routes {
         post("course.add.cart.post", "add-to-cart");
         get("course.checkout", "checkout");
         post("course.checkout.billing", "checkout/billing");
-        add("course.checkout.billing.update", "checkout/billing/{order_id}", "PATCH");
-        get("course.checkout.payment", "checkout/payment");
-        post("course.checkout.payment.store", "checkout/payment");
+        post("course.checkout.pay", "checkout/pay");
+        post("course.checkout.razorpay.verify", "checkout/razorpay/verify");
+        post("course.checkout.test", "checkout/test-pay");
+        get("course.checkout.paypal.return", "checkout/paypal/return");
         get("course.payment.success", "payment/success");
         get("course.payment.failed", "payment/failed");
-        get("paywithpaypal", "paywithpaypal");
-        post("paypal", "paypal");
-        get("status", "paypal");
 
         // -------------------------------------------------------------- blog
         get("blog.posts", "blog/posts/{category?}");
@@ -109,6 +107,7 @@ public class Routes {
         get("user.courses", "user/my-courses");
         get("user.workshop", "user/my-workshop");
         get("user.course.home", "user/course/{order_id}");
+        get("user.course.resume", "user/course/{order_id}/resume");
         get("user.course.modules", "user/course/modules/{id}");
         get("user.course.syllabus", "user/course/syllabus/{id}");
         get("user.course.module.lesson", "user/course/module/lesson/{module_id}");
@@ -125,6 +124,9 @@ public class Routes {
         get("user.notifications", "user/notifications");
         get("user.my.address", "user/my-address");
         get("user.order.history", "user/order-history");
+        get("user.wishlist", "user/wishlist");
+        get("user.orders", "user/orders");
+        post("wishlist.save", "wishlist");
         get("user.certificate.download", "user/certificate/download");
         get("user.certificate.share", "user/certificate/share");
         get("user.certificate.social.share", "user/certificate/social_share");

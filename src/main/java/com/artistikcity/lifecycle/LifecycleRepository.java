@@ -56,6 +56,13 @@ public class LifecycleRepository {
                 + " from enrollments e join courses c on c.id = e.course_id where e.user_id = ? order by e.id desc", userId);
     }
 
+    /** Newest paid order of this course by this student (null when there is none). */
+    public Object paidOrderId(long userId, long courseId) {
+        List<Map<String, Object>> r = jdbc.queryForList("select id from orders where user_id = ? and course_id = ? and payment_status = 1"
+                + " order by id desc limit 1", userId, courseId);
+        return r.isEmpty() ? null : r.get(0).get("id");
+    }
+
     public Map<String, Object> enrollment(long userId, long courseId) {
         List<Map<String, Object>> r = jdbc.queryForList("select * from enrollments where user_id = ? and course_id = ?", userId, courseId);
         return r.isEmpty() ? null : r.get(0);

@@ -26,11 +26,16 @@ public class CoursesController {
     private final Inertia inertia;
     private final Db db;
     private final CourseService courses;
+    private final com.artistikcity.http.Auth auth;
+    private final com.artistikcity.web.user.WishlistService wishlist;
 
-    public CoursesController(Inertia inertia, Db db, CourseService courses) {
+    public CoursesController(Inertia inertia, Db db, CourseService courses, com.artistikcity.http.Auth auth,
+                             com.artistikcity.web.user.WishlistService wishlist) {
         this.inertia = inertia;
         this.db = db;
         this.courses = courses;
+        this.auth = auth;
+        this.wishlist = wishlist;
     }
 
     @GetMapping("/courses")
@@ -111,6 +116,7 @@ public class CoursesController {
                 + " and course_start_date >= ? order by case when medium_id = ? then 0 else 1 end, id limit 4", id, java.time.LocalDate.now(),
                 course.get("medium_id")), true)));
         props.put("stats", stats);
+        props.put("saved", wishlist.isSaved(auth.userId(request), com.artistikcity.web.user.WishlistService.COURSE, id));
         return inertia.render(request, "CourseDetails", props);
     }
 }

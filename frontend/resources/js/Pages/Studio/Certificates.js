@@ -145,7 +145,7 @@ export default function Certificates() {
     const { credentials = [], stats = {}, stage = 4, verifyBase = '' } = usePage().props;
     const earned = credentials.filter((c) => c.eligible || c.certificate).length;
     return (
-        <StudioLayout title="Certificates & reports" subtitle="Earn a verifiable certificate for each course and download a printable portfolio of your work." active="/dashboard/certificates" stage={stage}>
+        <StudioLayout title="Certificates & reports" subtitle="Earn a verifiable certificate for each course and download a printable portfolio of your work." active="/dashboard/certificates">
             <PortfolioBuilder credentials={credentials} stats={stats} />
 
             <section className="mt-12">
@@ -158,7 +158,7 @@ export default function Certificates() {
                 {credentials.length === 0 ? (
                     <div className="mt-6 rounded-2xl border-2 border-dashed border-gray-300 p-10 text-center">
                         <p className="text-xl font-extrabold text-ink">No courses yet</p>
-                        <p className="mt-2 text-gray-600">Choose a track to start working towards your first certificate.</p>
+                        <p className="mt-2 text-gray-600">Choose a course to start working towards your first certificate.</p>
                         <a href="/courses?type=all" className="mt-6 inline-flex h-12 items-center px-6 rounded-full bg-brand text-white font-bold">Browse courses</a>
                     </div>
                 ) : (

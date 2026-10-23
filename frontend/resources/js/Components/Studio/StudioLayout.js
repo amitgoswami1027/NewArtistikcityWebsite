@@ -8,10 +8,9 @@ export const TABS = [
     { href: '/dashboard/submissions', label: 'Submissions', icon: 'fa-upload' },
     { href: '/dashboard/portfolio', label: 'Portfolio & shop', icon: 'fa-picture-o' },
     { href: '/dashboard/certificates', label: 'Certificates & reports', icon: 'fa-certificate' },
-    { href: '/user/my-account', label: 'Account', icon: 'fa-user' },
 ];
 
-/** The studio tab bar, shared by the new studio pages and the classic course/account pages under /user. */
+/** The studio tab bar (learning only; account pages live in the separate My account area). */
 export function StudioTabs({ active }) {
     return (
         <nav className="mt-6 flex gap-2 overflow-x-auto border-b border-gray-200" aria-label="Studio">
@@ -39,7 +38,7 @@ export function JourneyStepper({ stage = 4 }) {
                            className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${active ? 'bg-brand text-white' : done ? 'bg-ink text-white' : 'bg-white border border-gray-300 text-gray-500'}`}>
                             {done ? <i className="fa fa-check" aria-hidden="true"></i> : n}
                         </a>
-                        <span className={`text-base ${active ? 'font-bold text-ink' : 'text-gray-500'}`}>{s.title}</span>
+                        <span className={`text-base ${active ? 'font-bold text-ink' : 'text-gray-500'}`}>{s.title}{s.subtitle && <span className="font-normal"> – {s.subtitle}</span>}</span>
                         {n < JOURNEY.length && <span className="hidden sm:block w-6 h-px bg-gray-300 mx-1" aria-hidden="true"></span>}
                     </li>
                 );
@@ -48,13 +47,18 @@ export function JourneyStepper({ stage = 4 }) {
     );
 }
 
-export default function StudioLayout({ title, subtitle, active, stage, actions, children }) {
+/**
+ * Shell of every My studio page: breadcrumbs, title, the five studio tabs, optional journey stepper.
+ * {@code crumbs} adds levels between "My studio" and the page, e.g. [{ href: '/user/my-courses', label: 'My courses' }].
+ */
+export default function StudioLayout({ title, subtitle, active, stage, actions, crumbs = [], children }) {
     return (
         <SiteLayout title={title}>
             <div className="ac-wide">
                 <ul className="dm-crumbs">
                     <li><a href="/">Home</a></li>
                     <li><a href="/dashboard">My studio</a></li>
+                    {crumbs.map((c) => <li key={c.href}><a href={c.href}>{c.label}</a></li>)}
                     {title !== 'My studio' && <li>{title}</li>}
                 </ul>
                 <div className="dm-listhead" style={{ paddingTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>

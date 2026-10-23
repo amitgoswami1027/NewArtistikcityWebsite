@@ -55,6 +55,9 @@ public class UserTaskController {
     @GetMapping("/user/course/module/lesson/task/{task_id}")
     public ResponseEntity<String> taskDetails(HttpServletRequest request, @PathVariable("task_id") Long taskId) {
         Row task = NotFoundException.orFail(db.find("course_module_lesson_tasks", taskId));
+        // only students enrolled in (= with a paid order for) the course can open its tasks
+        Row order = NotFoundException.orFail(db.first("select id from orders where user_id = ? and course_id = ? and payment_status = 1 order by id desc limit 1",
+                auth.userId(request), task.get("course_id")));
         Row teacher = db.find("admins", task.get("admin_id"));
         if (teacher == null) {
             teacher = db.first("select a.* from admins a join courses c on c.admin_id = a.id where c.id = ?", task.get("course_id"));
@@ -76,6 +79,11 @@ public class UserTaskController {
         props.put("lessonDetails", lesson == null ? new Row() : lesson);
         props.put("lessonNav", courses.moduleLessonNavigation(task.lng("module_id")));
         props.put("messages", messages(taskId, auth.userId(request)));
+        Row course = db.first("select title from courses where id = ?", task.get("course_id"));
+        props.put("courseLinks", Map.of("overview", "/user/course/" + order.get("id"),
+                "lesson", "/user/course/modules/" + task.get("module_id") + "?lesson=" + task.get("lesson_id"),
+                "courseTitle", course == null ? "" : String.valueOf(course.get("title")),
+                "lessonTitle", lesson == null ? "" : String.valueOf(lesson.get("lesson_title"))));
         return inertia.renderUser(request, "Students/LessonTask", props);
     }
 
@@ -130,6 +138,10 @@ public class UserTaskController {
         Long taskId = in.lng("task_id");
         if (!me.equals(in.lng("from_id")) || taskId == null) {
             return redirect.back(request);
+        }
+        if (db.count("select count(*) from course_module_lesson_tasks t join orders o on o.course_id = t.course_id"
+                + " where t.id = ? and o.user_id = ? and o.payment_status = 1", taskId, me) == 0) {
+            throw new NotFoundException(); // not enrolled in this task's course
         }
         Row teacher = db.first("select c.admin_id as teacher_id from course_module_lesson_tasks t join courses c on c.id = t.course_id where t.id = ?", taskId);
         if (teacher != null) {

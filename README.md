@@ -154,7 +154,8 @@ Existing user and admin passwords keep working. Also copy Laravel's `storage/app
 | `STORAGE_DIR` | Uploaded files (served at `/storage/**`) | `./storage` |
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS` | SMTP. If empty, e-mails are only logged | – |
 | `MAIL_ADMIN_EMAIL` | Receives contact-form messages | admin@artistik.com |
-| `RAZORPAY_KEY`, `RAZORPAY_SECRET` | INR payments | – |
+| `RAZORPAY_KEY`, `RAZORPAY_SECRET` | INR payments (UPI, cards, NetBanking) | – |
+| `RAZORPAY_WEBHOOK_SECRET` | Verifies Razorpay webhooks (courses, marketplace, commissions) | – |
 | `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_MODE` (`sandbox`/`live`) | USD payments | sandbox |
 | `PAYMENT_TEST_MODE` | `true` = simulated payments when no keys are set | false |
 | `APP_URL` | Public site address used in e-mail links and OAuth callbacks, e.g. `https://artistikcity.com` | taken from the request |
@@ -183,8 +184,21 @@ authorised redirect URI `https://YOUR-SITE/social-login/google/callback` (for lo
 `https://YOUR-SITE/social-login/facebook/callback`; request the `email` and `public_profile` permissions. Put the app ID and app secret
 in `FACEBOOK_CLIENT_ID` / `FACEBOOK_CLIENT_SECRET`.
 
-**SMS codes:** with the default `SMS_PROVIDER=log` no SMS is sent; the code is written to the log and, with the `dev` profile, shown on
-the page. For real SMS set `SMS_PROVIDER=twilio` and the `TWILIO_*` values. To use another gateway (MSG91, Firebase, …) implement
+**Keys on your PC:** put them in a `.env` file in the project folder (copy `.env.example`; `.env` is git-ignored).
+`START-ArtistikCity.bat` reads it on every start, for example:
+
+```
+GOOGLE_CLIENT_ID=1234-abc.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-...
+FACEBOOK_CLIENT_ID=1234567890
+FACEBOOK_CLIENT_SECRET=...
+```
+
+Until keys are set, the login page shows a "not set up yet" note to a browser on your own PC instead of the buttons.
+
+**SMS codes:** with the default `SMS_PROVIDER=log` no SMS is sent. The code is written to `logs/app.log`, and
+`START-ArtistikCity.bat` (and the VS Code `dev` launch) also shows it on the page, but only to a browser on the same computer.
+On a server nobody sees it, so set up a real SMS provider there. For real SMS set `SMS_PROVIDER=twilio` and the `TWILIO_*` values. To use another gateway (MSG91, Firebase, …) implement
 `auth/sms/SmsSender` (one method) and select it in `auth/sms/SmsConfig`.
 
 **E-mail links** need SMTP (`MAIL_*`). Without SMTP every e-mail is saved as an HTML file in `logs/mail-outbox/`, so sign-in links,
@@ -201,8 +215,23 @@ signs that login out everywhere. Students see and end their sessions on *Login &
 sign-in methods requires a login from the last 30 minutes. Security events are kept in `auth_events` for 180 days.
 
 **Going live checklist:** HTTPS, `APP_URL`, `OTP_SECRET`, `MAIL_*`, `SMS_PROVIDER=twilio` + keys, the Google/Facebook keys with production
-redirect URIs, `WEBAUTHN_RP_ID`/`WEBAUTHN_ORIGINS`, and `FORWARD_HEADERS=framework` behind a proxy. Without `-Dspring.profiles.active=dev`,
-SMS codes are never shown on the page.
+redirect URIs, `WEBAUTHN_RP_ID`/`WEBAUTHN_ORIGINS`, and `FORWARD_HEADERS=framework` behind a proxy. Do not set `AUTH_EXPOSE_DEV_OTP` on a
+server. Even if it is set, codes are only shown to a browser on the server itself.
+
+### 4b. Course checkout
+
+"Enroll now" on a course leads to `/checkout`, one page with three steps (account, billing details, payment) and the order summary
+alongside. Prices always come from `course_prices` (INR via Razorpay, USD via PayPal), never from the browser.
+
+- **Razorpay:** the server creates a Razorpay order, the payment window opens on the page, and the result is accepted only with a
+  valid signature for that order. Also add a webhook in the Razorpay dashboard: URL `https://YOUR-SITE/api/v1/courses/razorpay-webhook`,
+  events `payment.captured` and `order.paid`, and the secret in `RAZORPAY_WEBHOOK_SECRET`. It completes enrollments when a student paid
+  but closed the page before it confirmed.
+- **PayPal:** the buyer approves on PayPal, and the order is captured when they return, after checking the amount and currency.
+- **Test mode** (`PAYMENT_TEST_MODE=true`, on for the dev profile and the Windows launcher): while a gateway has no keys, the page offers a
+  clearly marked simulated payment instead.
+- Students who are already enrolled see "Go to course" instead of paying again. Receipts are e-mailed, and every order is listed under
+  My account › Your orders.
 
 ## 5. Front-end (React)
 
