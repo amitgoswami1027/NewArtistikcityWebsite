@@ -79,7 +79,8 @@ public class ApiController {
         }
         byte[] image = Base64.getDecoder().decode(data.substring(data.indexOf(',') + 1));
         storage.put("certificates/" + name, image);
-        return ok(Row.of("status", "success", "imgPath", storage.resolve("certificates/" + name).toString()));
+        // the public URL (it used to be the server's file path, which leaked the install folder)
+        return ok(Row.of("status", "success", "imgPath", Storage.url("certificates/" + name)));
     }
 
     // --------------------------------------------------------- newsletter

@@ -1,0 +1,659 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  ArtistikCity on AWS (ap-south-1): CloudFront (HTTPS, /storage/* from a private S3 bucket, everything else from EC2),
+  one EC2 server running the Docker image, RDS MySQL 8.4, ECR, CloudWatch logs and a GitHub Actions deploy role.
+  See docs/AWS-DEPLOY.md for the step-by-step guide.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: {default: Website}
+        Parameters: [DomainName, AlternateDomainName, CertificateArn]
+      - Label: {default: Network (use the default VPC)}
+        Parameters: [VpcId, AppSubnetId, DbSubnetIds, CloudFrontPrefixListId, SshCidr, KeyName]
+      - Label: {default: Sizes}
+        Parameters: [InstanceType, DbInstanceClass, DbAllocatedStorage, DbMultiAZ, DbEngineVersion]
+      - Label: {default: GitHub deployments}
+        Parameters: [GitHubOwner, GitHubRepo, GitHubBranch, CreateGitHubOidcProvider]
+      - Label: {default: Other}
+        Parameters: [SsmPath, LatestAmiId]
+
+Parameters:
+  DomainName:
+    Type: String
+    Description: The site's address, e.g. www.artistikcity.com (must be on the certificate)
+    AllowedPattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$'
+  AlternateDomainName:
+    Type: String
+    Default: ''
+    Description: Optional second address served by the same distribution, e.g. artistikcity.com (must be on the certificate)
+  CertificateArn:
+    Type: String
+    Description: ACM certificate ARN from the us-east-1 stack (infra/certificate.yml)
+    AllowedPattern: '^arn:aws:acm:us-east-1:\d{12}:certificate/.+$'
+    ConstraintDescription: must be an ACM certificate in us-east-1 (CloudFront only uses certificates from us-east-1)
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: The VPC (the default VPC is fine)
+  AppSubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: A public subnet of that VPC for the web server
+  DbSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: At least two subnets of that VPC in different availability zones (for RDS)
+  CloudFrontPrefixListId:
+    Type: String
+    Description: >-
+      Id of the AWS-managed prefix list com.amazonaws.global.cloudfront.origin-facing in this region (pl-...). Find it with:
+      aws ec2 describe-managed-prefix-lists --region ap-south-1 --filters Name=prefix-list-name,Values=com.amazonaws.global.cloudfront.origin-facing --query "PrefixLists[0].PrefixListId" --output text
+    AllowedPattern: '^pl-[0-9a-f]+$'
+  SshCidr:
+    Type: String
+    Default: ''
+    Description: >-
+      Optional. Your own IP as a.b.c.d/32 to allow SSH. Leave empty (recommended): use AWS Systems Manager Session Manager
+      instead, which needs no open port and no key.
+  KeyName:
+    Type: String
+    Default: ''
+    Description: Optional EC2 key pair name for SSH (only useful together with SshCidr)
+  InstanceType:
+    Type: String
+    Default: t3.small
+    AllowedValues: [t3.small, t3.medium, t3a.small, t3a.medium, t3.large]
+    Description: t3.small (2 GB) is enough to start; t3.medium (4 GB) for more traffic. x86 only (the image is built for amd64).
+  DbInstanceClass:
+    Type: String
+    Default: db.t4g.micro
+    AllowedValues: [db.t4g.micro, db.t4g.small, db.t4g.medium, db.t3.micro, db.t3.small]
+  DbAllocatedStorage:
+    Type: Number
+    Default: 20
+    MinValue: 20
+    MaxValue: 1000
+  DbMultiAZ:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['true', 'false']
+    Description: A standby copy in a second zone (about twice the database cost). Can be switched on later.
+  DbEngineVersion:
+    Type: String
+    Default: '8.4'
+    Description: MySQL version (8.4 = latest 8.4 release; or an exact one such as 8.4.6)
+  GitHubOwner:
+    Type: String
+    Description: GitHub user or organisation that owns the repository
+  GitHubRepo:
+    Type: String
+    Description: Repository name (without the owner)
+  GitHubBranch:
+    Type: String
+    Default: main
+  CreateGitHubOidcProvider:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: An AWS account can have this provider only once. Choose false if token.actions.githubusercontent.com already exists in IAM.
+  SsmPath:
+    Type: String
+    Default: /artistikcity/prod
+    AllowedPattern: '^/[a-zA-Z0-9_./-]+[a-zA-Z0-9_-]$'
+    Description: Parameter Store folder for optional app settings (payment keys, mail, sign-in providers)
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Amazon Linux 2023 (latest), looked up automatically
+
+Conditions:
+  HasAlternate: !Not [!Equals [!Ref AlternateDomainName, '']]
+  HasSsh: !Not [!Equals [!Ref SshCidr, '']]
+  HasKey: !Not [!Equals [!Ref KeyName, '']]
+  CreateOidc: !Equals [!Ref CreateGitHubOidcProvider, 'true']
+  MultiAZ: !Equals [!Ref DbMultiAZ, 'true']
+
+Mappings:
+  # AWS managed CloudFront policies (fixed ids, the same in every account)
+  Managed:
+    CachePolicy:
+      CachingDisabled: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+      CachingOptimized: 658327ea-f89d-4fab-a63d-7e88639e58f6
+    OriginRequestPolicy:
+      AllViewerAndCloudFrontHeaders: 33f36d7e-f396-46d9-90e0-52428a34d9dc
+
+Resources:
+  # ------------------------------------------------------------------ secrets generated by AWS
+  OriginVerifySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AWS::StackName}/origin-verify'
+      Description: Shared secret CloudFront sends to the app in the X-Origin-Verify header (blocks direct access to EC2)
+      GenerateSecretString:
+        PasswordLength: 48
+        ExcludePunctuation: true
+  OtpSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AWS::StackName}/otp-secret'
+      Description: Key used by the app to protect one-time sign-in codes (OTP_SECRET)
+      GenerateSecretString:
+        PasswordLength: 48
+        ExcludePunctuation: true
+
+  # ------------------------------------------------------------------ S3: uploads (private, CloudFront only)
+  UploadsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-uploads-${AWS::AccountId}'
+      OwnershipControls:
+        Rules: [{ObjectOwnership: BucketOwnerEnforced}]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+            BucketKeyEnabled: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: old-versions
+            Status: Enabled
+            NoncurrentVersionExpiration: {NoncurrentDays: 30}
+            AbortIncompleteMultipartUpload: {DaysAfterInitiation: 7}
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [GET, HEAD]
+            AllowedOrigins: !If
+              - HasAlternate
+              - [!Sub 'https://${DomainName}', !Sub 'https://${AlternateDomainName}']
+              - [!Sub 'https://${DomainName}']
+            AllowedHeaders: ['*']
+            MaxAge: 3600
+      Tags:
+        - {Key: Project, Value: artistikcity}
+
+  UploadsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref UploadsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: CloudFrontReadsPublicFiles
+            Effect: Allow
+            Principal: {Service: cloudfront.amazonaws.com}
+            Action: s3:GetObject
+            Resource: !Sub '${UploadsBucket.Arn}/storage/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+          - Sid: TlsOnly
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: [!GetAtt UploadsBucket.Arn, !Sub '${UploadsBucket.Arn}/*']
+            Condition:
+              Bool: {aws:SecureTransport: 'false'}
+
+  # ------------------------------------------------------------------ CloudFront
+  UploadsOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${AWS::StackName}-uploads'
+        Description: CloudFront reads the private uploads bucket
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # static files of the app: cached at the edge; the ?v= content hash on app.js / ac-theme.css is part of the key
+  StaticCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${AWS::StackName}-static'
+        Comment: App static files, query string in the cache key
+        DefaultTTL: 86400
+        MaxTTL: 31536000
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+          CookiesConfig: {CookieBehavior: none}
+          HeadersConfig: {HeaderBehavior: none}
+          QueryStringsConfig: {QueryStringBehavior: all}
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn: OriginVerifySecret        # its value is read by name in the origin header below
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub 'ArtistikCity (${AWS::StackName})'
+        Aliases: !If [HasAlternate, [!Ref DomainName, !Ref AlternateDomainName], [!Ref DomainName]]
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_200          # includes India
+        Origins:
+          - Id: app
+            DomainName: !Sub
+              - 'ec2-${Dashed}.${AWS::Region}.compute.amazonaws.com'
+              - Dashed: !Join ['-', !Split ['.', !Ref AppElasticIp]]
+            CustomOriginConfig:
+              HTTPPort: 80
+              OriginProtocolPolicy: http-only
+              OriginReadTimeout: 60
+              OriginKeepaliveTimeout: 5
+            OriginCustomHeaders:
+              - HeaderName: X-Origin-Verify
+                HeaderValue: !Sub '{{resolve:secretsmanager:${AWS::StackName}/origin-verify}}'
+          - Id: uploads
+            DomainName: !GetAtt UploadsBucket.RegionalDomainName
+            S3OriginConfig: {OriginAccessIdentity: ''}
+            OriginAccessControlId: !GetAtt UploadsOriginAccessControl.Id
+        DefaultCacheBehavior:
+          TargetOriginId: app
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+          CachedMethods: [GET, HEAD]
+          CachePolicyId: !FindInMap [Managed, CachePolicy, CachingDisabled]
+          OriginRequestPolicyId: !FindInMap [Managed, OriginRequestPolicy, AllViewerAndCloudFrontHeaders]
+          Compress: true
+        CacheBehaviors:
+          - PathPattern: /storage/*
+            TargetOriginId: uploads
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD, OPTIONS]
+            CachedMethods: [GET, HEAD]
+            CachePolicyId: !FindInMap [Managed, CachePolicy, CachingOptimized]
+            Compress: true
+          - PathPattern: /js/*
+            TargetOriginId: app
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticCachePolicy
+            Compress: true
+          - PathPattern: /css/*
+            TargetOriginId: app
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticCachePolicy
+            Compress: true
+          - PathPattern: /assets/*
+            TargetOriginId: app
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticCachePolicy
+            Compress: true
+          - PathPattern: /fonts/*
+            TargetOriginId: app
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticCachePolicy
+            Compress: true
+      Tags:
+        - {Key: Project, Value: artistikcity}
+
+  # ------------------------------------------------------------------ network
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ArtistikCity web server - HTTP from CloudFront only
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - Description: HTTP from CloudFront edge servers only (HTTPS ends at CloudFront)
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourcePrefixListId: !Ref CloudFrontPrefixListId
+      Tags:
+        - {Key: Name, Value: artistikcity-app}
+
+  AppSshIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasSsh
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      Description: SSH from the administrator's IP
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: !Ref SshCidr
+
+  DbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ArtistikCity MySQL - only from the web server
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - Description: MySQL from the web server
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+      Tags:
+        - {Key: Name, Value: artistikcity-db}
+
+  # ------------------------------------------------------------------ RDS MySQL 8.4
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: ArtistikCity database subnets
+      SubnetIds: !Ref DbSubnetIds
+
+  DbParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: ArtistikCity MySQL settings
+      Family: mysql8.4
+      Parameters:
+        character_set_server: utf8mb4
+        collation_server: utf8mb4_unicode_ci
+        time_zone: Asia/Calcutta            # same clock as the local Windows setup (IST)
+        require_secure_transport: '1'       # TLS only
+        log_bin_trust_function_creators: '1'
+
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      DBInstanceIdentifier: !Sub '${AWS::StackName}-db'
+      Engine: mysql
+      EngineVersion: !Ref DbEngineVersion
+      DBInstanceClass: !Ref DbInstanceClass
+      DBName: artistikcity
+      MasterUsername: artistik_admin
+      ManageMasterUserPassword: true          # password kept and rotatable in Secrets Manager
+      AllocatedStorage: !Ref DbAllocatedStorage
+      MaxAllocatedStorage: 200
+      StorageType: gp3
+      StorageEncrypted: true
+      MultiAZ: !If [MultiAZ, true, false]
+      PubliclyAccessible: false
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups: [!Ref DbSecurityGroup]
+      DBParameterGroupName: !Ref DbParameterGroup
+      BackupRetentionPeriod: 7
+      PreferredBackupWindow: '20:30-21:30'          # 02:00-03:00 IST
+      PreferredMaintenanceWindow: 'sun:21:45-sun:22:45'
+      AutoMinorVersionUpgrade: true
+      CopyTagsToSnapshot: true
+      DeletionProtection: true
+      Tags:
+        - {Key: Project, Value: artistikcity}
+
+  # ------------------------------------------------------------------ ECR + logs
+  Repository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RepositoryName: !Sub '${AWS::StackName}'
+      ImageTagMutability: IMMUTABLE
+      ImageScanningConfiguration: {ScanOnPush: true}
+      EncryptionConfiguration: {EncryptionType: AES256}
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {"rules": [{"rulePriority": 1, "description": "keep the 30 most recent images",
+            "selection": {"tagStatus": "any", "countType": "imageCountMoreThan", "countNumber": 30},
+            "action": {"type": "expire"}}]}
+
+  AppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/${AWS::StackName}/app'
+      RetentionInDays: 30
+
+  # ------------------------------------------------------------------ EC2 server
+  AppRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: ArtistikCity web server
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ec2.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore     # Session Manager + Run Command (deploys)
+      Policies:
+        - PolicyName: artistikcity-app
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: UploadsReadWrite
+                Effect: Allow
+                Action: [s3:GetObject, s3:PutObject, s3:DeleteObject]
+                Resource: !Sub '${UploadsBucket.Arn}/storage/*'
+              - Sid: UploadsList            # lets S3 answer 404 (not 403) for files that do not exist
+                Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt UploadsBucket.Arn
+              - Sid: PullImages
+                Effect: Allow
+                Action: [ecr:BatchGetImage, ecr:GetDownloadUrlForLayer, ecr:BatchCheckLayerAvailability]
+                Resource: !GetAtt Repository.Arn
+              - Sid: EcrLogin
+                Effect: Allow
+                Action: ecr:GetAuthorizationToken
+                Resource: '*'
+              - Sid: ReadSecrets
+                Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource:
+                  - !GetAtt Database.MasterUserSecret.SecretArn
+                  - !Ref OriginVerifySecret
+                  - !Ref OtpSecret
+              - Sid: ReadSettings
+                Effect: Allow
+                Action: [ssm:GetParametersByPath, ssm:GetParameters, ssm:GetParameter]
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${SsmPath}'
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${SsmPath}/*'
+              - Sid: Logs
+                Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents, logs:DescribeLogStreams]
+                Resource: !Sub '${AppLogGroup.Arn}:*'
+
+  AppInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref AppRole]
+
+  AppLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        ImageId: !Ref LatestAmiId
+        InstanceType: !Ref InstanceType
+        KeyName: !If [HasKey, !Ref KeyName, !Ref AWS::NoValue]
+        IamInstanceProfile: {Arn: !GetAtt AppInstanceProfile.Arn}
+        SecurityGroupIds: [!Ref AppSecurityGroup]
+        MetadataOptions:
+          HttpEndpoint: enabled
+          HttpTokens: required             # IMDSv2 only
+          HttpPutResponseHopLimit: 2       # so the app inside Docker can use the instance role
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs: {VolumeSize: 30, VolumeType: gp3, Encrypted: true, DeleteOnTermination: true}
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - {Key: Name, Value: artistikcity-app}
+              - {Key: Project, Value: artistikcity}
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            # ArtistikCity server set-up (runs once, at first boot). Deploys come later from GitHub Actions.
+            set -euxo pipefail
+            dnf -y install aws-cfn-bootstrap
+            trap '/opt/aws/bin/cfn-signal -e 1 --stack ${AWS::StackName} --resource AppInstance --region ${AWS::Region}' ERR
+            dnf -y update
+            dnf -y install docker
+            mkdir -p /etc/docker
+            echo '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"3"}}' > /etc/docker/daemon.json
+            systemctl enable --now docker
+            # 2 GB swap: headroom for the JVM on small instances
+            if [ ! -f /swapfile ]; then
+              dd if=/dev/zero of=/swapfile bs=1M count=2048
+              chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+              echo '/swapfile none swap sw 0 0' >> /etc/fstab
+            fi
+            install -d -m 700 /opt/artistikcity
+            cat > /opt/artistikcity/deploy.conf <<'CONF'
+            AWS_REGION=${AWS::Region}
+            S3_BUCKET=${UploadsBucket}
+            DB_HOST=${Database.Endpoint.Address}
+            DB_NAME=artistikcity
+            DB_SECRET_ARN=${Database.MasterUserSecret.SecretArn}
+            ORIGIN_SECRET_ARN=${OriginVerifySecret}
+            OTP_SECRET_ARN=${OtpSecret}
+            SSM_PATH=${SsmPath}
+            LOG_GROUP=${AppLogGroup}
+            APP_URL=https://${DomainName}
+            CONF
+            chmod 600 /opt/artistikcity/deploy.conf
+            # entry point for GitHub Actions (through SSM Run Command): deploy-image.sh <image-uri>
+            # It takes the real deploy script out of the image, so deploy logic is versioned with the code.
+            cat > /opt/artistikcity/deploy-image.sh <<'SCRIPT'
+            #!/bin/bash
+            set -euo pipefail
+            source /opt/artistikcity/deploy.conf
+            IMAGE="$1"
+            aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${!IMAGE%%/*}"
+            docker pull -q "$IMAGE"
+            cid="$(docker create "$IMAGE")"
+            docker cp "$cid:/app/deploy/ec2-deploy.sh" /opt/artistikcity/ec2-deploy.sh
+            docker rm "$cid" > /dev/null
+            chmod 700 /opt/artistikcity/ec2-deploy.sh
+            exec /opt/artistikcity/ec2-deploy.sh "$IMAGE"
+            SCRIPT
+            chmod 700 /opt/artistikcity/deploy-image.sh
+            /opt/aws/bin/cfn-signal -e 0 --stack ${AWS::StackName} --resource AppInstance --region ${AWS::Region}
+
+  AppInstance:
+    Type: AWS::EC2::Instance
+    CreationPolicy:
+      ResourceSignal: {Count: 1, Timeout: PT20M}
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref AppLaunchTemplate
+        Version: !GetAtt AppLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref AppSubnetId
+
+  AppElasticIp:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref AppInstance
+      Tags:
+        - {Key: Name, Value: artistikcity-app}
+
+  # ------------------------------------------------------------------ GitHub Actions (OIDC, no stored AWS keys)
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateOidc
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: [sts.amazonaws.com]
+      ThumbprintList: [6938fd4d98bab03faadb97b34396831e3780aea1, 1c58a3a8518e8759bf075b76b750d4f2df264fcd]
+
+  GitHubDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Assumed by GitHub Actions to push images and deploy ArtistikCity
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !If
+                - CreateOidc
+                - !Ref GitHubOidcProvider
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  - !Sub 'repo:${GitHubOwner}/${GitHubRepo}:ref:refs/heads/${GitHubBranch}'
+                  - !Sub 'repo:${GitHubOwner}/${GitHubRepo}:environment:production'
+      Policies:
+        - PolicyName: artistikcity-deploy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: EcrLogin
+                Effect: Allow
+                Action: ecr:GetAuthorizationToken
+                Resource: '*'
+              - Sid: PushImages
+                Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+                  - ecr:PutImage
+                  - ecr:BatchGetImage
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:DescribeImages
+                Resource: !GetAtt Repository.Arn
+              - Sid: RunDeployOnTheServer
+                Effect: Allow
+                Action: ssm:SendCommand
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}::document/AWS-RunShellScript'
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/${AppInstance}'
+              - Sid: ReadDeployResult
+                Effect: Allow
+                Action: [ssm:GetCommandInvocation, ssm:ListCommandInvocations]
+                Resource: '*'
+              - Sid: RefreshCachedStaticFiles
+                Effect: Allow
+                Action: cloudfront:CreateInvalidation
+                Resource: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+
+Outputs:
+  CloudFrontDomain:
+    Description: Point your domain here (CNAME www -> this name)
+    Value: !GetAtt Distribution.DomainName
+  DistributionId:
+    Description: GitHub variable CLOUDFRONT_DISTRIBUTION_ID
+    Value: !Ref Distribution
+  EcrRepository:
+    Description: GitHub variable ECR_REPOSITORY (name)
+    Value: !Ref Repository
+  EcrRepositoryUri:
+    Value: !GetAtt Repository.RepositoryUri
+  InstanceId:
+    Description: GitHub variable EC2_INSTANCE_ID
+    Value: !Ref AppInstance
+  GitHubDeployRoleArn:
+    Description: GitHub variable AWS_DEPLOY_ROLE_ARN
+    Value: !GetAtt GitHubDeployRole.Arn
+  UploadsBucketName:
+    Value: !Ref UploadsBucket
+  DatabaseEndpoint:
+    Value: !GetAtt Database.Endpoint.Address
+  DatabaseSecretArn:
+    Description: Database user name and password (Secrets Manager)
+    Value: !GetAtt Database.MasterUserSecret.SecretArn
+  ServerElasticIp:
+    Value: !Ref AppElasticIp
+  SettingsPath:
+    Description: Put optional settings here as SecureString parameters, e.g. <path>/RAZORPAY_KEY
+    Value: !Ref SsmPath

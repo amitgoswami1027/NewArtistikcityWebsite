@@ -32,8 +32,9 @@ docker compose down -v && docker compose up -d            # wipe and reload demo
 cd frontend && npm install && npm run dev                 # or: npm run prod / npm run watch
 ```
 
-Unit tests cover the auth crypto (`src/test/java/com/artistikcity/auth`: tokens, password policy, JWT/JWKS, WebAuthn) and the
-rich-text cleaner (`support/HtmlCleanerTest`): `mvn test`.
+Unit tests cover the auth crypto (`src/test/java/com/artistikcity/auth`: tokens, password policy, JWT/JWKS, WebAuthn), the
+rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/VideoUploadCheckTest`), S3 request signing against
+AWS's published examples (`support/s3/SigV4Test`) and the CloudFront filter (`http/CloudFrontFilterTest`): `mvn test`.
 For everything else, run the app against MySQL and check the pages by hand. Use the demo logins below.
 
 **Local database access:** `127.0.0.1:3306`, database `artistikcity`, app user `artistik` / `Artistik@2026`,
@@ -41,6 +42,9 @@ root `root` / `ArtistikRoot@2026`. Client: `.tools\mysql-8.4.13-winx64\bin\mysql
 
 **Demo logins** (password `password`): student `student@artistikcity.com` at `/login`, admin `admin@artistikcity.com`
 at `/admin/login`, teacher `vaishali@artistikcity.com` at `/admin/login`.
+Optional demo pack `database/demo/demo-data.sql` (`LOAD-DEMO-DATA.bat` / `-DemoData`; generated, idempotent, ids 100+/1000+):
+teachers `ananya|kabir|meera|rohit|sana@artistikcity.com`, students `ishaan|neha|arjun|sophia|rahul|emily@example.com`,
+courses 101-113, workshops 121-126, orders 1001-1030. Same password. Its images are under `storage/uploads`.
 
 ## Layout
 
@@ -65,7 +69,10 @@ src/main/resources/
   static/       compiled assets. static/js/app.js is BUILD OUTPUT, so do not edit it by hand
   ziggy/        route.js used by the React route() helper
 frontend/resources/js/   React source: Pages/, Components/, Layouts/, Interface/
-database/       schema.sql (drops + recreates everything), seed.sql (demo data), migrations/ (future dated MySQL scripts)
+database/       schema.sql (drops + recreates everything), seed.sql (demo data), migrations/ (dated MySQL scripts), demo/ (optional demo pack)
+deploy/         ec2-deploy.sh, db-migrate.sh (AWS server scripts, shipped inside the image)
+infra/          CloudFormation: certificate.yml (us-east-1), artistikcity.yml (ap-south-1)
+docs/           AWS-DEPLOY.md
 storage/        uploaded files, served at /storage/**  (storage/certificates is git-ignored)
 ```
 
@@ -124,6 +131,20 @@ storage/        uploaded files, served at /storage/**  (storage/certificates is 
 - Site settings (`settings` table, tags `home`, `seo`, `contact`, `social`) are read through `admin/SiteSettings` (cached,
   invalidated on save). SEO values go into the root templates' `<head>` (`seo.*`; a controller can override them with the
   request attribute `Inertia.SEO_ATTRIBUTE`), contact/social reach React as the shared prop `site`.
+- **Course videos are separate:** `courses.intro_video_url` is the trailer on the public course page; `course_module_lessons.video_url`
+  is each lesson's own video in the learning view (no fallback to another video). Both hold a link or `/storage/uploads/courses/<id>/videos/<file>`,
+  uploaded through `POST /admin/api/courses/{id}/videos` (streamed to disk, 500 MB). The old `course_videos` table is no longer used.
+  Spring's multipart limit is 520 MB for that endpoint; every other form keeps 25 MB per file / 100 MB per form via `support/Input`.
+- Course page section tabs (`Pages/CourseDetails.js`): the root template has `<base href="/">`, so in-page links must not be
+  bare `#id` hrefs. The tabs scroll in code (`scrollToSection`) to just below the sticky header + tab bar.
+- **Storage:** always go through `support/Storage` (`put`, `put(stream)`, `copy`, `exists`, `read`, `storeUpload`); never write
+  files under the storage folder directly. `STORAGE_DRIVER=s3` keeps them in S3 (`support/s3/S3Client`: plain java.net.http +
+  SigV4, credentials from env or the EC2 role via IMDSv2), same `/storage/...` URLs; `web/StorageController` serves them when no CDN does.
+- **AWS** (docs/AWS-DEPLOY.md): CloudFront → EC2 (Docker) + RDS + S3, `infra/*.yml` (CloudFormation), `.github/workflows/deploy.yml`,
+  `deploy/ec2-deploy.sh` (deploy/rollback/status, runs from inside the image) and `deploy/db-migrate.sh` (schema on an empty
+  DB, else pending migrations - same rules as the launcher). `http/CloudFrontFilter` (`TRUST_CLOUDFRONT`) takes the visitor IP and
+  https from CloudFront headers and rejects requests without `X-Origin-Verify`. `GET /healthz` is the health check.
+  Migrations must stay compatible with the previous release (rollback only swaps the image).
 - Blog posts are public only when `status = 1`; drafts 404 for visitors (admins can preview). `/faq` reads the `faqs` table.
   Order `payment_status`: 0 pending, 1 paid, 2 failed, 3 refunded; course access needs 1.
 - Wish list: table `wishlist_items` (type `course` or `painting`), `POST /wishlist {type, id, saved}`, page `/user/wishlist`

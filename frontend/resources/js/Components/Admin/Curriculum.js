@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { errorText } from '@/Components/Admin/AdminLayout';
 import { Button, Badge, Drawer, EmptyState, Card } from '@/Components/Admin/kit';
-import { useForm, Field, TextField, Toggle, DropZone, RichText, uploadImage } from '@/Components/Admin/form';
+import { useForm, Field, TextField, Toggle, DropZone, RichText, VideoField, uploadImage } from '@/Components/Admin/form';
 
 /** Modules → lessons → practice tasks, plus course projects. Every change saves straight away. */
 export default function Curriculum({ courseId, initial, toast, confirm, noun = 'course', onChange }) {
@@ -74,6 +74,7 @@ export default function Curriculum({ courseId, initial, toast, confirm, noun = '
                                                 <b>{l.title}</b>
                                                 <small>
                                                     {l.tasks.length > 0 && <span><i className="fa fa-pencil-square-o" aria-hidden="true"></i> {l.tasks.length} task{l.tasks.length === 1 ? '' : 's'}</span>}
+                                                    {l.video_url && <span><i className="fa fa-play-circle" aria-hidden="true"></i> video</span>}
                                                     {l.pdf && <span><i className="fa fa-file-pdf-o" aria-hidden="true"></i> notes</span>}
                                                     {!l.description && <span className="adm-warn">No lesson notes yet</span>}
                                                 </small>
@@ -147,7 +148,9 @@ function ModulePanel({ api, item, onClose, onSaved, toast }) {
 }
 
 function LessonPanel({ api, item, moduleId, modules, onClose, onSaved, toast, confirm }) {
-    const form = useForm({ title: item ? item.title : '', module_id: String(moduleId || ''), description: item ? item.description : '', status: item ? item.status : true },
+    // this lesson's own form state: its video is never shared with the course or other lessons
+    const form = useForm({ title: item ? item.title : '', module_id: String(moduleId || ''), description: item ? item.description : '',
+        video_url: item ? (item.video_url || '') : '', status: item ? item.status : true },
         { title: ['required', 'max:255'], module_id: ['required'] });
     const [pdf, setPdf] = useState([]);
     const [removePdf, setRemovePdf] = useState(false);
@@ -157,6 +160,7 @@ function LessonPanel({ api, item, moduleId, modules, onClose, onSaved, toast, co
         fd.append('title', form.values.title);
         fd.append('module_id', form.values.module_id);
         fd.append('description', form.values.description || '');
+        fd.append('video_url', form.values.video_url || '');
         fd.append('status', form.values.status ? '1' : '0');
         if (pdf[0]) fd.append('pdf', pdf[0]);
         if (removePdf) fd.append('remove_pdf', '1');
@@ -171,6 +175,10 @@ function LessonPanel({ api, item, moduleId, modules, onClose, onSaved, toast, co
                     <select className="adm-input" {...form.bind('module_id')}>
                         {modules.map((m, i) => <option key={m.id} value={String(m.id)}>{i + 1}. {m.title}</option>)}
                     </select>
+                </Field>
+                <Field label="Lesson video" name="video_url" optional>
+                    <VideoField name="video_url" label="Lesson video" value={form.values.video_url} error={form.error('video_url')}
+                        onChange={(x) => form.set('video_url', x)} uploadUrl={`${api}/videos`} />
                 </Field>
                 <Field label="Lesson notes" name="description" hint="Shown in the student's lesson view under the video." optional>
                     <RichText name="description" value={form.values.description} onChange={(x) => form.set('description', x)} minHeight={220} onUpload={uploadImage} />

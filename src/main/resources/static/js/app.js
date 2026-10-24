@@ -15412,6 +15412,7 @@ var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react
 var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_CourseShell = __toESM(__webpack_require__("./resources/js/Components/Course/CourseShell.js"));
+var import_VideoPlayer = __toESM(__webpack_require__("./resources/js/Components/Video/VideoPlayer.js"));
 const SIDEBAR_KEY = "ac.cl.sidebar";
 const readPref = () => {
   try {
@@ -15425,10 +15426,6 @@ const writePref = (open) => {
     window.localStorage.setItem(SIDEBAR_KEY, open ? "open" : "closed");
   } catch (e) {
   }
-};
-const embed = (url) => {
-  const m = String(url || "").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  return m ? `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0` : null;
 };
 function Syllabus({ syllabus, current, done, onPick }) {
   const [open, setOpen] = (0, import_react.useState)(() => new Set(syllabus.map((m) => String(m.id))));
@@ -15522,7 +15519,8 @@ function Learn() {
       setProgress({ done: count, total, percent: total ? Math.round(count * 100 / total) : 0 });
     }).catch((e) => setError(e.response && e.response.data && e.response.data.message || "Could not save your progress. Please try again.")).finally(() => setBusy(false));
   };
-  const src = lesson && lesson.video ? embed(lesson.video.url) : null;
+  const vsrc = lesson && lesson.video ? (0, import_VideoPlayer.videoSource)(lesson.video.url) : null;
+  const src = vsrc && vsrc.kind !== "link" ? vsrc.src : null;
   const toggleLabel = drawer || sidebar ? "Hide lessons" : "Show lessons";
   return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
     import_CourseShell.default,
@@ -15566,16 +15564,7 @@ function Learn() {
             lesson.total
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: lesson.title }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `cl-media ${src ? "" : "cl-media--ph"}`, children: src ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            "iframe",
-            {
-              src,
-              title: lesson.video.title || lesson.title,
-              loading: "lazy",
-              allow: "accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen",
-              allowFullScreen: true
-            }
-          ) : lesson.video && lesson.video.url ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { className: "cl-media__ph", href: lesson.video.url, target: "_blank", rel: "noopener noreferrer", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `cl-media ${src ? "" : "cl-media--ph"}`, children: src ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_VideoPlayer.default, { url: lesson.video.url, title: lesson.video.title || lesson.title }, lesson.id) : lesson.video && lesson.video.url ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { className: "cl-media__ph", href: lesson.video.url, target: "_blank", rel: "noopener noreferrer", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play-circle", "aria-hidden": "true" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
               "Watch \u201C",
@@ -16297,6 +16286,7 @@ __export(form_exports, {
   TagInput: () => TagInput,
   TextField: () => TextField,
   Toggle: () => Toggle,
+  VideoField: () => VideoField,
   check: () => check,
   slugify: () => slugify,
   uploadImage: () => uploadImage,
@@ -16309,6 +16299,7 @@ var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react
 var import_react_simple_wysiwyg = __webpack_require__("../../febuild/node_modules/react-simple-wysiwyg/lib/index.es.mjs");
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_VideoPlayer = __toESM(__webpack_require__("./resources/js/Components/Video/VideoPlayer.js"));
 const uploadImage = (file) => {
   const fd = new FormData();
   fd.append("file", file);
@@ -16744,6 +16735,154 @@ function DropZone({ name, value = [], onChange, existing = [], onRemoveExisting,
     ] })
   ] });
 }
+const VIDEO_MAX_MB = 500;
+const VIDEO_ACCEPT = "video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.m4v,.mov,.webm";
+const isStoredVideo = (v) => /^\/storage\/uploads\/courses\/\d+\/videos\//.test(String(v || ""));
+const fileNameOf = (v) => decodeURIComponent(String(v || "").split("/").pop()).replace(/^\d+_/, "");
+function VideoField({ name, value, onChange, uploadUrl, error, label = "Video", uploadHint }) {
+  const [mode, setMode] = (0, import_react.useState)(isStoredVideo(value) ? "file" : "link");
+  const [over, setOver] = (0, import_react.useState)(false);
+  const [progress, setProgress] = (0, import_react.useState)(null);
+  const [local, setLocal] = (0, import_react.useState)(null);
+  const cancel = (0, import_react.useRef)(null);
+  const input = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => () => cancel.current && cancel.current.cancel(), []);
+  const src = (0, import_VideoPlayer.videoSource)(value);
+  const linkText = isStoredVideo(value) ? "" : value || "";
+  const linkError = linkText && !/^https?:\/\/\S+$/i.test(linkText.trim()) ? "Enter a full link starting with https://" : null;
+  const upload = (list) => {
+    const f = Array.from(list || [])[0];
+    if (!f || !uploadUrl) return;
+    if (!/\.(mp4|m4v|mov|webm)$/i.test(f.name)) {
+      setLocal(`\u201C${f.name}\u201D is not an MP4, MOV or WebM video.`);
+      return;
+    }
+    if (f.size > VIDEO_MAX_MB * 1024 * 1024) {
+      setLocal(`\u201C${f.name}\u201D is ${fmtSize(f.size)}; the limit is ${VIDEO_MAX_MB} MB. Upload it to YouTube or Vimeo and paste the link instead.`);
+      return;
+    }
+    setLocal(null);
+    setProgress(0);
+    const fd = new FormData();
+    fd.append("file", f);
+    cancel.current = import_axios.default.CancelToken.source();
+    import_axios.default.post(uploadUrl, fd, {
+      cancelToken: cancel.current.token,
+      onUploadProgress: (e) => e.total && setProgress(Math.min(99, Math.round(e.loaded * 100 / e.total)))
+    }).then((r) => {
+      setProgress(null);
+      onChange(r.data.url);
+    }).catch((e) => {
+      setProgress(null);
+      if (import_axios.default.isCancel(e)) return;
+      const d = e.response && e.response.data;
+      setLocal(d && d.errors && d.errors.file || d && d.message || "The upload failed. Check your connection and try again.");
+    }).finally(() => {
+      cancel.current = null;
+    });
+  };
+  const err = local || error || linkError;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("adm-video", err && "has-error"), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-video__modes", role: "tablist", "aria-label": `${label} source`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "tab", "aria-selected": mode === "link", className: mode === "link" ? "is-on" : "", onClick: () => setMode("link"), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-link", "aria-hidden": "true" }),
+        " Paste a link"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "tab", "aria-selected": mode === "file", className: mode === "file" ? "is-on" : "", onClick: () => setMode("file"), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-upload", "aria-hidden": "true" }),
+        " Upload a file"
+      ] })
+    ] }),
+    mode === "link" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "input",
+      {
+        id: `f-${name}`,
+        className: "adm-input",
+        type: "url",
+        inputMode: "url",
+        placeholder: "https://www.youtube.com/watch?v=\u2026 or https://vimeo.com/\u2026",
+        "aria-label": `${label} link`,
+        value: linkText,
+        onChange: (e) => {
+          setLocal(null);
+          onChange(e.target.value);
+        },
+        "aria-invalid": err ? "true" : void 0,
+        "aria-describedby": err ? `f-${name}-err` : `f-${name}-hint`
+      }
+    ),
+    mode === "file" && (progress !== null ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-video__progress", role: "status", "aria-live": "polite", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-video__bar", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: `${progress}%` } }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        "Uploading\u2026 ",
+        progress,
+        "%"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", onClick: () => cancel.current && cancel.current.cancel(), children: "Cancel" })
+    ] }) : uploadUrl ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "div",
+      {
+        className: (0, import_kit.cx)("adm-drop", "adm-drop--video", over && "is-over"),
+        role: "button",
+        tabIndex: 0,
+        id: `f-${name}`,
+        "aria-describedby": err ? `f-${name}-err` : `f-${name}-hint`,
+        onClick: () => input.current && input.current.click(),
+        onKeyDown: (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            input.current.click();
+          }
+        },
+        onDragOver: (e) => {
+          e.preventDefault();
+          setOver(true);
+        },
+        onDragLeave: () => setOver(false),
+        onDrop: (e) => {
+          e.preventDefault();
+          setOver(false);
+          upload(e.dataTransfer.files);
+        },
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-film", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: isStoredVideo(value) ? "Replace the video file" : "Drop a video here or click to choose" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: uploadHint || `MP4, MOV or WebM up to ${VIDEO_MAX_MB} MB` }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { ref: input, type: "file", accept: VIDEO_ACCEPT, hidden: true, onChange: (e) => {
+            upload(e.target.files);
+            e.target.value = "";
+          } })
+        ]
+      }
+    ) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-video__note", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-info-circle", "aria-hidden": "true" }),
+      " Save first, then you can upload a file here. Links work straight away."
+    ] })),
+    value && src && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-video__preview", children: [
+      src.kind === "link" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-video__nolive", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link", "aria-hidden": "true" }),
+        " No preview for this link. It opens in a new tab for students."
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-video__frame", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_VideoPlayer.default, { url: value, title: `${label} preview` }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-video__meta", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${src.kind === "file" ? "fa-file-video-o" : src.provider === "YouTube" ? "fa-youtube-play" : src.provider === "Vimeo" ? "fa-vimeo" : "fa-link"}`, "aria-hidden": "true" }),
+          isStoredVideo(value) ? `Uploaded file \xB7 ${fileNameOf(value)}` : src.provider ? `${src.provider} video` : src.kind === "file" ? "Video file link" : "Video link"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-linkbtn", onClick: () => {
+          setLocal(null);
+          onChange("");
+        }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }),
+          " Remove video"
+        ] })
+      ] })
+    ] }),
+    err ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-field__error", id: `f-${name}-err`, role: "alert", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-circle", "aria-hidden": "true" }),
+      err
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-video__hint", id: `f-${name}-hint`, children: "YouTube and Vimeo links play in the page. Uploaded files play with the built-in player." })
+  ] });
+}
 const fmt = (tag) => ({ $el }) => {
   if ($el) $el.focus();
   document.execCommand("formatBlock", false, tag);
@@ -17004,6 +17143,10 @@ function Curriculum({ courseId, initial, toast, confirm, noun = "course", onChan
                   " task",
                   l.tasks.length === 1 ? "" : "s"
                 ] }),
+                l.video_url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play-circle", "aria-hidden": "true" }),
+                  " video"
+                ] }),
                 l.pdf && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o", "aria-hidden": "true" }),
                   " notes"
@@ -17118,7 +17261,13 @@ function ModulePanel({ api, item, onClose, onSaved, toast }) {
 }
 function LessonPanel({ api, item, moduleId, modules, onClose, onSaved, toast, confirm }) {
   const form = (0, import_form.useForm)(
-    { title: item ? item.title : "", module_id: String(moduleId || ""), description: item ? item.description : "", status: item ? item.status : true },
+    {
+      title: item ? item.title : "",
+      module_id: String(moduleId || ""),
+      description: item ? item.description : "",
+      video_url: item ? item.video_url || "" : "",
+      status: item ? item.status : true
+    },
     { title: ["required", "max:255"], module_id: ["required"] }
   );
   const [pdf, setPdf] = (0, import_react.useState)([]);
@@ -17129,6 +17278,7 @@ function LessonPanel({ api, item, moduleId, modules, onClose, onSaved, toast, co
     fd.append("title", form.values.title);
     fd.append("module_id", form.values.module_id);
     fd.append("description", form.values.description || "");
+    fd.append("video_url", form.values.video_url || "");
     fd.append("status", form.values.status ? "1" : "0");
     if (pdf[0]) fd.append("pdf", pdf[0]);
     if (removePdf) fd.append("remove_pdf", "1");
@@ -17161,6 +17311,17 @@ function LessonPanel({ api, item, moduleId, modules, onClose, onSaved, toast, co
             ". ",
             m.title
           ] }, m.id)) })) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Lesson video", name: "video_url", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.VideoField,
+            {
+              name: "video_url",
+              label: "Lesson video",
+              value: form.values.video_url,
+              error: form.error("video_url"),
+              onChange: (x) => form.set("video_url", x),
+              uploadUrl: `${api}/videos`
+            }
+          ) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Lesson notes", name: "description", hint: "Shown in the student's lesson view under the video.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "description", value: form.values.description, onChange: (x) => form.set("description", x), minHeight: 220, onUpload: import_form.uploadImage }) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Notes PDF", name: "pdf", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
             import_form.DropZone,
@@ -17542,7 +17703,7 @@ const blank = (kind, me) => ({
   course_deliverables: [],
   price_inr: "",
   price_usd: "",
-  videos: []
+  intro_video_url: ""
 });
 const editable = (c) => {
   const v = __spreadValues({}, c);
@@ -17626,7 +17787,6 @@ function CourseEditor() {
       toast(r.data.message);
     }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
   };
-  const setVideo = (i, k, val) => form.set("videos", v.videos.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { [k]: val }) : x));
   const title = isNew ? `New ${noun}` : saved.title || `Untitled ${noun}`;
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title, crumbs: [{ label: "Learning" }, { href: base, label: kind === "workshop" ? "Workshops" : "Courses" }, { label: isNew ? `New ${noun}` : saved.title }], children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
@@ -17738,7 +17898,7 @@ function CourseEditor() {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Prerequisites", name: "course_prerequisites", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "course_prerequisites", value: v.course_prerequisites, onChange: (x) => form.set("course_prerequisites", x), minHeight: 140 }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.FormSection, { id: "lists", title: "Highlights & lists", description: "Bullet lists on the course page. Press Enter to add an item; use the arrows to reorder.", children: LISTS.map(([k, l, h]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: l, name: k, hint: h, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.ListEditor, { name: k, value: v[k], onChange: (x) => form.set(k, x), placeholder: "Add an item and press Enter" }) }, k)) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "media", title: "Photos & videos", description: "The first photo is the cover in listings. Videos are YouTube or other links shown on the page and in lessons.", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "media", title: "Photos & intro video", description: `The first photo is the cover in listings. The intro video plays on the public ${noun} page. Each lesson has its own video in Curriculum.`, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Photos", name: "photos", error: null, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           import_form.DropZone,
           {
@@ -17752,14 +17912,17 @@ function CourseEditor() {
             label: "Drop photos here or click to choose"
           }
         ) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Videos", name: "videos", error: form.error("videos"), optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
-          v.videos.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-list__row", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", placeholder: "Video title", "aria-label": `Video ${i + 1} title`, value: x.title, onChange: (e) => setVideo(i, "title", e.target.value) }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", placeholder: "https://www.youtube.com/watch?v=\u2026", "aria-label": `Video ${i + 1} link`, value: x.url, onChange: (e) => setVideo(i, "url", e.target.value) }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => form.set("videos", v.videos.filter((_, j) => j !== i)), "aria-label": `Remove video ${i + 1}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }) })
-          ] }, i)),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", onClick: () => form.set("videos", [...v.videos, { title: "", url: "" }]), children: "Add a video" }) })
-        ] }) })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Intro / trailer video", name: "intro_video_url", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.VideoField,
+          {
+            name: "intro_video_url",
+            label: "Intro video",
+            value: v.intro_video_url || "",
+            error: form.error("intro_video_url"),
+            onChange: (x) => form.set("intro_video_url", x),
+            uploadUrl: saved ? `/admin/api/courses/${saved.id}/videos` : null
+          }
+        ) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
         import_form.SaveBar,
@@ -20116,6 +20279,81 @@ function PasswordForm({ toast }) {
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-lock", busy: form.busy, type: "submit", children: "Change password" }) })
   ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Video/VideoPlayer.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var VideoPlayer_exports = {};
+__export(VideoPlayer_exports, {
+  default: () => VideoPlayer,
+  videoSource: () => videoSource
+});
+module.exports = __toCommonJS(VideoPlayer_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+const FILE_EXT = /\.(mp4|m4v|mov|webm)(\?.*)?$/i;
+function videoSource(url, { autoplay = false } = {}) {
+  const u = String(url || "").trim();
+  if (!u) return null;
+  const yt = u.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{6,})/);
+  if (yt) return { kind: "embed", provider: "YouTube", src: `https://www.youtube-nocookie.com/embed/${yt[1]}?rel=0${autoplay ? "&autoplay=1" : ""}` };
+  const vm = u.match(/vimeo\.com\/(?:video\/)?(\d{5,})/);
+  if (vm) return { kind: "embed", provider: "Vimeo", src: `https://player.vimeo.com/video/${vm[1]}${autoplay ? "?autoplay=1" : ""}` };
+  if (u.startsWith("/storage/") || FILE_EXT.test(u)) return { kind: "file", src: u };
+  return { kind: "link", src: u };
+}
+function VideoPlayer({ url, title, autoplay = false, className, poster }) {
+  const s = videoSource(url, { autoplay });
+  if (!s || s.kind === "link") return null;
+  if (s.kind === "embed") {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "iframe",
+      {
+        className,
+        src: s.src,
+        title: title || "Video",
+        loading: "lazy",
+        allow: "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen",
+        allowFullScreen: true
+      }
+    );
+  }
+  return (
+    // eslint-disable-next-line jsx-a11y/media-has-caption
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", { className, src: s.src, title: title || "Video", controls: true, playsInline: true, preload: "metadata", autoPlay: autoplay, poster })
+  );
 }
 
 
@@ -22619,6 +22857,7 @@ __export(CourseDetails_exports, {
 module.exports = __toCommonJS(CourseDetails_exports);
 var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
 var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_VideoPlayer = __toESM(__webpack_require__("./resources/js/Components/Video/VideoPlayer.js"));
 var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
 var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
 var import_CourseCard = __toESM(__webpack_require__("./resources/js/Components/Site/CourseCard.js"));
@@ -22629,18 +22868,28 @@ var import_api = __webpack_require__("./resources/js/Components/Auth/api.js");
 const asList = (v) => Array.isArray(v) ? v.filter((x) => x !== null && String(x).trim() !== "") : [];
 const has = (v) => v !== void 0 && v !== null && String(v).trim() !== "";
 const stripHtml = (h) => String(h || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-function youtubeEmbed(url) {
-  if (!url) return null;
-  const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  return m ? `https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0` : null;
-}
 const TABS = [
   { id: "information", label: "Information" },
   { id: "content", label: "Content" },
   { id: "projects", label: "Projects" },
   { id: "reviews", label: "Reviews" },
-  { id: "faq", label: "FAQ" }
+  { id: "faqs", label: "FAQs" }
 ];
+const SECTION_GAP = 12;
+function stickyOffset() {
+  const tabs = document.querySelector(".dm-tabs");
+  if (!tabs) return 0;
+  const top = parseFloat(window.getComputedStyle(tabs).top) || 0;
+  return top + tabs.getBoundingClientRect().height;
+}
+function scrollToSection(id, smooth) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const y = el.getBoundingClientRect().top + window.pageYOffset - stickyOffset() - SECTION_GAP;
+  window.scrollTo({ top: Math.max(0, y), behavior: smooth && !reduce ? "smooth" : "auto" });
+  el.focus({ preventScroll: true });
+}
 const PERKS = [
   { icon: "fa-video-camera", title: "Live classes", text: "Learn alongside a small group with real-time demos." },
   { icon: "fa-comments-o", title: "Instructor feedback", text: "Get personal notes on the projects you submit." },
@@ -22667,7 +22916,8 @@ function CourseDetails() {
   const teacher = data.teacher || {};
   const cover = (0, import_ProgramCard.programImage)(data);
   const video = videos[0];
-  const embed = video ? youtubeEmbed(video.video_url) : null;
+  const trailer = video ? (0, import_VideoPlayer.videoSource)(video.video_url) : null;
+  const embed = trailer && trailer.kind !== "link" ? trailer.src : null;
   const allLessons = curriculum.flatMap((u, ui) => (u.lessons || []).map((l, li) => __spreadProps(__spreadValues({}, l), { unit: ui + 1, n: li + 1 })));
   const firstPrice = data.prices && data.prices[0] ? data.prices[0].price_inr : 0;
   const [active, setActive] = (0, import_react.useState)("information");
@@ -22682,16 +22932,36 @@ function CourseDetails() {
   (0, import_react.useEffect)(() => {
     setPageUrl(window.location.href);
     const onScroll = () => {
-      let current = "information";
+      const line = stickyOffset() + SECTION_GAP + 4;
+      let current = TABS[0].id;
       TABS.forEach((t) => {
         const el = document.getElementById(t.id);
-        if (el && el.getBoundingClientRect().top < 160) current = t.id;
+        if (el && el.getBoundingClientRect().top <= line) current = t.id;
       });
+      if (window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 2) current = TABS[TABS.length - 1].id;
       setActive(current);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const hash = decodeURIComponent(window.location.hash.slice(1));
+    const target = hash === "faq" ? "faqs" : hash;
+    const timer = TABS.some((t) => t.id === target) ? window.setTimeout(() => {
+      scrollToSection(target, false);
+      onScroll();
+    }, 60) : null;
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (timer) window.clearTimeout(timer);
+    };
   }, []);
+  const pagePath = typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
+  const goTo = (e, id) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    scrollToSection(id, true);
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}#${id}`);
+    setActive(id);
+  };
   const share = () => {
     if (navigator.share) {
       navigator.share({ title: data.title, url: pageUrl }).catch(() => {
@@ -22735,7 +23005,7 @@ function CourseDetails() {
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-course", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-cover", children: playing && embed ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", { src: embed, title: video.video_title || data.title, allow: "autoplay; encrypted-media; picture-in-picture", allowFullScreen: true }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-cover", children: playing && embed ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_VideoPlayer.default, { url: video.video_url, title: `${data.title}: trailer`, autoplay: true, poster: cover }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: cover, alt: data.title }),
             video && (embed ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-cover__play", onClick: () => setPlaying(true), "aria-label": "Play trailer", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play" }) }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "dm-cover__play", href: video.video_url, target: "_blank", rel: "noopener", "aria-label": "Watch trailer", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play" }) }) })),
             video && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-cover__label", children: "Watch the trailer" })
@@ -22792,8 +23062,18 @@ function CourseDetails() {
               ] })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-tabs", "aria-label": "Course sections", children: TABS.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `#${t.id}`, className: active === t.id ? "is-active" : "", children: t.label }, t.id)) }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { id: "information", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-tabs", "aria-label": "Course sections", children: TABS.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "a",
+            {
+              href: `${pagePath}#${t.id}`,
+              className: active === t.id ? "is-active" : "",
+              "aria-current": active === t.id ? "location" : void 0,
+              onClick: (e) => goTo(e, t.id),
+              children: t.label
+            },
+            t.id
+          )) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { id: "information", className: "dm-anchor", tabIndex: -1, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { children: [
                 "About this ",
@@ -22908,7 +23188,46 @@ function CourseDetails() {
               ] })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { id: "projects", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block dm-units dm-anchor", id: "content", tabIndex: -1, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Content" }),
+            curriculum.length > 0 ? curriculum.map((u, ui) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { open: ui === 0, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "dm-unit-code", children: [
+                  "U",
+                  ui + 1
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  u.module_title,
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                    (u.lessons || []).length,
+                    " lessons",
+                    has(u.module_duration) ? ` \xB7 ${u.module_duration}` : ""
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: (u.lessons || []).map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${Number(l.has_download) ? "fa-file-pdf-o" : "fa-play-circle-o"}` }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  l.lesson_title,
+                  stripHtml(l.lesson_description) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: stripHtml(l.lesson_description) })
+                ] })
+              ] }, l.id)) })
+            ] }, u.id)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-rich", dangerouslySetInnerHTML: { __html: data.summary_details || data.schedule_details || "<p>The detailed syllabus will be shared when the batch opens.</p>" } }),
+            projects.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-unit-code", children: "FP" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  "Final project",
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: projects[0].project_title })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: projects[0].project_description })
+              ] }) })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { id: "projects", className: "dm-anchor", tabIndex: -1, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { children: [
                 workshop ? "Workshop" : "Course",
@@ -22967,7 +23286,7 @@ function CourseDetails() {
               ] })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", id: "reviews", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block dm-anchor", id: "reviews", tabIndex: -1, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Reviews" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-reviewsum", children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
@@ -23028,45 +23347,6 @@ function CourseDetails() {
               ] })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block dm-units", id: "content", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Content" }),
-            curriculum.length > 0 ? curriculum.map((u, ui) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { open: ui === 0, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "dm-unit-code", children: [
-                  "U",
-                  ui + 1
-                ] }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-                  u.module_title,
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
-                    (u.lessons || []).length,
-                    " lessons",
-                    has(u.module_duration) ? ` \xB7 ${u.module_duration}` : ""
-                  ] })
-                ] })
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: (u.lessons || []).map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${Number(l.has_download) ? "fa-file-pdf-o" : "fa-play-circle-o"}` }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-                  l.lesson_title,
-                  stripHtml(l.lesson_description) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: stripHtml(l.lesson_description) })
-                ] })
-              ] }, l.id)) })
-            ] }, u.id)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-rich", dangerouslySetInnerHTML: { __html: data.summary_details || data.schedule_details || "<p>The detailed syllabus will be shared when the batch opens.</p>" } }),
-            projects.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-unit-code", children: "FP" }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-                  "Final project",
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: projects[0].project_title })
-                ] })
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush" }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: projects[0].project_description })
-              ] }) })
-            ] })
-          ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { children: [
               "What to expect from an ArtistikCity ",
@@ -23078,7 +23358,7 @@ function CourseDetails() {
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: p.text })
             ] }, p.title)) })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block dm-faq", id: "faq", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-block dm-faq dm-anchor", id: "faqs", tabIndex: -1, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Frequently asked questions" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "Do I need any previous experience?" }),
@@ -30472,15 +30752,12 @@ __export(Classroom_exports, {
 module.exports = __toCommonJS(Classroom_exports);
 var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
 var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_VideoPlayer = __toESM(__webpack_require__("./resources/js/Components/Video/VideoPlayer.js"));
 var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
 var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
 const strip = (h) => String(h || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-const embed = (url) => {
-  const m = String(url || "").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  return m ? `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0` : null;
-};
 function Classroom() {
   const { course, enrolled, orderId, modules = [], completed: initialDone = [], progress: initialProgress = 0, videos = [], submissions = [] } = (0, import_inertia_react.usePage)().props;
   const lessons = (0, import_react.useMemo)(() => modules.flatMap((m, mi) => (m.lessons || []).map((l, li) => __spreadProps(__spreadValues({}, l), { unit: mi + 1, n: li + 1, moduleTitle: m.module_title }))), [modules]);
@@ -30492,8 +30769,9 @@ function Classroom() {
   const [error, setError] = (0, import_react.useState)(null);
   const active = lessons.find((l) => l.id === activeId);
   const idx = lessons.findIndex((l) => l.id === activeId);
-  const video = videos[idx] || videos[0];
-  const src = video ? embed(video.video_url) : null;
+  const video = active ? videos.find((v) => String(v.lesson_id) === String(active.id)) : null;
+  const vsrc = video ? (0, import_VideoPlayer.videoSource)(video.video_url) : null;
+  const src = vsrc && vsrc.kind !== "link" ? vsrc.src : null;
   if (!enrolled) {
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudioLayout.default, { title: course.title, active: "/user/my-courses", crumbs: [{ href: "/user/my-courses", label: "My courses" }], children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-2xl font-black text-ink", children: "This classroom is for enrolled students" }),
@@ -30538,7 +30816,7 @@ function Classroom() {
       ] }) }),
       children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "grid grid-cols-12 gap-8", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "col-span-12 lg:col-span-8", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "relative rounded-2xl overflow-hidden bg-ink", style: { aspectRatio: "16 / 9" }, children: src ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", { title: video.video_title || (active == null ? void 0 : active.lesson_title), src, className: "absolute inset-0 w-full h-full", allow: "encrypted-media; picture-in-picture", allowFullScreen: true }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "relative rounded-2xl overflow-hidden bg-ink", style: { aspectRatio: "16 / 9" }, children: src ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_VideoPlayer.default, { url: video.video_url, title: video.video_title || (active == null ? void 0 : active.lesson_title), className: "absolute inset-0 w-full h-full" }, active == null ? void 0 : active.id) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
             "div",
             {
               className: "absolute inset-0 flex flex-col items-center justify-center text-center text-white p-8",
@@ -107261,4 +107539,4 @@ module.exports = JSON.parse('{"name":"axios","version":"0.21.4","description":"P
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()
-;
+;

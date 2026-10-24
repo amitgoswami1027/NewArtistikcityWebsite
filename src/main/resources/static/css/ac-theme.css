@@ -1922,3 +1922,39 @@ body.adm-noscroll { overflow: hidden; }
 .adm-login .adm-login__error { display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: #fde8e7; color: #8f1d14; font-size: 14px; margin-bottom: 16px; }
 .adm-login .adm-login__error p { margin: 0; }
 .adm-login .adm-login__help { margin: 18px 0 0; font-size: 13px; color: var(--ac-muted); }
+
+/* ---- course page: section anchors land below the sticky header + tab bar (69 + 58 px) ---- */
+.dm-anchor { scroll-margin-top: 140px; }
+.dm-anchor:focus { outline: none; }
+.dm-anchor:focus-visible { outline: 2px solid var(--ac-brand); outline-offset: 6px; }
+.dm-cover video, .cl-media video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; object-fit: contain; display: block; }
+
+/* ---- admin: video field (link or uploaded file, with preview) ---- */
+.adm .adm-video { display: grid; gap: 10px; }
+.adm .adm-video__modes { display: inline-flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--adm-soft); justify-self: start; }
+.adm .adm-video__modes button { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border: 0; border-radius: 9px; background: none; font-weight: 700; font-size: 13.5px; color: var(--adm-muted); cursor: pointer; }
+.adm .adm-video__modes button.is-on { background: #fff; color: var(--ac-ink); box-shadow: 0 1px 3px rgba(14,26,58,.12); }
+.adm .adm-video__modes button:focus-visible { outline: 2px solid var(--ac-brand); outline-offset: 2px; }
+.adm .adm-drop--video { padding: 22px 16px; }
+.adm .adm-video__progress { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--adm-line); border-radius: 12px; background: #fff; font-weight: 700; font-size: 13.5px; }
+.adm .adm-video__bar { height: 8px; border-radius: 99px; background: var(--adm-soft); overflow: hidden; }
+.adm .adm-video__bar span { display: block; height: 100%; border-radius: 99px; background: var(--ac-brand); transition: width .2s ease; }
+.adm .adm-video__note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--adm-soft); color: var(--adm-muted); font-size: 13.5px; }
+.adm .adm-video__note .fa { margin-right: 6px; color: var(--ac-brand); }
+.adm .adm-video__preview { border: 1px solid var(--adm-line); border-radius: 12px; overflow: hidden; background: #fff; }
+.adm .adm-video__frame { position: relative; aspect-ratio: 16 / 9; background: #0e1a3a; max-width: 560px; }
+.adm .adm-video__frame iframe, .adm .adm-video__frame video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+.adm .adm-video__nolive { padding: 14px 16px; color: var(--adm-muted); font-size: 13.5px; }
+.adm .adm-video__meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-top: 1px solid var(--adm-line); font-size: 13.5px; font-weight: 600; }
+.adm .adm-video__meta > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm .adm-video__meta .fa { margin-right: 6px; color: var(--adm-muted); }
+.adm .adm-video__meta .fa-youtube-play { color: #e00; }
+.adm .adm-video__hint { margin: 0; color: var(--adm-muted); font-size: 12.5px; }
+.adm .adm-video.has-error .adm-input { border-color: #d92d20; }
+
+/* course page: the single column on tablets and phones must be allowed to shrink below the sidebar's
+   content width, otherwise the price card makes the whole page scroll sideways */
+@media (max-width: 1024px) {
+  .dm-course { grid-template-columns: minmax(0, 1fr); }
+  .dm-course > * { min-width: 0; }
+}

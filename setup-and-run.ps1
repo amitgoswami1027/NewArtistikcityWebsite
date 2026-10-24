@@ -21,6 +21,8 @@
 .EXAMPLE
     .\setup-and-run.ps1 -ResetDatabase                    # drop all tables and reload the demo data
 .EXAMPLE
+    .\setup-and-run.ps1 -DemoData                         # also load database\demo\demo-data.sql (extra courses, orders, logins)
+.EXAMPLE
     .\setup-and-run.ps1 -Db mysql -DbUser root -DbPassword "YourPassword"
 .EXAMPLE
     .\setup-and-run.ps1 -Db docker
@@ -37,6 +39,7 @@ param(
     [string]$AppPassword = 'Artistik@2026',
     [string]$RootPassword = 'ArtistikRoot@2026',
     [switch]$ResetDatabase,
+    [switch]$DemoData,
     [switch]$DatabaseOnly,
     [switch]$StopDatabase,
     [int]$Port = 8080,
@@ -502,6 +505,17 @@ if ($AdminCnf) {
         }
         $r = Invoke-MysqlClient $MysqlExe $AdminCnf ("$Database -e `"INSERT IGNORE INTO schema_migrations (filename) VALUES ('$($m.Name)')`"") $null
     }
+    if ($DemoData) {
+        # optional demo pack: extra teachers, students, courses, workshops, orders and content.
+        # Uses fixed ids and INSERT IGNORE, so running it again changes nothing.
+        $demo = Join-Path $Root 'database\demo\demo-data.sql'
+        if (-not (Test-Path $demo)) { Fail "Demo data file not found: $demo" }
+        Step 'Loading the demo data pack (database\demo\demo-data.sql)'
+        $r = Invoke-MysqlClient $MysqlExe $AdminCnf $Database $demo
+        if ($r.Code -eq 0 -and $r.Output -match 'ERROR \d+') { $r.Code = 1 }
+        if ($r.Code -ne 0) { Write-Host $r.Output; Fail 'Loading the demo data failed - see the message above.' }
+        Ok 'Demo data loaded. Logins use the password "password" (see README, section "Demo data").'
+    }
     $env:DB_USERNAME = $AppUser; $env:DB_PASSWORD = $AppPassword; $env:DB_INIT = 'never'
 } else {
     # no mysql.exe on this PC (remote server): the application connects with your login and,
@@ -510,6 +524,7 @@ if ($AdminCnf) {
     $AppUrl += '&createDatabaseIfNotExist=true'
     $env:DB_INIT = if ($ResetDatabase) { 'always' } else { 'never' }
     if (-not $ResetDatabase) { Info 'First run on an empty database? Run once with -ResetDatabase to create the tables and demo data.' }
+    if ($DemoData) { Info 'No mysql.exe here, so -DemoData was skipped. Run database\demo\demo-data.sql with your MySQL client.' }
 }
 $env:DB_URL = $AppUrl
 

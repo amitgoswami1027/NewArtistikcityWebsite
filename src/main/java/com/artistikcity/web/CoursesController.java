@@ -82,7 +82,7 @@ public class CoursesController {
         List<Row> modules = db.select("select id, module_title, module_duration from course_modules"
                 + " where course_id = ? and status = '1' order by sort_order, id", id);
         List<Row> lessons = db.select("select id, module_id, lesson_title, lesson_description, case when lesson_pdf is null or lesson_pdf = ''"
-                + " then 0 else 1 end as has_download from course_module_lessons where course_id = ? and status = '1' order by sort_order, id", id);
+                + " then 0 else 1 end as has_download, case when video_url is null or video_url = '' then 0 else 1 end as has_video from course_module_lessons where course_id = ? and status = '1' order by sort_order, id", id);
         for (Row m : modules) {
             List<Row> own = new ArrayList<>();
             for (Row l : lessons) {
@@ -111,7 +111,9 @@ public class CoursesController {
                 + " where r.course_id = ? and r.status = 1 order by r.id desc limit 12", id));
         props.put("gallery", db.select("select a.id, a.photo_name, a.user_id, u.name, u.slug from student_artworks a"
                 + " join users u on u.id = a.user_id where a.status = 1 order by a.id desc limit 8"));
-        props.put("videos", db.select("select video_title, video_url from course_videos where course_id = ? and status = 1 order by id limit 1", id));
+        // the course's intro / trailer video (lesson videos are only shown to enrolled students)
+        String intro = db.first("select intro_video_url from courses where id = ?", id).str("intro_video_url", "").trim();
+        props.put("videos", intro.isEmpty() ? List.of() : List.of(Map.of("video_title", "Trailer", "video_url", intro)));
         props.put("related", courses.withStats(courses.withRelations(db.select("select * from courses where status = 1 and id <> ?"
                 + " and course_start_date >= ? order by case when medium_id = ? then 0 else 1 end, id limit 4", id, java.time.LocalDate.now(),
                 course.get("medium_id")), true)));

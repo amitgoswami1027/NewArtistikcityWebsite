@@ -31,6 +31,7 @@ public class SessionInterceptor implements HandlerInterceptor {
         String token = Csrf.token(request);
         Cookie cookie = new Cookie("XSRF-TOKEN", token);
         cookie.setPath("/");
+        cookie.setSecure(request.isSecure());   // https (directly or behind CloudFront): never sent over plain http
         response.addCookie(cookie);
 
         if (!SAFE.contains(request.getMethod()) && !Csrf.matches(request)) {

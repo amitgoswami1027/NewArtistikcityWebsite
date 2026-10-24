@@ -76,6 +76,13 @@ public class GlobalExceptionHandler {
         if (e instanceof org.springframework.web.ErrorResponse er) {
             // framework errors (404 no handler/resource, 405 method not allowed, ...) keep their status
             int code = er.getStatusCode().value();
+            String uri = request.getRequestURI();
+            if (code == 413 && (uri.startsWith("/admin/api/") || uri.startsWith("/api/"))) {
+                // too-large upload on a JSON endpoint: a message the form can show
+                String reason = e instanceof org.springframework.web.server.ResponseStatusException rse && rse.getReason() != null
+                        ? rse.getReason() : "That file is too large.";
+                return ResponseEntity.status(code).contentType(MediaType.APPLICATION_JSON).body(json.encode(Map.of("message", reason)));
+            }
             return ResponseEntity.status(code)
                     .contentType(new MediaType("text", "html", java.nio.charset.StandardCharsets.UTF_8))
                     .body("<!DOCTYPE html><html><head><title>" + code + "</title></head><body style=\"font-family:sans-serif;"

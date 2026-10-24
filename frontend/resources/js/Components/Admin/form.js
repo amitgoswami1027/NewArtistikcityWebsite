@@ -5,6 +5,7 @@ import {
 } from 'react-simple-wysiwyg';
 import axios from 'axios';
 import { cx, Button } from '@/Components/Admin/kit';
+import VideoPlayer, { videoSource } from '@/Components/Video/VideoPlayer';
 
 /** Uploads an image for a rich text editor; resolves with its URL. */
 export const uploadImage = (file) => {
@@ -368,6 +369,117 @@ export function DropZone({ name, value = [], onChange, existing = [], onRemoveEx
                 </button>
             )}
             {err && <p className="adm-field__error" id={`f-${name}-err`} role="alert"><i className="fa fa-exclamation-circle" aria-hidden="true"></i>{err}</p>}
+        </div>
+    );
+}
+
+/* ---------------------------------------------------------- video */
+
+const VIDEO_MAX_MB = 500;
+const VIDEO_ACCEPT = 'video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.m4v,.mov,.webm';
+const isStoredVideo = (v) => /^\/storage\/uploads\/courses\/\d+\/videos\//.test(String(v || ''));
+const fileNameOf = (v) => decodeURIComponent(String(v || '').split('/').pop()).replace(/^\d+_/, '');
+
+/**
+ * One video value (a link or an uploaded file) with a live preview.
+ * `uploadUrl`: endpoint that streams a file to storage and answers {url}; when it is missing (course not saved yet)
+ * only links can be used. The component only ever calls onChange with its own value, so a lesson's video and the
+ * course's intro video stay independent.
+ */
+export function VideoField({ name, value, onChange, uploadUrl, error, label = 'Video', uploadHint }) {
+    const [mode, setMode] = useState(isStoredVideo(value) ? 'file' : 'link');
+    const [over, setOver] = useState(false);
+    const [progress, setProgress] = useState(null);   // null | 0..100
+    const [local, setLocal] = useState(null);
+    const cancel = useRef(null);
+    const input = useRef(null);
+    useEffect(() => () => cancel.current && cancel.current.cancel(), []);
+    const src = videoSource(value);
+    const linkText = isStoredVideo(value) ? '' : (value || '');
+    const linkError = linkText && !/^https?:\/\/\S+$/i.test(linkText.trim()) ? 'Enter a full link starting with https://' : null;
+
+    const upload = (list) => {
+        const f = Array.from(list || [])[0];
+        if (!f || !uploadUrl) return;
+        if (!/\.(mp4|m4v|mov|webm)$/i.test(f.name)) { setLocal(`“${f.name}” is not an MP4, MOV or WebM video.`); return; }
+        if (f.size > VIDEO_MAX_MB * 1024 * 1024) { setLocal(`“${f.name}” is ${fmtSize(f.size)}; the limit is ${VIDEO_MAX_MB} MB. Upload it to YouTube or Vimeo and paste the link instead.`); return; }
+        setLocal(null);
+        setProgress(0);
+        const fd = new FormData();
+        fd.append('file', f);
+        cancel.current = axios.CancelToken.source();
+        axios.post(uploadUrl, fd, {
+            cancelToken: cancel.current.token,
+            onUploadProgress: (e) => e.total && setProgress(Math.min(99, Math.round((e.loaded * 100) / e.total))),
+        }).then((r) => { setProgress(null); onChange(r.data.url); })
+            .catch((e) => {
+                setProgress(null);
+                if (axios.isCancel(e)) return;
+                const d = e.response && e.response.data;
+                setLocal((d && d.errors && d.errors.file) || (d && d.message) || 'The upload failed. Check your connection and try again.');
+            })
+            .finally(() => { cancel.current = null; });
+    };
+
+    const err = local || error || linkError;
+    return (
+        <div className={cx('adm-video', err && 'has-error')}>
+            <div className="adm-video__modes" role="tablist" aria-label={`${label} source`}>
+                <button type="button" role="tab" aria-selected={mode === 'link'} className={mode === 'link' ? 'is-on' : ''} onClick={() => setMode('link')}>
+                    <i className="fa fa-link" aria-hidden="true"></i> Paste a link
+                </button>
+                <button type="button" role="tab" aria-selected={mode === 'file'} className={mode === 'file' ? 'is-on' : ''} onClick={() => setMode('file')}>
+                    <i className="fa fa-upload" aria-hidden="true"></i> Upload a file
+                </button>
+            </div>
+
+            {mode === 'link' && (
+                <input id={`f-${name}`} className="adm-input" type="url" inputMode="url" placeholder="https://www.youtube.com/watch?v=… or https://vimeo.com/…"
+                    aria-label={`${label} link`} value={linkText} onChange={(e) => { setLocal(null); onChange(e.target.value); }}
+                    aria-invalid={err ? 'true' : undefined} aria-describedby={err ? `f-${name}-err` : `f-${name}-hint`} />
+            )}
+            {mode === 'file' && (progress !== null ? (
+                <div className="adm-video__progress" role="status" aria-live="polite">
+                    <div className="adm-video__bar"><span style={{ width: `${progress}%` }}></span></div>
+                    <span>Uploading… {progress}%</span>
+                    <Button size="sm" variant="ghost" onClick={() => cancel.current && cancel.current.cancel()}>Cancel</Button>
+                </div>
+            ) : uploadUrl ? (
+                <div className={cx('adm-drop', 'adm-drop--video', over && 'is-over')} role="button" tabIndex={0} id={`f-${name}`}
+                    aria-describedby={err ? `f-${name}-err` : `f-${name}-hint`}
+                    onClick={() => input.current && input.current.click()}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.current.click(); } }}
+                    onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
+                    onDrop={(e) => { e.preventDefault(); setOver(false); upload(e.dataTransfer.files); }}>
+                    <i className="fa fa-film" aria-hidden="true"></i>
+                    <b>{isStoredVideo(value) ? 'Replace the video file' : 'Drop a video here or click to choose'}</b>
+                    <span>{uploadHint || `MP4, MOV or WebM up to ${VIDEO_MAX_MB} MB`}</span>
+                    <input ref={input} type="file" accept={VIDEO_ACCEPT} hidden onChange={(e) => { upload(e.target.files); e.target.value = ''; }} />
+                </div>
+            ) : (
+                <p className="adm-video__note"><i className="fa fa-info-circle" aria-hidden="true"></i> Save first, then you can upload a file here. Links work straight away.</p>
+            ))}
+
+            {value && src && (
+                <div className="adm-video__preview">
+                    {src.kind === 'link' ? (
+                        <div className="adm-video__nolive"><i className="fa fa-external-link" aria-hidden="true"></i> No preview for this link. It opens in a new tab for students.</div>
+                    ) : (
+                        <div className="adm-video__frame"><VideoPlayer url={value} title={`${label} preview`} /></div>
+                    )}
+                    <div className="adm-video__meta">
+                        <span>
+                            <i className={`fa ${src.kind === 'file' ? 'fa-file-video-o' : src.provider === 'YouTube' ? 'fa-youtube-play' : src.provider === 'Vimeo' ? 'fa-vimeo' : 'fa-link'}`} aria-hidden="true"></i>
+                            {isStoredVideo(value) ? `Uploaded file · ${fileNameOf(value)}` : src.provider ? `${src.provider} video` : src.kind === 'file' ? 'Video file link' : 'Video link'}
+                        </span>
+                        <button type="button" className="adm-linkbtn" onClick={() => { setLocal(null); onChange(''); }}>
+                            <i className="fa fa-trash-o" aria-hidden="true"></i> Remove video
+                        </button>
+                    </div>
+                </div>
+            )}
+            {err ? <p className="adm-field__error" id={`f-${name}-err`} role="alert"><i className="fa fa-exclamation-circle" aria-hidden="true"></i>{err}</p>
+                : <p className="adm-video__hint" id={`f-${name}-hint`}>YouTube and Vimeo links play in the page. Uploaded files play with the built-in player.</p>}
         </div>
     );
 }

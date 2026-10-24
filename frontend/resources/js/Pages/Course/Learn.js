@@ -2,15 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, usePage } from '@inertiajs/inertia-react';
 import axios from 'axios';
 import CourseShell, { ProgressBar, lessonUrl } from '@/Components/Course/CourseShell';
+import VideoPlayer, { videoSource } from '@/Components/Video/VideoPlayer';
 
 const SIDEBAR_KEY = 'ac.cl.sidebar';
 const readPref = () => { try { return window.localStorage.getItem(SIDEBAR_KEY) !== 'closed'; } catch (e) { return true; } };
 const writePref = (open) => { try { window.localStorage.setItem(SIDEBAR_KEY, open ? 'open' : 'closed'); } catch (e) { /* private mode */ } };
 
-const embed = (url) => {
-    const m = String(url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-    return m ? `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0` : null;
-};
 
 /** Sidebar: every module with its lessons; the current lesson is highlighted. */
 function Syllabus({ syllabus, current, done, onPick }) {
@@ -94,7 +91,8 @@ export default function Learn() {
             .finally(() => setBusy(false));
     };
 
-    const src = lesson && lesson.video ? embed(lesson.video.url) : null;
+    const vsrc = lesson && lesson.video ? videoSource(lesson.video.url) : null;
+    const src = vsrc && vsrc.kind !== 'link' ? vsrc.src : null; // this lesson's own video
     const toggleLabel = drawer || sidebar ? 'Hide lessons' : 'Show lessons';
 
     return (
@@ -137,8 +135,7 @@ export default function Learn() {
 
                             <div className={`cl-media ${src ? '' : 'cl-media--ph'}`}>
                                 {src ? (
-                                    <iframe src={src} title={lesson.video.title || lesson.title} loading="lazy"
-                                        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen></iframe>
+                                    <VideoPlayer key={lesson.id} url={lesson.video.url} title={lesson.video.title || lesson.title} />
                                 ) : lesson.video && lesson.video.url ? (
                                     <a className="cl-media__ph" href={lesson.video.url} target="_blank" rel="noopener noreferrer">
                                         <i className="fa fa-play-circle" aria-hidden="true"></i><span>Watch “{lesson.video.title}”</span>

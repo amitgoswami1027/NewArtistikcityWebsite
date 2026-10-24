@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import VideoPlayer, { videoSource } from '@/Components/Video/VideoPlayer';
 import { usePage } from '@inertiajs/inertia-react';
 import SiteLayout from '@/Components/Site/SiteLayout';
 import CourseCard, { formatCount } from '@/Components/Site/CourseCard';
@@ -11,19 +12,34 @@ const asList = (v) => (Array.isArray(v) ? v.filter((x) => x !== null && String(x
 const has = (v) => v !== undefined && v !== null && String(v).trim() !== '';
 const stripHtml = (h) => String(h || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
-function youtubeEmbed(url) {
-    if (!url) return null;
-    const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-    return m ? `https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0` : null;
-}
 
 const TABS = [
     { id: 'information', label: 'Information' },
     { id: 'content', label: 'Content' },
     { id: 'projects', label: 'Projects' },
     { id: 'reviews', label: 'Reviews' },
-    { id: 'faq', label: 'FAQ' },
+    { id: 'faqs', label: 'FAQs' },
 ];
+
+/** Height covered by the sticky site header and the sticky section tabs (measured, so it follows the layout). */
+const SECTION_GAP = 12; // space left between the sticky tab bar and a section heading
+
+function stickyOffset() {
+    const tabs = document.querySelector('.dm-tabs');
+    if (!tabs) return 0;
+    const top = parseFloat(window.getComputedStyle(tabs).top) || 0;
+    return top + tabs.getBoundingClientRect().height;
+}
+
+/** Scrolls a section to just below the sticky bars and moves keyboard focus to it. */
+function scrollToSection(id, smooth) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const y = el.getBoundingClientRect().top + window.pageYOffset - stickyOffset() - SECTION_GAP;
+    window.scrollTo({ top: Math.max(0, y), behavior: smooth && !reduce ? 'smooth' : 'auto' });
+    el.focus({ preventScroll: true });
+}
 
 const PERKS = [
     { icon: 'fa-video-camera', title: 'Live classes', text: 'Learn alongside a small group with real-time demos.' },
@@ -52,7 +68,8 @@ export default function CourseDetails() {
     const teacher = data.teacher || {};
     const cover = programImage(data);
     const video = videos[0];
-    const embed = video ? youtubeEmbed(video.video_url) : null;
+    const trailer = video ? videoSource(video.video_url) : null;   // the course's own intro video
+    const embed = trailer && trailer.kind !== 'link' ? trailer.src : null;
     const allLessons = curriculum.flatMap((u, ui) => (u.lessons || []).map((l, li) => ({ ...l, unit: ui + 1, n: li + 1 })));
     const firstPrice = data.prices && data.prices[0] ? data.prices[0].price_inr : 0;
 
@@ -69,13 +86,33 @@ export default function CourseDetails() {
     useEffect(() => {
         setPageUrl(window.location.href);
         const onScroll = () => {
-            let current = 'information';
-            TABS.forEach((t) => { const el = document.getElementById(t.id); if (el && el.getBoundingClientRect().top < 160) current = t.id; });
+            const line = stickyOffset() + SECTION_GAP + 4;
+            let current = TABS[0].id;
+            TABS.forEach((t) => { const el = document.getElementById(t.id); if (el && el.getBoundingClientRect().top <= line) current = t.id; });
+            // at the very bottom the last short section can never reach the line: treat it as current
+            if (window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 2) current = TABS[TABS.length - 1].id;
             setActive(current);
         };
         window.addEventListener('scroll', onScroll, { passive: true });
-        return () => window.removeEventListener('scroll', onScroll);
+        // opened with #reviews etc.: the sections only exist after React renders, and Inertia resets the scroll
+        // position right after mounting, so scroll on the next tick (#faq is the old name of #faqs)
+        const hash = decodeURIComponent(window.location.hash.slice(1));
+        const target = hash === 'faq' ? 'faqs' : hash;
+        const timer = TABS.some((t) => t.id === target) ? window.setTimeout(() => { scrollToSection(target, false); onScroll(); }, 60) : null;
+        onScroll();
+        return () => { window.removeEventListener('scroll', onScroll); if (timer) window.clearTimeout(timer); };
     }, []);
+
+    // The root template has <base href="/">, so a plain href="#content" would open the home page.
+    // The tabs link to this page's own path and scroll in place, below the sticky header and tab bar.
+    const pagePath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
+    const goTo = (e, id) => {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        scrollToSection(id, true);
+        window.history.replaceState(window.history.state, '', `${window.location.pathname}${window.location.search}#${id}`);
+        setActive(id);
+    };
 
     const share = () => {
         if (navigator.share) { navigator.share({ title: data.title, url: pageUrl }).catch(() => {}); return; }
@@ -124,7 +161,7 @@ export default function CourseDetails() {
                         {/* cover / trailer */}
                         <div className="dm-cover">
                             {playing && embed ? (
-                                <iframe src={embed} title={video.video_title || data.title} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen></iframe>
+                                <VideoPlayer url={video.video_url} title={`${data.title}: trailer`} autoplay poster={cover} />
                             ) : (
                                 <>
                                     <img src={cover} alt={data.title} />
@@ -168,11 +205,14 @@ export default function CourseDetails() {
                         </div>
 
                         <nav className="dm-tabs" aria-label="Course sections">
-                            {TABS.map((t) => <a key={t.id} href={`#${t.id}`} className={active === t.id ? 'is-active' : ''}>{t.label}</a>)}
+                            {TABS.map((t) => (
+                                <a key={t.id} href={`${pagePath}#${t.id}`} className={active === t.id ? 'is-active' : ''}
+                                    aria-current={active === t.id ? 'location' : undefined} onClick={(e) => goTo(e, t.id)}>{t.label}</a>
+                            ))}
                         </nav>
 
                         {/* ---------- INFORMATION ---------- */}
-                        <div id="information">
+                        <div id="information" className="dm-anchor" tabIndex={-1}>
                             <section className="dm-block">
                                 <h2>About this {kind}</h2>
                                 {has(data.introduction) && <p style={{ fontSize: 18, fontWeight: 600 }}>{data.introduction}</p>}
@@ -246,8 +286,37 @@ export default function CourseDetails() {
                             </section>
                         </div>
 
+                        {/* ---------- CONTENT / CURRICULUM ---------- */}
+                        <section className="dm-block dm-units dm-anchor" id="content" tabIndex={-1}>
+                            <h2>Content</h2>
+                            {curriculum.length > 0 ? curriculum.map((u, ui) => (
+                                <details key={u.id} open={ui === 0}>
+                                    <summary>
+                                        <span className="dm-unit-code">U{ui + 1}</span>
+                                        <span>{u.module_title}<small>{(u.lessons || []).length} lessons{has(u.module_duration) ? ` · ${u.module_duration}` : ''}</small></span>
+                                    </summary>
+                                    <ol>
+                                        {(u.lessons || []).map((l) => (
+                                            <li key={l.id}>
+                                                <i className={`fa ${Number(l.has_download) ? 'fa-file-pdf-o' : 'fa-play-circle-o'}`}></i>
+                                                <span>{l.lesson_title}{stripHtml(l.lesson_description) && <small>{stripHtml(l.lesson_description)}</small>}</span>
+                                            </li>
+                                        ))}
+                                    </ol>
+                                </details>
+                            )) : (
+                                <div className="ac-rich" dangerouslySetInnerHTML={{ __html: data.summary_details || data.schedule_details || '<p>The detailed syllabus will be shared when the batch opens.</p>' }}></div>
+                            )}
+                            {projects.length > 0 && (
+                                <details>
+                                    <summary><span className="dm-unit-code">FP</span><span>Final project<small>{projects[0].project_title}</small></span></summary>
+                                    <ol><li><i className="fa fa-paint-brush"></i><span>{projects[0].project_description}</span></li></ol>
+                                </details>
+                            )}
+                        </section>
+
                         {/* ---------- PROJECTS ---------- */}
-                        <div id="projects">
+                        <div id="projects" className="dm-anchor" tabIndex={-1}>
                             <section className="dm-block">
                                 <h2>{workshop ? 'Workshop' : 'Course'} project</h2>
                                 {projects.length > 0 ? projects.map((p, i) => (
@@ -295,7 +364,7 @@ export default function CourseDetails() {
                         </div>
 
                         {/* ---------- REVIEWS ---------- */}
-                        <section className="dm-block" id="reviews">
+                        <section className="dm-block dm-anchor" id="reviews" tabIndex={-1}>
                             <h2>Reviews</h2>
                             <div className="dm-reviewsum">
                                 <div><strong>{formatCount(stats.students)}</strong><span>Students</span></div>
@@ -346,35 +415,6 @@ export default function CourseDetails() {
                             </section>
                         )}
 
-                        {/* ---------- CONTENT / CURRICULUM ---------- */}
-                        <section className="dm-block dm-units" id="content">
-                            <h2>Content</h2>
-                            {curriculum.length > 0 ? curriculum.map((u, ui) => (
-                                <details key={u.id} open={ui === 0}>
-                                    <summary>
-                                        <span className="dm-unit-code">U{ui + 1}</span>
-                                        <span>{u.module_title}<small>{(u.lessons || []).length} lessons{has(u.module_duration) ? ` · ${u.module_duration}` : ''}</small></span>
-                                    </summary>
-                                    <ol>
-                                        {(u.lessons || []).map((l) => (
-                                            <li key={l.id}>
-                                                <i className={`fa ${Number(l.has_download) ? 'fa-file-pdf-o' : 'fa-play-circle-o'}`}></i>
-                                                <span>{l.lesson_title}{stripHtml(l.lesson_description) && <small>{stripHtml(l.lesson_description)}</small>}</span>
-                                            </li>
-                                        ))}
-                                    </ol>
-                                </details>
-                            )) : (
-                                <div className="ac-rich" dangerouslySetInnerHTML={{ __html: data.summary_details || data.schedule_details || '<p>The detailed syllabus will be shared when the batch opens.</p>' }}></div>
-                            )}
-                            {projects.length > 0 && (
-                                <details>
-                                    <summary><span className="dm-unit-code">FP</span><span>Final project<small>{projects[0].project_title}</small></span></summary>
-                                    <ol><li><i className="fa fa-paint-brush"></i><span>{projects[0].project_description}</span></li></ol>
-                                </details>
-                            )}
-                        </section>
-
                         {/* ---------- PERKS ---------- */}
                         <section className="dm-block">
                             <h2>What to expect from an ArtistikCity {kind}</h2>
@@ -384,7 +424,7 @@ export default function CourseDetails() {
                         </section>
 
                         {/* ---------- FAQ ---------- */}
-                        <section className="dm-block dm-faq" id="faq">
+                        <section className="dm-block dm-faq dm-anchor" id="faqs" tabIndex={-1}>
                             <h2>Frequently asked questions</h2>
                             <details><summary>Do I need any previous experience?</summary><p>{has(data.course_prerequisites) ? data.course_prerequisites : 'No. The lessons start from the basics and build up step by step.'}</p></details>
                             <details><summary>When does the {kind} start and how long is it?</summary><p>{has(data.course_start_date) ? `The next batch starts on ${data.course_start_date}. ` : ''}{has(data.duration) ? `It runs for ${data.duration} ${workshop ? 'days' : 'weeks'}` : ''}{has(data.time_required) ? `, with about ${data.time_required} hours per session.` : '.'}</p></details>

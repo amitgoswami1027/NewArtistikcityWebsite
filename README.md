@@ -39,12 +39,15 @@ Closing the window or pressing **Ctrl+C** stops the site, and MySQL too if the l
 | **`START-ArtistikCity.bat`** | MySQL + website (see above). **Start here.** |
 | `START-MySQL.bat` | Starts only MySQL, which keeps running in the background. Use it before running the app from VS Code (F5 also starts it for you). |
 | `STOP-MySQL.bat` | Stops the portable MySQL. Your data is kept. |
+| `LOAD-DEMO-DATA.bat` | Adds the demo data pack (more courses, workshops, orders, teacher and student logins), then starts the site. See *Demo data* below. |
 | `DOCKER-START.bat` | The whole stack in Docker Desktop (see below). |
 
 Options, from a command prompt (also accepted by `setup-and-run.ps1`):
 
 ```bat
 START-ArtistikCity.bat -ResetDatabase                 :: drop all tables and reload the demo data
+START-ArtistikCity.bat -DemoData                      :: also load database\demo\demo-data.sql
+START-ArtistikCity.bat -ResetDatabase -DemoData       :: clean database + the full demo pack
 START-ArtistikCity.bat -Port 9090 -SkipBuild -NoBrowser
 START-ArtistikCity.bat -DbPort 3307                   :: if another MySQL already uses 3306
 START-ArtistikCity.bat -Db mysql -DbUser root -DbPassword "YourPassword"   :: your own MySQL server
@@ -99,6 +102,12 @@ pre-configured in `ArtistikCity.code-workspace`), MySQL Workbench, DBeaver or He
 
 The Docker database uses the same user, password and port as the portable one.
 
+## ☁️ Deploy on AWS
+
+Step-by-step guide: **[docs/AWS-DEPLOY.md](docs/AWS-DEPLOY.md)** - CloudFront (HTTPS) + EC2 (Docker) + RDS MySQL 8.4 + S3 for
+uploads, created with CloudFormation (`infra/`), and deployed by GitHub Actions on every push to `main`
+(`.github/workflows/deploy.yml`: tests, image to ECR, deploy over SSM with health check and automatic rollback).
+
 ## 2. Run with Maven against any MySQL
 
 1. Create the database and a user, for example in the `mysql` client as root:
@@ -132,6 +141,43 @@ The Docker database uses the same user, password and port as the portable one.
 | Student | `/login` | `student@artistikcity.com` |
 | Admin panel | `/admin/login` | `admin@artistikcity.com` |
 | Teacher (instructor) | `/admin/login` | `vaishali@artistikcity.com` |
+
+### Demo data pack (optional, `database/demo/demo-data.sql`)
+
+`LOAD-DEMO-DATA.bat` (or `-DemoData`) fills every admin and studio screen so you can try the whole site. It adds rows
+with fixed ids (100+ / 1000+) using `INSERT IGNORE`, so it can be run again safely and never changes or deletes your own data.
+The images it uses are in `storage/uploads` (`courses/1xx`, `teachers/1x`, `students/10x`, `blog/demo-*`, …).
+Apply it on a database that is already set up (it runs after the migrations).
+
+- **13 courses** (botanical watercolour, wildlife, charcoal and graphite portraits, kids' drawing, acrylic pouring and
+  landscapes, oil painting, still life, Procreate, urban sketching, eye studies, plus one hidden draft) and **6 workshops**,
+  each with modules, lessons, practice tasks, a final project, prices in INR and USD and a cover image. Two courses and one
+  workshop have already finished, so the *Finished* filters have content.
+- **30 course orders** over the last six months: paid (RazorPay in INR, PayPal in USD), pending, failed and refunded, with
+  enrolments and lesson progress (some courses completed, so certificates can be issued).
+- Studio: submissions waiting for review, approved and rejected; portfolio items listed for sale; marketplace paintings
+  (one sold and delivered); commission orders in every stage; student task conversations; wish lists.
+- Content: 6 testimonials, home and student gallery artworks, 6 blog posts (one draft) with categories and tags,
+  3 free lessons, 5 more FAQs, 6 contact messages, 26 newsletter subscribers, one sent and one draft campaign.
+
+Logins (password **`password`** for all):
+
+| Role | Sign in at | E-mail |
+|---|---|---|
+| Teacher – watercolour | `/admin/login` | `ananya@artistikcity.com` |
+| Teacher – charcoal & drawing | `/admin/login` | `kabir@artistikcity.com` |
+| Teacher – acrylic | `/admin/login` | `meera@artistikcity.com` |
+| Teacher – oil painting | `/admin/login` | `rohit@artistikcity.com` |
+| Teacher – digital & ink | `/admin/login` | `sana@artistikcity.com` |
+| Student (Jaipur) | `/login` → *Log in with a password instead* | `ishaan@example.com` |
+| Student (Pune) | `/login` | `neha@example.com` |
+| Student (Kochi) | `/login` | `arjun@example.com` |
+| Student (Goa) | `/login` | `sophia@example.com` |
+| Student (Lucknow) | `/login` | `rahul@example.com` |
+| Student (London, pays in USD) | `/login` | `emily@example.com` |
+
+To remove the demo pack, reset the database (`START-ArtistikCity.bat -ResetDatabase`). Remove or change these accounts
+before putting the site online.
 
 ### Bringing over data from the old Laravel (MySQL) site
 
@@ -169,6 +215,11 @@ Existing user and admin passwords keep working. Also copy Laravel's `storage/app
 | `AUTH_DEFAULT_COUNTRY_CODE` | Country code added to phone numbers typed without one | 91 |
 | `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGINS` | Passkeys: your domain (e.g. `artistikcity.com`) and allowed origins (e.g. `https://artistikcity.com`). Empty = the request's host | – |
 | `FORWARD_HEADERS` | `framework` when running behind a reverse proxy / load balancer that terminates HTTPS | none |
+| `STORAGE_DRIVER` | Where uploads are kept: `local` (the `STORAGE_DIR` folder) or `s3` | local |
+| `S3_BUCKET`, `AWS_REGION`, `S3_PREFIX` | With `STORAGE_DRIVER=s3`: bucket, its region, key prefix (`/storage/x.jpg` = object `storage/x.jpg`). Credentials: the EC2 instance role, or `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` | – / – / `storage/` |
+| `TRUST_CLOUDFRONT`, `ORIGIN_VERIFY_SECRET` | Behind Amazon CloudFront: visitor IP and HTTPS from CloudFront's headers; requests without the secret `X-Origin-Verify` header get 403 (use instead of `FORWARD_HEADERS`) | false / – |
+| `SESSION_COOKIE_SECURE` | Mark the HTTP session cookie Secure (set `true` on HTTPS sites) | false |
+| `SERVER_COMPRESSION` | gzip pages, CSS and the script bundle | true |
 
 ### 4a. Sign-in & security
 
@@ -240,7 +291,7 @@ and phones) and the account menu and **Log out** in the top-right corner:
 
 | Area | URL | What it does |
 |---|---|---|
-| Courses / Workshops | `/admin/courses`, `/admin/workshop` | Searchable, sortable lists; editor in sections (basics, category, schedule, pricing, page content, lists, photos & videos) and a **Curriculum** tab for modules, lessons (notes, PDF), practice tasks and projects. Duplicate copies the curriculum too. Paid courses can be hidden but not deleted. |
+| Courses / Workshops | `/admin/courses`, `/admin/workshop` | Searchable, sortable lists; editor in sections (basics, category, schedule, pricing, page content, lists, photos, intro / trailer video) and a **Curriculum** tab for modules, lessons (own video, notes, PDF), practice tasks and projects. Videos are a YouTube / Vimeo / https link or an uploaded MP4, MOV or WebM file (up to 500 MB, stored in `storage/uploads/courses/<id>/videos/`); the course's intro video and each lesson's video are separate. Duplicate copies the curriculum too. Paid courses can be hidden but not deleted. |
 | Free lessons | `/admin/free-courses` | Free video lessons for new students. |
 | Course orders | `/admin/orders` | Filters (status, course, method, currency, dates), CSV export, order details, manual *paid* / *refunded* with a required note (history is kept), certificates. |
 | Newsletter | `/admin/newsletter` | Subscribers (add in bulk, unsubscribe, export) and newsletters (write, preview, send a test, send to everyone). Every e-mail has a signed unsubscribe link. |

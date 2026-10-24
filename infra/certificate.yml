@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  ArtistikCity - HTTPS certificate for CloudFront. CloudFront only accepts certificates from us-east-1, so deploy
+  THIS stack in us-east-1 (everything else runs in ap-south-1). Free; renews automatically while the DNS record stays.
+
+Parameters:
+  DomainName:
+    Type: String
+    Description: The site's main address, e.g. www.artistikcity.com
+    AllowedPattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$'
+  AlternateDomainName:
+    Type: String
+    Default: ''
+    Description: Optional second address on the same certificate, e.g. artistikcity.com (leave empty for none)
+  HostedZoneId:
+    Type: String
+    Default: ''
+    Description: >-
+      Only if the domain's DNS is in Route 53 in this account: its hosted zone id (validation records are then created
+      for you). Otherwise leave empty and add the CNAME record shown in the ACM console at your DNS provider.
+
+Conditions:
+  HasAlternate: !Not [!Equals [!Ref AlternateDomainName, '']]
+  HasZone: !Not [!Equals [!Ref HostedZoneId, '']]
+  HasZoneAndAlternate: !And [!Condition HasZone, !Condition HasAlternate]
+
+Resources:
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      SubjectAlternativeNames: !If [HasAlternate, [!Ref AlternateDomainName], !Ref AWS::NoValue]
+      ValidationMethod: DNS
+      DomainValidationOptions: !If
+        - HasZone
+        - !If
+          - HasZoneAndAlternate
+          - - DomainName: !Ref DomainName
+              HostedZoneId: !Ref HostedZoneId
+            - DomainName: !Ref AlternateDomainName
+              HostedZoneId: !Ref HostedZoneId
+          - - DomainName: !Ref DomainName
+              HostedZoneId: !Ref HostedZoneId
+        - !Ref AWS::NoValue
+      Tags:
+        - Key: Project
+          Value: artistikcity
+
+Outputs:
+  CertificateArn:
+    Description: Pass this to the main stack (parameter CertificateArn)
+    Value: !Ref Certificate

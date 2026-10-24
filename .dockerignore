@@ -9,3 +9,15 @@ frontend/node_modules/
 .vscode/
 *.bat
 *.ps1
+# secrets, local-only and AWS/CI files never go into the image
+.env
+.env.*
+logs/
+storage/certificates/
+_backup_before_*/
+redesign-backup*/
+.github/
+infra/
+docs/
+tools/
+test-output/

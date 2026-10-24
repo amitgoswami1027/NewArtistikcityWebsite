@@ -23,6 +23,10 @@ import java.util.Set;
  */
 public class Input {
 
+    /** Upload limits for forms read through this class (the video upload streams to disk instead). */
+    public static final long MAX_FILE_BYTES = 25L * 1024 * 1024;
+    public static final long MAX_REQUEST_BYTES = 100L * 1024 * 1024;
+
     private static final String ATTR = Input.class.getName();
 
     private final Map<String, Object> data = new LinkedHashMap<>();
@@ -67,9 +71,17 @@ public class Input {
         }
         if (contentType.startsWith("multipart/")) {
             try {
+                long total = 0;
                 for (Part part : request.getParts()) {
                     if (part.getSubmittedFileName() == null) {
                         continue;
+                    }
+                    // Spring's multipart limit is high so the streaming video upload can take large files;
+                    // everything read into memory here keeps the usual limits.
+                    total += part.getSize();
+                    if (part.getSize() > MAX_FILE_BYTES || total > MAX_REQUEST_BYTES) {
+                        throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE,
+                                "Files can be up to 25 MB each (100 MB per form).");
                     }
                     byte[] bytes;
                     try (InputStream is = part.getInputStream()) {
@@ -83,6 +95,8 @@ public class Input {
                     files.computeIfAbsent(base, k -> new ArrayList<>())
                             .add(new UploadedFile(name, part.getSubmittedFileName(), part.getContentType(), bytes));
                 }
+            } catch (org.springframework.web.server.ResponseStatusException e) {
+                throw e;
             } catch (Exception e) {
                 throw new IllegalStateException("Cannot read multipart request", e);
             }

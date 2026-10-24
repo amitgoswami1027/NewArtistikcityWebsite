@@ -87,8 +87,10 @@ public class LifecycleRepository {
         return jdbc.queryForList("select lesson_id from lesson_completions where enrollment_id = ?", Long.class, enrollmentId);
     }
 
+    /** Each lesson's own video (lessons without one are left out). */
     public List<Map<String, Object>> videos(long courseId) {
-        return jdbc.queryForList("select video_title, video_url from course_videos where course_id = ? and status = 1 order by id", courseId);
+        return jdbc.queryForList("select id as lesson_id, lesson_title as video_title, video_url from course_module_lessons"
+                + " where course_id = ? and status = '1' and video_url is not null and video_url <> '' order by sort_order, id", courseId);
     }
 
     /** Marks a lesson complete (idempotent) and recalculates the enrollment progress. Returns the new progress %. */

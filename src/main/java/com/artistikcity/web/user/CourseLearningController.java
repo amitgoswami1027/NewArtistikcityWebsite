@@ -229,7 +229,7 @@ public class CourseLearningController {
         props.put("module", Map.of("id", module.get("id"), "title", module.get("module_title")));
         if (index >= 0) {
             Map<String, Object> cur = lessons.get(index);
-            Row l = db.first("select id, lesson_title, lesson_description, lesson_pdf from course_module_lessons where id = ?", cur.get("id"));
+            Row l = db.first("select id, lesson_title, lesson_description, lesson_pdf, video_url from course_module_lessons where id = ?", cur.get("id"));
             Map<String, Object> lesson = new LinkedHashMap<>(cur);
             lesson.put("description", safeHtml(l.str("lesson_description")));
             lesson.put("pdf", l.get("lesson_pdf") == null || l.str("lesson_pdf").isBlank() ? null
@@ -240,9 +240,9 @@ public class CourseLearningController {
                         "description", String.valueOf(safeHtml(t.str("task_description")))));
             }
             lesson.put("tasks", tasks);
-            List<Row> videos = db.select("select video_title, video_url from course_videos where course_id = ? and status = 1 order by id", courseId);
-            Row video = videos.isEmpty() ? null : videos.get(Math.min(index, videos.size() - 1));
-            lesson.put("video", video == null ? null : Map.of("title", String.valueOf(video.get("video_title")), "url", String.valueOf(video.get("video_url"))));
+            // the lesson's own video (set per lesson in Admin > Courses > Curriculum)
+            String video = l.str("video_url", "").trim();
+            lesson.put("video", video.isEmpty() ? null : Map.of("title", l.str("lesson_title", ""), "url", video));
             lesson.put("total", lessons.size());
             props.put("lesson", lesson);
             props.put("prev", index > 0 ? link(lessons.get(index - 1)) : null);

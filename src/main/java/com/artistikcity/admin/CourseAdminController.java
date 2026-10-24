@@ -206,11 +206,7 @@ public class CourseAdminController {
         v.put("photos", photos);
         v.put("schedule_pdf", c.str("schedule_pdf", "").isBlank() ? null
                 : Map.of("name", c.str("schedule_pdf"), "url", "/storage/uploads/courses/schedule/" + id + "/" + c.str("schedule_pdf")));
-        List<Map<String, Object>> videos = new ArrayList<>();
-        for (Row vd : db.select("select video_title, video_url from course_videos where course_id = ? order by id", id)) {
-            videos.add(Map.of("title", vd.str("video_title", ""), "url", vd.str("video_url", "")));
-        }
-        v.put("videos", videos);
+        v.put("intro_video_url", c.str("intro_video_url", ""));
         v.put("enrolled", db.count("select count(*) from orders where course_id = ? and payment_status = 1", id));
         v.put("public_url", "/course/" + c.str("slug"));
         v.put("updated_at", c.get("updated_at"));
@@ -296,24 +292,8 @@ public class CourseAdminController {
         if (instructor != null && db.find("admins", instructor) == null) {
             errors.put("admin_id", "Choose an instructor from the list.");
         }
-        List<Map<String, Object>> videos = new ArrayList<>();
-        if (d.get("videos") instanceof List<?> vs) {
-            int i = 0;
-            for (Object o : vs) {
-                if (o instanceof Map<?, ?> m) {
-                    String vt = m.get("title") == null ? "" : String.valueOf(m.get("title")).trim();
-                    String vu = m.get("url") == null ? "" : String.valueOf(m.get("url")).trim();
-                    if (vt.isEmpty() && vu.isEmpty()) {
-                        continue;
-                    }
-                    if (!URL.matcher(vu).matches()) {
-                        errors.put("videos", "Video " + (i + 1) + ": enter a full link starting with https://");
-                    }
-                    videos.add(Map.of("title", AdminKit.trim(vt, 255), "url", AdminKit.trim(vu, 1000)));
-                }
-                i++;
-            }
-        }
+        // the course's own trailer / landing video; lesson videos are saved separately with each lesson
+        String introVideo = videoUrl(str(d, "intro_video_url"), "intro_video_url", errors);
         List<UploadedFile> photos = in.files("photos");
         for (UploadedFile f : photos) {
             String e = AdminKit.checkImage(f);
@@ -354,6 +334,7 @@ public class CourseAdminController {
             c.put(k, AdminKit.trim(str(d, k), 255));
         }
         c.put("course_based", "video_course".equals(str(d, "course_based")) ? "video_course" : "instructor_based");
+        c.put("intro_video_url", introVideo);
         for (String k : List.of("introduction", "summary", "schedule")) {
             c.put(k, str(d, k).trim());
         }
@@ -406,10 +387,6 @@ public class CourseAdminController {
         }
         if (pdf != null) {
             db.updateById("courses", courseId, Row.of("schedule_pdf", storage.storeUpload(pdf, "uploads/courses/schedule/" + courseId)));
-        }
-        db.update("delete from course_videos where course_id = ?", courseId);
-        for (Map<String, Object> v : videos) {
-            db.insert("course_videos", Row.of("course_id", courseId, "video_title", v.get("title"), "video_url", v.get("url"), "status", 1));
         }
         Row saved = db.find("courses", courseId);
         String base = saved.lng("course_type_id", 1) == 2 ? "/admin/workshop" : "/admin/courses";
@@ -487,9 +464,6 @@ public class CourseAdminController {
         if (price != null) {
             db.insert("course_prices", Row.of("course_id", newId, "price_inr", price.get("price_inr"), "price_usd", price.get("price_usd")));
         }
-        for (Row v : db.select("select * from course_videos where course_id = ? order by id", id)) {
-            db.insert("course_videos", Row.of("course_id", newId, "video_title", v.get("video_title"), "video_url", v.get("video_url"), "status", v.get("status")));
-        }
         // copy the curriculum too, so a new batch starts with the same modules and lessons
         for (Row m : db.select("select * from course_modules where course_id = ? order by sort_order, id", id)) {
             long mid = db.insert("course_modules", Row.of("admin_id", m.get("admin_id"), "course_id", newId, "module_title", m.get("module_title"),
@@ -497,7 +471,7 @@ public class CourseAdminController {
             for (Row l : db.select("select * from course_module_lessons where module_id = ? order by sort_order, id", m.get("id"))) {
                 long lid = db.insert("course_module_lessons", Row.of("admin_id", l.get("admin_id"), "course_id", newId, "module_id", mid,
                         "lesson_title", l.get("lesson_title"), "lesson_description", l.get("lesson_description"), "lesson_pdf", l.get("lesson_pdf"),
-                        "sort_order", l.get("sort_order"), "status", l.get("status")));
+                        "video_url", l.get("video_url"), "sort_order", l.get("sort_order"), "status", l.get("status")));
                 if (l.str("lesson_pdf") != null && !l.str("lesson_pdf").isBlank()) {
                     storage.copy("uploads/courses/lessons/" + l.get("id") + "/" + l.str("lesson_pdf"), "uploads/courses/lessons/" + lid + "/" + l.str("lesson_pdf"));
                 }
@@ -565,7 +539,7 @@ public class CourseAdminController {
             tv.put("status", "1".equals(t.str("status")));
             tasksByLesson.computeIfAbsent(t.lng("lesson_id"), k -> new ArrayList<>()).add(tv);
         }
-        for (Row l : db.select("select id, module_id, lesson_title, lesson_description, lesson_pdf, status from course_module_lessons"
+        for (Row l : db.select("select id, module_id, lesson_title, lesson_description, lesson_pdf, video_url, status from course_module_lessons"
                 + " where course_id = ? order by sort_order, id", courseId)) {
             Map<String, Object> lv = new LinkedHashMap<>();
             lv.put("id", l.get("id"));
@@ -573,6 +547,7 @@ public class CourseAdminController {
             lv.put("description", l.str("lesson_description", ""));
             lv.put("pdf", l.str("lesson_pdf", "").isBlank() ? null
                     : Map.of("name", l.str("lesson_pdf"), "url", "/storage/uploads/courses/lessons/" + l.get("id") + "/" + l.str("lesson_pdf")));
+            lv.put("video_url", l.str("video_url", ""));
             lv.put("status", "1".equals(l.str("status")));
             lv.put("tasks", tasksByLesson.getOrDefault(l.lng("id"), List.of()));
             lessonsByModule.computeIfAbsent(l.lng("module_id"), k -> new ArrayList<>()).add(lv);
@@ -658,11 +633,16 @@ public class CourseAdminController {
         if (pdfError != null) {
             errors.put("pdf", pdfError);
         }
+        // this lesson's own video: only written to this lesson row, never to the course or other lessons
+        String video = in.has("video_url") ? videoUrl(in.get("video_url"), "video_url", errors) : null;
         if (!errors.isEmpty()) {
             return kit.invalid(errors);
         }
         Row v = Row.of("lesson_title", title, "module_id", moduleId, "lesson_description", HtmlCleaner.clean(in.get("description")),
                 "status", in.has("status") && !in.bool("status") ? "0" : "1");
+        if (in.has("video_url")) {
+            v.put("video_url", video);
+        }
         Long lessonId = in.lng("id");
         if (lessonId == null) {
             v.put("course_id", courseId);
@@ -776,6 +756,98 @@ public class CourseAdminController {
         owned(request, courseId);
         db.update("delete from course_projects where id = ? and course_id = ?", projectId, courseId);
         return curriculumOk(courseId, "Project deleted.");
+    }
+
+    // ================================================================ videos
+
+    /** Largest video file accepted by the upload endpoint. */
+    static final long MAX_VIDEO = 500L * 1024 * 1024;
+    private static final Pattern STORED_VIDEO = Pattern.compile("^/storage/(uploads/courses/\\d+/videos/[A-Za-z0-9._-]+)$");
+    private static final List<String> VIDEO_EXT = List.of("mp4", "m4v", "mov", "webm");
+
+    /**
+     * A video value from a form: empty (no video), a link (https://... YouTube, Vimeo or a video file),
+     * or a file uploaded through {@link #uploadVideo}. Puts an error under {@code field} when it is neither.
+     *
+     * @return the value to store, or null for none
+     */
+    String videoUrl(String raw, String field, Map<String, String> errors) {
+        String v = raw == null ? "" : raw.trim();
+        if (v.isEmpty()) {
+            return null;
+        }
+        if (v.length() > 1000) {
+            errors.put(field, "That link is too long (1000 characters at most).");
+            return null;
+        }
+        java.util.regex.Matcher m = STORED_VIDEO.matcher(v);
+        if (m.matches()) {
+            if (!storage.exists(m.group(1))) {
+                errors.put(field, "The uploaded video file is missing. Upload it again.");
+            }
+            return v;
+        }
+        if (!URL.matcher(v).matches()) {
+            errors.put(field, "Enter a full link starting with https://, or upload a video file.");
+        }
+        return v;
+    }
+
+    /**
+     * Uploads a video file (MP4, M4V, MOV or WebM, up to 500 MB) for a course's intro or one of its lessons.
+     * The file is streamed to storage/uploads/courses/{id}/videos/ and the answer carries its URL; the form then
+     * saves that URL in the field it belongs to (intro_video_url or the lesson's video_url).
+     */
+    @PostMapping("/admin/api/courses/{id}/videos")
+    public ResponseEntity<String> uploadVideo(HttpServletRequest request, @PathVariable("id") long courseId,
+                                              @org.springframework.web.bind.annotation.RequestParam(value = "file", required = false)
+                                              org.springframework.web.multipart.MultipartFile file) {
+        owned(request, courseId);
+        if (file == null || file.isEmpty()) {
+            return kit.invalid(Map.of("file", "Choose a video file to upload."));
+        }
+        String error = checkVideo(file);
+        if (error != null) {
+            return kit.invalid(Map.of("file", error));
+        }
+        String original = file.getOriginalFilename() == null ? "video" : file.getOriginalFilename();
+        int dot = original.lastIndexOf('.');
+        String ext = original.substring(dot + 1).toLowerCase(java.util.Locale.ROOT);
+        String base = com.artistikcity.support.Str.slug(dot > 0 ? original.substring(0, dot) : original);
+        String name = (System.currentTimeMillis() / 1000) + "_" + (base == null || base.isBlank() ? "video" : AdminKit.trim(base, 80)) + "." + ext;
+        String rel = "uploads/courses/" + courseId + "/videos/" + name;
+        try (java.io.InputStream src = file.getInputStream()) {
+            storage.put(rel, src, file.getSize());     // local disk or S3, streamed (never held in memory)
+        } catch (java.io.IOException | java.io.UncheckedIOException e) {
+            return kit.fail(HttpStatus.INTERNAL_SERVER_ERROR, "The video could not be saved. Try again.");
+        }
+        audit.log(kit.admin(request), "course", courseId, "video uploaded", name);
+        return kit.ok(Map.of("url", "/storage/" + rel, "name", original, "size", file.getSize(), "message", "Video uploaded."));
+    }
+
+    /** @return an error text, or null when the upload looks like a playable video file. */
+    static String checkVideo(org.springframework.web.multipart.MultipartFile f) {
+        if (f.getSize() > MAX_VIDEO) {
+            return "Video files can be up to 500 MB. Upload larger videos to YouTube or Vimeo and paste the link.";
+        }
+        String name = f.getOriginalFilename() == null ? "" : f.getOriginalFilename();
+        int dot = name.lastIndexOf('.');
+        String ext = dot < 0 ? "" : name.substring(dot + 1).toLowerCase(java.util.Locale.ROOT);
+        byte[] b = new byte[12];
+        int n = 0;
+        try (java.io.InputStream in = f.getInputStream()) {
+            n = in.readNBytes(b, 0, 12);
+        } catch (java.io.IOException e) {
+            return "The file could not be read.";
+        }
+        return VIDEO_EXT.contains(ext) && isVideo(b, n) ? null : "Upload an MP4, MOV or WebM video.";
+    }
+
+    /** MP4 / MOV / M4V ("....ftyp") or WebM / Matroska (EBML header). */
+    static boolean isVideo(byte[] b, int n) {
+        boolean iso = n >= 8 && b[4] == 'f' && b[5] == 't' && b[6] == 'y' && b[7] == 'p';
+        boolean ebml = n >= 4 && (b[0] & 0xFF) == 0x1A && (b[1] & 0xFF) == 0x45 && (b[2] & 0xFF) == 0xDF && (b[3] & 0xFF) == 0xA3;
+        return iso || ebml;
     }
 
     // ================================================================ helpers

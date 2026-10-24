@@ -1,14 +1,11 @@
 import React, { useMemo, useState } from 'react';
+import VideoPlayer, { videoSource } from '@/Components/Video/VideoPlayer';
 import { usePage } from '@inertiajs/inertia-react';
 import axios from 'axios';
 import StudioLayout from '@/Components/Studio/StudioLayout';
 import { statusStyle } from '@/Components/Studio/Journey';
 
 const strip = (h) => String(h || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-const embed = (url) => {
-    const m = String(url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-    return m ? `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0` : null;
-};
 
 export default function Classroom() {
     const { course, enrolled, orderId, modules = [], completed: initialDone = [], progress: initialProgress = 0, videos = [], submissions = [] } = usePage().props;
@@ -21,8 +18,9 @@ export default function Classroom() {
     const [error, setError] = useState(null);
     const active = lessons.find((l) => l.id === activeId);
     const idx = lessons.findIndex((l) => l.id === activeId);
-    const video = videos[idx] || videos[0];
-    const src = video ? embed(video.video_url) : null;
+    const video = active ? videos.find((v) => String(v.lesson_id) === String(active.id)) : null; // each lesson plays its own video
+    const vsrc = video ? videoSource(video.video_url) : null;
+    const src = vsrc && vsrc.kind !== 'link' ? vsrc.src : null;
 
     if (!enrolled) {
         return (
@@ -60,7 +58,7 @@ export default function Classroom() {
                 <div className="col-span-12 lg:col-span-8">
                     <div className="relative rounded-2xl overflow-hidden bg-ink" style={{ aspectRatio: '16 / 9' }}>
                         {src ? (
-                            <iframe title={video.video_title || active?.lesson_title} src={src} className="absolute inset-0 w-full h-full" allow="encrypted-media; picture-in-picture" allowFullScreen></iframe>
+                            <VideoPlayer key={active?.id} url={video.video_url} title={video.video_title || active?.lesson_title} className="absolute inset-0 w-full h-full" />
                         ) : (
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-8"
                                  style={{ background: course.photo ? `linear-gradient(rgba(17,17,17,.65),rgba(17,17,17,.85)), url(/storage/uploads/courses/${course.id}/${course.photo}) center/cover` : undefined }}>

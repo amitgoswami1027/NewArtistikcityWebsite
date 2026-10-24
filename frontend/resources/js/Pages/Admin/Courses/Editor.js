@@ -5,7 +5,7 @@ import axios from 'axios';
 import AdminLayout, { PageHeader, useToast, errorText } from '@/Components/Admin/AdminLayout';
 import { Button, Badge, useConfirm } from '@/Components/Admin/kit';
 import {
-    useForm, useUnsavedGuard, uploadImage, FormSection, Field, TextField, SelectField, Toggle, ChoiceChips, SlugField, ListEditor, DropZone, RichText, SaveBar, Row2, Row3,
+    useForm, useUnsavedGuard, uploadImage, FormSection, Field, VideoField, TextField, SelectField, Toggle, ChoiceChips, SlugField, ListEditor, DropZone, RichText, SaveBar, Row2, Row3,
 } from '@/Components/Admin/form';
 import Curriculum from '@/Components/Admin/Curriculum';
 
@@ -32,7 +32,7 @@ const blank = (kind, me) => ({
     introduction: '', introduction_details: '', summary: '', summary_details: '', schedule: '', schedule_details: '', course_outcome: '', course_prerequisites: '',
     includes: { certificate: kind !== 'workshop', study_material_access: true, medium: true, age: true, skills: true },
     course_highlights: [], course_learn: [], course_for: [], course_not_for: [], course_problems_solved: [], course_deliverables: [],
-    price_inr: '', price_usd: '', videos: [],
+    price_inr: '', price_usd: '', intro_video_url: '',
 });
 
 const editable = (c) => {
@@ -112,7 +112,6 @@ export default function CourseEditor() {
             .catch((e) => toast(errorText(e), 'error'));
     };
 
-    const setVideo = (i, k, val) => form.set('videos', v.videos.map((x, j) => (j === i ? { ...x, [k]: val } : x)));
     const title = isNew ? `New ${noun}` : (saved.title || `Untitled ${noun}`);
 
     return (
@@ -229,22 +228,14 @@ export default function CourseEditor() {
                         ))}
                     </FormSection>
 
-                    <FormSection id="media" title="Photos & videos" description="The first photo is the cover in listings. Videos are YouTube or other links shown on the page and in lessons.">
+                    <FormSection id="media" title="Photos & intro video" description={`The first photo is the cover in listings. The intro video plays on the public ${noun} page. Each lesson has its own video in Curriculum.`}>
                         <Field label="Photos" name="photos" error={null} optional>
                             <DropZone name="photos" multiple value={photos} onChange={setPhotos} error={form.error('photos')}
                                 existing={saved ? saved.photos : []} onRemoveExisting={removePhoto} label="Drop photos here or click to choose" />
                         </Field>
-                        <Field label="Videos" name="videos" error={form.error('videos')} optional>
-                            <div className="adm-stack">
-                                {v.videos.map((x, i) => (
-                                    <div key={i} className="adm-list__row">
-                                        <input className="adm-input" placeholder="Video title" aria-label={`Video ${i + 1} title`} value={x.title} onChange={(e) => setVideo(i, 'title', e.target.value)} />
-                                        <input className="adm-input" placeholder="https://www.youtube.com/watch?v=…" aria-label={`Video ${i + 1} link`} value={x.url} onChange={(e) => setVideo(i, 'url', e.target.value)} />
-                                        <button type="button" onClick={() => form.set('videos', v.videos.filter((_, j) => j !== i))} aria-label={`Remove video ${i + 1}`}><i className="fa fa-trash-o" aria-hidden="true"></i></button>
-                                    </div>
-                                ))}
-                                <div><Button size="sm" icon="fa-plus" onClick={() => form.set('videos', [...v.videos, { title: '', url: '' }])}>Add a video</Button></div>
-                            </div>
+                        <Field label="Intro / trailer video" name="intro_video_url" optional>
+                            <VideoField name="intro_video_url" label="Intro video" value={v.intro_video_url || ''} error={form.error('intro_video_url')}
+                                onChange={(x) => form.set('intro_video_url', x)} uploadUrl={saved ? `/admin/api/courses/${saved.id}/videos` : null} />
                         </Field>
                     </FormSection>
 

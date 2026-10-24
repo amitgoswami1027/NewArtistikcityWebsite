@@ -27,7 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // "web" group: session, flash, CSRF
-        registry.addInterceptor(sessionInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(sessionInterceptor).addPathPatterns("/**").excludePathPatterns("/healthz");
 
         // "auth" middleware
         registry.addInterceptor(guards.authenticated())
@@ -49,9 +49,12 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // uploaded files: /storage/uploads/... and /storage/certificates/...
-        String location = storage.root().toUri().toString();
-        registry.addResourceHandler("/storage/**")
-                .addResourceLocations(location.endsWith("/") ? location : location + "/");
+        // (with STORAGE_DRIVER=s3 they come from the bucket instead: CloudFront, or web/StorageController)
+        if (!storage.isS3()) {
+            String location = storage.root().toUri().toString();
+            registry.addResourceHandler("/storage/**")
+                    .addResourceLocations(location.endsWith("/") ? location : location + "/");
+        }
         // the student area uses <base href="/user/">, so relative "assets/images/x" requests arrive as /user/assets/...
         registry.addResourceHandler("/user/assets/**")
                 .addResourceLocations("classpath:/static/assets/user/", "classpath:/static/assets/");

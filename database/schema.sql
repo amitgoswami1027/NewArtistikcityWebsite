@@ -342,6 +342,7 @@ CREATE TABLE courses (
     course_prerequisites   LONGTEXT NULL,
     course_start_date      DATE NULL,
     course_based           VARCHAR(50) NULL,
+    intro_video_url        VARCHAR(1000) NULL,   -- trailer on the public course page (link or /storage/... file)
     is_free_course         TINYINT NOT NULL DEFAULT 0,
     status                 TINYINT NOT NULL DEFAULT 1,
     created_at             DATETIME NULL,
@@ -414,6 +415,7 @@ CREATE TABLE course_module_lessons (
     lesson_title       VARCHAR(255) NOT NULL,
     lesson_description LONGTEXT NULL,
     lesson_pdf         VARCHAR(500) NULL,
+    video_url          VARCHAR(1000) NULL,   -- this lesson's own video (link or /storage/... file)
     sort_order         INT NOT NULL DEFAULT 0,
     status             VARCHAR(20) NOT NULL DEFAULT '0',
     created_at         DATETIME NULL,
@@ -829,9 +831,10 @@ CREATE TABLE enrollments (
     user_id             BIGINT       NOT NULL,
     course_id           BIGINT       NOT NULL,
     progress_percentage INT          NOT NULL DEFAULT 0 CHECK (progress_percentage BETWEEN 0 AND 100),
-    status              VARCHAR(20) NOT NULL DEFAULT 'Active' CHECK (status IN ('Active', 'Completed')),
+    status              VARCHAR(20) NOT NULL DEFAULT 'Active',
     created_at          DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          DATETIME    NULL,
+    CONSTRAINT enrollments_status_check CHECK (status IN ('Active', 'Completed', 'Refunded')),
     CONSTRAINT enrollments_user_course_unique UNIQUE (user_id, course_id),
     CONSTRAINT enrollments_user_id_foreign FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE NO ACTION,
     CONSTRAINT enrollments_course_id_foreign FOREIGN KEY (course_id) REFERENCES courses (id) ON DELETE NO ACTION
