@@ -18,6 +18,7 @@ To change the schema of a database that already holds real data:
 | `2026-10-23_auth_system.sql` | Sign-in system: `users.password` → `password_hash` (nullable), `phone` → `phone_number` (E.164, unique) + `phone_verified_at`, `is_verified`; moves `provider`/`provider_id` into `linked_accounts`; adds `auth_sessions`, `auth_refresh_tokens`, `auth_otps`, `auth_tokens`, `webauthn_credentials`, `auth_events`; drops `password_resets`. When two accounts shared one phone number, the oldest keeps it. |
 | `2026-10-23_wishlist.sql` | Adds `wishlist_items` (saved courses/workshops and marketplace originals). |
 | `2026-10-24_course_checkout.sql` | Adds `orders.gateway_ref` (the Razorpay / PayPal order id behind each payment) and indexes for the checkout. |
+| `2026-10-25_admin_console.sql` | Admin console: curriculum order (`sort_order` on modules and lessons), blog SEO fields (`posts.meta_title`, `meta_description`; `subtitle` widened to 500), newsletter subscriber state (`source`, `unsubscribed_at`) and `newsletter_campaigns`, `faqs` (with starter questions), `contacts.read_at`, `admin_audit`, and the SEO / contact / social rows in `settings`. |
 
 The earlier SQL Server (T-SQL) migrations were removed when the project moved to MySQL. Everything they did is
 already in `schema.sql`, and they remain available in git history.

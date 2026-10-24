@@ -1,107 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>ArtistikCity - Admin Panel</title>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- CSRF Token -->
-  <meta name="_token" content="{{csrf}}">
-
-  <link rel="shortcut icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-  <!-- plugin css -->
-  <link rel="stylesheet" href="/assets/plugins/@mdi/font/css/materialdesignicons.min.css">
-  <link rel="stylesheet" href="/assets/plugins/perfect-scrollbar/perfect-scrollbar.css">
-  <!-- end plugin css -->
-
-  <!-- plugin css -->
-  
-  <!-- end plugin css -->
-
-  <!-- common css -->
-  <link rel="stylesheet" href="/css/admin/app.css">
-  <!-- end common css -->
-
-  
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Admin sign in · ArtistikCity</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+    <link href="/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/css/ac-theme.css">
 </head>
-<body data-base-url="/">
-
-  <div class="container-scroller" id="app">
-    <div class="container-fluid page-body-wrapper full-page-wrapper">
-      
-
-<div class="content-wrapper d-flex align-items-center justify-content-center auth theme-one" style="background-image: url(/assets/images/auth/login_1.jpg); background-size: cover;">
-  <div class="row w-100">
-    <div class="col-lg-4 mx-auto">
-    {{#hasErrors}}
-    <div class="alert alert-danger">
-      <ul>
-          {{#errorList}}
-              <li>{{.}}</li>
-          {{/errorList}}
-      </ul>
-  </div>
-  {{/hasErrors}}
-      <div class="auto-form-wrapper">
-          <form method="POST" action="/admin/login">
+<body style="margin:0">
+<main class="ac adm-login">
+    <div class="adm-login__card">
+        <a href="/" class="adm-login__logo"><img src="/assets/images/logo.png" alt="ArtistikCity"></a>
+        <span class="adm-login__tag">Admin</span>
+        <h1>Sign in to the admin</h1>
+        <p class="adm-login__lede">For the ArtistikCity team and instructors. Students sign in <a href="/login">here</a>.</p>
+        {{#hasErrors}}
+        <div class="adm-login__error" role="alert">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+            <div>{{#errorList}}<p>{{.}}</p>{{/errorList}}</div>
+        </div>
+        {{/hasErrors}}
+        <form method="POST" action="/admin/login" novalidate>
             <input type="hidden" name="_token" value="{{csrf}}">
-          <div class="form-group">
-            <label class="label">Username</label>
-            <div class="input-group">
-              <input type="text" name="email" class="form-control" placeholder="Username">
-              <div class="input-group-append">
-                <span class="input-group-text">
-                  <i class="mdi mdi-check-circle-outline"></i>
-                </span>
-              </div>
+            <label for="email">E-mail</label>
+            <input id="email" type="email" name="email" value="{{old.email}}" autocomplete="username" required autofocus>
+            <label for="password">Password</label>
+            <div class="adm-login__pw">
+                <input id="password" type="password" name="password" autocomplete="current-password" required>
+                <button type="button" aria-label="Show password" onclick="var i=document.getElementById('password');var s=i.type==='password';i.type=s?'text':'password';this.setAttribute('aria-label',s?'Hide password':'Show password');this.firstElementChild.className=s?'fa fa-eye-slash':'fa fa-eye';"><i class="fa fa-eye" aria-hidden="true"></i></button>
             </div>
-          </div>
-          <div class="form-group">
-            <label class="label">Password</label>
-            <div class="input-group">
-              <input type="password" name="password" class="form-control" placeholder="*********">
-              <div class="input-group-append">
-                <span class="input-group-text">
-                  <i class="mdi mdi-check-circle-outline"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <input type="submit" class="btn btn-primary submit-btn btn-block" value="Login" />
-          </div>
-          <div class="form-group d-flex justify-content-between">
-            <div class="form-check form-check-flat mt-0">
-              <label class="form-check-label">
-                <input type="checkbox" class="form-check-input" checked> Keep me signed in </label>
-            </div>
-            <a href="#" class="text-small forgot-password text-black">Forgot Password</a>
-          </div>
+            <button type="submit" class="adm-login__submit">Sign in</button>
         </form>
-      </div>
-      <ul class="auth-footer">
-        <li>Admin Panel</li>
-      </ul>
-      <p class="footer-text text-center">copyright © 2021. All rights reserved.</p>
+        <p class="adm-login__help">Forgot your password? Ask a super admin to set a new one in <b>Instructor profiles</b>.</p>
     </div>
-  </div>
-</div>
-
-
-    </div>
-  </div>
-
-    <!-- base js -->
-    <script src="/js/admin/app.js"></script>
-    <!-- end base js -->
-
-    <!-- plugin js -->
-    
-    <!-- end plugin js -->
-
-    
+</main>
 </body>
 </html>

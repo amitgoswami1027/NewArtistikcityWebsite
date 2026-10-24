@@ -77,9 +77,9 @@ public class CourseLearningController {
 
     /** Modules with their (published) lessons in order, each lesson flagged done / with its task count. */
     private List<Map<String, Object>> syllabus(long courseId, Set<String> done) {
-        List<Row> modules = db.select("select id, module_title, module_duration from course_modules where course_id = ? and status = '1' order by id", courseId);
+        List<Row> modules = db.select("select id, module_title, module_duration from course_modules where course_id = ? and status = '1' order by sort_order, id", courseId);
         List<Row> lessons = db.select("select l.id, l.module_id, l.lesson_title, (select count(*) from course_module_lesson_tasks t where t.lesson_id = l.id"
-                + " and t.status = '1') as tasks from course_module_lessons l where l.course_id = ? and l.status = '1' order by l.id", courseId);
+                + " and t.status = '1') as tasks from course_module_lessons l where l.course_id = ? and l.status = '1' order by l.sort_order, l.id", courseId);
         List<Map<String, Object>> out = new ArrayList<>();
         int number = 0;
         for (Row m : modules) {
@@ -263,7 +263,7 @@ public class CourseLearningController {
     @GetMapping("/user/course/module/lesson/{module_id}")
     public ResponseEntity<String> oldLesson(HttpServletRequest request, @PathVariable("module_id") long moduleId,
                                             @RequestParam(value = "page", required = false) Integer page) {
-        List<Row> ls = db.select("select id from course_module_lessons where module_id = ? and status = '1' order by id", moduleId);
+        List<Row> ls = db.select("select id from course_module_lessons where module_id = ? and status = '1' order by sort_order, id", moduleId);
         int i = page == null || page < 1 ? 0 : Math.min(page - 1, Math.max(ls.size() - 1, 0));
         return redirect.to(request, "/user/course/modules/" + moduleId + (ls.isEmpty() ? "" : "?lesson=" + ls.get(i).get("id")));
     }

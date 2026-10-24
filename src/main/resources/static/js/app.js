@@ -2842,352 +2842,303 @@ module.exports = {
 /***/ }),
 
 /***/ "./resources/js/Components/Admin/AdminLayout.js":
-/*!******************************************************!*\
-  !*** ./resources/js/Components/Admin/AdminLayout.js ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   PageHeader: () => (/* binding */ PageHeader),
-/* harmony export */   "default": () => (/* binding */ AdminLayout),
-/* harmony export */   errorText: () => (/* binding */ errorText),
-/* harmony export */   useToast: () => (/* binding */ useToast)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-var NAV = [{
-  section: 'Workspace'
-}, {
-  href: '/admin/dashboard',
-  label: 'Overview',
-  icon: 'fa-th-large',
-  cap: 'overview'
-}, {
-  href: '/admin/dashboard/submissions',
-  label: 'Verification desk',
-  icon: 'fa-check-square-o',
-  cap: 'submissions',
-  badge: 'submissions'
-}, {
-  href: '/admin/dashboard/commissions',
-  label: 'Commissions',
-  icon: 'fa-paint-brush',
-  cap: 'commissions',
-  badge: 'commissions'
-}, {
-  href: '/admin/dashboard/marketplace',
-  label: 'Marketplace',
-  icon: 'fa-tags',
-  cap: 'marketplace',
-  badge: 'marketplace'
-}, {
-  href: '/admin/dashboard/people',
-  label: 'People & roles',
-  icon: 'fa-users',
-  cap: 'people'
-}, {
-  section: 'Showcase'
-}, {
-  href: '/admin/dashboard/gallery',
-  label: 'Gallery',
-  icon: 'fa-picture-o',
-  cap: 'gallery'
-}, {
-  href: '/admin/dashboard/testimonials',
-  label: 'Testimonials',
-  icon: 'fa-quote-left',
-  cap: 'testimonials'
-}, {
-  href: '/admin/blog/post',
-  label: 'Blog posts',
-  icon: 'fa-pencil-square-o',
-  cap: 'settings',
-  classic: true
-}, {
-  section: 'Catalog'
-}, {
-  href: '/admin/courses',
-  label: 'Courses',
-  icon: 'fa-graduation-cap',
-  cap: 'catalog',
-  classic: true
-}, {
-  href: '/admin/workshop',
-  label: 'Workshops',
-  icon: 'fa-calendar',
-  cap: 'catalog',
-  classic: true
-}, {
-  href: '/admin/free-courses',
-  label: 'Free lessons',
-  icon: 'fa-gift',
-  cap: 'settings',
-  classic: true
-}, {
-  href: '/admin/mediums',
-  label: 'Mediums, genres & skills',
-  icon: 'fa-sliders',
-  cap: 'settings',
-  classic: true
-}, {
-  section: 'Business'
-}, {
-  href: '/admin/orders',
-  label: 'Course orders',
-  icon: 'fa-shopping-cart',
-  cap: 'revenue',
-  classic: true
-}, {
-  href: '/admin/newsletter',
-  label: 'Newsletter',
-  icon: 'fa-envelope-o',
-  cap: 'settings',
-  classic: true
-}, {
-  href: '/admin/settings',
-  label: 'Settings',
-  icon: 'fa-cog',
-  cap: 'settings',
-  classic: true
-}];
-function useToast() {
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState2 = _slicedToArray(_useState, 2),
-    toast = _useState2[0],
-    setToast = _useState2[1];
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    if (!toast) return undefined;
-    var t = setTimeout(function () {
-      return setToast(null);
-    }, 3500);
-    return function () {
-      return clearTimeout(t);
-    };
-  }, [toast]);
-  var node = toast ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-    role: "status",
-    className: "fixed bottom-6 right-6 z-50 rounded-xl px-5 py-3 shadow-xl text-sm font-bold ".concat(toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-ink text-white'),
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("i", {
-      className: "fa ".concat(toast.type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle', " mr-2"),
-      "aria-hidden": "true"
-    }), toast.text]
-  }) : null;
-  return [node, function (text) {
-    var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'ok';
-    return setToast({
-      text: text,
-      type: type
-    });
-  }];
-}
-var errorText = function errorText(e) {
-  var fallback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Something went wrong.';
-  return e && e.response && e.response.data && e.response.data.message || fallback;
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
 };
-function PageHeader(_ref) {
-  var title = _ref.title,
-    subtitle = _ref.subtitle,
-    actions = _ref.actions;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-    className: "flex flex-wrap items-end justify-between gap-4 mb-8",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h1", {
-        className: "text-3xl sm:text-4xl font-black tracking-tight text-ink",
-        children: title
-      }), subtitle && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
-        className: "mt-1 text-base text-gray-600 max-w-2xl",
-        children: subtitle
-      })]
-    }), actions && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-      className: "flex flex-wrap gap-2",
-      children: actions
-    })]
-  });
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var AdminLayout_exports = {};
+__export(AdminLayout_exports, {
+  NAV: () => NAV,
+  PageHeader: () => PageHeader,
+  activeItem: () => activeItem,
+  default: () => AdminLayout,
+  errorText: () => errorText,
+  useToast: () => useToast
+});
+module.exports = __toCommonJS(AdminLayout_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_ErrorBoundary = __toESM(__webpack_require__("./resources/js/Components/Admin/ErrorBoundary.js"));
+const NAV = [
+  { group: "Workspace", items: [
+    { href: "/admin/dashboard", label: "Overview", icon: "fa-th-large", cap: "overview", exact: true },
+    { href: "/admin/dashboard/submissions", label: "Verification desk", icon: "fa-check-square-o", cap: "submissions", badge: "submissions" },
+    { href: "/admin/tasks", label: "Student tasks", icon: "fa-comments-o", cap: "submissions", badge: "tasks" }
+  ] },
+  { group: "Learning", items: [
+    { href: "/admin/courses", label: "Courses", icon: "fa-graduation-cap", cap: "catalog", also: ["/admin/courses/"] },
+    { href: "/admin/workshop", label: "Workshops", icon: "fa-calendar", cap: "catalog", also: ["/admin/workshop/"] },
+    { href: "/admin/free-courses", label: "Free lessons", icon: "fa-gift", cap: "settings", also: ["/admin/free-courses/"] },
+    { href: "/admin/catalog", label: "Mediums, genres & skills", icon: "fa-sliders", cap: "settings" }
+  ] },
+  { group: "Sales", items: [
+    { href: "/admin/orders", label: "Course orders", icon: "fa-shopping-cart", cap: "revenue", also: ["/admin/orders/"] },
+    { href: "/admin/dashboard/commissions", label: "Commissions", icon: "fa-paint-brush", cap: "commissions", badge: "commissions" },
+    { href: "/admin/dashboard/marketplace", label: "Marketplace", icon: "fa-tags", cap: "marketplace", badge: "marketplace", also: ["/admin/dashboard/marketplace/"] }
+  ] },
+  { group: "Community", items: [
+    { href: "/admin/dashboard/people", label: "People & roles", icon: "fa-users", cap: "people" },
+    { href: "/admin/instructors", label: "Instructor profiles", icon: "fa-user", cap: "people.manage", also: ["/admin/instructors/"] },
+    { href: "/admin/dashboard/testimonials", label: "Testimonials", icon: "fa-quote-left", cap: "testimonials" },
+    { href: "/admin/dashboard/gallery", label: "Gallery", icon: "fa-picture-o", cap: "gallery" }
+  ] },
+  { group: "Content", items: [
+    { href: "/admin/blog/post", label: "Blog posts", icon: "fa-pencil-square-o", cap: "settings", also: ["/admin/blog/post/"] },
+    { href: "/admin/blog/taxonomy", label: "Blog categories & tags", icon: "fa-bookmark-o", cap: "settings" },
+    { href: "/admin/faq", label: "FAQ", icon: "fa-question-circle-o", cap: "settings" },
+    { href: "/admin/newsletter", label: "Newsletter", icon: "fa-envelope-o", cap: "settings", also: ["/admin/newsletter/"] },
+    { href: "/admin/contacts", label: "Contact messages", icon: "fa-inbox", cap: "settings", badge: "contacts" }
+  ] },
+  { group: "Setup", items: [
+    { href: "/admin/settings", label: "Site settings & SEO", icon: "fa-cog", cap: "settings" }
+  ] }
+];
+const NAV_KEY = "ac.admin.nav";
+const readCollapsed = () => {
+  try {
+    return window.localStorage.getItem(NAV_KEY) === "collapsed";
+  } catch (e) {
+    return false;
+  }
+};
+const saveCollapsed = (v) => {
+  try {
+    window.localStorage.setItem(NAV_KEY, v ? "collapsed" : "open");
+  } catch (e) {
+  }
+};
+const isActive = (item, path) => item.exact ? path === item.href : path === item.href || (item.also || []).some((p) => path.startsWith(p));
+function activeItem(path) {
+  let found = null;
+  NAV.forEach((g) => g.items.forEach((i) => {
+    if (!found && isActive(i, path)) found = __spreadProps(__spreadValues({}, i), { group: g.group });
+  }));
+  return found;
 }
-function AdminLayout(_ref2) {
-  var title = _ref2.title,
-    children = _ref2.children;
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    _usePage$props$admin = _usePage$props.admin,
-    admin = _usePage$props$admin === void 0 ? {} : _usePage$props$admin,
-    _usePage$props$badges = _usePage$props.badges,
-    badges = _usePage$props$badges === void 0 ? {} : _usePage$props$badges;
-  var caps = admin.capabilities || [];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState4 = _slicedToArray(_useState3, 2),
-    open = _useState4[0],
-    setOpen = _useState4[1];
-  var here = typeof window !== 'undefined' ? window.location.pathname : '';
-  var token = typeof document !== 'undefined' ? (document.head.querySelector('meta[name="csrf-token"]') || {}).content : '';
-  // keep only links the persona may use, and drop section titles that end up empty
-  var items = [];
-  NAV.forEach(function (n) {
-    if (n.section) {
-      items.push(n);
+function useToast() {
+  const [toast, setToast] = (0, import_react.useState)(null);
+  (0, import_react.useEffect)(() => {
+    if (!toast) return void 0;
+    const t = setTimeout(() => setToast(null), toast.type === "error" ? 6e3 : 3500);
+    return () => clearTimeout(t);
+  }, [toast]);
+  const node = toast ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-at": toast.at, role: toast.type === "error" ? "alert" : "status", className: `adm-toast ${toast.type === "error" ? "is-error" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${toast.type === "error" ? "fa-exclamation-circle" : "fa-check-circle"}`, "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: toast.text }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => setToast(null), "aria-label": "Dismiss", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+  ] }, toast.at) : null;
+  return [node, (text, type = "ok") => setToast({ text, type, at: Date.now() })];
+}
+const errorText = (e, fallback = "Something went wrong. Please try again.") => {
+  if (e && e.response) {
+    if (e.response.status === 419) return "Your session expired. Reload the page and try again.";
+    if (e.response.status === 413) return "That file is too large.";
+    if (e.response.data && e.response.data.message) return e.response.data.message;
+    if (e.response.status === 403) return "You don't have access to this.";
+    if (e.response.status >= 500) return "The server had a problem. Please try again in a moment.";
+  } else if (e && e.request) {
+    return "Could not reach the server. Check your connection.";
+  }
+  return fallback;
+};
+function PageHeader({ title, subtitle, actions, eyebrow }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-pagehead", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-pagehead__text", children: [
+      eyebrow && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-eyebrow", children: eyebrow }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: title }),
+      subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: subtitle })
+    ] }),
+    actions && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-pagehead__actions", children: actions })
+  ] });
+}
+function AccountMenu({ admin, token }) {
+  const [open, setOpen] = (0, import_react.useState)(false);
+  const ref = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (!open) return void 0;
+    const close = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const esc = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open]);
+  const initial = (admin.name || "A").trim().charAt(0).toUpperCase();
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-account", ref, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-account__btn", "aria-haspopup": "menu", "aria-expanded": open, onClick: () => setOpen((o) => !o), children: [
+      admin.photoUrl ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: admin.photoUrl, alt: "", className: "adm-avatar" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-avatar", "aria-hidden": "true", children: initial }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-account__name", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: admin.name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: admin.personaLabel })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-down", "aria-hidden": "true" })
+    ] }),
+    open && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-menu", role: "menu", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-menu__head", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: admin.name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: admin.email })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { role: "menuitem", href: "/admin/profile", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-user", "aria-hidden": "true" }),
+        "Your profile"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { role: "menuitem", href: "/admin/change-password", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+        "Change password"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { role: "menuitem", href: "/", target: "_blank", rel: "noopener noreferrer", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link", "aria-hidden": "true" }),
+        "View website"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { method: "post", action: "/admin/logout", className: "adm-menu__logout", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "hidden", name: "_token", value: token }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "submit", role: "menuitem", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-sign-out", "aria-hidden": "true" }),
+          "Log out"
+        ] })
+      ] })
+    ] })
+  ] });
+}
+function AdminLayout({ title, crumbs, children, wide = false }) {
+  const { admin = {}, badges = {} } = (0, import_inertia_react.usePage)().props;
+  const caps = admin.capabilities || [];
+  const [collapsed, setCollapsed] = (0, import_react.useState)(readCollapsed);
+  const [drawer, setDrawer] = (0, import_react.useState)(false);
+  const path = typeof window !== "undefined" ? window.location.pathname.replace(/\/+$/, "") || "/" : "";
+  const token = typeof document !== "undefined" ? (document.head.querySelector('meta[name="csrf-token"]') || {}).content : "";
+  const current = activeItem(path);
+  (0, import_react.useEffect)(() => {
+    if (!drawer) return void 0;
+    const esc = (e) => {
+      if (e.key === "Escape") setDrawer(false);
+    };
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+  }, [drawer]);
+  const toggle = () => {
+    if (window.matchMedia && window.matchMedia("(max-width: 1023px)").matches) {
+      setDrawer((d) => !d);
       return;
     }
-    if (caps.includes(n.cap)) items.push(n);
-  });
-  var visible = items.filter(function (n, i) {
-    return !n.section || items[i + 1] && !items[i + 1].section;
-  });
-  var sidebar = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("nav", {
-    className: "flex flex-col h-full",
-    "aria-label": "Admin",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("a", {
-      href: "/admin/dashboard",
-      className: "flex items-center gap-3 px-6 h-16 border-b border-gray-200",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("img", {
-        src: "/assets/images/logo.png",
-        alt: "ArtistikCity",
-        className: "h-8 w-auto"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-        className: "font-mono text-xs uppercase tracking-widest text-gray-500",
-        children: "Console"
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-      className: "flex-1 overflow-y-auto py-4",
-      children: visible.map(function (n, i) {
-        return n.section ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
-          className: "px-6 pt-5 pb-2 font-mono text-xs uppercase tracking-widest text-gray-400",
-          children: n.section
-        }, "s".concat(i)) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("a", {
-          href: n.href,
-          "aria-current": here === n.href ? 'page' : undefined,
-          className: "mx-3 flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-semibold ".concat(here === n.href ? 'bg-ink text-white' : 'text-gray-700 hover:bg-gray-100'),
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("i", {
-            className: "fa ".concat(n.icon, " w-5 text-center"),
-            "aria-hidden": "true"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-            className: "flex-1",
-            children: n.label
-          }), n.badge && Number(badges[n.badge]) > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-            className: "rounded-full bg-brand text-white text-xs font-bold px-2 py-0.5",
-            children: badges[n.badge]
-          }), n.classic && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("i", {
-            className: "fa fa-external-link text-xs opacity-40",
-            "aria-hidden": "true",
-            title: "Classic editor"
-          })]
-        }, n.href);
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-      className: "border-t border-gray-200 p-4",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-        className: "flex items-center gap-3",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-          className: "w-10 h-10 rounded-full bg-brand text-white font-black flex items-center justify-center",
-          children: (admin.name || 'A').charAt(0)
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-          className: "flex-1 min-w-0",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
-            className: "font-bold text-ink truncate",
-            children: admin.name
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
-            className: "font-mono text-xs uppercase tracking-widest text-brand",
-            children: admin.personaLabel
-          })]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-        className: "mt-3 grid grid-cols-3 gap-2 text-sm",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("a", {
-          href: "/admin/profile",
-          className: "text-center rounded-lg border border-gray-200 py-2 font-semibold hover:border-ink",
-          children: "Profile"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("a", {
-          href: "/",
-          className: "text-center rounded-lg border border-gray-200 py-2 font-semibold hover:border-ink",
-          children: "Site"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("form", {
-          method: "post",
-          action: "/admin/logout",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
-            type: "hidden",
-            name: "_token",
-            value: token
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
-            className: "w-full rounded-lg border border-gray-200 py-2 font-semibold hover:border-ink",
-            children: "Log out"
-          })]
-        })]
-      })]
-    })]
-  });
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-    className: "ac",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.Head, {
-      title: "".concat(title, " \xB7 Admin")
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-      className: "tw min-h-screen bg-gray-50",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("aside", {
-        className: "hidden lg:block fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 z-30",
-        children: sidebar
-      }), open && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-        className: "lg:hidden fixed inset-0 z-40 flex",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-          className: "w-72 bg-white shadow-xl",
-          children: sidebar
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
-          type: "button",
-          className: "flex-1 bg-black bg-opacity-40",
-          "aria-label": "Close menu",
-          onClick: function onClick() {
-            return setOpen(false);
-          }
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-        className: "lg:pl-72",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("header", {
-          className: "sticky top-0 z-20 h-16 bg-white border-b border-gray-200 flex items-center gap-4 px-4 sm:px-8",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
-            type: "button",
-            className: "lg:hidden w-10 h-10 rounded-lg border border-gray-200",
-            "aria-label": "Open menu",
-            onClick: function onClick() {
-              return setOpen(true);
-            },
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("i", {
-              className: "fa fa-bars",
-              "aria-hidden": "true"
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("p", {
-            className: "font-mono text-xs uppercase tracking-widest text-gray-500 truncate",
-            children: ["ArtistikCity admin \xB7 ", title]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-            className: "ml-auto flex items-center gap-2",
-            children: caps.includes('submissions') && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("a", {
-              href: "/admin/dashboard/submissions",
-              className: "relative w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:border-ink",
-              title: "Pending reviews",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("i", {
-                className: "fa fa-bell-o",
-                "aria-hidden": "true"
-              }), Number(badges.submissions) > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-                className: "absolute -top-1 -right-1 rounded-full bg-brand text-white text-xs font-bold px-1.5",
-                children: badges.submissions
-              })]
-            })
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("main", {
-          className: "px-4 sm:px-8 py-8 max-w-[1500px]",
-          children: children
-        })]
-      })]
-    })]
-  });
+    setCollapsed((c) => {
+      saveCollapsed(!c);
+      return !c;
+    });
+  };
+  const trail = crumbs || [
+    ...current && current.href !== "/admin/dashboard" ? [{ label: current.group }] : [],
+    ...current && current.href !== path ? [{ href: current.href, label: current.label }] : [],
+    { label: title }
+  ];
+  const groups = NAV.map((g) => __spreadProps(__spreadValues({}, g), { items: g.items.filter((i) => caps.includes(i.cap)) })).filter((g) => g.items.length);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `ac adm ${collapsed ? "is-collapsed" : ""} ${drawer ? "is-drawer" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: `${title} \xB7 Admin` }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "#adm-main", className: "adm-skip", children: "Skip to content" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "adm-side", "aria-label": "Admin navigation", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-side__brand", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/admin/dashboard", className: "adm-side__logo", title: "Admin overview", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/logo.png", alt: "ArtistikCity" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__tag", children: "Admin" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-side__close", onClick: () => setDrawer(false), "aria-label": "Close menu", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "adm-side__nav", children: groups.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-side__group", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-side__label", children: g.group }),
+        g.items.map((i) => {
+          const on = isActive(i, path);
+          const n = i.badge ? Number(badges[i.badge]) || 0 : 0;
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: i.href, className: `adm-side__link ${on ? "is-on" : ""}`, "aria-current": on ? "page" : void 0, title: collapsed ? i.label : void 0, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${i.icon}`, "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__text", children: i.label }),
+            n > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__badge", "aria-label": `${n} waiting`, children: n > 99 ? "99+" : n })
+          ] }, i.href);
+        })
+      ] }, g.group)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-side__collapse", onClick: toggle, "aria-label": collapsed ? "Expand menu" : "Collapse menu", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${collapsed ? "fa-angle-double-right" : "fa-angle-double-left"}`, "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__text", children: "Collapse menu" })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-scrim", onClick: () => setDrawer(false), "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "adm-top", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-top__menu", onClick: toggle, "aria-label": "Toggle menu", "aria-expanded": drawer || !collapsed, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-bars", "aria-hidden": "true" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "adm-crumbs", "aria-label": "Breadcrumb", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ol", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/admin/dashboard", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-home", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Admin home" })
+          ] }) }),
+          trail.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { "aria-current": i === trail.length - 1 ? "page" : void 0, children: c.href && i < trail.length - 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: c.href, children: c.label }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: c.label }) }, `${c.label}-${i}`))
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-top__right", children: [
+          caps.includes("submissions") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/admin/dashboard/submissions", className: "adm-iconbtn", title: "Pending reviews", "aria-label": `Pending reviews: ${Number(badges.submissions) || 0}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-bell-o", "aria-hidden": "true" }),
+            Number(badges.submissions) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-iconbtn__dot", children: badges.submissions })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AccountMenu, { admin, token }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { method: "post", action: "/admin/logout", className: "adm-top__logout", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "hidden", name: "_token", value: token }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "submit", className: "adm-btn adm-btn--line adm-btn--sm", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-sign-out", "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Log out" })
+            ] })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { id: "adm-main", className: `adm-main ${wide ? "is-wide" : ""}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tw", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ErrorBoundary.default, { children }) }) })
+    ] })
+  ] });
 }
+
 
 /***/ }),
 
@@ -8533,243 +8484,125 @@ function ProgramCard(_ref) {
 /***/ }),
 
 /***/ "./resources/js/Components/Site/SiteFooter.js":
-/*!****************************************************!*\
-  !*** ./resources/js/Components/Site/SiteFooter.js ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ SiteFooter)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "../../febuild/node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _Components_Constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Constants */ "./resources/js/Components/Constants.js");
-/* harmony import */ var _Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Site/SiteHeader */ "./resources/js/Components/Site/SiteHeader.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SiteFooter_exports = {};
+__export(SiteFooter_exports, {
+  default: () => SiteFooter
+});
+module.exports = __toCommonJS(SiteFooter_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_Constants = __webpack_require__("./resources/js/Components/Constants.js");
+var import_SiteHeader = __webpack_require__("./resources/js/Components/Site/SiteHeader.js");
+const SOCIAL = [
+  ["facebook", "Facebook", "fa-facebook", "https://www.facebook.com/StudioVaishaliArts/"],
+  ["instagram", "Instagram", "fa-instagram", "https://www.instagram.com/artistikcity/"],
+  ["youtube", "YouTube", "fa-youtube-play", "https://www.youtube.com/@artistikcityYT"],
+  ["linkedin", "LinkedIn", "fa-linkedin", "https://in.linkedin.com/in/vaishali-jetly-goswami-4b5874233"]
+];
 function SiteFooter() {
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
-    _useState2 = _slicedToArray(_useState, 2),
-    mediums = _useState2[0],
-    setMediums = _useState2[1];
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    axios__WEBPACK_IMPORTED_MODULE_1___default().get("".concat(_Components_Constants__WEBPACK_IMPORTED_MODULE_2__.API_URL, "/get_mediums")).then(function (r) {
-      return setMediums(Array.isArray(r.data) ? r.data : []);
-    })["catch"](function () {});
+  const { site } = (0, import_inertia_react.usePage)().props;
+  const social = site && site.social && Object.keys(site.social).length ? SOCIAL.filter(([k]) => site.social[k]).map(([k, l, i]) => [k, l, i, site.social[k]]) : SOCIAL;
+  const [mediums, setMediums] = (0, import_react.useState)([]);
+  (0, import_react.useEffect)(() => {
+    import_axios.default.get(`${import_Constants.API_URL}/get_mediums`).then((r) => setMediums(Array.isArray(r.data) ? r.data : [])).catch(() => {
+    });
   }, []);
-  var year = new Date().getFullYear();
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("footer", {
-    className: "dm-footer",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "ac-wide",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "dm-footer__grid",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "dm-footer__brand",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            href: "/",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("img", {
-              src: "/assets/images/footerlogo.png",
-              alt: "ArtistikCity"
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-            style: {
-              maxWidth: 320
-            },
-            children: "Online art courses taught live by a working artist. Learn to draw and paint at your own pace, in any medium, at any age."
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-            className: "ac-social",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: "https://www.facebook.com/StudioVaishaliArts/",
-              target: "_blank",
-              rel: "noopener",
-              "aria-label": "Facebook",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                className: "fa fa-facebook"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: "https://www.instagram.com/artistikcity/",
-              target: "_blank",
-              rel: "noopener",
-              "aria-label": "Instagram",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                className: "fa fa-instagram"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: "https://www.youtube.com/@artistikcityYT",
-              target: "_blank",
-              rel: "noopener",
-              "aria-label": "YouTube",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                className: "fa fa-youtube-play"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: "https://in.linkedin.com/in/vaishali-jetly-goswami-4b5874233",
-              target: "_blank",
-              rel: "noopener",
-              "aria-label": "LinkedIn",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                className: "fa fa-linkedin"
-              })
-            })]
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h6", {
-            children: "Mediums"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
-            children: [mediums.map(function (m) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                  href: (0,_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_3__.catalogUrl)({
-                    medium: m.id
-                  }),
-                  children: m.name
-                })
-              }, m.id);
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: (0,_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_3__.catalogUrl)({}),
-                children: "All courses"
-              })
-            })]
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h6", {
-            children: "Learn"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: (0,_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_3__.catalogUrl)({
-                  type: 'course'
-                }),
-                children: "Live courses"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: (0,_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_3__.catalogUrl)({
-                  type: 'workshop'
-                }),
-                children: "Workshops"
-              })
-            }), _Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_3__.AGE_GROUPS.map(function (a) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-                  href: (0,_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_3__.catalogUrl)({
-                    age: a
-                  }),
-                  children: [a.split(' - ')[0], " courses"]
-                })
-              }, a);
-            })]
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h6", {
-            children: "ArtistikCity"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: route('commission.step1'),
-                children: "Artist Commission Portal"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: route('artistikcity.vision'),
-                children: "Our vision"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: route('how.it.works'),
-                children: "How it works"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: route('instructor'),
-                children: "Our instructor"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: "/marketplace",
-                children: "Art marketplace"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: "/marketplace?source=student",
-                children: "Student originals"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: route('studio.stories'),
-                children: "Studio Stories"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: "https://studiovaishaliarts.com/",
-                target: "_blank",
-                rel: "noopener",
-                children: "Studio Vaishali Arts"
-              })
-            })]
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h6", {
-            children: "Support"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: route('faq'),
-                children: "FAQ"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: route('customer.support'),
-                children: "Help centre"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: route('contact'),
-                children: "Contact us"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: route('join'),
-                children: "Join for free"
-              })
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "dm-footer__bottom",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
-          children: ["\xA9 ", year, " ArtistikCity. All rights reserved."]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("nav", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            href: route('terms.conditions'),
-            children: "Terms of use"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            href: route('privacy.policy'),
-            children: "Privacy policy"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            href: route('contact'),
-            children: "Contact"
-          })]
-        })]
-      })]
-    })
-  });
+  const year = (/* @__PURE__ */ new Date()).getFullYear();
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("footer", { className: "dm-footer", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-footer__grid", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-footer__brand", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/footerlogo.png", alt: "ArtistikCity" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { maxWidth: 320 }, children: "Online art courses taught live by a working artist. Learn to draw and paint at your own pace, in any medium, at any age." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-social", children: social.map(([k, label, icon, href]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href, target: "_blank", rel: "noopener noreferrer", "aria-label": label, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}` }) }, k)) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "Mediums" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
+          mediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({ medium: m.id }), children: m.name }) }, m.id)),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({}), children: "All courses" }) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "Learn" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({ type: "course" }), children: "Live courses" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({ type: "workshop" }), children: "Workshops" }) }),
+          import_SiteHeader.AGE_GROUPS.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: (0, import_SiteHeader.catalogUrl)({ age: a }), children: [
+            a.split(" - ")[0],
+            " courses"
+          ] }) }, a))
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "ArtistikCity" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("commission.step1"), children: "Artist Commission Portal" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("artistikcity.vision"), children: "Our vision" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("how.it.works"), children: "How it works" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("instructor"), children: "Our instructor" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", children: "Art marketplace" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace?source=student", children: "Student originals" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("studio.stories"), children: "Studio Stories" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://studiovaishaliarts.com/", target: "_blank", rel: "noopener", children: "Studio Vaishali Arts" }) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "Support" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("faq"), children: "FAQ" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("customer.support"), children: "Help centre" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("contact"), children: "Contact us" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("join"), children: "Join for free" }) })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-footer__bottom", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        "\xA9 ",
+        year,
+        " ArtistikCity. All rights reserved."
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("terms.conditions"), children: "Terms of use" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("privacy.policy"), children: "Privacy policy" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("contact"), children: "Contact" })
+      ] })
+    ] })
+  ] }) });
 }
+
 
 /***/ }),
 
@@ -15876,6 +15709,4413 @@ function CourseShell({ title, course, progress, back, actions, footer = true, cl
     children,
     footer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteFooter.default, {})
   ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Admin/ErrorBoundary.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var ErrorBoundary_exports = {};
+__export(ErrorBoundary_exports, {
+  default: () => ErrorBoundary
+});
+module.exports = __toCommonJS(ErrorBoundary_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+class ErrorBoundary extends import_react.default.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  componentDidCatch(error, info) {
+    console.error("Admin screen crashed", error, info && info.componentStack);
+  }
+  render() {
+    if (!this.state.error) return this.props.children;
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-crash", role: "alert", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-triangle", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: this.props.title || "This screen ran into a problem" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Your data is safe. Reload the page to try again; if it keeps happening, tell the developer what you clicked last." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-crash__actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-btn adm-btn--dark", onClick: () => window.location.reload(), children: "Reload page" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "adm-btn adm-btn--line", href: "/admin/dashboard", children: "Go to the overview" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "Technical details" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: String(this.state.error && (this.state.error.stack || this.state.error)) })
+      ] })
+    ] });
+  }
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Admin/kit.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var kit_exports = {};
+__export(kit_exports, {
+  Badge: () => Badge,
+  Button: () => Button,
+  Card: () => Card,
+  DataTable: () => DataTable,
+  Drawer: () => Drawer,
+  EmptyState: () => EmptyState,
+  FilterSelect: () => FilterSelect,
+  Pagination: () => Pagination,
+  SearchBox: () => SearchBox,
+  Segments: () => Segments,
+  Stat: () => Stat,
+  Toolbar: () => Toolbar,
+  cx: () => cx,
+  fmtDate: () => fmtDate,
+  money: () => money,
+  plural: () => plural,
+  useConfirm: () => useConfirm,
+  useGrid: () => useGrid
+});
+module.exports = __toCommonJS(kit_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+const cx = (...a) => a.filter(Boolean).join(" ");
+function Card({ title, subtitle, actions, children, flush = false, className }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: cx("adm-card", flush && "is-flush", className), children: [
+    (title || actions) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "adm-card__head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        title && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: title }),
+        subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: subtitle })
+      ] }),
+      actions && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-card__actions", children: actions })
+    ] }),
+    children
+  ] });
+}
+function Button(_a) {
+  var _b = _a, { as = "button", variant = "line", size, icon, children, busy, className, type } = _b, rest = __objRest(_b, ["as", "variant", "size", "icon", "children", "busy", "className", "type"]);
+  const cls = cx("adm-btn", `adm-btn--${variant}`, size && `adm-btn--${size}`, className);
+  const inner = /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+    children && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children })
+  ] });
+  if (as === "a") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", __spreadProps(__spreadValues({ className: cls }, rest), { children: inner }));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", __spreadProps(__spreadValues({ type: type || "button", className: cls, disabled: busy || rest.disabled }, rest), { children: inner }));
+}
+const TONES = { green: "is-green", red: "is-red", amber: "is-amber", blue: "is-blue", grey: "is-grey", pink: "is-pink" };
+function Badge({ tone = "grey", children, dot }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: cx("adm-badge", TONES[tone]), children: [
+    dot && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "adm-badge__dot", "aria-hidden": "true" }),
+    children
+  ] });
+}
+function EmptyState({ icon = "fa-inbox", title, children, action }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-empty", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: title }),
+    children && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children }),
+    action
+  ] });
+}
+function Stat({ label, value, icon, tone }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: cx("adm-stat", tone && `is-${tone}`), children: [
+    icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: value }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: label })
+  ] });
+}
+function SearchBox({ value = "", onSearch, placeholder = "Search", delay = 350, label }) {
+  const [text, setText] = (0, import_react.useState)(value);
+  const first = (0, import_react.useRef)(true);
+  (0, import_react.useEffect)(() => {
+    setText(value);
+  }, [value]);
+  (0, import_react.useEffect)(() => {
+    if (first.current) {
+      first.current = false;
+      return void 0;
+    }
+    if (text === value) return void 0;
+    const t = setTimeout(() => onSearch(text), delay);
+    return () => clearTimeout(t);
+  }, [text]);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-search", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search", "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: label || placeholder }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "input",
+      {
+        type: "search",
+        value: text,
+        placeholder,
+        onChange: (e) => setText(e.target.value),
+        onKeyDown: (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            onSearch(text);
+          }
+        }
+      }
+    ),
+    text && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => {
+      setText("");
+      onSearch("");
+    }, "aria-label": "Clear search", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+  ] });
+}
+function FilterSelect({ label, value, options, onChange, allLabel = "All" }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-filter", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: label }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: value || "", onChange: (e) => onChange(e.target.value), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: allLabel }),
+      options.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: o.value, children: o.label }, o.value))
+    ] })
+  ] });
+}
+function Segments({ value, options, onChange, label }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-segments", role: "tablist", "aria-label": label, children: options.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    "button",
+    {
+      type: "button",
+      role: "tab",
+      "aria-selected": String(value || "") === String(o.value),
+      className: String(value || "") === String(o.value) ? "is-on" : "",
+      onClick: () => onChange(o.value),
+      children: [
+        o.label,
+        o.count !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: o.count })
+      ]
+    },
+    o.value
+  )) });
+}
+function Toolbar({ children, end }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-toolbar", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-toolbar__main", children }),
+    end && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-toolbar__end", children: end })
+  ] });
+}
+function useGrid(prop = "grid", extraProps = []) {
+  const page = (0, import_inertia_react.usePage)();
+  const grid = page.props[prop] || { rows: [], meta: {} };
+  const [loading, setLoading] = (0, import_react.useState)(false);
+  const meta = grid.meta || {};
+  const params = (0, import_react.useCallback)(() => {
+    const p = {};
+    if (meta.q) p.q = meta.q;
+    if (meta.sort) p.sort = meta.sort;
+    if (meta.dir) p.dir = meta.dir;
+    if (meta.perPage && meta.perPage !== 20) p.per = meta.perPage;
+    if (meta.page && meta.page > 1) p.page = meta.page;
+    Object.entries(meta.filters || {}).forEach(([k, v]) => {
+      if (v) p[k] = v;
+    });
+    return p;
+  }, [meta]);
+  const go = (change, { resetPage = true } = {}) => {
+    const next = __spreadValues(__spreadValues({}, params()), change);
+    if (resetPage && !("page" in change)) delete next.page;
+    Object.keys(next).forEach((k) => {
+      if (next[k] === "" || next[k] === null || next[k] === void 0) delete next[k];
+    });
+    import_inertia.Inertia.get(window.location.pathname, next, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+      only: [prop, "badges", ...extraProps],
+      onStart: () => setLoading(true),
+      onFinish: () => setLoading(false)
+    });
+  };
+  const reload = () => import_inertia.Inertia.reload({ only: [prop, "badges", ...extraProps], preserveScroll: true, onStart: () => setLoading(true), onFinish: () => setLoading(false) });
+  return {
+    rows: grid.rows || [],
+    meta,
+    loading,
+    go,
+    reload,
+    filter: (name) => (meta.filters || {})[name] || "",
+    search: (q) => go({ q }),
+    sortBy: (key) => go({ sort: key, dir: meta.sort === key && meta.dir === "asc" ? "desc" : "asc" }, { resetPage: false }),
+    setPage: (n) => go({ page: n }, { resetPage: false }),
+    setPer: (n) => go({ per: n }),
+    exportUrl: (base) => {
+      const p = params();
+      delete p.page;
+      delete p.per;
+      const qs = new URLSearchParams(p).toString();
+      return qs ? `${base}?${qs}` : base;
+    }
+  };
+}
+function SortHeader({ col, meta, onSort }) {
+  if (!col.sort) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: col.label });
+  const on = meta.sort === col.sort;
+  const dir = on ? meta.dir : null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    "button",
+    {
+      type: "button",
+      className: cx("adm-th-sort", on && "is-on"),
+      onClick: () => onSort(col.sort),
+      "aria-label": `Sort by ${col.label}${on ? dir === "asc" ? ", currently ascending" : ", currently descending" : ""}`,
+      children: [
+        col.label,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${!on ? "fa-sort" : dir === "asc" ? "fa-sort-asc" : "fa-sort-desc"}`, "aria-hidden": "true" })
+      ]
+    }
+  );
+}
+function DataTable({ columns, rows, meta = {}, loading, onSort, rowKey = "id", empty, onRowClick, caption, selected, onSelect }) {
+  const selectable = !!onSelect;
+  const allOn = selectable && rows.length > 0 && rows.every((r) => selected.includes(r[rowKey]));
+  const skeleton = loading && rows.length === 0;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: cx("adm-table", loading && "is-loading"), "aria-busy": loading ? "true" : "false", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table__scroll", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
+      caption && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("caption", { className: "sr-only", children: caption }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        selectable && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { className: "adm-td-check", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "input",
+          {
+            type: "checkbox",
+            checked: allOn,
+            "aria-label": "Select all rows on this page",
+            onChange: () => onSelect(allOn ? selected.filter((id) => !rows.some((r) => r[rowKey] === id)) : Array.from(/* @__PURE__ */ new Set([...selected, ...rows.map((r) => r[rowKey])])))
+          }
+        ) }),
+        columns.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "th",
+          {
+            scope: "col",
+            className: cx(c.align === "right" && "is-right", c.hide && `hide-${c.hide}`, c.className),
+            "aria-sort": meta.sort && meta.sort === c.sort ? meta.dir === "asc" ? "ascending" : "descending" : void 0,
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SortHeader, { col: c, meta, onSort })
+          },
+          c.key
+        ))
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tbody", { children: [
+        skeleton && [0, 1, 2, 3, 4].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { className: "adm-skel-row", children: [
+          selectable && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {}),
+          columns.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: cx(c.hide && `hide-${c.hide}`), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-skel" }) }, c.key))
+        ] }, `sk${i}`)),
+        !skeleton && rows.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "tr",
+          {
+            className: cx(onRowClick && "is-clickable", selectable && selected.includes(r[rowKey]) && "is-selected"),
+            onClick: onRowClick ? (e) => {
+              if (!e.target.closest("a,button,input,select,label")) onRowClick(r);
+            } : void 0,
+            children: [
+              selectable && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "adm-td-check", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                "input",
+                {
+                  type: "checkbox",
+                  checked: selected.includes(r[rowKey]),
+                  "aria-label": "Select row",
+                  onChange: () => onSelect(selected.includes(r[rowKey]) ? selected.filter((x) => x !== r[rowKey]) : [...selected, r[rowKey]])
+                }
+              ) }),
+              columns.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: cx(c.align === "right" && "is-right", c.hide && `hide-${c.hide}`, c.className), "data-label": c.label, children: c.render ? c.render(r) : r[c.key] === null || r[c.key] === void 0 || r[c.key] === "" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) : String(r[c.key]) }, c.key))
+            ]
+          },
+          r[rowKey]
+        ))
+      ] })
+    ] }) }),
+    !skeleton && rows.length === 0 && (empty || /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EmptyState, { title: "Nothing here yet" }))
+  ] });
+}
+function Pagination({ meta = {}, onPage, onPer }) {
+  const { page = 1, pages = 1, total = 0, perPage = 20 } = meta;
+  if (!total) return null;
+  const from = (page - 1) * perPage + 1;
+  const to = Math.min(total, page * perPage);
+  const nums = [];
+  for (let i = Math.max(1, page - 2); i <= Math.min(pages, page + 2); i++) nums.push(i);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { className: "adm-pager", "aria-label": "Pagination", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-pager__info", children: [
+      from,
+      "\u2013",
+      to,
+      " of ",
+      total
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-pager__pages", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onPage(page - 1), disabled: page <= 1, "aria-label": "Previous page", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-left", "aria-hidden": "true" }) }),
+      nums[0] > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onPage(1), children: "1" }),
+        nums[0] > 2 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\u2026" })
+      ] }),
+      nums.map((n) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: n === page ? "is-on" : "", "aria-current": n === page ? "page" : void 0, onClick: () => onPage(n), children: n }, n)),
+      nums[nums.length - 1] < pages && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        nums[nums.length - 1] < pages - 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\u2026" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onPage(pages), children: pages })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onPage(page + 1), disabled: page >= pages, "aria-label": "Next page", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-right", "aria-hidden": "true" }) })
+    ] }),
+    onPer && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-pager__per", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Rows" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { value: perPage, onChange: (e) => onPer(Number(e.target.value)), children: [10, 20, 50, 100].map((n) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: n, children: n }, n)) })
+    ] })
+  ] });
+}
+function Drawer({ open, title, subtitle, onClose, children, footer, size = "md" }) {
+  const ref = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (!open) return void 0;
+    const esc = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", esc);
+    document.body.classList.add("adm-noscroll");
+    const t = setTimeout(() => {
+      const el = ref.current && ref.current.querySelector("input:not([type=hidden]),textarea,select,button");
+      if (el) el.focus();
+    }, 30);
+    return () => {
+      document.removeEventListener("keydown", esc);
+      document.body.classList.remove("adm-noscroll");
+      clearTimeout(t);
+    };
+  }, [open]);
+  if (!open) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-overlay", onMouseDown: (e) => {
+    if (e.target === e.currentTarget) onClose();
+  }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: cx("adm-drawer", `is-${size}`), role: "dialog", "aria-modal": "true", "aria-label": title, ref, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "adm-drawer__head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: title }),
+        subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: subtitle })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-iconbtn", onClick: onClose, "aria-label": "Close", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-drawer__body", children }),
+    footer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("footer", { className: "adm-drawer__foot", children: footer })
+  ] }) });
+}
+function useConfirm() {
+  const [state, setState] = (0, import_react.useState)(null);
+  const confirm = (opts) => new Promise((resolve) => setState(__spreadProps(__spreadValues({}, opts), { resolve })));
+  const close = (v) => {
+    if (state) state.resolve(v);
+    setState(null);
+  };
+  const node = state ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-overlay is-center", onMouseDown: (e) => {
+    if (e.target === e.currentTarget) close(false);
+  }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    "div",
+    {
+      className: "adm-dialog",
+      role: "alertdialog",
+      "aria-modal": "true",
+      "aria-labelledby": "adm-dialog-title",
+      onKeyDown: (e) => {
+        if (e.key === "Escape") close(false);
+      },
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "adm-dialog-title", children: state.title }),
+        state.body && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: state.body }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-dialog__actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, { onClick: () => close(false), children: state.cancelLabel || "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, { variant: state.danger ? "danger" : "dark", onClick: () => close(true), autoFocus: true, children: state.confirmLabel || "Confirm" })
+        ] })
+      ]
+    }
+  ) }) : null;
+  return [node, confirm];
+}
+const fmtDate = (s, withTime = false) => {
+  if (!s) return "\u2014";
+  const d = new Date(String(s).replace(" ", "T"));
+  if (Number.isNaN(d.getTime())) return String(s);
+  return d.toLocaleDateString("en-IN", __spreadValues({ day: "numeric", month: "short", year: "numeric" }, withTime ? { hour: "2-digit", minute: "2-digit" } : {}));
+};
+const money = (amount, currency) => {
+  const n = Number(amount);
+  if (amount === null || amount === void 0 || amount === "" || Number.isNaN(n)) return "\u2014";
+  const cur = String(currency || "inr").toUpperCase() === "USD" ? "USD" : "INR";
+  return n.toLocaleString(cur === "USD" ? "en-US" : "en-IN", { style: "currency", currency: cur, maximumFractionDigits: n % 1 ? 2 : 0 });
+};
+const plural = (n, one, many) => `${n} ${Number(n) === 1 ? one : many || `${one}s`}`;
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Admin/form.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var form_exports = {};
+__export(form_exports, {
+  ChoiceChips: () => ChoiceChips,
+  DropZone: () => DropZone,
+  Field: () => Field,
+  FormSection: () => FormSection,
+  ListEditor: () => ListEditor,
+  RichText: () => RichText,
+  Row2: () => Row2,
+  Row3: () => Row3,
+  SaveBar: () => SaveBar,
+  SelectField: () => SelectField,
+  SlugField: () => SlugField,
+  TagInput: () => TagInput,
+  TextField: () => TextField,
+  Toggle: () => Toggle,
+  check: () => check,
+  slugify: () => slugify,
+  uploadImage: () => uploadImage,
+  useForm: () => useForm,
+  useUnsavedGuard: () => useUnsavedGuard
+});
+module.exports = __toCommonJS(form_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_react_simple_wysiwyg = __webpack_require__("../../febuild/node_modules/react-simple-wysiwyg/lib/index.es.mjs");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+const uploadImage = (file) => {
+  const fd = new FormData();
+  fd.append("file", file);
+  return import_axios.default.post("/admin/api/media", fd).then((r) => r.data.url);
+};
+const RULES = {
+  required: (v) => (v === null || v === void 0 || String(v).trim() === "" || Array.isArray(v) && v.length === 0) && "This field is required.",
+  email: (v) => v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v).trim()) && "Enter a valid e-mail address.",
+  url: (v) => v && !/^https?:\/\/[^\s]+$/i.test(String(v).trim()) && "Enter a full link starting with http:// or https://",
+  slug: (v) => v && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(String(v)) && "Use lowercase letters, numbers and single dashes only.",
+  number: (v) => v !== "" && v !== null && v !== void 0 && Number.isNaN(Number(v)) && "Enter a number.",
+  date: (v) => v && Number.isNaN(new Date(String(v)).getTime()) && "Enter a valid date."
+};
+function check(value, rules = []) {
+  for (const r of rules) {
+    const [name, arg] = String(r).split(":");
+    if (name === "max") {
+      if (value && String(value).length > Number(arg)) return `Keep it under ${arg} characters.`;
+      continue;
+    }
+    if (name === "min") {
+      if (value !== "" && value !== null && value !== void 0 && Number(value) < Number(arg)) return `Must be at least ${arg}.`;
+      continue;
+    }
+    if (name === "minlen") {
+      if (value && String(value).length < Number(arg)) return `Use at least ${arg} characters.`;
+      continue;
+    }
+    const fn = RULES[name];
+    const msg = fn && fn(value);
+    if (msg) return msg;
+  }
+  return null;
+}
+function useForm(initial, rules = {}) {
+  const [values, setValues] = (0, import_react.useState)(initial);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [saved, setSaved] = (0, import_react.useState)(initial);
+  const rulesRef = (0, import_react.useRef)(rules);
+  rulesRef.current = rules;
+  const set = (name, value) => {
+    setValues((v) => __spreadProps(__spreadValues({}, v), { [name]: value }));
+    setErrors((e) => e[name] ? __spreadProps(__spreadValues({}, e), { [name]: null }) : e);
+  };
+  const setMany = (patch) => setValues((v) => __spreadValues(__spreadValues({}, v), patch));
+  const validateField = (name, value = values[name]) => {
+    const msg = check(value, rulesRef.current[name]);
+    setErrors((e) => __spreadProps(__spreadValues({}, e), { [name]: msg }));
+    return msg;
+  };
+  const validate = () => {
+    const next = {};
+    Object.keys(rulesRef.current).forEach((k) => {
+      const m = check(values[k], rulesRef.current[k]);
+      if (m) next[k] = m;
+    });
+    setErrors(next);
+    if (Object.keys(next).length) focusFirst(Object.keys(next));
+    return Object.keys(next).length === 0;
+  };
+  const focusFirst = (names) => {
+    setTimeout(() => {
+      const el = names.map((n) => document.querySelector(`[data-field="${n}"] input, [data-field="${n}"] textarea, [data-field="${n}"] select, [data-field="${n}"] [contenteditable], [data-field="${n}"] button`)).find(Boolean);
+      if (el) {
+        el.focus({ preventScroll: true });
+        el.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+    }, 20);
+  };
+  const submit = (request, { skipValidation = false } = {}) => {
+    if (!skipValidation && !validate()) return Promise.reject(Object.assign(new Error("invalid"), { invalid: true }));
+    setBusy(true);
+    return request().then((r) => {
+      setSaved(values);
+      return r;
+    }).catch((e) => {
+      if (e.response && e.response.status === 422 && e.response.data && e.response.data.errors) {
+        setErrors(e.response.data.errors);
+        focusFirst(Object.keys(e.response.data.errors));
+      }
+      throw e;
+    }).finally(() => setBusy(false));
+  };
+  const bind = (name, { type = "text" } = {}) => ({
+    id: `f-${name}`,
+    name,
+    value: values[name] === null || values[name] === void 0 ? "" : values[name],
+    onChange: (e) => set(name, type === "checkbox" ? e.target.checked : e.target.value),
+    onBlur: () => {
+      if (rulesRef.current[name]) validateField(name);
+    },
+    "aria-invalid": errors[name] ? "true" : void 0,
+    "aria-describedby": errors[name] ? `f-${name}-err` : void 0
+  });
+  const dirty = (0, import_react.useMemo)(() => JSON.stringify(values) !== JSON.stringify(saved), [values, saved]);
+  return {
+    values,
+    set,
+    setMany,
+    errors,
+    setErrors,
+    error: (n) => errors[n],
+    busy,
+    submit,
+    validate,
+    validateField,
+    bind,
+    dirty,
+    reset: (v) => {
+      setValues(v);
+      setSaved(v);
+      setErrors({});
+    },
+    markSaved: () => setSaved(values)
+  };
+}
+function useUnsavedGuard(dirty) {
+  (0, import_react.useEffect)(() => {
+    if (!dirty) return void 0;
+    const h = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    };
+    window.addEventListener("beforeunload", h);
+    return () => window.removeEventListener("beforeunload", h);
+  }, [dirty]);
+}
+function FormSection({ title, description, children, id, aside }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "adm-fsec", id, "aria-labelledby": id ? `${id}-t` : void 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-fsec__intro", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: id ? `${id}-t` : void 0, children: title }),
+      description && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: description }),
+      aside
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-fsec__body", children })
+  ] });
+}
+function Field({ label, name, hint, error, required, children, counter, max, className, optional }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("adm-field", error && "has-error", className), "data-field": name, children: [
+    label && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-field__label", htmlFor: `f-${name}`, children: [
+      label,
+      required && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-req", "aria-hidden": "true", children: " *" }),
+      optional && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-opt", children: "Optional" }),
+      max && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: (0, import_kit.cx)("adm-count", counter > max && "is-over"), "aria-live": "polite", children: [
+        counter || 0,
+        "/",
+        max
+      ] })
+    ] }),
+    children,
+    error ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-field__error", id: `f-${name}-err`, role: "alert", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-circle", "aria-hidden": "true" }),
+      error
+    ] }) : hint && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__hint", children: hint })
+  ] });
+}
+const Row2 = ({ children }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-grid2", children });
+const Row3 = ({ children }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-grid3", children });
+function TextField({ form, name, label, hint, required, max, type = "text", placeholder, rows, prefix, suffix, optional, inputProps = {} }) {
+  const b = form.bind(name);
+  const val = form.values[name] || "";
+  const input = rows ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", __spreadValues(__spreadProps(__spreadValues({}, b), { rows, placeholder, className: "adm-input" }), inputProps)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", __spreadValues(__spreadProps(__spreadValues({}, b), { type, placeholder, className: "adm-input" }), inputProps));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { label, name, hint, error: form.error(name), required, max, counter: String(val).length, optional, children: prefix || suffix ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-affix", children: [
+    prefix && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: prefix }),
+    input,
+    suffix && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: suffix })
+  ] }) : input });
+}
+function SelectField({ form, name, label, options, hint, required, placeholder = "Choose\u2026", optional }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { label, name, hint, error: form.error(name), required, optional, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", __spreadProps(__spreadValues({}, form.bind(name)), { className: "adm-input", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: placeholder }),
+    options.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: o.value, children: o.label }, o.value))
+  ] })) });
+}
+function Toggle({ checked, onChange, label, description, name, disabled }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: (0, import_kit.cx)("adm-toggle", disabled && "is-disabled"), "data-field": name, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", role: "switch", checked: !!checked, disabled, onChange: (e) => onChange(e.target.checked), "aria-checked": !!checked }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-toggle__track", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-toggle__text", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: label }),
+      description && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: description })
+    ] })
+  ] });
+}
+function ChoiceChips({ options, value = [], onChange, name, multiple = true }) {
+  const on = (v) => multiple ? value.map(String).includes(String(v)) : String(value) === String(v);
+  const flip = (v) => {
+    if (!multiple) return onChange(v);
+    return onChange(on(v) ? value.filter((x) => String(x) !== String(v)) : [...value, v]);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-chips", "data-field": name, role: "group", children: options.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: on(o.value) ? "is-on" : "", "aria-pressed": on(o.value), onClick: () => flip(o.value), children: [
+    on(o.value) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+    o.label
+  ] }, o.value)) });
+}
+const slugify = (s) => String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 90);
+function SlugField({ form, name = "slug", source, prefix, label = "URL slug", onCheck }) {
+  const [existing] = (0, import_react.useState)(!!form.values[name]);
+  const [manual, setManual] = (0, import_react.useState)(!!form.values[name]);
+  const [status, setStatus] = (0, import_react.useState)(null);
+  (0, import_react.useEffect)(() => {
+    if (!manual) form.set(name, slugify(form.values[source]));
+  }, [form.values[source]]);
+  (0, import_react.useEffect)(() => {
+    if (!onCheck || !form.values[name]) {
+      setStatus(null);
+      return void 0;
+    }
+    const t = setTimeout(() => onCheck(form.values[name]).then(setStatus).catch(() => setStatus(null)), 400);
+    return () => clearTimeout(t);
+  }, [form.values[name]]);
+  const taken = status && status.available === false;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    Field,
+    {
+      label,
+      name,
+      error: form.error(name) || (taken ? "This URL is already used." : null),
+      hint: existing ? "Changing the URL breaks links people already shared." : manual ? "Edited by hand." : "Created from the title; edit it if you want a shorter link.",
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-affix", children: [
+          prefix && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: prefix }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", __spreadProps(__spreadValues({}, form.bind(name)), { className: "adm-input", onChange: (e) => {
+            setManual(true);
+            form.set(name, slugify(e.target.value).slice(0, 90) || e.target.value.toLowerCase());
+          } })),
+          manual && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-affix__btn", onClick: () => {
+            setManual(false);
+            form.set(name, slugify(form.values[source]));
+          }, title: "Regenerate from the title", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-refresh", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Regenerate from the title" })
+          ] })
+        ] }),
+        taken && status.suggestion && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-linkbtn", onClick: () => {
+          setManual(true);
+          form.set(name, status.suggestion);
+        }, children: [
+          "Use \u201C",
+          status.suggestion,
+          "\u201D instead"
+        ] })
+      ]
+    }
+  );
+}
+function TagInput({ value = [], onChange, suggestions = [], placeholder = "Add a tag and press Enter", name, max = 20 }) {
+  const [text, setText] = (0, import_react.useState)("");
+  const [open, setOpen] = (0, import_react.useState)(false);
+  const add = (t) => {
+    const tag = String(t).trim().replace(/\s+/g, " ").slice(0, 60);
+    if (!tag || value.some((v) => v.toLowerCase() === tag.toLowerCase()) || value.length >= max) {
+      setText("");
+      return;
+    }
+    onChange([...value, tag]);
+    setText("");
+  };
+  const matches = suggestions.filter((s) => s.toLowerCase().includes(text.toLowerCase()) && !value.some((v) => v.toLowerCase() === s.toLowerCase())).slice(0, 8);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-tags", "data-field": name, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-tags__box", children: [
+      value.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-tag", children: [
+        t,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onChange(value.filter((x) => x !== t)), "aria-label": `Remove ${t}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+      ] }, t)),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        {
+          id: `f-${name}`,
+          value: text,
+          placeholder: value.length ? "" : placeholder,
+          onChange: (e) => {
+            setText(e.target.value);
+            setOpen(true);
+          },
+          onFocus: () => setOpen(true),
+          onBlur: () => setTimeout(() => setOpen(false), 150),
+          onKeyDown: (e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              add(text);
+            }
+            if (e.key === "Backspace" && !text && value.length) onChange(value.slice(0, -1));
+          }
+        }
+      )
+    ] }),
+    open && text && matches.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "adm-tags__list", role: "listbox", children: matches.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onMouseDown: (e) => {
+      e.preventDefault();
+      add(m);
+    }, children: m }) }, m)) })
+  ] });
+}
+function ListEditor({ value = [], onChange, placeholder = "Add an item", name, max = 30 }) {
+  const [text, setText] = (0, import_react.useState)("");
+  const move = (i, d) => {
+    const n = [...value];
+    const [x] = n.splice(i, 1);
+    n.splice(i + d, 0, x);
+    onChange(n);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-list", "data-field": name, children: [
+    value.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-list__row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-list__n", children: i + 1 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", value: v, "aria-label": `Item ${i + 1}`, onChange: (e) => onChange(value.map((x, j) => j === i ? e.target.value : x)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => move(i, -1), disabled: i === 0, "aria-label": "Move up", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-up", "aria-hidden": "true" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => move(i, 1), disabled: i === value.length - 1, "aria-label": "Move down", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-down", "aria-hidden": "true" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onChange(value.filter((_, j) => j !== i)), "aria-label": "Remove", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }) })
+    ] }, i)),
+    value.length < max && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-list__add", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        {
+          className: "adm-input",
+          value: text,
+          placeholder,
+          "aria-label": placeholder,
+          id: `f-${name}`,
+          onChange: (e) => setText(e.target.value),
+          onKeyDown: (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (text.trim()) {
+                onChange([...value, text.trim()]);
+                setText("");
+              }
+            }
+          }
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", onClick: () => {
+        if (text.trim()) {
+          onChange([...value, text.trim()]);
+          setText("");
+        }
+      }, children: "Add" })
+    ] })
+  ] });
+}
+const fmtSize = (b) => b > 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`;
+function DropZone({ name, value = [], onChange, existing = [], onRemoveExisting, multiple = false, kind = "image", maxMB, hint, label = "Drop files here or click to choose", error }) {
+  const [over, setOver] = (0, import_react.useState)(false);
+  const [local, setLocal] = (0, import_react.useState)(null);
+  const input = (0, import_react.useRef)(null);
+  const limit = maxMB || (kind === "pdf" ? 15 : 8);
+  const accept = kind === "pdf" ? "application/pdf,.pdf" : "image/jpeg,image/png,image/webp,image/gif";
+  const previews = (0, import_react.useMemo)(() => value.map((f) => ({ f, url: kind === "image" ? URL.createObjectURL(f) : null })), [value, kind]);
+  (0, import_react.useEffect)(() => () => previews.forEach((p) => p.url && URL.revokeObjectURL(p.url)), [previews]);
+  const take = (list) => {
+    const files = Array.from(list || []);
+    const bad = files.find((f) => kind === "pdf" ? !/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name) : !/^image\/(jpeg|png|webp|gif)$/.test(f.type));
+    if (bad) {
+      setLocal(kind === "pdf" ? `\u201C${bad.name}\u201D is not a PDF.` : `\u201C${bad.name}\u201D is not a JPG, PNG, WebP or GIF image.`);
+      return;
+    }
+    const big = files.find((f) => f.size > limit * 1024 * 1024);
+    if (big) {
+      setLocal(`\u201C${big.name}\u201D is ${fmtSize(big.size)}; the limit is ${limit} MB.`);
+      return;
+    }
+    setLocal(null);
+    onChange(multiple ? [...value, ...files] : files.slice(0, 1));
+  };
+  const shown = multiple || !value.length && !existing.length;
+  const err = local || error;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("adm-drop-wrap", err && "has-error"), "data-field": name, children: [
+    (existing.length > 0 || value.length > 0) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: (0, import_kit.cx)("adm-files", kind === "image" && "is-grid"), children: [
+      existing.map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+        kind === "image" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: x.url, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-files__name", children: kind === "pdf" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: x.url, target: "_blank", rel: "noopener noreferrer", children: x.name || "Current file" }) : x.name }),
+        onRemoveExisting && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onRemoveExisting(x), "aria-label": `Remove ${x.name || "file"}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }) })
+      ] }, `e${x.id || x.url}`)),
+      previews.map(({ f, url }, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "is-new", children: [
+        url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: url, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-files__name", children: [
+          f.name,
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+            fmtSize(f.size),
+            " \xB7 new"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onChange(value.filter((_, j) => j !== i)), "aria-label": `Remove ${f.name}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+      ] }, `n${i}`))
+    ] }),
+    shown && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "div",
+      {
+        className: (0, import_kit.cx)("adm-drop", over && "is-over"),
+        role: "button",
+        tabIndex: 0,
+        id: `f-${name}`,
+        "aria-describedby": err ? `f-${name}-err` : void 0,
+        onClick: () => input.current && input.current.click(),
+        onKeyDown: (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            input.current.click();
+          }
+        },
+        onDragOver: (e) => {
+          e.preventDefault();
+          setOver(true);
+        },
+        onDragLeave: () => setOver(false),
+        onDrop: (e) => {
+          e.preventDefault();
+          setOver(false);
+          take(e.dataTransfer.files);
+        },
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${kind === "pdf" ? "fa-file-pdf-o" : "fa-cloud-upload"}`, "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: label }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: hint || (kind === "pdf" ? `PDF up to ${limit} MB` : `JPG, PNG, WebP or GIF up to ${limit} MB${multiple ? " \xB7 several at once" : ""}`) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { ref: input, type: "file", accept, multiple, hidden: true, onChange: (e) => {
+            take(e.target.files);
+            e.target.value = "";
+          } })
+        ]
+      }
+    ),
+    !shown && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-linkbtn", onClick: () => input.current && input.current.click(), children: [
+      "Replace file",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { ref: input, type: "file", accept, hidden: true, onChange: (e) => {
+        take(e.target.files);
+        e.target.value = "";
+      } })
+    ] }),
+    err && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-field__error", id: `f-${name}-err`, role: "alert", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-circle", "aria-hidden": "true" }),
+      err
+    ] })
+  ] });
+}
+const fmt = (tag) => ({ $el }) => {
+  if ($el) $el.focus();
+  document.execCommand("formatBlock", false, tag);
+};
+const BtnH2 = (0, import_react_simple_wysiwyg.createButton)("Heading", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "H2" }), fmt("H2"));
+const BtnH3 = (0, import_react_simple_wysiwyg.createButton)("Subheading", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "H3" }), fmt("H3"));
+const BtnPara = (0, import_react_simple_wysiwyg.createButton)("Paragraph", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\xB6" }), fmt("P"));
+const BtnQuote = (0, import_react_simple_wysiwyg.createButton)("Quote", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-quote-left", "aria-hidden": "true" }), fmt("BLOCKQUOTE"));
+const wordCount = (html) => {
+  const text = String(html || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").trim();
+  return text ? text.split(/\s+/).length : 0;
+};
+function RichText({ value, onChange, name, placeholder = "Start writing\u2026", onUpload, minHeight = 280, error }) {
+  const [tab, setTab] = (0, import_react.useState)("write");
+  const [uploading, setUploading] = (0, import_react.useState)(false);
+  const fileRef = (0, import_react.useRef)(null);
+  const rangeRef = (0, import_react.useRef)(null);
+  const BtnImage = (0, import_react.useMemo)(() => (0, import_react_simple_wysiwyg.createButton)("Insert image", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o", "aria-hidden": "true" }), () => {
+    const sel = window.getSelection();
+    rangeRef.current = sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+    if (fileRef.current) fileRef.current.click();
+  }), []);
+  const insertImage = (file) => {
+    if (!file || !onUpload) return;
+    setUploading(true);
+    onUpload(file).then((url) => {
+      const el = document.querySelector(`[data-field="${name}"] .rsw-ce`);
+      if (el) el.focus();
+      const sel = window.getSelection();
+      if (rangeRef.current && sel) {
+        sel.removeAllRanges();
+        sel.addRange(rangeRef.current);
+      }
+      document.execCommand("insertHTML", false, `<img src="${url}" alt="">`);
+      if (el) onChange(el.innerHTML);
+    }).finally(() => setUploading(false));
+  };
+  const words = wordCount(value);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("adm-rte", error && "has-error"), "data-field": name, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rte__tabs", role: "tablist", "aria-label": "Editor mode", children: [
+      [["write", "Write"], ["preview", "Preview"], ["html", "HTML"]].map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", role: "tab", "aria-selected": tab === k, className: tab === k ? "is-on" : "", onClick: () => setTab(k), children: l }, k)),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-rte__meta", children: uploading ? "Uploading image\u2026" : `${words} words \xB7 ${Math.max(1, Math.round(words / 200))} min read` })
+    ] }),
+    tab === "write" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.EditorProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_react_simple_wysiwyg.Editor,
+      {
+        value: value || "",
+        onChange: (e) => onChange(e.target.value),
+        placeholder,
+        containerProps: { style: { minHeight } },
+        children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_react_simple_wysiwyg.Toolbar, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnUndo, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnRedo, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.Separator, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BtnPara, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BtnH2, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BtnH3, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BtnQuote, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.Separator, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnBold, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnItalic, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnUnderline, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnStrikeThrough, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.Separator, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnBulletList, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnNumberedList, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.Separator, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnLink, {}),
+          onUpload && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BtnImage, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react_simple_wysiwyg.BtnClearFormatting, {})
+        ] })
+      }
+    ) }),
+    tab === "preview" && (value && wordCount(value) + (String(value).includes("<img") ? 1 : 0) > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-prose adm-rte__preview", dangerouslySetInnerHTML: { __html: value } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-rte__preview adm-muted", children: "Nothing to preview yet." })),
+    tab === "html" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { className: "adm-input adm-rte__html", value: value || "", onChange: (e) => onChange(e.target.value), style: { minHeight }, "aria-label": "HTML source", spellCheck: "false" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { ref: fileRef, type: "file", accept: "image/jpeg,image/png,image/webp,image/gif", hidden: true, onChange: (e) => {
+      insertImage(e.target.files[0]);
+      e.target.value = "";
+    } })
+  ] });
+}
+function SaveBar({ dirty, busy, onSave, saveLabel = "Save changes", children, status }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("adm-savebar", dirty && "is-dirty"), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-savebar__status", "aria-live": "polite", children: busy ? "Saving\u2026" : dirty ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "adm-badge__dot is-amber", "aria-hidden": "true" }),
+      "Unsaved changes"
+    ] }) : status || /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+      "All changes saved"
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-savebar__actions", children: [
+      children,
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", onClick: onSave, busy, icon: "fa-check", children: saveLabel })
+    ] })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Admin/Curriculum.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Curriculum_exports = {};
+__export(Curriculum_exports, {
+  default: () => Curriculum
+});
+module.exports = __toCommonJS(Curriculum_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __webpack_require__("./resources/js/Components/Admin/AdminLayout.js");
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+function Curriculum({ courseId, initial, toast, confirm, noun = "course", onChange }) {
+  const [data, setData] = (0, import_react.useState)(initial || { modules: [], projects: [] });
+  const [panel, setPanel] = (0, import_react.useState)(null);
+  const [open, setOpen] = (0, import_react.useState)(() => new Set(initial && initial.modules[0] ? [initial.modules[0].id] : []));
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const api = `/admin/api/courses/${courseId}`;
+  const apply = (r) => {
+    setData(r.data.curriculum);
+    if (onChange) onChange(r.data.curriculum);
+    toast(r.data.message);
+    return r;
+  };
+  const fail = (e) => toast((0, import_AdminLayout.errorText)(e), "error");
+  const toggle = (id) => setOpen((s) => {
+    const n = new Set(s);
+    n.has(id) ? n.delete(id) : n.add(id);
+    return n;
+  });
+  const move = (kind, id, direction) => {
+    setBusy(`${kind}${id}`);
+    import_axios.default.post(`${api}/${kind}s/${id}/move`, { direction }).then(apply).catch(fail).finally(() => setBusy(null));
+  };
+  const remove = async (kind, item) => {
+    const body = kind === "module" ? `Its ${item.lessons.length} lesson(s), their tasks and students' progress on them are removed too.` : kind === "lesson" ? "Its practice tasks and students\u2019 progress on this lesson are removed too." : "This cannot be undone.";
+    if (!await confirm({ title: `Delete \u201C${item.title}\u201D?`, body, confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`${api}/${kind}s/${item.id}`).then(apply).catch(fail);
+  };
+  const lessons = data.modules.reduce((n, m) => n + m.lessons.length, 0);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-curr", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-toolbar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-toolbar__main", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: data.modules.length }),
+        " module",
+        data.modules.length === 1 ? "" : "s",
+        " \xB7 ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: lessons }),
+        " lesson",
+        lessons === 1 ? "" : "s",
+        " \xB7 ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: data.projects.length }),
+        " project",
+        data.projects.length === 1 ? "" : "s"
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-toolbar__end", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-plus", onClick: () => setPanel({ type: "module", item: null }), children: "Add module" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_kit.Button,
+          {
+            variant: "dark",
+            icon: "fa-plus",
+            disabled: !data.modules.length,
+            onClick: () => setPanel({ type: "lesson", item: null, moduleId: data.modules[data.modules.length - 1].id }),
+            title: data.modules.length ? void 0 : "Add a module first",
+            children: "Add lesson"
+          }
+        )
+      ] })
+    ] }),
+    data.modules.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.EmptyState, { icon: "fa-list-ol", title: "No modules yet", action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setPanel({ type: "module", item: null }), children: "Add the first module" }), children: [
+      "Group the ",
+      noun,
+      " into modules (for example \u201CWeek 1: Materials\u201D), then add lessons to each module."
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "adm-mods", children: data.modules.map((m, mi) => {
+      const isOpen = open.has(m.id);
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: `adm-mod ${isOpen ? "is-open" : ""}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-mod__head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-mod__toggle", onClick: () => toggle(m.id), "aria-expanded": isOpen, "aria-controls": `mod-${m.id}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa fa-angle-${isOpen ? "down" : "right"}`, "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-mod__num", children: mi + 1 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-mod__title", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: m.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                m.lessons.length,
+                " lesson",
+                m.lessons.length === 1 ? "" : "s",
+                m.duration ? ` \xB7 ${m.duration}` : ""
+              ] })
+            ] })
+          ] }),
+          !m.status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Hidden" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-up", disabled: mi === 0, busy: busy === `module${m.id}`, onClick: () => move("module", m.id, "up"), "aria-label": `Move ${m.title} up`, title: "Move up" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-down", disabled: mi === data.modules.length - 1, onClick: () => move("module", m.id, "down"), "aria-label": `Move ${m.title} down`, title: "Move down" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-pencil", onClick: () => setPanel({ type: "module", item: m }), "aria-label": `Edit ${m.title}`, title: "Edit module" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove("module", m), "aria-label": `Delete ${m.title}`, title: "Delete module" })
+          ] })
+        ] }),
+        isOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "adm-lessons", id: `mod-${m.id}`, children: [
+          m.lessons.map((l, li) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "adm-lesson", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-lesson__num", children: li + 1 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-lesson__title", onClick: () => setPanel({ type: "lesson", item: l, moduleId: m.id }), children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: l.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                l.tasks.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-pencil-square-o", "aria-hidden": "true" }),
+                  " ",
+                  l.tasks.length,
+                  " task",
+                  l.tasks.length === 1 ? "" : "s"
+                ] }),
+                l.pdf && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o", "aria-hidden": "true" }),
+                  " notes"
+                ] }),
+                !l.description && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-warn", children: "No lesson notes yet" })
+              ] })
+            ] }),
+            !l.status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Hidden" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-up", disabled: li === 0, onClick: () => move("lesson", l.id, "up"), "aria-label": `Move ${l.title} up`, title: "Move up" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-down", disabled: li === m.lessons.length - 1, onClick: () => move("lesson", l.id, "down"), "aria-label": `Move ${l.title} down`, title: "Move down" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove("lesson", l), "aria-label": `Delete ${l.title}`, title: "Delete lesson" })
+            ] })
+          ] }, l.id)),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: "adm-lesson is-add", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-linkbtn", onClick: () => setPanel({ type: "lesson", item: null, moduleId: m.id }), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-plus", "aria-hidden": "true" }),
+            " Add a lesson to this module"
+          ] }) })
+        ] })
+      ] }, m.id);
+    }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Card,
+      {
+        title: "Course projects",
+        subtitle: "Bigger pieces students submit for feedback and their certificate.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", onClick: () => setPanel({ type: "project", item: null }), children: "Add project" }),
+        children: data.projects.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "No projects yet." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "adm-plain", children: data.projects.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "adm-lesson", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush adm-lesson__num", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-lesson__title", onClick: () => setPanel({ type: "project", item: p }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: p.title }) }),
+          !p.status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Hidden" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove("project", p), "aria-label": `Delete ${p.title}`, title: "Delete project" })
+        ] }, p.id)) })
+      }
+    ),
+    panel && panel.type === "module" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      ModulePanel,
+      {
+        api,
+        item: panel.item,
+        onClose: () => setPanel(null),
+        toast,
+        onSaved: (r) => {
+          const before = data.modules.map((m) => m.id);
+          apply(r);
+          r.data.curriculum.modules.forEach((m) => {
+            if (!before.includes(m.id)) setOpen((s) => /* @__PURE__ */ new Set([...s, m.id]));
+          });
+          setPanel(null);
+        }
+      }
+    ),
+    panel && panel.type === "lesson" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      LessonPanel,
+      {
+        api,
+        item: panel.item,
+        moduleId: panel.moduleId,
+        modules: data.modules,
+        toast,
+        confirm,
+        onClose: () => setPanel(null),
+        onSaved: (r, close, moduleId) => {
+          apply(r);
+          if (moduleId) setOpen((s) => /* @__PURE__ */ new Set([...s, Number(moduleId)]));
+          if (close) setPanel(null);
+          else {
+            const l = findLesson(r.data.curriculum, panel.item ? panel.item.id : null);
+            if (l) setPanel(__spreadProps(__spreadValues({}, panel), { item: l }));
+          }
+        }
+      }
+    ),
+    panel && panel.type === "project" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProjectPanel, { api, item: panel.item, onClose: () => setPanel(null), onSaved: (r) => {
+      apply(r);
+      setPanel(null);
+    }, toast })
+  ] });
+}
+const findLesson = (cur, id) => {
+  let found = null;
+  cur.modules.forEach((m) => m.lessons.forEach((l) => {
+    if (l.id === id) found = l;
+  }));
+  return found;
+};
+const reject = (toast) => (e) => toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error");
+function ModulePanel({ api, item, onClose, onSaved, toast }) {
+  const form = (0, import_form.useForm)({ title: item ? item.title : "", duration: item ? item.duration : "", status: item ? item.status : true }, { title: ["required", "max:255"] });
+  const save = () => form.submit(() => import_axios.default.post(`${api}/modules`, __spreadProps(__spreadValues({}, form.values), { id: item ? item.id : void 0 }))).then(onSaved).catch(reject(toast));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Drawer,
+    {
+      open: true,
+      title: item ? "Edit module" : "New module",
+      size: "sm",
+      onClose,
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy: form.busy, onClick: save, icon: "fa-check", children: item ? "Save module" : "Add module" })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-stack", onSubmit: (e) => {
+        e.preventDefault();
+        save();
+      }, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "title", label: "Module title", required: true, max: 255, placeholder: "e.g. Week 1: Materials and first washes" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "duration", label: "Duration", placeholder: "e.g. 1 week", optional: true }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "status", checked: form.values.status, onChange: (x) => form.set("status", x), label: "Visible to students" })
+      ] })
+    }
+  );
+}
+function LessonPanel({ api, item, moduleId, modules, onClose, onSaved, toast, confirm }) {
+  const form = (0, import_form.useForm)(
+    { title: item ? item.title : "", module_id: String(moduleId || ""), description: item ? item.description : "", status: item ? item.status : true },
+    { title: ["required", "max:255"], module_id: ["required"] }
+  );
+  const [pdf, setPdf] = (0, import_react.useState)([]);
+  const [removePdf, setRemovePdf] = (0, import_react.useState)(false);
+  const save = (close = true) => {
+    const fd = new FormData();
+    if (item) fd.append("id", item.id);
+    fd.append("title", form.values.title);
+    fd.append("module_id", form.values.module_id);
+    fd.append("description", form.values.description || "");
+    fd.append("status", form.values.status ? "1" : "0");
+    if (pdf[0]) fd.append("pdf", pdf[0]);
+    if (removePdf) fd.append("remove_pdf", "1");
+    return form.submit(() => import_axios.default.post(`${api}/lessons`, fd)).then((r) => {
+      setPdf([]);
+      setRemovePdf(false);
+      onSaved(r, close, form.values.module_id);
+    }).catch(reject(toast));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Drawer,
+    {
+      open: true,
+      size: "lg",
+      title: item ? "Edit lesson" : "New lesson",
+      subtitle: item ? void 0 : "Students see lessons in the order of this list.",
+      onClose,
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy: form.busy, onClick: () => save(true), icon: "fa-check", children: item ? "Save lesson" : "Add lesson" })
+      ] }),
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-stack", onSubmit: (e) => {
+          e.preventDefault();
+          save(true);
+        }, noValidate: true, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "title", label: "Lesson title", required: true, max: 255, placeholder: "e.g. Flat and graded washes" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Module", name: "module_id", required: true, error: form.error("module_id"), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", __spreadProps(__spreadValues({ className: "adm-input" }, form.bind("module_id")), { children: modules.map((m, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: String(m.id), children: [
+            i + 1,
+            ". ",
+            m.title
+          ] }, m.id)) })) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Lesson notes", name: "description", hint: "Shown in the student's lesson view under the video.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "description", value: form.values.description, onChange: (x) => form.set("description", x), minHeight: 220, onUpload: import_form.uploadImage }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Notes PDF", name: "pdf", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.DropZone,
+            {
+              name: "pdf",
+              kind: "pdf",
+              value: pdf,
+              onChange: setPdf,
+              error: form.error("pdf"),
+              existing: item && item.pdf && !removePdf ? [__spreadValues({ id: "pdf" }, item.pdf)] : [],
+              onRemoveExisting: () => setRemovePdf(true)
+            }
+          ) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "status", checked: form.values.status, onChange: (x) => form.set("status", x), label: "Visible to students" })
+        ] }),
+        item && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tasks, { api, lesson: item, toast, confirm, onChanged: (r) => onSaved(r, false) }),
+        !item && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-gap", children: "Save the lesson to add practice tasks to it." })
+      ]
+    }
+  );
+}
+function Tasks({ api, lesson, toast, confirm, onChanged }) {
+  const [edit, setEdit] = (0, import_react.useState)(null);
+  const form = (0, import_form.useForm)({ title: "", description: "", status: true }, { title: ["required", "max:255"] });
+  const start = (t) => {
+    setEdit(t ? t.id : "new");
+    form.reset({ title: t ? t.title : "", description: t ? t.description : "", status: t ? t.status : true });
+  };
+  const save = () => form.submit(() => import_axios.default.post(`${api}/tasks`, __spreadProps(__spreadValues({}, form.values), { lesson_id: lesson.id, id: edit === "new" ? void 0 : edit }))).then((r) => {
+    setEdit(null);
+    onChanged(r);
+  }).catch(reject(toast));
+  const remove = async (t) => {
+    if (!await confirm({ title: `Delete the task \u201C${t.title}\u201D?`, confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`${api}/tasks/${t.id}`).then(onChanged).catch(reject(toast));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-tasks", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "Practice tasks" }),
+    lesson.tasks.length === 0 && edit === null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "No tasks. Tasks ask students to practise and send their work for feedback." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "adm-plain", children: lesson.tasks.map((t) => edit === t.id ? null : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "adm-task", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.title }),
+        !t.status && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Hidden" })
+        ] }),
+        t.description && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: t.description })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-pencil", onClick: () => start(t), "aria-label": `Edit task ${t.title}`, title: "Edit" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove(t), "aria-label": `Delete task ${t.title}`, title: "Delete" })
+      ] })
+    ] }, t.id)) }),
+    edit !== null ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-task is-edit", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "title", label: "Task", required: true, max: 255, placeholder: "e.g. Paint three wash swatches" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "description", label: "Instructions", rows: 3, optional: true }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "task-status", checked: form.values.status, onChange: (x) => form.set("status", x), label: "Visible to students" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", size: "sm", busy: form.busy, onClick: save, icon: "fa-check", children: edit === "new" ? "Add task" : "Save task" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => setEdit(null), children: "Cancel" })
+      ] })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", onClick: () => start(null), children: "Add a task" })
+  ] });
+}
+function ProjectPanel({ api, item, onClose, onSaved, toast }) {
+  const form = (0, import_form.useForm)({ title: item ? item.title : "", description: item ? item.description : "", status: item ? item.status : true }, { title: ["required", "max:255"] });
+  const save = () => form.submit(() => import_axios.default.post(`${api}/projects`, __spreadProps(__spreadValues({}, form.values), { id: item ? item.id : void 0 }))).then(onSaved).catch(reject(toast));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Drawer,
+    {
+      open: true,
+      size: "lg",
+      title: item ? "Edit project" : "New project",
+      onClose,
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy: form.busy, onClick: save, icon: "fa-check", children: item ? "Save project" : "Add project" })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-stack", onSubmit: (e) => {
+        e.preventDefault();
+        save();
+      }, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "title", label: "Project title", required: true, max: 255, placeholder: "e.g. Final landscape" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Brief", name: "description", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "description", value: form.values.description, onChange: (x) => form.set("description", x), minHeight: 200 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "status", checked: form.values.status, onChange: (x) => form.set("status", x), label: "Visible to students" })
+      ] })
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Courses/Index.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Index_exports = {};
+__export(Index_exports, {
+  default: () => CoursesIndex
+});
+module.exports = __toCommonJS(Index_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+function CoursesIndex() {
+  const { kind, mediums = [], counts = {} } = (0, import_inertia_react.usePage)().props;
+  const g = (0, import_kit.useGrid)("grid", ["counts"]);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const [busyId, setBusyId] = (0, import_react.useState)(null);
+  const base = kind === "workshop" ? "/admin/workshop" : "/admin/courses";
+  const noun = kind === "workshop" ? "workshop" : "course";
+  const Noun = kind === "workshop" ? "Workshop" : "Course";
+  const setStatus = (row, live) => {
+    setBusyId(row.id);
+    import_axios.default.post(`/admin/api/courses/${row.id}/status`, { status: live }).then((r) => {
+      toast(r.data.message);
+      g.reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusyId(null));
+  };
+  const duplicate = async (row) => {
+    if (!await confirm({ title: `Duplicate \u201C${row.title}\u201D?`, body: `A hidden copy with the same details, price and curriculum is created, starting in two weeks. You can then change the dates and publish it.`, confirmLabel: "Duplicate" })) return;
+    setBusyId(row.id);
+    import_axios.default.post(`/admin/api/courses/${row.id}/duplicate`).then((r) => {
+      toast(r.data.message);
+      import_inertia.Inertia.visit(r.data.editUrl);
+    }).catch((e) => {
+      toast((0, import_AdminLayout.errorText)(e), "error");
+      setBusyId(null);
+    });
+  };
+  const remove = async (row) => {
+    if (!await confirm({ title: `Delete \u201C${row.title}\u201D?`, body: `This removes the ${noun}, its photos, modules, lessons and tasks for good. ${Number(row.enrolled) > 0 ? "" : "Nobody has paid for it yet."}`, confirmLabel: "Delete", danger: true })) return;
+    setBusyId(row.id);
+    import_axios.default.delete(`/admin/api/courses/${row.id}`).then((r) => {
+      toast(r.data.message);
+      g.reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusyId(null));
+  };
+  const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+  const columns = [
+    { key: "title", label: Noun, sort: "title", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell", children: [
+      r.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: r.image, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-thumb", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o", "aria-hidden": "true" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `${base}/edit/${r.id}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.title }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: [r.medium, r.instructor && `by ${r.instructor}`].filter(Boolean).join(" \xB7 ") || r.slug })
+      ] })
+    ] }) },
+    { key: "start", label: "Starts", sort: "start", hide: "md", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+      (0, import_kit.fmtDate)(r.course_start_date),
+      r.course_start_date && String(r.course_start_date).slice(0, 10) < today && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: "Finished" })
+      ] })
+    ] }) },
+    { key: "price", label: "Price", sort: "price", hide: "lg", render: (r) => Number(r.is_free_course) === 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "blue", children: "Free" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+      (0, import_kit.money)(r.price_inr, "inr"),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: (0, import_kit.money)(r.price_usd, "usd") })
+    ] }) },
+    { key: "curriculum", label: "Curriculum", hide: "lg", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted", children: [
+      r.modules,
+      " modules \xB7 ",
+      r.lessons,
+      " lessons"
+    ] }) },
+    { key: "enrolled", label: "Students", sort: "enrolled", align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.enrolled }) },
+    { key: "status", label: "Status", render: (r) => Number(r.status) === 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", dot: true, children: "Live" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "grey", dot: true, children: "Hidden" }) },
+    { key: "actions", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Actions" }), align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `${base}/edit/${r.id}`, icon: "fa-pencil", children: "Edit" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_kit.Button,
+        {
+          size: "sm",
+          variant: "ghost",
+          icon: Number(r.status) === 1 ? "fa-eye-slash" : "fa-eye",
+          busy: busyId === r.id,
+          onClick: () => setStatus(r, Number(r.status) !== 1),
+          title: Number(r.status) === 1 ? "Hide from the site" : "Publish",
+          "aria-label": Number(r.status) === 1 ? `Hide ${r.title}` : `Publish ${r.title}`
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-files-o", onClick: () => duplicate(r), title: "Duplicate", "aria-label": `Duplicate ${r.title}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", variant: "ghost", icon: "fa-external-link", href: `/course/${r.slug}`, target: "_blank", rel: "noopener noreferrer", title: "View on site", "aria-label": `View ${r.title} on the site` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove(r), title: "Delete", "aria-label": `Delete ${r.title}` })
+    ] }) }
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: kind === "workshop" ? "Workshops" : "Courses", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title: kind === "workshop" ? "Workshops" : "Courses",
+        subtitle: kind === "workshop" ? "Short, hands-on sessions. Create one, add its lessons and publish it when it is ready." : "Multi-week live courses: details, pricing, media and the curriculum students follow.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Button, { as: "a", variant: "brand", icon: "fa-plus", href: `${base}/create`, children: [
+          "New ",
+          noun
+        ] })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Segments,
+      {
+        label: "When",
+        value: g.filter("when"),
+        onChange: (v) => g.go({ when: v }),
+        options: [{ value: "", label: "All", count: counts.all }, { value: "upcoming", label: "Upcoming", count: counts.upcoming }, { value: "past", label: "Finished", count: counts.past }]
+      }
+    ), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: `Search ${noun}s by title` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Status", value: g.filter("status"), onChange: (v) => g.go({ status: v }), options: [{ value: "live", label: "Live" }, { value: "hidden", label: `Hidden (${counts.hidden || 0})` }] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Medium", value: g.filter("medium"), onChange: (v) => g.go({ medium: v }), options: mediums.map((m) => ({ value: String(m.value), label: m.label })) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        columns,
+        rows: g.rows,
+        meta: g.meta,
+        loading: g.loading,
+        onSort: g.sortBy,
+        caption: `${Noun}s`,
+        empty: g.meta.q || Object.keys(g.meta.filters || {}).length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-search", title: `No ${noun}s match`, action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => g.go({ q: "", status: "", medium: "", when: "" }), children: "Clear filters" }), children: "Try a different search or filter." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-graduation-cap", title: `No ${noun}s yet`, action: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Button, { as: "a", variant: "brand", icon: "fa-plus", href: `${base}/create`, children: [
+          "Create the first ",
+          noun
+        ] }), children: "Add the details, price and lessons; publish when it is ready." })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer }),
+    dialog,
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Courses/Editor.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Editor_exports = {};
+__export(Editor_exports, {
+  default: () => CourseEditor
+});
+module.exports = __toCommonJS(Editor_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+var import_Curriculum = __toESM(__webpack_require__("./resources/js/Components/Admin/Curriculum.js"));
+const LISTS = [
+  ["course_highlights", "Highlights", "Short selling points shown near the top of the page."],
+  ["course_learn", "What students will learn", "One skill or outcome per line."],
+  ["course_for", "Who it is for", ""],
+  ["course_not_for", "Who it is not for", ""],
+  ["course_problems_solved", "Problems it solves", ""],
+  ["course_deliverables", "What students make", "Projects or pieces they finish during the course."]
+];
+const INCLUDES = [
+  ["certificate", "Certificate of completion"],
+  ["study_material_access", "Study material access"],
+  ["medium", "Show the medium"],
+  ["age", "Show the age group"],
+  ["skills", "Show the skill level"]
+];
+const blank = (kind, me) => ({
+  kind,
+  title: "",
+  slug: "",
+  sub_title: "",
+  status: false,
+  is_free_course: false,
+  admin_id: me ? String(me) : "",
+  medium_id: "",
+  genre_ids: [],
+  skill_id: "",
+  age_group: "",
+  course_based: "instructor_based",
+  course_start_date: "",
+  duration: "",
+  sessions: "",
+  time_required: "",
+  mini_projects: "",
+  course_modules: "",
+  introduction: "",
+  introduction_details: "",
+  summary: "",
+  summary_details: "",
+  schedule: "",
+  schedule_details: "",
+  course_outcome: "",
+  course_prerequisites: "",
+  includes: { certificate: kind !== "workshop", study_material_access: true, medium: true, age: true, skills: true },
+  course_highlights: [],
+  course_learn: [],
+  course_for: [],
+  course_not_for: [],
+  course_problems_solved: [],
+  course_deliverables: [],
+  price_inr: "",
+  price_usd: "",
+  videos: []
+});
+const editable = (c) => {
+  const v = __spreadValues({}, c);
+  ["id", "photos", "schedule_pdf", "enrolled", "public_url", "updated_at"].forEach((k) => delete v[k]);
+  return v;
+};
+function CourseEditor() {
+  const { kind, course, curriculum, mediums = [], genres = [], skills = [], instructors = [], me } = (0, import_inertia_react.usePage)().props;
+  const [saved, setSaved] = (0, import_react.useState)(course);
+  const isNew = !saved;
+  const noun = kind === "workshop" ? "workshop" : "course";
+  const base = kind === "workshop" ? "/admin/workshop" : "/admin/courses";
+  const [tab, setTab] = (0, import_react.useState)(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "curriculum" && course ? "curriculum" : "details");
+  const [cur, setCur] = (0, import_react.useState)(curriculum);
+  const [photos, setPhotos] = (0, import_react.useState)([]);
+  const [schedule, setSchedule] = (0, import_react.useState)([]);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const form = (0, import_form.useForm)(course ? editable(course) : blank(kind, me), {
+    title: ["required", "max:255"],
+    slug: ["slug", "max:90"],
+    sub_title: ["max:500"],
+    course_start_date: (course ? !course.is_free_course : true) ? ["date"] : [],
+    price_inr: ["number", "min:0"],
+    price_usd: ["number", "min:0"],
+    duration: ["number"],
+    sessions: ["number"],
+    time_required: ["number"],
+    mini_projects: ["number"]
+  });
+  const v = form.values;
+  (0, import_form.useUnsavedGuard)(form.dirty || photos.length > 0 || schedule.length > 0);
+  const save = () => {
+    const extra = {};
+    if (!v.is_free_course) {
+      if (!v.course_start_date) extra.course_start_date = "Choose when the first session starts.";
+      if (v.price_inr === "" || v.price_inr === null) extra.price_inr = "Enter the price in rupees.";
+      if (v.price_usd === "" || v.price_usd === null) extra.price_usd = "Enter the price in US dollars.";
+    }
+    const ok = form.validate();
+    if (!ok || Object.keys(extra).length) {
+      form.setErrors((prev) => __spreadValues(__spreadValues({}, prev), extra));
+      toast("Please fill in the highlighted fields.", "error");
+      if (ok) {
+        const el = document.querySelector(`[data-field="${Object.keys(extra)[0]}"] input`);
+        if (el) {
+          el.focus();
+          el.scrollIntoView({ block: "center" });
+        }
+      }
+      return;
+    }
+    const fd = new FormData();
+    fd.append("data", JSON.stringify(v));
+    photos.forEach((f) => fd.append("photos", f));
+    if (schedule[0]) fd.append("schedule_pdf", schedule[0]);
+    form.submit(() => import_axios.default.post(isNew ? "/admin/api/courses" : `/admin/api/courses/${saved.id}`, fd), { skipValidation: true }).then((r) => {
+      if (isNew) {
+        toast(r.data.message);
+        import_inertia.Inertia.visit(`${r.data.editUrl}?tab=curriculum`);
+        return;
+      }
+      setSaved(r.data.course);
+      form.reset(editable(r.data.course));
+      setPhotos([]);
+      setSchedule([]);
+      toast(r.data.message);
+    }).catch((e) => toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const removePhoto = async (p) => {
+    if (!await confirm({ title: "Remove this photo?", body: "It disappears from the course page straight away.", confirmLabel: "Remove", danger: true })) return;
+    import_axios.default.delete(`/admin/api/courses/${saved.id}/photos/${p.id}`).then((r) => {
+      setSaved(__spreadProps(__spreadValues({}, saved), { photos: saved.photos.filter((x) => x.id !== p.id) }));
+      toast(r.data.message);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const removeSchedule = async () => {
+    if (!await confirm({ title: "Remove the schedule PDF?", confirmLabel: "Remove", danger: true })) return;
+    import_axios.default.delete(`/admin/api/courses/${saved.id}/schedule`).then((r) => {
+      setSaved(__spreadProps(__spreadValues({}, saved), { schedule_pdf: null }));
+      toast(r.data.message);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const setVideo = (i, k, val) => form.set("videos", v.videos.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { [k]: val }) : x));
+  const title = isNew ? `New ${noun}` : saved.title || `Untitled ${noun}`;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title, crumbs: [{ label: "Learning" }, { href: base, label: kind === "workshop" ? "Workshops" : "Courses" }, { label: isNew ? `New ${noun}` : saved.title }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        eyebrow: kind === "workshop" ? "Workshop" : "Course",
+        title,
+        subtitle: isNew ? "Fill in the basics and save; you can add modules and lessons right after." : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          saved.status ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", dot: true, children: "Live on the site" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { dot: true, children: "Hidden" }),
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted", children: [
+            "\xB7 ",
+            saved.enrolled,
+            " enrolled"
+          ] })
+        ] }),
+        actions: !isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", href: saved.public_url, target: "_blank", rel: "noopener noreferrer", icon: "fa-external-link", children: "View page" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-tabs", role: "tablist", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", role: "tab", "aria-selected": tab === "details", className: tab === "details" ? "is-on" : "", onClick: () => setTab("details"), children: "Details" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+        "button",
+        {
+          type: "button",
+          role: "tab",
+          "aria-selected": tab === "curriculum",
+          className: tab === "curriculum" ? "is-on" : "",
+          disabled: isNew,
+          onClick: () => setTab("curriculum"),
+          title: isNew ? "Save first to add modules and lessons" : void 0,
+          children: [
+            "Curriculum",
+            !isNew && cur && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: cur.modules.length })
+          ]
+        }
+      )
+    ] }),
+    tab === "curriculum" && !isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Curriculum.default, { courseId: saved.id, initial: cur, toast, confirm, noun, onChange: setCur }),
+    tab === "details" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-form", onSubmit: (e) => {
+      e.preventDefault();
+      save();
+    }, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "basics", title: "Basics", description: `The name and summary students see in listings and at the top of the ${noun} page.`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "title", label: "Title", required: true, max: 255, placeholder: kind === "workshop" ? "e.g. Weekend Watercolour Florals" : "e.g. Watercolour Landscapes for Beginners" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SlugField, { form, source: "title", prefix: "/course/", onCheck: (s) => import_axios.default.get("/admin/api/slug", { params: { table: "courses", slug: s, except: saved ? saved.id : 0 } }).then((r) => r.data) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "sub_title", label: "Subtitle", max: 500, rows: 2, hint: "One or two sentences under the title.", optional: true }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Type", name: "kind", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "adm-input", id: "f-kind", value: v.kind, onChange: (e) => form.set("kind", e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "course", children: "Course (several weeks)" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "workshop", children: "Workshop (short session)" })
+          ] }) }),
+          instructors.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SelectField, { form, name: "admin_id", label: "Instructor", options: instructors.map((i) => ({ value: String(i.value), label: i.label })), placeholder: "Choose an instructor" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Instructor", name: "admin_id", hint: "Your courses are always listed under your name.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", value: "You", disabled: true }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "status", checked: v.status, onChange: (x) => form.set("status", x), label: "Visible on the site", description: v.status ? "Students can find and buy it." : "Hidden until you switch this on." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "category", title: "Category", description: "Used for filters on the courses page and shown in the course facts.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SelectField, { form, name: "medium_id", label: "Medium", options: mediums.map((m) => ({ value: String(m.value), label: m.label })) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SelectField, { form, name: "skill_id", label: "Skill level", options: skills.map((m) => ({ value: String(m.value), label: m.label })), optional: true })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Genres", name: "genre_ids", hint: "Pick all that apply.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.ChoiceChips, { name: "genre_ids", options: genres.map((g) => ({ value: String(g.value), label: g.label })), value: v.genre_ids, onChange: (x) => form.set("genre_ids", x) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "age_group", label: "Age group", placeholder: "e.g. 12+ years", max: 255, optional: true })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "schedule", title: "Schedule & format", description: "When it runs and how much time it takes. Numbers only; units are added on the site.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "is_free_course", checked: v.is_free_course, onChange: (x) => form.set("is_free_course", x), label: "Free course", description: "No payment and no start date needed." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "course_start_date", label: "First session", type: "date", required: !v.is_free_course }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "duration", label: "Duration", suffix: "weeks", inputProps: { inputMode: "numeric" }, optional: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "sessions", label: "Live sessions", inputProps: { inputMode: "numeric" }, optional: true })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "time_required", label: "Time needed", suffix: "hrs/week", inputProps: { inputMode: "numeric" }, optional: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "mini_projects", label: "Mini projects", inputProps: { inputMode: "numeric" }, optional: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "course_modules", label: "Modules (shown)", inputProps: { inputMode: "numeric" }, hint: "Leave empty to count automatically.", optional: true })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Format", name: "course_based", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "adm-input", id: "f-course_based", value: v.course_based, onChange: (e) => form.set("course_based", e.target.value), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "instructor_based", children: "Live with an instructor" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "video_course", children: "Recorded video course" })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "schedule", label: "Schedule summary", rows: 2, placeholder: "e.g. Live sessions every Saturday and Sunday, 11 am IST", optional: true }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Schedule details", name: "schedule_details", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "schedule_details", value: v.schedule_details, onChange: (x) => form.set("schedule_details", x), minHeight: 140, onUpload: import_form.uploadImage }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Schedule PDF", name: "schedule_pdf", hint: "Students can download it from the course page and their classroom.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.DropZone,
+          {
+            name: "schedule_pdf",
+            kind: "pdf",
+            value: schedule,
+            onChange: setSchedule,
+            error: form.error("schedule_pdf"),
+            existing: saved && saved.schedule_pdf ? [__spreadValues({ id: "pdf" }, saved.schedule_pdf)] : [],
+            onRemoveExisting: removeSchedule
+          }
+        ) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "pricing", title: "Pricing", description: "Charged at checkout: rupees in India (Razorpay), US dollars elsewhere (PayPal).", children: [
+        v.is_free_course ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "This is a free course, so no price is charged." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "price_inr", label: "Price in India", prefix: "\u20B9", required: true, inputProps: { inputMode: "decimal" }, placeholder: "4999" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "price_usd", label: "Price elsewhere", prefix: "US$", required: true, inputProps: { inputMode: "decimal" }, placeholder: "69" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Included with the course", name: "includes", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-stack", children: INCLUDES.map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: `inc-${k}`, checked: !!v.includes[k], onChange: (x) => form.set("includes", __spreadProps(__spreadValues({}, v.includes), { [k]: x })), label: l }, k)) }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "content", title: "Page content", description: "The longer sections of the course page. Use headings and lists to keep them easy to scan.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "introduction", label: "Introduction (short)", rows: 2, optional: true }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Introduction", name: "introduction_details", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "introduction_details", value: v.introduction_details, onChange: (x) => form.set("introduction_details", x), onUpload: import_form.uploadImage }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "summary", label: "Summary (short)", rows: 2, optional: true }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Summary", name: "summary_details", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "summary_details", value: v.summary_details, onChange: (x) => form.set("summary_details", x), minHeight: 180, onUpload: import_form.uploadImage }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Outcome", name: "course_outcome", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "course_outcome", value: v.course_outcome, onChange: (x) => form.set("course_outcome", x), minHeight: 140 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Prerequisites", name: "course_prerequisites", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "course_prerequisites", value: v.course_prerequisites, onChange: (x) => form.set("course_prerequisites", x), minHeight: 140 }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.FormSection, { id: "lists", title: "Highlights & lists", description: "Bullet lists on the course page. Press Enter to add an item; use the arrows to reorder.", children: LISTS.map(([k, l, h]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: l, name: k, hint: h, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.ListEditor, { name: k, value: v[k], onChange: (x) => form.set(k, x), placeholder: "Add an item and press Enter" }) }, k)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "media", title: "Photos & videos", description: "The first photo is the cover in listings. Videos are YouTube or other links shown on the page and in lessons.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Photos", name: "photos", error: null, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.DropZone,
+          {
+            name: "photos",
+            multiple: true,
+            value: photos,
+            onChange: setPhotos,
+            error: form.error("photos"),
+            existing: saved ? saved.photos : [],
+            onRemoveExisting: removePhoto,
+            label: "Drop photos here or click to choose"
+          }
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Videos", name: "videos", error: form.error("videos"), optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+          v.videos.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-list__row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", placeholder: "Video title", "aria-label": `Video ${i + 1} title`, value: x.title, onChange: (e) => setVideo(i, "title", e.target.value) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", placeholder: "https://www.youtube.com/watch?v=\u2026", "aria-label": `Video ${i + 1} link`, value: x.url, onChange: (e) => setVideo(i, "url", e.target.value) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => form.set("videos", v.videos.filter((_, j) => j !== i)), "aria-label": `Remove video ${i + 1}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }) })
+          ] }, i)),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", onClick: () => form.set("videos", [...v.videos, { title: "", url: "" }]), children: "Add a video" }) })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_form.SaveBar,
+        {
+          dirty: form.dirty || photos.length > 0 || schedule.length > 0,
+          busy: form.busy,
+          onSave: save,
+          saveLabel: isNew ? `Create ${noun}` : "Save changes",
+          status: isNew ? "Not saved yet" : void 0,
+          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", href: base, variant: "ghost", children: isNew ? "Cancel" : "Back to list" })
+        }
+      )
+    ] }),
+    dialog,
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/FreeCourses.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var FreeCourses_exports = {};
+__export(FreeCourses_exports, {
+  default: () => FreeCourses
+});
+module.exports = __toCommonJS(FreeCourses_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+function FreeCourses() {
+  const g = (0, import_kit.useGrid)("grid");
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const [editing, setEditing] = (0, import_react.useState)(null);
+  (0, import_react.useEffect)(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("new")) setEditing({});
+    const id = q.get("edit");
+    if (id) {
+      const row = g.rows.find((r) => String(r.id) === id);
+      if (row) setEditing(row);
+    }
+  }, []);
+  const remove = async (r) => {
+    if (!await confirm({ title: `Delete \u201C${r.title}\u201D?`, body: "Students will no longer see this free lesson.", confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`/admin/api/free-courses/${r.id}`).then((x) => {
+      toast(x.data.message);
+      g.reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const columns = [
+    { key: "title", label: "Free lesson", sort: "title", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell", children: [
+      r.photo_url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: r.photo_url, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-thumb", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-gift", "aria-hidden": "true" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-linkbtn", onClick: () => setEditing(r), children: r.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: r.slug })
+      ] })
+    ] }) },
+    { key: "videos", label: "Videos", render: (r) => `${r.videos}` },
+    { key: "updated", label: "Updated", sort: "updated", hide: "md", render: (r) => (0, import_kit.fmtDate)(r.updated_at) },
+    { key: "status", label: "Status", render: (r) => Number(r.status) === 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", dot: true, children: "Live" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { dot: true, children: "Hidden" }) },
+    { key: "actions", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Actions" }), align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-pencil", onClick: () => setEditing(r), children: "Edit" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove(r), "aria-label": `Delete ${r.title}`, title: "Delete" })
+    ] }) }
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Free lessons", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title: "Free lessons",
+        subtitle: "Short video lessons new students can watch before they buy a course.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEditing({}), children: "New free lesson" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: "Search free lessons" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Status", value: g.filter("status"), onChange: (v) => g.go({ status: v }), options: [{ value: "live", label: "Live" }, { value: "hidden", label: "Hidden" }] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        columns,
+        rows: g.rows,
+        meta: g.meta,
+        loading: g.loading,
+        onSort: g.sortBy,
+        caption: "Free lessons",
+        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-gift", title: "No free lessons", action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEditing({}), children: "Add one" }), children: "Free lessons help students try a medium before they enrol." })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer }),
+    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FreeCourseDrawer, { item: editing.id ? editing : null, onClose: () => setEditing(null), toast, onSaved: () => {
+      setEditing(null);
+      g.reload();
+    } }),
+    dialog,
+    toastNode
+  ] });
+}
+function FreeCourseDrawer({ item, onClose, onSaved, toast }) {
+  const form = (0, import_form.useForm)({
+    id: item ? item.id : "",
+    title: item ? item.title : "",
+    slug: item ? item.slug : "",
+    description: item ? item.description || "" : "",
+    status: item ? Number(item.status) === 1 : true,
+    videos: item ? item.video_list : []
+  }, { title: ["required", "max:255"], slug: ["slug"] });
+  const [photo, setPhoto] = (0, import_react.useState)([]);
+  const v = form.values;
+  const save = () => {
+    const fd = new FormData();
+    fd.append("data", JSON.stringify(v));
+    if (photo[0]) fd.append("photo", photo[0]);
+    form.submit(() => import_axios.default.post("/admin/api/free-courses", fd)).then((r) => {
+      toast(r.data.message);
+      onSaved();
+    }).catch((e) => toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const setVideo = (i, k, val) => form.set("videos", v.videos.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { [k]: val }) : x));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Drawer,
+    {
+      open: true,
+      size: "lg",
+      title: item ? "Edit free lesson" : "New free lesson",
+      onClose,
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy: form.busy, onClick: save, children: item ? "Save" : "Create" })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-stack", onSubmit: (e) => {
+        e.preventDefault();
+        save();
+      }, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "title", label: "Title", required: true, max: 255 }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SlugField, { form, source: "title", onCheck: (s) => import_axios.default.get("/admin/api/slug", { params: { table: "free_courses", slug: s, except: item ? item.id : 0 } }).then((r) => r.data) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Description", name: "description", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "description", value: v.description, onChange: (x) => form.set("description", x), minHeight: 160, onUpload: import_form.uploadImage }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Cover photo", name: "photo", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.DropZone, { name: "photo", value: photo, onChange: setPhoto, error: form.error("photo"), existing: item && item.photo_url ? [{ id: "p", url: item.photo_url, name: item.photo }] : [] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Videos", name: "videos", error: form.error("videos"), hint: "YouTube or other video links, in the order students should watch them.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+          v.videos.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-list__row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", placeholder: "Video title", "aria-label": `Video ${i + 1} title`, value: x.title, onChange: (e) => setVideo(i, "title", e.target.value) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", placeholder: "https://\u2026", "aria-label": `Video ${i + 1} link`, value: x.url, onChange: (e) => setVideo(i, "url", e.target.value) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => form.set("videos", v.videos.filter((_, j) => j !== i)), "aria-label": `Remove video ${i + 1}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }) })
+          ] }, i)),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", onClick: () => form.set("videos", [...v.videos, { title: "", url: "" }]), children: "Add a video" }) })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "status", checked: v.status, onChange: (x) => form.set("status", x), label: "Visible to students" })
+      ] })
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Orders.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Orders_exports = {};
+__export(Orders_exports, {
+  default: () => Orders
+});
+module.exports = __toCommonJS(Orders_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+const STATUS = {
+  0: { key: "pending", label: "Pending", tone: "amber" },
+  1: { key: "paid", label: "Paid", tone: "green" },
+  2: { key: "failed", label: "Failed", tone: "red" },
+  3: { key: "refunded", label: "Refunded", tone: "blue" }
+};
+const statusOf = (s) => STATUS[Number(s)] || STATUS[0];
+function Orders() {
+  const { stats = {}, courses = [] } = (0, import_inertia_react.usePage)().props;
+  const g = (0, import_kit.useGrid)("grid", ["stats"]);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [openId, setOpenId] = (0, import_react.useState)(null);
+  (0, import_react.useEffect)(() => {
+    const id = new URLSearchParams(window.location.search).get("order");
+    if (id) setOpenId(Number(id));
+  }, []);
+  const columns = [
+    { key: "order", label: "Order", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-linkbtn", onClick: () => setOpenId(r.id), children: r.order_number || `#${r.id}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: (0, import_kit.fmtDate)(r.created_at, true) })
+    ] }) },
+    { key: "student", label: "Student", sort: "student", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.student || r.billing_name || "Guest" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: r.student_email || r.billing_email })
+    ] }) },
+    { key: "course", label: "Course", sort: "course", hide: "md", render: (r) => r.course ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+      r.course,
+      Number(r.course_type_id) === 2 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Workshop" })
+      ] })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "Deleted course" }) },
+    { key: "amount", label: "Amount", sort: "amount", align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_kit.money)(r.price, r.price_type) }) },
+    { key: "method", label: "Method", hide: "lg", render: (r) => r.payment_option || /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) },
+    { key: "status", label: "Status", render: (r) => {
+      const s = statusOf(r.payment_status);
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: s.tone, dot: true, children: s.label });
+    } },
+    { key: "cert", label: "Certificate", hide: "lg", render: (r) => Number(r.issue_certificate) === 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: "Issued" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) },
+    { key: "open", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Details" }), align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => setOpenId(r.id), "aria-label": `Open order ${r.order_number || r.id}`, children: "Details" }) }
+  ];
+  const anyFilter = g.meta.q || Object.keys(g.meta.filters || {}).length > 0;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Course orders", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title: "Course orders",
+        subtitle: "Every course and workshop purchase. Open an order to see the payment, change its status or issue the certificate.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-download", href: g.exportUrl("/admin/orders/export"), children: "Export CSV" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stats", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { icon: "fa-inr", label: "Revenue (INR, all time)", value: (0, import_kit.money)(stats.revenueInr, "inr") }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { icon: "fa-usd", label: "Revenue (USD, all time)", value: (0, import_kit.money)(stats.revenueUsd, "usd") }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { icon: "fa-calendar", label: `This month \xB7 ${stats.monthOrders || 0} paid orders`, value: (0, import_kit.money)(stats.monthInr, "inr") }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { icon: "fa-certificate", label: "Paid, certificate not issued", value: stats.certificatesDue || 0 })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Segments,
+      {
+        label: "Status",
+        value: g.filter("status"),
+        onChange: (v) => g.go({ status: v }),
+        options: [{ value: "", label: "All", count: stats.all }, { value: "paid", label: "Paid", count: stats.paid }, { value: "pending", label: "Pending", count: stats.pending }, { value: "failed", label: "Failed", count: stats.failed }, { value: "refunded", label: "Refunded", count: stats.refunded }]
+      }
+    ), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: "Order no., student, e-mail or payment id" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Course", value: g.filter("course"), onChange: (v) => g.go({ course: v }), options: courses.map((c) => ({ value: String(c.value), label: c.label })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Method", value: g.filter("method"), onChange: (v) => g.go({ method: v }), options: [{ value: "razorpay", label: "Razorpay" }, { value: "paypal", label: "PayPal" }, { value: "manual", label: "Manual" }, { value: "free", label: "Free" }] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Currency", value: g.filter("currency"), onChange: (v) => g.go({ currency: v }), options: [{ value: "inr", label: "INR" }, { value: "usd", label: "USD" }] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-filter", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "From" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: g.filter("from"), onChange: (e) => g.go({ from: e.target.value }), "aria-label": "From date" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-filter", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "To" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: g.filter("to"), onChange: (e) => g.go({ to: e.target.value }), "aria-label": "To date" })
+      ] }),
+      anyFilter && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", size: "sm", icon: "fa-times", onClick: () => g.go({ q: "", status: "", course: "", method: "", currency: "", from: "", to: "" }), children: "Clear all" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        columns,
+        rows: g.rows,
+        meta: g.meta,
+        loading: g.loading,
+        onSort: g.sortBy,
+        caption: "Orders",
+        onRowClick: (r) => setOpenId(r.id),
+        empty: anyFilter ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-search", title: "No orders match these filters", action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => g.go({ q: "", status: "", course: "", method: "", currency: "", from: "", to: "" }), children: "Clear filters" }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-shopping-cart", title: "No orders yet", children: "Orders appear here as soon as a student starts checkout." })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer }),
+    openId && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OrderDrawer, { id: openId, onClose: () => setOpenId(null), toast, onChanged: () => g.reload() }),
+    toastNode
+  ] });
+}
+function OrderDrawer({ id, onClose, toast, onChanged }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [error, setError] = (0, import_react.useState)(null);
+  const [change, setChange] = (0, import_react.useState)(null);
+  const [note, setNote] = (0, import_react.useState)("");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [fieldErr, setFieldErr] = (0, import_react.useState)(null);
+  (0, import_react.useEffect)(() => {
+    setData(null);
+    setError(null);
+    import_axios.default.get(`/admin/api/orders/${id}`).then((r) => setData(r.data)).catch((e) => setError((0, import_AdminLayout.errorText)(e)));
+  }, [id]);
+  const o = data && data.order;
+  const s = o ? statusOf(o.payment_status) : null;
+  const submit = () => {
+    setBusy(true);
+    setFieldErr(null);
+    import_axios.default.post(`/admin/api/orders/${id}/status`, { status: change, note }).then((r) => {
+      setData(r.data);
+      setChange(null);
+      setNote("");
+      toast(r.data.message);
+      onChanged();
+    }).catch((e) => {
+      if (e.response && e.response.status === 422) setFieldErr(e.response.data.message);
+      else toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const issue = () => {
+    setBusy(true);
+    import_axios.default.post(`/admin/api/orders/${id}/certificate`).then((r) => {
+      setData(r.data);
+      toast(r.data.message);
+      onChanged();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(false));
+  };
+  const actions = o ? Object.values(STATUS).filter((x) => x.key !== s.key) : [];
+  const verb = { paid: "Mark as paid", pending: "Mark as pending", failed: "Mark as failed", refunded: "Mark as refunded" };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Drawer,
+    {
+      open: true,
+      size: "lg",
+      title: o ? `Order ${o.order_number || `#${o.id}`}` : "Order",
+      subtitle: o ? `Placed ${(0, import_kit.fmtDate)(o.created_at, true)}` : void 0,
+      onClose,
+      footer: o && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        Number(o.payment_status) === 1 && Number(o.issue_certificate) !== 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", icon: "fa-certificate", busy: busy && !change, onClick: issue, children: "Issue certificate" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Close" })
+      ] }),
+      children: [
+        error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-alert is-error", role: "alert", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-circle", "aria-hidden": "true" }),
+          error
+        ] }),
+        !data && !error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-stack", "aria-busy": "true", children: [0, 1, 2, 3, 4].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-skel", style: { height: 16, width: `${90 - i * 12}%` } }, i)) }),
+        o && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: s.tone, dot: true, children: s.label }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { className: "adm-amount", children: (0, import_kit.money)(o.price, o.price_type) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: o.payment_option || "No payment yet" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "Change status" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-inline", children: actions.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: change === a.key ? "dark" : "line", onClick: () => {
+            setChange(a.key);
+            setFieldErr(null);
+          }, children: verb[a.key] }, a.key)) }),
+          change && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-task is-edit", children: [
+            change === "paid" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Use this for payments received outside the website (for example a bank transfer). The student gets access to the course straight away." }),
+            change === "refunded" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Record a refund made in Razorpay or PayPal. The student loses access to the course." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: change === "paid" || change === "refunded" ? "Note (required)" : "Note", name: "note", error: fieldErr, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-note", className: "adm-input", rows: 2, value: note, onChange: (e) => setNote(e.target.value), placeholder: change === "paid" ? "e.g. NEFT ref 1234, received 24 Oct" : "Reason or reference" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: change === "refunded" || change === "failed" ? "danger" : "brand", size: "sm", busy, onClick: submit, icon: "fa-check", children: verb[change] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => setChange(null), children: "Cancel" })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "Student" }),
+          data.student ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "adm-dl", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Name" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: data.student.name }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "E-mail" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `mailto:${data.student.email}`, children: data.student.email }) }),
+            data.student.phone_number && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Phone" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: data.student.phone_number })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Joined" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_kit.fmtDate)(data.student.created_at) })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "No student account linked." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "Course" }),
+          data.course ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "adm-dl", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: Number(data.course.course_type_id) === 2 ? "Workshop" : "Course" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/${Number(data.course.course_type_id) === 2 ? "workshop" : "courses"}/edit/${data.course.id}`, children: data.course.title }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Starts" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_kit.fmtDate)(data.course.course_start_date) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Progress" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: data.enrollment ? `${data.enrollment.status} \xB7 ${data.enrollment.completed} lessons done \xB7 ${data.enrollment.progress_percentage}%` : "Not enrolled" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Certificate" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: data.certificate ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: data.certificate.certificate_path, target: "_blank", rel: "noopener noreferrer", children: data.certificate.certificate_number }) : "Not issued" })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "This course was deleted." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "Billing" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "adm-dl", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Name" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.billing_name || "\u2014" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "E-mail" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.billing_email || "\u2014" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Address" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: [o.billing_address, o.billing_city, o.billing_state, o.billing_zipcode, o.billing_country].filter(Boolean).join(", ") || "\u2014" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "Payment" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "adm-dl", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Gateway order" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.gateway_ref || "\u2014" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Payment id" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.payment_id || "\u2014" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Last update" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_kit.fmtDate)(o.updated_at, true) })
+          ] }),
+          o.payment_details && typeof o.payment_details === "object" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { className: "adm-details", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "Gateway response" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: JSON.stringify(o.payment_details, null, 2) })
+          ] }),
+          data.history && data.history.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "History" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "adm-timeline", children: data.history.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: h.action }),
+              h.details && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                " \u2014 ",
+                h.details
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                h.admin_name || "System",
+                " \xB7 ",
+                (0, import_kit.fmtDate)(h.created_at, true)
+              ] })
+            ] }, i)) })
+          ] })
+        ] })
+      ]
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Newsletter.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Newsletter_exports = {};
+__export(Newsletter_exports, {
+  default: () => Newsletter
+});
+module.exports = __toCommonJS(Newsletter_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+const CAMPAIGN_TONE = { draft: "grey", sending: "amber", sent: "green", failed: "red" };
+const CAMPAIGN_LABEL = { draft: "Draft", sending: "Sending\u2026", sent: "Sent", failed: "Failed" };
+function Newsletter() {
+  const { counts = {}, campaigns = [], adminEmail } = (0, import_inertia_react.usePage)().props;
+  const [tab, setTab] = (0, import_react.useState)(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "campaigns" ? "campaigns" : "subscribers");
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const switchTab = (t) => {
+    setTab(t);
+    const url = new URL(window.location.href);
+    if (t === "campaigns") url.searchParams.set("tab", "campaigns");
+    else url.searchParams.delete("tab");
+    window.history.replaceState(window.history.state, "", url.toString());
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Newsletter", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AdminLayout.PageHeader, { title: "Newsletter", subtitle: "People who signed up in the site footer, and the e-mails you send them." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stats", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { icon: "fa-users", label: "Subscribed", value: counts.active || 0 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { icon: "fa-line-chart", label: "New in the last 30 days", value: counts.last30 || 0 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { icon: "fa-user-times", label: "Unsubscribed", value: counts.unsubscribed || 0 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { icon: "fa-paper-plane-o", label: "Newsletters sent", value: campaigns.filter((c) => c.status === "sent").length })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-tabs", role: "tablist", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "tab", "aria-selected": tab === "subscribers", className: tab === "subscribers" ? "is-on" : "", onClick: () => switchTab("subscribers"), children: [
+        "Subscribers ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: counts.active || 0 })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "tab", "aria-selected": tab === "campaigns", className: tab === "campaigns" ? "is-on" : "", onClick: () => switchTab("campaigns"), children: [
+        "Newsletters ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: campaigns.length })
+      ] })
+    ] }),
+    tab === "subscribers" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Subscribers, { toast, confirm }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Campaigns, { campaigns, toast, confirm, adminEmail, active: counts.active || 0 }),
+    dialog,
+    toastNode
+  ] });
+}
+function Subscribers({ toast, confirm }) {
+  const g = (0, import_kit.useGrid)("grid", ["counts"]);
+  const [selected, setSelected] = (0, import_react.useState)([]);
+  const [adding, setAdding] = (0, import_react.useState)(false);
+  const form = (0, import_form.useForm)({ emails: "" }, { emails: ["required"] });
+  const add = () => form.submit(() => import_axios.default.post("/admin/api/newsletter/subscribers", form.values)).then((r) => {
+    toast(r.data.message);
+    setAdding(false);
+    form.reset({ emails: "" });
+    g.reload();
+  }).catch((e) => {
+    if (!(e.response && e.response.status === 422)) toast((0, import_AdminLayout.errorText)(e), "error");
+  });
+  const toggle = (r) => import_axios.default.post(`/admin/api/newsletter/subscribers/${r.id}/status`, { subscribed: !!r.unsubscribed_at }).then((x) => {
+    toast(x.data.message);
+    g.reload();
+  }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  const removeSelected = async () => {
+    if (!await confirm({ title: `Delete ${selected.length} subscriber${selected.length === 1 ? "" : "s"}?`, body: "They are removed from the list completely. To stop e-mails but keep the record, unsubscribe them instead.", confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.post("/admin/api/newsletter/subscribers/delete", { ids: selected }).then((r) => {
+      toast(r.data.message);
+      setSelected([]);
+      g.reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const columns = [
+    { key: "email", label: "E-mail", sort: "email", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.email }),
+      r.student && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+        "Student: ",
+        r.student
+      ] })
+    ] }) },
+    { key: "source", label: "Source", hide: "md", render: (r) => r.source === "admin" ? "Added by admin" : r.source === "footer" ? "Site footer" : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) },
+    { key: "date", label: "Subscribed", sort: "date", render: (r) => (0, import_kit.fmtDate)(r.created_at) },
+    { key: "state", label: "Status", render: (r) => r.unsubscribed_at ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Badge, { children: [
+      "Unsubscribed ",
+      (0, import_kit.fmtDate)(r.unsubscribed_at)
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", dot: true, children: "Subscribed" }) },
+    { key: "actions", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Actions" }), align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", onClick: () => toggle(r), children: r.unsubscribed_at ? "Resubscribe" : "Unsubscribe" }) }
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-download", href: g.exportUrl("/admin/newsletter/export"), children: "Export CSV" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setAdding(true), children: "Add subscribers" })
+    ] }), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: "Search e-mail addresses" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_kit.Segments,
+        {
+          label: "Status",
+          value: g.filter("state"),
+          onChange: (v) => g.go({ state: v }),
+          options: [{ value: "", label: "All" }, { value: "active", label: "Subscribed" }, { value: "unsubscribed", label: "Unsubscribed" }]
+        }
+      )
+    ] }),
+    selected.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-bulk", role: "region", "aria-label": "Bulk actions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        selected.length,
+        " selected"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "danger", icon: "fa-trash-o", onClick: removeSelected, children: "Delete" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "line", onClick: () => setSelected([]), children: "Clear" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        columns,
+        rows: g.rows,
+        meta: g.meta,
+        loading: g.loading,
+        onSort: g.sortBy,
+        caption: "Subscribers",
+        selected,
+        onSelect: setSelected,
+        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-envelope-o", title: g.meta.q ? "No matching subscribers" : "No subscribers yet", children: g.meta.q ? "Try another search." : "Visitors can subscribe in the site footer, or add addresses yourself." })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer }),
+    adding && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Drawer,
+      {
+        open: true,
+        size: "sm",
+        title: "Add subscribers",
+        subtitle: "Only add people who agreed to receive the newsletter.",
+        onClose: () => setAdding(false),
+        footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => setAdding(false), children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy: form.busy, onClick: add, children: "Add" })
+        ] }),
+        children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "emails", label: "E-mail addresses", rows: 8, required: true, hint: "One per line, or separated by commas. Addresses already on the list are skipped.", placeholder: "asha@example.com\nrahul@example.com" })
+      }
+    )
+  ] });
+}
+function Campaigns({ campaigns, toast, confirm, adminEmail, active }) {
+  const [editing, setEditing] = (0, import_react.useState)(null);
+  const sending = campaigns.some((c) => c.status === "sending");
+  (0, import_react.useEffect)(() => {
+    if (!sending) return void 0;
+    const t = setInterval(() => import_inertia.Inertia.reload({ only: ["campaigns", "counts"], preserveScroll: true }), 3e3);
+    return () => clearInterval(t);
+  }, [sending]);
+  const reload = () => import_inertia.Inertia.reload({ only: ["campaigns", "counts"], preserveScroll: true });
+  const remove = async (c) => {
+    if (!await confirm({ title: `Delete \u201C${c.subject}\u201D?`, confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`/admin/api/newsletter/campaigns/${c.id}`).then((r) => {
+      toast(r.data.message);
+      reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const duplicate = (c) => import_axios.default.post(`/admin/api/newsletter/campaigns/${c.id}/duplicate`).then((r) => {
+    toast(r.data.message);
+    reload();
+    setEditing(r.data.campaign);
+  }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-pencil", onClick: () => setEditing({}), children: "Write a newsletter" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted", children: [
+      "Sent to ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: active }),
+      " subscribed address",
+      active === 1 ? "" : "es",
+      ". Every e-mail has an unsubscribe link."
+    ] }) }),
+    campaigns.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-paper-plane-o", title: "No newsletters yet", action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-pencil", onClick: () => setEditing({}), children: "Write the first one" }), children: "Share new courses, workshops, student work and studio news." }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "adm-campaigns", children: campaigns.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "adm-campaign", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-campaign__main", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: CAMPAIGN_TONE[c.status], dot: true, children: CAMPAIGN_LABEL[c.status] || c.status }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: c.subject }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: c.status === "sent" ? `Sent ${(0, import_kit.fmtDate)(c.sent_at, true)} to ${c.sent_count} of ${c.recipients}${c.failed_count ? ` \xB7 ${c.failed_count} failed` : ""}` : c.status === "sending" ? `${c.sent_count + c.failed_count} of ${c.recipients} sent so far\u2026` : `Last edited ${(0, import_kit.fmtDate)(c.updated_at, true)}${c.author ? ` by ${c.author}` : ""}` }),
+        c.status === "sending" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-progress", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: `${c.recipients ? Math.round((c.sent_count + c.failed_count) * 100 / c.recipients) : 0}%` } }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+        c.status === "draft" || c.status === "failed" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-pencil", onClick: () => setEditing(c), children: "Edit" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-eye", onClick: () => setEditing(c), children: "View" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-files-o", onClick: () => duplicate(c), "aria-label": `Duplicate ${c.subject}`, title: "Duplicate" }),
+        c.status !== "sending" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove(c), "aria-label": `Delete ${c.subject}`, title: "Delete" })
+      ] })
+    ] }, c.id)) }),
+    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Composer, { item: editing.id ? editing : null, onClose: () => setEditing(null), toast, confirm, adminEmail, active, onChanged: reload })
+  ] });
+}
+function Composer({ item, onClose, toast, confirm, adminEmail, active, onChanged }) {
+  const [current, setCurrent] = (0, import_react.useState)(item);
+  const readOnly = current && current.status !== "draft" && current.status !== "failed";
+  const form = (0, import_form.useForm)(
+    { subject: item ? item.subject : "", preheader: item ? item.preheader || "" : "", body: item ? item.body || "" : "" },
+    { subject: ["required", "max:255"], preheader: ["max:255"], body: ["required"] }
+  );
+  const [view, setView] = (0, import_react.useState)(readOnly ? "preview" : "edit");
+  const [previewHtml, setPreviewHtml] = (0, import_react.useState)("");
+  const [testTo, setTestTo] = (0, import_react.useState)(adminEmail || "");
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const frame = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (view !== "preview") return;
+    import_axios.default.post("/admin/api/newsletter/preview", form.values, { responseType: "text" }).then((r) => setPreviewHtml(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  }, [view]);
+  const saveDraft = () => form.submit(() => import_axios.default.post("/admin/api/newsletter/campaigns", __spreadProps(__spreadValues({}, form.values), { id: current ? current.id : void 0 }))).then((r) => {
+    setCurrent(r.data.campaign);
+    toast(r.data.message);
+    onChanged();
+    return r.data.campaign;
+  }).catch((e) => {
+    if (!e.invalid) toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error");
+    throw e;
+  });
+  const ensureSaved = () => form.dirty || !current ? saveDraft() : Promise.resolve(current);
+  const sendTest = () => {
+    setBusy("test");
+    ensureSaved().then((c) => import_axios.default.post(`/admin/api/newsletter/campaigns/${c.id}/test`, { email: testTo })).then((r) => toast(r.data.message)).catch((e) => {
+      if (e && e.response) toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(null));
+  };
+  const sendAll = () => {
+    ensureSaved().then(async (c) => {
+      if (!await confirm({ title: `Send \u201C${c.subject}\u201D now?`, body: `It goes to ${active} subscribed address${active === 1 ? "" : "es"} and can't be recalled. Send yourself a test first if you haven't.`, confirmLabel: `Send to ${active}` })) return;
+      setBusy("send");
+      import_axios.default.post(`/admin/api/newsletter/campaigns/${c.id}/send`).then((r) => {
+        toast(r.data.message);
+        onChanged();
+        onClose();
+      }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(null));
+    }).catch(() => {
+    });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Drawer,
+    {
+      open: true,
+      size: "lg",
+      title: readOnly ? current.subject : current ? "Edit newsletter" : "New newsletter",
+      subtitle: readOnly ? `Sent ${(0, import_kit.fmtDate)(current.sent_at, true)}` : "Write, preview, send yourself a test, then send it to everyone.",
+      onClose,
+      footer: readOnly ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Close" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => saveDraft().catch(() => {
+        }), busy: form.busy && !busy, icon: "fa-floppy-o", children: "Save draft" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Button, { variant: "brand", icon: "fa-paper-plane", busy: busy === "send", onClick: sendAll, disabled: !active, children: [
+          "Send to ",
+          active
+        ] })
+      ] }),
+      children: [
+        !readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rte__tabs adm-composer-tabs", role: "tablist", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", role: "tab", "aria-selected": view === "edit", className: view === "edit" ? "is-on" : "", onClick: () => setView("edit"), children: "Write" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", role: "tab", "aria-selected": view === "preview", className: view === "preview" ? "is-on" : "", onClick: () => setView("preview"), children: "E-mail preview" })
+        ] }),
+        view === "edit" && !readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-stack", onSubmit: (e) => {
+          e.preventDefault();
+          saveDraft().catch(() => {
+          });
+        }, noValidate: true, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "subject", label: "Subject", required: true, max: 255, placeholder: "e.g. New: Weekend watercolour florals workshop" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "preheader", label: "Preview text", max: 255, hint: "Shown after the subject in most inboxes.", optional: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Message", name: "body", required: true, error: form.error("body"), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "body", value: form.values.body, onChange: (x) => form.set("body", x), minHeight: 320, onUpload: import_form.uploadImage, error: form.error("body") }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-task is-edit", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Send a test to", name: "test", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-test", className: "adm-input adm-grow", type: "email", value: testTo, onChange: (e) => setTestTo(e.target.value) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-paper-plane-o", busy: busy === "test", onClick: sendTest, children: "Send test" })
+          ] }) }) })
+        ] }),
+        view === "preview" && (previewHtml ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", { ref: frame, title: "E-mail preview", className: "adm-mailframe", sandbox: "", srcDoc: previewHtml }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-stack", "aria-busy": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-skel", style: { height: 300 } }) }))
+      ]
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Blog/Index.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Index_exports = {};
+__export(Index_exports, {
+  default: () => BlogIndex
+});
+module.exports = __toCommonJS(Index_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+function BlogIndex() {
+  const { counts = {}, categories = [] } = (0, import_inertia_react.usePage)().props;
+  const g = (0, import_kit.useGrid)("grid", ["counts"]);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const setStatus = (r, publish) => import_axios.default.post(`/admin/api/posts/${r.id}/status`, { status: publish }).then((x) => {
+    toast(x.data.message);
+    g.reload();
+  }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  const remove = async (r) => {
+    if (!await confirm({ title: `Delete \u201C${r.title}\u201D?`, body: "The post and its link are removed for good.", confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`/admin/api/posts/${r.id}`).then((x) => {
+      toast(x.data.message);
+      g.reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const columns = [
+    { key: "title", label: "Post", sort: "title", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell", children: [
+      r.image_url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: r.image_url, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-thumb", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-text-o", "aria-hidden": "true" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/blog/post/${r.id}/edit`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.title }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          r.categories || "No category",
+          Number(r.featured) === 1 ? " \xB7 Featured" : ""
+        ] })
+      ] })
+    ] }) },
+    { key: "author", label: "Author", hide: "lg", render: (r) => r.author || /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) },
+    { key: "date", label: "Date", sort: "date", hide: "md", render: (r) => (0, import_kit.fmtDate)(r.created_at) },
+    { key: "updated", label: "Updated", sort: "updated", hide: "lg", render: (r) => (0, import_kit.fmtDate)(r.updated_at, true) },
+    { key: "status", label: "Status", render: (r) => Number(r.status) === 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", dot: true, children: "Published" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "amber", dot: true, children: "Draft" }) },
+    { key: "actions", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Actions" }), align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", icon: "fa-pencil", href: `/admin/blog/post/${r.id}/edit`, children: "Edit" }),
+      Number(r.status) === 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-eye-slash", onClick: () => setStatus(r, false), "aria-label": `Unpublish ${r.title}`, title: "Move to drafts" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-globe", onClick: () => setStatus(r, true), "aria-label": `Publish ${r.title}`, title: "Publish" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", variant: "ghost", icon: "fa-external-link", href: `/blog/post/${r.slug}`, target: "_blank", rel: "noopener noreferrer", "aria-label": `View ${r.title}`, title: Number(r.status) === 1 ? "View on site" : "Preview" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove(r), "aria-label": `Delete ${r.title}`, title: "Delete" })
+    ] }) }
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Blog posts", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title: "Blog posts",
+        subtitle: "Write, preview and publish Studio articles. Drafts stay private until you publish them.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-bookmark-o", href: "/admin/blog/taxonomy", children: "Categories & tags" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", variant: "brand", icon: "fa-plus", href: "/admin/blog/post/create", children: "New post" })
+        ] })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Segments,
+      {
+        label: "Status",
+        value: g.filter("status"),
+        onChange: (v) => g.go({ status: v }),
+        options: [{ value: "", label: "All", count: counts.all }, { value: "published", label: "Published", count: counts.published }, { value: "draft", label: "Drafts", count: counts.draft }]
+      }
+    ), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: "Search posts" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Category", value: g.filter("category"), onChange: (v) => g.go({ category: v }), options: categories.map((c) => ({ value: String(c.value), label: c.label })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Featured", value: g.filter("featured"), onChange: (v) => g.go({ featured: v }), options: [{ value: "1", label: "Featured only" }], allLabel: "Any" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        columns,
+        rows: g.rows,
+        meta: g.meta,
+        loading: g.loading,
+        onSort: g.sortBy,
+        caption: "Blog posts",
+        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-pencil-square-o", title: g.meta.q ? "No posts match" : "No posts yet", action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", variant: "brand", icon: "fa-plus", href: "/admin/blog/post/create", children: "Write a post" }) })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer }),
+    dialog,
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Blog/Editor.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Editor_exports = {};
+__export(Editor_exports, {
+  default: () => BlogEditor
+});
+module.exports = __toCommonJS(Editor_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+const strip = (html) => String(html || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+function BlogEditor() {
+  const { post, categories = [], tags = [] } = (0, import_inertia_react.usePage)().props;
+  const [saved, setSaved] = (0, import_react.useState)(post);
+  const isNew = !saved;
+  const [image, setImage] = (0, import_react.useState)([]);
+  const [removeImage, setRemoveImage] = (0, import_react.useState)(false);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const initial = post ? {
+    title: post.title,
+    slug: post.slug,
+    subtitle: post.subtitle,
+    body: post.body,
+    status: post.status,
+    featured: post.featured,
+    category_ids: post.category_ids,
+    tags: post.tags,
+    meta_title: post.meta_title,
+    meta_description: post.meta_description
+  } : { title: "", slug: "", subtitle: "", body: "", status: false, featured: false, category_ids: [], tags: [], meta_title: "", meta_description: "" };
+  const form = (0, import_form.useForm)(initial, { title: ["required", "max:256"], slug: ["slug", "max:100"], subtitle: ["max:500"], meta_title: ["max:255"], meta_description: ["max:500"] });
+  const v = form.values;
+  (0, import_form.useUnsavedGuard)(form.dirty || image.length > 0 || removeImage);
+  const save = (publish) => {
+    const next = __spreadProps(__spreadValues({}, v), { status: publish === void 0 ? v.status : publish, remove_image: removeImage });
+    const extra = {};
+    if (next.status) {
+      if (!strip(next.subtitle)) extra.subtitle = "Add a short summary; it shows in the blog list.";
+      if (!strip(next.body)) extra.body = "Write the post before publishing it.";
+    }
+    const ok = form.validate();
+    if (!ok || Object.keys(extra).length) {
+      form.setErrors((prev) => __spreadValues(__spreadValues({}, prev), extra));
+      toast("Please fix the highlighted fields.", "error");
+      return;
+    }
+    const fd = new FormData();
+    fd.append("data", JSON.stringify(next));
+    if (image[0]) fd.append("image", image[0]);
+    form.submit(() => import_axios.default.post(isNew ? "/admin/api/posts" : `/admin/api/posts/${saved.id}`, fd), { skipValidation: true }).then((r) => {
+      toast(r.data.message);
+      if (isNew) {
+        import_inertia.Inertia.visit(r.data.editUrl, { replace: true });
+        return;
+      }
+      setSaved(r.data.post);
+      form.reset(__spreadProps(__spreadValues({}, v), { status: r.data.post.status, slug: r.data.post.slug }));
+      setImage([]);
+      setRemoveImage(false);
+    }).catch((e) => toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const snippetTitle = v.meta_title || v.title || "Post title";
+  const snippetText = v.meta_description || v.subtitle || strip(v.body).slice(0, 160) || "A short description of the post appears here in search results.";
+  const words = strip(v.body) ? strip(v.body).split(" ").length : 0;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: isNew ? "New post" : saved.title, crumbs: [{ label: "Content" }, { href: "/admin/blog/post", label: "Blog posts" }, { label: isNew ? "New post" : saved.title }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        eyebrow: "Blog",
+        title: isNew ? "New post" : saved.title || "Untitled post",
+        subtitle: isNew ? "Drafts are private. Publish when the post is ready." : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          saved.status ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Badge, { tone: "green", dot: true, children: [
+            "Published ",
+            (0, import_kit.fmtDate)(saved.created_at)
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "amber", dot: true, children: "Draft" }),
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted", children: [
+            "\xB7 last saved ",
+            (0, import_kit.fmtDate)(saved.updated_at, true)
+          ] })
+        ] }),
+        actions: !isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-external-link", href: saved.public_url, target: "_blank", rel: "noopener noreferrer", children: saved.status ? "View post" : "Preview" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-split", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Title", name: "title", required: true, error: form.error("title"), max: 256, counter: v.title.length, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", __spreadProps(__spreadValues({}, form.bind("title")), { className: "adm-input adm-input--title", placeholder: "Write a clear, specific title" })) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "subtitle", label: "Summary", rows: 2, max: 500, hint: "One or two sentences shown under the title and in the blog list." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Post", name: "body", error: form.error("body"), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "body", value: v.body, onChange: (x) => form.set("body", x), minHeight: 420, onUpload: import_form.uploadImage, error: form.error("body"), placeholder: "Tell the story. Use headings to split it into sections\u2026" }) })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Search & sharing", subtitle: "How the post looks in Google and when shared. Leave empty to use the title and summary.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-serp", "aria-label": "Search result preview", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-serp__url", children: [
+              "artistikcity.com \u203A blog \u203A ",
+              v.slug || "post-url"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-serp__title", children: snippetTitle.length > 60 ? `${snippetTitle.slice(0, 59)}\u2026` : snippetTitle }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-serp__text", children: snippetText.length > 160 ? `${snippetText.slice(0, 159)}\u2026` : snippetText })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "meta_title", label: "SEO title", max: 255, hint: "Best under 60 characters.", optional: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "meta_description", label: "Meta description", rows: 3, max: 500, hint: "Best between 120 and 160 characters.", optional: true })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "adm-stack adm-sticky", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Publish", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "status", checked: v.status, onChange: (x) => form.set("status", x), label: v.status ? "Published" : "Draft", description: v.status ? "Visible on the blog." : "Only admins can see it." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "featured", checked: v.featured, onChange: (x) => form.set("featured", x), label: "Featured", description: "Shown in the featured slot on the blog." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+            words,
+            " words \xB7 about ",
+            Math.max(1, Math.round(words / 200)),
+            " min read"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+            !v.status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => save(false), busy: form.busy, icon: "fa-floppy-o", children: "Save draft" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", onClick: () => save(true), busy: form.busy, icon: v.status && saved && saved.status ? "fa-check" : "fa-globe", children: saved && saved.status ? "Update post" : "Publish" })
+          ] }),
+          (form.dirty || image.length > 0 || removeImage) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-small adm-warn", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle", "aria-hidden": "true" }),
+            " Unsaved changes"
+          ] })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Cover image", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.DropZone,
+          {
+            name: "image",
+            value: image,
+            onChange: setImage,
+            error: form.error("image"),
+            label: "Drop an image or click to choose",
+            existing: saved && saved.image && !removeImage ? [__spreadValues({ id: "img" }, saved.image)] : [],
+            onRemoveExisting: () => setRemoveImage(true)
+          }
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Categories", children: categories.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted", children: [
+          "No categories yet. ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/admin/blog/taxonomy", children: "Create one" }),
+          "."
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.ChoiceChips, { name: "category_ids", options: categories.map((c) => ({ value: String(c.value), label: c.label })), value: v.category_ids, onChange: (x) => form.set("category_ids", x) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Tags", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TagInput, { name: "tags", value: v.tags, onChange: (x) => form.set("tags", x), suggestions: tags }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Press Enter after each tag. New tags are created when you save." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Link", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.SlugField,
+          {
+            form,
+            source: "title",
+            prefix: "/blog/post/",
+            label: "URL slug",
+            onCheck: (s) => import_axios.default.get("/admin/api/slug", { params: { table: "posts", slug: s, except: saved ? saved.id : 0 } }).then((r) => r.data)
+          }
+        ) })
+      ] })
+    ] }),
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Taxonomies.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Taxonomies_exports = {};
+__export(Taxonomies_exports, {
+  default: () => Taxonomies
+});
+module.exports = __toCommonJS(Taxonomies_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+function Taxonomies() {
+  const { group, tabs = [], type, items: initial = [] } = (0, import_inertia_react.usePage)().props;
+  const [items, setItems] = (0, import_react.useState)(initial);
+  const [q, setQ] = (0, import_react.useState)("");
+  const [sort, setSort] = (0, import_react.useState)({ key: "name", dir: "asc" });
+  const [page, setPage] = (0, import_react.useState)(1);
+  const [per, setPer] = (0, import_react.useState)(20);
+  const [editing, setEditing] = (0, import_react.useState)(null);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const base = group === "blog" ? "/admin/blog/taxonomy" : "/admin/catalog";
+  const title = group === "blog" ? "Blog categories & tags" : "Mediums, genres & skills";
+  const filtered = (0, import_react.useMemo)(() => {
+    const t = q.trim().toLowerCase();
+    const rows2 = items.filter((i) => !t || i.name.toLowerCase().includes(t) || i.slug.includes(t));
+    const val = (r) => sort.key === "usage" ? Number(r.usage) : String(r[sort.key] || "").toLowerCase();
+    return [...rows2].sort((a, b) => (val(a) < val(b) ? -1 : val(a) > val(b) ? 1 : 0) * (sort.dir === "asc" ? 1 : -1));
+  }, [items, q, sort]);
+  const pages = Math.max(1, Math.ceil(filtered.length / per));
+  const current = Math.min(page, pages);
+  const rows = filtered.slice((current - 1) * per, current * per);
+  const meta = { page: current, pages, total: filtered.length, perPage: per, sort: sort.key, dir: sort.dir };
+  const remove = async (r) => {
+    const body = r.usage > 0 && type.detachable ? `It is removed from ${r.usage} post${r.usage === 1 ? "" : "s"}.` : "This cannot be undone.";
+    if (!await confirm({ title: `Delete \u201C${r.name}\u201D?`, body, confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`/admin/api/taxonomy/${type.key}/${r.id}`).then((x) => {
+      setItems(x.data.items);
+      toast(x.data.message);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const usageLabel = (n) => group === "blog" ? `${n} post${n === 1 ? "" : "s"}` : `${n} course${n === 1 ? "" : "s"}`;
+  const columns = [
+    { key: "name", label: "Name", sort: "name", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell", children: [
+      type.hasPhoto && (r.photo_url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: r.photo_url, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-thumb", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o", "aria-hidden": "true" }) })),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-linkbtn", onClick: () => setEditing(r), children: r.name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: r.slug })
+      ] })
+    ] }) },
+    { key: "usage", label: "Used by", sort: "usage", render: (r) => r.usage > 0 ? usageLabel(r.usage) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "Not used" }) },
+    { key: "status", label: "Status", render: (r) => r.status ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", dot: true, children: "On" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { dot: true, children: "Off" }) },
+    { key: "actions", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Actions" }), align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-pencil", onClick: () => setEditing(r), children: "Edit" }),
+      !(type.locked || []).includes(r.id) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove(r), "aria-label": `Delete ${r.name}`, title: "Delete" })
+    ] }) }
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title,
+        subtitle: type.hint,
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEditing({}), children: [
+          "Add ",
+          type.label
+        ] })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "adm-tabs", "aria-label": "Lists", children: tabs.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `${base}?type=${t.key}`, className: t.key === type.key ? "is-on" : "", "aria-current": t.key === type.key ? "page" : void 0, children: [
+      t.label,
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: t.count })
+    ] }, t.key)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Toolbar, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: q, onSearch: (x) => {
+      setQ(x);
+      setPage(1);
+    }, placeholder: `Search ${type.plural.toLowerCase()}`, delay: 150 }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        columns,
+        rows,
+        meta,
+        onSort: (k) => setSort((s) => ({ key: k, dir: s.key === k && s.dir === "asc" ? "desc" : "asc" })),
+        caption: type.plural,
+        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-tags", title: q ? "Nothing matches" : `No ${type.plural.toLowerCase()} yet`, action: !q && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEditing({}), children: "Add the first one" }) })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta, onPage: setPage, onPer: (n) => {
+      setPer(n);
+      setPage(1);
+    } }),
+    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TermDrawer, { type, item: editing.id ? editing : null, onClose: () => setEditing(null), toast, onSaved: (r) => {
+      setItems(r.data.items);
+      toast(r.data.message);
+      setEditing(null);
+    } }),
+    dialog,
+    toastNode
+  ] });
+}
+function TermDrawer({ type, item, onClose, onSaved, toast }) {
+  const form = (0, import_form.useForm)({ name: item ? item.name : "", slug: item ? item.slug : "", status: item ? item.status : true }, { name: ["required", "max:100"], slug: ["slug"] });
+  const [photo, setPhoto] = (0, import_react.useState)([]);
+  const save = () => {
+    const fd = new FormData();
+    if (item) fd.append("id", item.id);
+    fd.append("name", form.values.name);
+    fd.append("slug", form.values.slug);
+    fd.append("status", form.values.status ? "1" : "0");
+    if (photo[0]) fd.append("photo", photo[0]);
+    form.submit(() => import_axios.default.post(`/admin/api/taxonomy/${type.key}`, fd)).then(onSaved).catch((e) => toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error"));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Drawer,
+    {
+      open: true,
+      size: "sm",
+      title: item ? `Edit ${type.label}` : `New ${type.label}`,
+      onClose,
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy: form.busy, onClick: save, children: item ? "Save" : "Add" })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-stack", onSubmit: (e) => {
+        e.preventDefault();
+        save();
+      }, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "name", label: "Name", required: true, max: 100 }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SlugField, { form, source: "name", label: "URL name" }),
+        type.hasPhoto && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Photo", name: "photo", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.DropZone, { name: "photo", value: photo, onChange: setPhoto, error: form.error("photo"), existing: item && item.photo_url ? [{ id: "p", url: item.photo_url, name: item.name }] : [] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "status", checked: form.values.status, onChange: (x) => form.set("status", x), label: "Shown on the site" })
+      ] })
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Contacts.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Contacts_exports = {};
+__export(Contacts_exports, {
+  default: () => Contacts
+});
+module.exports = __toCommonJS(Contacts_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+const STATE = { 1: ["New", "pink"], 2: ["Read", "grey"], 3: ["Archived", "blue"] };
+function Contacts() {
+  const { counts = {} } = (0, import_inertia_react.usePage)().props;
+  const g = (0, import_kit.useGrid)("grid", ["counts"]);
+  const [open, setOpen] = (0, import_react.useState)(null);
+  const [selected, setSelected] = (0, import_react.useState)([]);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const setStatus = (r, status, quiet) => import_axios.default.post(`/admin/api/contacts/${r.id}/status`, { status }).then((x) => {
+    if (!quiet) toast(x.data.message);
+    g.reload();
+  }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  const view = (r) => {
+    setOpen(r);
+    if (Number(r.status) === 1) setStatus(r, "read", true);
+  };
+  const remove = async (ids) => {
+    if (!await confirm({ title: `Delete ${ids.length === 1 ? "this message" : `${ids.length} messages`}?`, confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.post("/admin/api/contacts/delete", { ids }).then((x) => {
+      toast(x.data.message);
+      setSelected([]);
+      setOpen(null);
+      g.reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const columns = [
+    { key: "name", label: "From", sort: "name", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-linkbtn", onClick: () => view(r), children: Number(r.status) === 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.name || r.email }) : r.name || r.email }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: r.email })
+    ] }) },
+    { key: "message", label: "Message", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-clip", children: r.message }) },
+    { key: "date", label: "Received", sort: "date", hide: "md", render: (r) => (0, import_kit.fmtDate)(r.created_at, true) },
+    { key: "status", label: "Status", render: (r) => {
+      const [l, t] = STATE[Number(r.status)] || STATE[2];
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: t, dot: true, children: l });
+    } }
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Contact messages", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title: "Contact messages",
+        subtitle: "Everything sent through the contact form. Reply by e-mail, then archive the message.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-download", href: g.exportUrl("/admin/contacts/export"), children: "Export CSV" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Segments,
+      {
+        label: "Status",
+        value: g.filter("status"),
+        onChange: (v) => g.go({ status: v }),
+        options: [{ value: "", label: "All", count: counts.all }, { value: "new", label: "New", count: counts.new }, { value: "read", label: "Read", count: counts.read }, { value: "archived", label: "Archived", count: counts.archived }]
+      }
+    ), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: "Search name, e-mail or message" }) }),
+    selected.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-bulk", role: "region", "aria-label": "Bulk actions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        selected.length,
+        " selected"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "danger", icon: "fa-trash-o", onClick: () => remove(selected), children: "Delete" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "line", onClick: () => setSelected([]), children: "Clear" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        columns,
+        rows: g.rows,
+        meta: g.meta,
+        loading: g.loading,
+        onSort: g.sortBy,
+        caption: "Contact messages",
+        onRowClick: view,
+        selected,
+        onSelect: setSelected,
+        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-inbox", title: g.meta.q || g.filter("status") ? "No messages match" : "No messages yet", children: "Messages from the contact page land here." })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer }),
+    open && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      import_kit.Drawer,
+      {
+        open: true,
+        title: open.name || open.email,
+        subtitle: `Received ${(0, import_kit.fmtDate)(open.created_at, true)}`,
+        onClose: () => setOpen(null),
+        footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", icon: "fa-trash-o", onClick: () => remove([open.id]), children: "Delete" }),
+          Number(open.status) !== 3 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-archive", onClick: () => {
+            setStatus(open, "archived");
+            setOpen(null);
+          }, children: "Archive" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-undo", onClick: () => {
+            setStatus(open, "new");
+            setOpen(null);
+          }, children: "Move to inbox" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", variant: "brand", icon: "fa-reply", href: `mailto:${open.email}?subject=${encodeURIComponent("Re: your message to ArtistikCity")}`, children: "Reply by e-mail" })
+        ] }),
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "adm-dl", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "E-mail" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `mailto:${open.email}`, children: open.email }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Phone" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: open.mobile_no ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `tel:${open.mobile_no}`, children: open.mobile_no }) : "\u2014" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "Message" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-message", children: open.message })
+        ]
+      }
+    ),
+    dialog,
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Faq.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Faq_exports = {};
+__export(Faq_exports, {
+  default: () => Faq
+});
+module.exports = __toCommonJS(Faq_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+function Faq() {
+  const { faqs: initial = [] } = (0, import_inertia_react.usePage)().props;
+  const [faqs, setFaqs] = (0, import_react.useState)(initial);
+  const [q, setQ] = (0, import_react.useState)("");
+  const [editing, setEditing] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const categories = (0, import_react.useMemo)(() => Array.from(new Set(faqs.map((f) => f.category).filter(Boolean))), [faqs]);
+  const shown = faqs.filter((f) => !q || `${f.question} ${f.category || ""} ${f.answer || ""}`.toLowerCase().includes(q.toLowerCase()));
+  const move = (f, direction) => {
+    setBusy(f.id);
+    import_axios.default.post(`/admin/api/faqs/${f.id}/move`, { direction }).then((r) => setFaqs(r.data.faqs)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(null));
+  };
+  const remove = async (f) => {
+    if (!await confirm({ title: "Delete this question?", body: f.question, confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`/admin/api/faqs/${f.id}`).then((r) => {
+      setFaqs(r.data.faqs);
+      toast(r.data.message);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "FAQ", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title: "FAQ",
+        subtitle: "Questions and answers on the public FAQ page, in this order.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-external-link", href: "/faq", target: "_blank", rel: "noopener noreferrer", children: "View page" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEditing({}), children: "Add question" })
+        ] })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Toolbar, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: q, onSearch: setQ, placeholder: "Search questions", delay: 150 }) }),
+    shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-question-circle-o", title: q ? "No questions match" : "No questions yet", action: !q && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEditing({}), children: "Add the first question" }), children: "Answer what students ask most: payments, class times, materials, certificates." }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "adm-faq", children: shown.map((f) => {
+      const i = faqs.findIndex((x) => x.id === f.id);
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "adm-faq__item", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-mod__num", children: i + 1 }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-faq__q", onClick: () => setEditing(f), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: f.question }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+            f.category || "No category",
+            Number(f.status) !== 1 && " \xB7 hidden"
+          ] })
+        ] }),
+        Number(f.status) !== 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Hidden" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-up", disabled: !!q || i === 0, busy: busy === f.id, onClick: () => move(f, "up"), "aria-label": "Move up", title: "Move up" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-down", disabled: !!q || i === faqs.length - 1, onClick: () => move(f, "down"), "aria-label": "Move down", title: "Move down" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-pencil", onClick: () => setEditing(f), "aria-label": `Edit: ${f.question}`, title: "Edit" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove(f), "aria-label": `Delete: ${f.question}`, title: "Delete" })
+        ] })
+      ] }, f.id);
+    }) }),
+    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      FaqDrawer,
+      {
+        item: editing.id ? editing : null,
+        categories,
+        onClose: () => setEditing(null),
+        toast,
+        onSaved: (r) => {
+          setFaqs(r.data.faqs);
+          toast(r.data.message);
+          setEditing(null);
+        }
+      }
+    ),
+    dialog,
+    toastNode
+  ] });
+}
+function FaqDrawer({ item, categories, onClose, onSaved, toast }) {
+  const form = (0, import_form.useForm)(
+    { question: item ? item.question : "", answer: item ? item.answer || "" : "", category: item ? item.category || "" : "", status: item ? Number(item.status) === 1 : true },
+    { question: ["required", "max:500"], answer: ["required"], category: ["max:100"] }
+  );
+  const save = () => form.submit(() => import_axios.default.post("/admin/api/faqs", __spreadProps(__spreadValues({}, form.values), { id: item ? item.id : void 0 }))).then(onSaved).catch((e) => {
+    if (!e.invalid) toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error");
+  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Drawer,
+    {
+      open: true,
+      size: "lg",
+      title: item ? "Edit question" : "New question",
+      onClose,
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy: form.busy, onClick: save, children: item ? "Save" : "Add question" })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-stack", onSubmit: (e) => {
+        e.preventDefault();
+        save();
+      }, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "question", label: "Question", required: true, max: 500 }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Answer", name: "answer", required: true, error: form.error("answer"), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "answer", value: form.values.answer, onChange: (x) => form.set("answer", x), minHeight: 180, error: form.error("answer") }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.TextField,
+          {
+            form,
+            name: "category",
+            label: "Category",
+            max: 100,
+            hint: categories.length ? `Existing: ${categories.join(", ")}` : "e.g. Payments, Classes, Certificates",
+            optional: true,
+            inputProps: { list: "faq-cats" }
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", { id: "faq-cats", children: categories.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: c }, c)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "status", checked: form.values.status, onChange: (x) => form.set("status", x), label: "Shown on the FAQ page" })
+      ] })
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Settings.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Settings_exports = {};
+__export(Settings_exports, {
+  default: () => Settings
+});
+module.exports = __toCommonJS(Settings_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+const flatten = (values) => {
+  const out = {};
+  Object.entries(values).forEach(([g, kv]) => Object.entries(kv).forEach(([k, v]) => {
+    out[`${g}.${k}`] = v || "";
+  }));
+  return out;
+};
+const nest = (flat) => {
+  const out = {};
+  Object.entries(flat).forEach(([key, v]) => {
+    const [g, k] = key.split(".");
+    out[g] = out[g] || {};
+    out[g][k] = v;
+  });
+  return out;
+};
+function Settings() {
+  const { values, defaults = {} } = (0, import_inertia_react.usePage)().props;
+  const [saved, setSaved] = (0, import_react.useState)(flatten(values));
+  const [v, setV] = (0, import_react.useState)(flatten(values));
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [og, setOg] = (0, import_react.useState)([]);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const dirty = JSON.stringify(v) !== JSON.stringify(saved) || og.length > 0;
+  (0, import_form.useUnsavedGuard)(dirty);
+  const set = (k, x) => {
+    setV((p) => __spreadProps(__spreadValues({}, p), { [k]: x }));
+    setErrors((e) => __spreadProps(__spreadValues({}, e), { [k]: null }));
+  };
+  const input = (k, label, { hint, rows, placeholder, max = 255, type = "text", optional = true } = {}) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label, name: k, hint, error: errors[k], max, counter: (v[k] || "").length, optional, children: rows ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: `f-${k}`, className: "adm-input", rows, value: v[k], placeholder, onChange: (e) => set(k, e.target.value), "aria-invalid": errors[k] ? "true" : void 0 }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-${k}`, type, className: "adm-input", value: v[k], placeholder, onChange: (e) => set(k, e.target.value), "aria-invalid": errors[k] ? "true" : void 0 }) });
+  const save = () => {
+    setBusy(true);
+    const fd = new FormData();
+    fd.append("data", JSON.stringify(nest(v)));
+    if (og[0]) fd.append("og_image", og[0]);
+    import_axios.default.post("/admin/api/settings", fd).then((r) => {
+      const f = flatten(r.data.values);
+      setSaved(f);
+      setV(f);
+      setOg([]);
+      setErrors({});
+      toast(r.data.message);
+    }).catch((e) => {
+      if (e.response && e.response.status === 422) {
+        setErrors(e.response.data.errors || {});
+        toast(e.response.data.message, "error");
+        const first = Object.keys(e.response.data.errors || {})[0];
+        const el = first && document.getElementById(`f-${first}`);
+        if (el) {
+          el.focus();
+          el.scrollIntoView({ block: "center" });
+        }
+      } else toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const title = v["seo.site_title"] || defaults.site_title;
+  const desc = v["seo.meta_description"] || defaults.meta_description;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Site settings & SEO", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AdminLayout.PageHeader, { title: "Site settings & SEO", subtitle: "Details used across the public website. Changes go live as soon as you save." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-form", onSubmit: (e) => {
+      e.preventDefault();
+      save();
+    }, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "seo", title: "Search & sharing", description: "The default title and description search engines and social networks show for the site. Blog posts can override them.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-serp", "aria-label": "Search result preview", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-serp__url", children: "artistikcity.com" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-serp__title", children: title.length > 60 ? `${title.slice(0, 59)}\u2026` : title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-serp__text", children: desc.length > 160 ? `${desc.slice(0, 159)}\u2026` : desc })
+        ] }),
+        input("seo.site_title", "Site title", { hint: "Best under 60 characters.", optional: false }),
+        input("seo.meta_description", "Meta description", { rows: 3, max: 500, hint: "Best between 120 and 160 characters." }),
+        input("seo.meta_keywords", "Keywords", { hint: "Comma separated. Most search engines ignore these, but some tools read them." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Share image", name: "seo.og_image", hint: "Shown when the site is shared on WhatsApp, Facebook or LinkedIn. 1200 \xD7 630 px works best.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.DropZone,
+          {
+            name: "seo.og_image",
+            value: og,
+            onChange: setOg,
+            error: errors["seo.og_image"],
+            existing: v["seo.og_image"] ? [{ id: "og", url: v["seo.og_image"], name: "Current share image" }] : [],
+            onRemoveExisting: () => set("seo.og_image", "")
+          }
+        ) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "home", title: "Homepage highlights", description: "The three short points under the course and workshop sections of the homepage.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+          input("home.course_text_1", "Course point 1", { max: 60 }),
+          input("home.course_text_2", "Course point 2", { max: 60 }),
+          input("home.course_text_3", "Course point 3", { max: 60 })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+          input("home.workshop_text_1", "Workshop point 1", { max: 60 }),
+          input("home.workshop_text_2", "Workshop point 2", { max: 60 }),
+          input("home.workshop_text_3", "Workshop point 3", { max: 60 })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "contact", title: "Contact details", description: "Shown on the contact page. Leave a field empty to hide it.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+          input("contact.email", "E-mail", { type: "email", placeholder: "hello@artistikcity.com" }),
+          input("contact.phone", "Phone / WhatsApp", { placeholder: "+91 98765 43210" })
+        ] }),
+        input("contact.address", "Office address", { rows: 3, max: 500, hint: "One line per row; it also links to Google Maps." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "social", title: "Social links", description: "Icons in the site footer and on the contact page. Leave a link empty to hide that icon.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+          input("social.instagram", "Instagram", { placeholder: "https://www.instagram.com/\u2026" }),
+          input("social.facebook", "Facebook", { placeholder: "https://www.facebook.com/\u2026" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+          input("social.youtube", "YouTube", { placeholder: "https://www.youtube.com/@\u2026" }),
+          input("social.linkedin", "LinkedIn", { placeholder: "https://www.linkedin.com/\u2026" })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SaveBar, { dirty, busy, onSave: save, children: dirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", onClick: () => {
+        setV(saved);
+        setOg([]);
+        setErrors({});
+      }, children: "Discard changes" }) })
+    ] }),
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Instructors.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Instructors_exports = {};
+__export(Instructors_exports, {
+  default: () => Instructors
+});
+module.exports = __toCommonJS(Instructors_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+function Instructors() {
+  const { roles = [], admin = {} } = (0, import_inertia_react.usePage)().props;
+  const g = (0, import_kit.useGrid)("grid");
+  const [editing, setEditing] = (0, import_react.useState)(null);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  (0, import_react.useEffect)(() => {
+    const id = new URLSearchParams(window.location.search).get("edit");
+    if (id) {
+      const row = g.rows.find((r) => String(r.id) === id);
+      if (row) setEditing(row);
+    }
+  }, []);
+  const remove = async (r) => {
+    if (!await confirm({ title: `Delete ${r.name}'s account?`, body: "They can no longer sign in to the admin, and their public profile disappears.", confirmLabel: "Delete account", danger: true })) return;
+    import_axios.default.delete(`/admin/api/instructors/${r.id}`).then((x) => {
+      toast(x.data.message);
+      g.reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const columns = [
+    { key: "name", label: "Name", sort: "name", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell", children: [
+      r.photo_url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: r.photo_url, alt: "", className: "is-round" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-thumb is-round", children: (r.name || "?").charAt(0) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-linkbtn", onClick: () => setEditing(r), children: r.name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: r.designation || r.email })
+      ] })
+    ] }) },
+    { key: "email", label: "Sign-in e-mail", hide: "md", render: (r) => r.email },
+    { key: "role", label: "Role", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: r.admin_type === "admin" ? "pink" : r.admin_type === "moderator" ? "blue" : "grey", children: r.role_label }) },
+    { key: "courses", label: "Courses", sort: "courses", align: "right", render: (r) => `${r.live_courses} live / ${r.courses}` },
+    { key: "actions", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Actions" }), align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-pencil", onClick: () => setEditing(r), children: "Edit" }),
+      r.public_url && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", variant: "ghost", icon: "fa-external-link", href: r.public_url, target: "_blank", rel: "noopener noreferrer", "aria-label": `View ${r.name}'s profile`, title: "Public profile" }),
+      String(r.id) !== String(admin.id) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove(r), "aria-label": `Delete ${r.name}`, title: "Delete account" })
+    ] }) }
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Instructor profiles", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title: "Instructor profiles",
+        subtitle: "Admin accounts and the public profiles students see on course pages. Roles decide what each person can do in the admin.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-user-plus", onClick: () => setEditing({}), children: "Add a person" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: "Search by name or e-mail" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Role", value: g.filter("role"), onChange: (v) => g.go({ role: v }), options: roles })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { columns, rows: g.rows, meta: g.meta, loading: g.loading, onSort: g.sortBy, caption: "Staff", empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-users", title: "Nobody matches" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer }),
+    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PersonDrawer, { item: editing.id ? editing : null, roles, onClose: () => setEditing(null), toast, onSaved: (m) => {
+      toast(m);
+      setEditing(null);
+      g.reload();
+    } }),
+    dialog,
+    toastNode
+  ] });
+}
+function PersonDrawer({ item, roles, onClose, onSaved, toast }) {
+  const form = (0, import_form.useForm)({
+    name: item ? item.name : "",
+    email: item ? item.email : "",
+    slug: item ? item.slug || "" : "",
+    admin_type: item ? item.admin_type : "teacher",
+    designation: item ? item.designation || "" : "",
+    profile_title: item ? item.profile_title || "" : "",
+    location: item ? item.location || "" : "",
+    profile_description: item ? item.profile_description || "" : "",
+    password: ""
+  }, { name: ["required", "max:100"], email: ["required", "email"], slug: ["slug"], password: item ? ["minlen:8"] : ["required", "minlen:8"] });
+  const [photo, setPhoto] = (0, import_react.useState)([]);
+  const save = () => {
+    const fd = new FormData();
+    if (item) fd.append("id", item.id);
+    Object.entries(form.values).forEach(([k, v]) => fd.append(k, v || ""));
+    if (photo[0]) fd.append("photo", photo[0]);
+    form.submit(() => import_axios.default.post("/admin/api/instructors", fd)).then((r) => onSaved(r.data.message)).catch((e) => {
+      if (!e.invalid) toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error");
+    });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Drawer,
+    {
+      open: true,
+      size: "lg",
+      title: item ? item.name : "Add a person",
+      subtitle: item ? "Account and public profile" : "They sign in at /admin/login with this e-mail and password.",
+      onClose,
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy: form.busy, onClick: save, children: item ? "Save" : "Create account" })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-stack", onSubmit: (e) => {
+        e.preventDefault();
+        save();
+      }, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "Account" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "name", label: "Name", required: true, max: 100 }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "email", label: "Sign-in e-mail", type: "email", required: true })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SelectField, { form, name: "admin_type", label: "Role", options: roles, placeholder: "Choose a role", required: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.TextField,
+            {
+              form,
+              name: "password",
+              label: item ? "New password" : "First password",
+              type: "password",
+              required: !item,
+              hint: item ? "Leave empty to keep the current password." : "At least 8 characters. Share it securely.",
+              inputProps: { autoComplete: "new-password" }
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "adm-sub", children: "Public profile" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "designation", label: "Designation", placeholder: "e.g. Founder & Lead Instructor", optional: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "profile_title", label: "Headline", placeholder: "e.g. Artist, Illustrator & Art Educator", optional: true })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "location", label: "Location", optional: true }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SlugField, { form, source: "name", prefix: "/teacher/", label: "Profile URL" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "About", name: "profile_description", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "profile_description", value: form.values.profile_description, onChange: (x) => form.set("profile_description", x), minHeight: 180 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Photo", name: "photo", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.DropZone, { name: "photo", value: photo, onChange: setPhoto, error: form.error("photo"), existing: item && item.photo_url ? [{ id: "p", url: item.photo_url, name: item.name }] : [] }) })
+      ] })
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Tasks.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Tasks_exports = {};
+__export(Tasks_exports, {
+  default: () => Tasks
+});
+module.exports = __toCommonJS(Tasks_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+const TONE = { "Under Review": "amber", Feedback: "blue", Reviewed: "grey", Completed: "green" };
+function Tasks() {
+  const { statuses = [], courses = [] } = (0, import_inertia_react.usePage)().props;
+  const g = (0, import_kit.useGrid)("grid");
+  const [open, setOpen] = (0, import_react.useState)(null);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const columns = [
+    { key: "student", label: "Student", sort: "student", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.student }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: r.student_email })
+    ] }) },
+    { key: "task", label: "Task", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-linkbtn", onClick: () => setOpen(r.id), children: r.task_title }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: [r.course, r.lesson_title].filter(Boolean).join(" \xB7 ") })
+    ] }) },
+    { key: "last", label: "Last activity", sort: "last", hide: "md", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+      (0, import_kit.fmtDate)(r.last_at, true),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { className: "adm-muted", children: [
+        r.last_from === "Student" ? "Student wrote" : "You replied",
+        " \xB7 ",
+        r.messages,
+        " messages"
+      ] })
+    ] }) },
+    { key: "status", label: "Status", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      r.last_from === "Student" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "pink", dot: true, children: "Needs reply" }),
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: TONE[r.status] || "grey", children: r.status || "\u2014" })
+    ] }) },
+    { key: "open", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Open" }), align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => setOpen(r.id), children: "Open" }) }
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Student tasks", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AdminLayout.PageHeader, { title: "Student tasks", subtitle: "Answers to the practice tasks inside lessons. Reply with feedback and set where each one stands." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Segments,
+      {
+        label: "Status",
+        value: g.filter("status"),
+        onChange: (v) => g.go({ status: v }),
+        options: [{ value: "", label: "All" }, { value: "waiting", label: "Needs reply" }, ...statuses.map((s) => ({ value: s, label: s }))]
+      }
+    ), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: "Student, task or course" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Course", value: g.filter("course"), onChange: (v) => g.go({ course: v }), options: courses.map((c) => ({ value: String(c.value), label: c.label })) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        columns,
+        rows: g.rows,
+        meta: g.meta,
+        loading: g.loading,
+        onSort: g.sortBy,
+        caption: "Student tasks",
+        onRowClick: (r) => setOpen(r.id),
+        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-comments-o", title: "No task answers here", children: "When students answer a practice task, it shows up in this list." })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer }),
+    open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ThreadDrawer, { id: open, statuses, onClose: () => setOpen(null), toast, onChanged: () => g.reload() }),
+    toastNode
+  ] });
+}
+function ThreadDrawer({ id, statuses, onClose, toast, onChanged }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [error, setError] = (0, import_react.useState)(null);
+  const [reply, setReply] = (0, import_react.useState)("");
+  const [status, setStatus] = (0, import_react.useState)("Feedback");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [fieldError, setFieldError] = (0, import_react.useState)(null);
+  (0, import_react.useEffect)(() => {
+    import_axios.default.get(`/admin/api/tasks/${id}`).then((r) => {
+      setData(r.data);
+      const last = [...r.data.messages].reverse().find((m) => m.from_type === "Student");
+      if (last && last.review_status && last.review_status !== "Under Review") setStatus(last.review_status);
+    }).catch((e) => setError((0, import_AdminLayout.errorText)(e)));
+  }, [id]);
+  const send = () => {
+    setBusy(true);
+    setFieldError(null);
+    import_axios.default.post(`/admin/api/tasks/${id}/reply`, { reply, status }).then((r) => {
+      setData(r.data);
+      setReply("");
+      toast(r.data.message);
+      onChanged();
+    }).catch((e) => {
+      if (e.response && e.response.status === 422) setFieldError(e.response.data.message);
+      else toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const t = data && data.thread;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Drawer,
+    {
+      open: true,
+      size: "lg",
+      title: t ? t.task_title : "Task",
+      subtitle: t ? `${t.student} \xB7 ${[t.course, t.lesson_title].filter(Boolean).join(" \xB7 ")}` : void 0,
+      onClose,
+      footer: data && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-filter", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { value: status, onChange: (e) => setStatus(e.target.value), "aria-label": "Review status", children: statuses.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: s, children: s }, s)) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-reply", busy, onClick: send, children: reply.replace(/<[^>]+>/g, "").trim() ? "Send reply" : "Update status" })
+      ] }),
+      children: [
+        error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-alert is-error", role: "alert", children: error }),
+        !data && !error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-skel", style: { height: 120 } }),
+        data && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+          t.task_description && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-alert is-info", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-info-circle", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Task:" }),
+              " ",
+              t.task_description
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "adm-thread", children: data.messages.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: m.from_type === "Teacher" ? "is-staff" : "", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-thread__head", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: m.from_name }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                (0, import_kit.fmtDate)(m.created_at, true),
+                m.review_status && m.from_type === "Student" ? ` \xB7 ${m.review_status}` : ""
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-prose", dangerouslySetInnerHTML: { __html: m.reply || "" } }),
+            m.photos.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-thread__photos", children: m.photos.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: p, target: "_blank", rel: "noopener noreferrer", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: p, alt: "Student work" }) }, p)) })
+          ] }, m.id)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Your reply", name: "reply", error: fieldError, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "reply", value: reply, onChange: setReply, minHeight: 140, placeholder: "What works well, and what to try next\u2026" }) })
+        ] })
+      ]
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Profile.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Profile_exports = {};
+__export(Profile_exports, {
+  default: () => Profile
+});
+module.exports = __toCommonJS(Profile_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+function Profile() {
+  const { me, tab: initialTab } = (0, import_inertia_react.usePage)().props;
+  const [tab, setTab] = (0, import_react.useState)(initialTab);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const go = (t) => {
+    setTab(t);
+    window.history.replaceState(window.history.state, "", t === "password" ? "/admin/change-password" : "/admin/profile");
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: tab === "password" ? "Change password" : "Your profile", crumbs: [{ label: "Account" }, { label: tab === "password" ? "Change password" : "Your profile" }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title: me.name,
+        subtitle: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "pink", children: me.role_label }),
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: me.email })
+        ] }),
+        actions: me.public_url && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-external-link", href: me.public_url, target: "_blank", rel: "noopener noreferrer", children: "Public profile" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-tabs", role: "tablist", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", role: "tab", "aria-selected": tab === "profile", className: tab === "profile" ? "is-on" : "", onClick: () => go("profile"), children: "Profile" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", role: "tab", "aria-selected": tab === "password", className: tab === "password" ? "is-on" : "", onClick: () => go("password"), children: "Password" })
+    ] }),
+    tab === "profile" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileForm, { me, toast }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PasswordForm, { toast }),
+    toastNode
+  ] });
+}
+function ProfileForm({ me, toast }) {
+  const form = (0, import_form.useForm)(
+    { name: me.name || "", designation: me.designation || "", profile_title: me.profile_title || "", location: me.location || "", profile_description: me.profile_description || "" },
+    { name: ["required", "max:100"] }
+  );
+  const [photo, setPhoto] = (0, import_react.useState)([]);
+  const save = () => {
+    const fd = new FormData();
+    Object.entries(form.values).forEach(([k, v]) => fd.append(k, v || ""));
+    if (photo[0]) fd.append("photo", photo[0]);
+    form.submit(() => import_axios.default.post("/admin/api/profile", fd)).then((r) => {
+      toast(r.data.message);
+      setPhoto([]);
+    }).catch((e) => {
+      if (!e.invalid) toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error");
+    });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("form", { className: "adm-form", onSubmit: (e) => {
+    e.preventDefault();
+    save();
+  }, noValidate: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { title: "About you", description: "Shown on your public instructor page and next to your courses.", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "name", label: "Name", required: true, max: 100 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "location", label: "Location", optional: true })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "designation", label: "Designation", optional: true }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "profile_title", label: "Headline", optional: true })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "About", name: "profile_description", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: "profile_description", value: form.values.profile_description, onChange: (x) => form.set("profile_description", x), minHeight: 180 }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Photo", name: "photo", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.DropZone, { name: "photo", value: photo, onChange: setPhoto, error: form.error("photo"), existing: me.photo_url ? [{ id: "p", url: me.photo_url, name: "Current photo" }] : [] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy: form.busy, type: "submit", children: "Save profile" }) })
+  ] }) });
+}
+function PasswordForm({ toast }) {
+  const form = (0, import_form.useForm)(
+    { current_password: "", new_password: "", confirm_password: "" },
+    { current_password: ["required"], new_password: ["required", "minlen:8"], confirm_password: ["required"] }
+  );
+  const save = () => {
+    if (form.values.new_password !== form.values.confirm_password) {
+      form.setErrors({ confirm_password: "The two passwords don't match." });
+      return;
+    }
+    form.submit(() => import_axios.default.post("/admin/api/password", form.values)).then((r) => {
+      toast(r.data.message);
+      form.reset({ current_password: "", new_password: "", confirm_password: "" });
+    }).catch((e) => {
+      if (!e.invalid) toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error");
+    });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("form", { className: "adm-form", onSubmit: (e) => {
+    e.preventDefault();
+    save();
+  }, noValidate: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { title: "Change password", description: "Use at least 8 characters. A short phrase of a few words is easy to remember and hard to guess.", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "current_password", label: "Current password", type: "password", required: true, inputProps: { autoComplete: "current-password" } }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "new_password", label: "New password", type: "password", required: true, inputProps: { autoComplete: "new-password" } }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "confirm_password", label: "Repeat new password", type: "password", required: true, inputProps: { autoComplete: "new-password" } })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-lock", busy: form.busy, type: "submit", children: "Change password" }) })
+  ] }) });
 }
 
 
@@ -102134,6 +106374,34 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Admin/Profile": "./resources/js/Pages/Admin/Profile.js",
+	"./Admin/Profile.js": "./resources/js/Pages/Admin/Profile.js",
+	"./Admin/Tasks": "./resources/js/Pages/Admin/Tasks.js",
+	"./Admin/Tasks.js": "./resources/js/Pages/Admin/Tasks.js",
+	"./Admin/Instructors": "./resources/js/Pages/Admin/Instructors.js",
+	"./Admin/Instructors.js": "./resources/js/Pages/Admin/Instructors.js",
+	"./Admin/Settings": "./resources/js/Pages/Admin/Settings.js",
+	"./Admin/Settings.js": "./resources/js/Pages/Admin/Settings.js",
+	"./Admin/Faq": "./resources/js/Pages/Admin/Faq.js",
+	"./Admin/Faq.js": "./resources/js/Pages/Admin/Faq.js",
+	"./Admin/Contacts": "./resources/js/Pages/Admin/Contacts.js",
+	"./Admin/Contacts.js": "./resources/js/Pages/Admin/Contacts.js",
+	"./Admin/Taxonomies": "./resources/js/Pages/Admin/Taxonomies.js",
+	"./Admin/Taxonomies.js": "./resources/js/Pages/Admin/Taxonomies.js",
+	"./Admin/Blog/Editor": "./resources/js/Pages/Admin/Blog/Editor.js",
+	"./Admin/Blog/Editor.js": "./resources/js/Pages/Admin/Blog/Editor.js",
+	"./Admin/Blog/Index": "./resources/js/Pages/Admin/Blog/Index.js",
+	"./Admin/Blog/Index.js": "./resources/js/Pages/Admin/Blog/Index.js",
+	"./Admin/Newsletter": "./resources/js/Pages/Admin/Newsletter.js",
+	"./Admin/Newsletter.js": "./resources/js/Pages/Admin/Newsletter.js",
+	"./Admin/Orders": "./resources/js/Pages/Admin/Orders.js",
+	"./Admin/Orders.js": "./resources/js/Pages/Admin/Orders.js",
+	"./Admin/FreeCourses": "./resources/js/Pages/Admin/FreeCourses.js",
+	"./Admin/FreeCourses.js": "./resources/js/Pages/Admin/FreeCourses.js",
+	"./Admin/Courses/Editor": "./resources/js/Pages/Admin/Courses/Editor.js",
+	"./Admin/Courses/Editor.js": "./resources/js/Pages/Admin/Courses/Editor.js",
+	"./Admin/Courses/Index": "./resources/js/Pages/Admin/Courses/Index.js",
+	"./Admin/Courses/Index.js": "./resources/js/Pages/Admin/Courses/Index.js",
 	"./Course/Learn": "./resources/js/Pages/Course/Learn.js",
 	"./Course/Learn.js": "./resources/js/Pages/Course/Learn.js",
 	"./Course/Overview": "./resources/js/Pages/Course/Overview.js",

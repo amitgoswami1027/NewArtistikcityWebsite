@@ -53,7 +53,7 @@ public class LifecycleRepository {
                 + " (select count(*) from course_module_lessons l where l.course_id = c.id and l.status = '1') as total_lessons,"
                 + " (select count(*) from lesson_completions lc where lc.enrollment_id = e.id) as completed_lessons,"
                 + " (select count(*) from student_submissions s where s.user_id = e.user_id and s.course_id = e.course_id) as submissions"
-                + " from enrollments e join courses c on c.id = e.course_id where e.user_id = ? order by e.id desc", userId);
+                + " from enrollments e join courses c on c.id = e.course_id where e.user_id = ? and e.status <> 'Refunded' order by e.id desc", userId);
     }
 
     /** Newest paid order of this course by this student (null when there is none). */
@@ -75,12 +75,12 @@ public class LifecycleRepository {
     }
 
     public List<Map<String, Object>> modules(long courseId) {
-        return jdbc.queryForList("select id, module_title, module_duration from course_modules where course_id = ? and status = '1' order by id", courseId);
+        return jdbc.queryForList("select id, module_title, module_duration from course_modules where course_id = ? and status = '1' order by sort_order, id", courseId);
     }
 
     public List<Map<String, Object>> lessons(long courseId) {
         return jdbc.queryForList("select id, module_id, lesson_title, lesson_description, lesson_pdf from course_module_lessons"
-                + " where course_id = ? and status = '1' order by module_id, id", courseId);
+                + " where course_id = ? and status = '1' order by sort_order, id", courseId);
     }
 
     public List<Long> completedLessonIds(long enrollmentId) {

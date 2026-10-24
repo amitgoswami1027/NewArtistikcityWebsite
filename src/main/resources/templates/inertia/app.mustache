@@ -5,7 +5,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{csrf}}">
 
-        <title inertia>{{appName}}</title>
+        <title inertia>{{seo.title}}</title>
+        <meta name="description" content="{{seo.description}}">
+        {{#seo.keywords}}<meta name="keywords" content="{{seo.keywords}}">{{/seo.keywords}}
+        <meta property="og:site_name" content="ArtistikCity">
+        <meta property="og:title" content="{{seo.title}}">
+        <meta property="og:description" content="{{seo.description}}">
+        <meta property="og:image" content="{{seo.image}}">
+        <meta name="twitter:card" content="summary_large_image">
         <link rel="shortcut icon" href="/favicon.ico">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
         <base href="/" />

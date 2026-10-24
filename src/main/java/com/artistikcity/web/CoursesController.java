@@ -80,9 +80,9 @@ public class CoursesController {
 
         // curriculum: units (modules) with their lessons
         List<Row> modules = db.select("select id, module_title, module_duration from course_modules"
-                + " where course_id = ? and status = '1' order by id", id);
+                + " where course_id = ? and status = '1' order by sort_order, id", id);
         List<Row> lessons = db.select("select id, module_id, lesson_title, lesson_description, case when lesson_pdf is null or lesson_pdf = ''"
-                + " then 0 else 1 end as has_download from course_module_lessons where course_id = ? and status = '1' order by id", id);
+                + " then 0 else 1 end as has_download from course_module_lessons where course_id = ? and status = '1' order by sort_order, id", id);
         for (Row m : modules) {
             List<Row> own = new ArrayList<>();
             for (Row l : lessons) {

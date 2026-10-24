@@ -42,7 +42,10 @@ public class Inertia {
 
     public static final String ROOT_APP = "inertia/app";
     public static final String ROOT_USER = "inertia/user";
+    /** Request attribute with page-specific SEO values ({title, description, image}) for the root template. */
+    public static final String SEO_ATTRIBUTE = "ac.seo";
 
+    private final com.artistikcity.admin.SiteSettings site;
     private final Json json;
     private final com.artistikcity.web.user.WishlistService wishlist;
     private final Auth auth;
@@ -53,7 +56,8 @@ public class Inertia {
     private final String ziggyScript;
 
     public Inertia(Json json, Auth auth, Routes routes, Views views, Environment env,
-                   com.artistikcity.web.user.WishlistService wishlist) {
+                   com.artistikcity.web.user.WishlistService wishlist, com.artistikcity.admin.SiteSettings site) {
+        this.site = site;
         this.json = json;
         this.wishlist = wishlist;
         this.auth = auth;
@@ -92,6 +96,9 @@ public class Inertia {
             all.put("nav", nav);
         }
         Supplier<Object> flashMessage = () -> Flash.get(request, "message");
+        // contact details and social links managed in Admin > Site settings (footer, contact page)
+        Supplier<Object> siteInfo = site::publicInfo;
+        all.put("site", siteInfo);
         all.put("flash", Row.of("message", flashMessage));
         if (props != null) {
             all.putAll(props);
@@ -127,6 +134,16 @@ public class Inertia {
         model.put("ziggy", ziggy(request));
         model.put("csrf", Csrf.token(request));
         model.put("assetVersion", version);
+        Map<String, Object> seo = site.seo(baseUrl(request));
+        // a controller can set page-specific values (e.g. a blog post) with request attribute SEO_ATTRIBUTE
+        if (request.getAttribute(SEO_ATTRIBUTE) instanceof Map<?, ?> custom) {
+            custom.forEach((k, v) -> {
+                if (v != null && !String.valueOf(v).isBlank()) {
+                    seo.put(String.valueOf(k), v);
+                }
+            });
+        }
+        model.put("seo", seo);
         return views.page(request, rootView, model);
     }
 

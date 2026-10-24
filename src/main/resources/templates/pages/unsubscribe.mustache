@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Newsletter · ArtistikCity</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
+    <link href="/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/css/ac-theme.css">
+</head>
+<body style="margin:0">
+<main class="ac nl-page">
+    <div class="nl-card">
+        <a href="/" class="nl-logo"><img src="/assets/images/logo.png" alt="ArtistikCity"></a>
+        {{#invalid}}
+        <h1>This link has expired</h1>
+        <p>We couldn't confirm the e-mail address in this link. Use the unsubscribe link from a recent newsletter, or <a href="/contact">contact us</a> and we'll remove you.</p>
+        {{/invalid}}
+        {{#confirm}}
+        <h1>Unsubscribe from the newsletter?</h1>
+        <p><b>{{email}}</b> will stop receiving ArtistikCity news. Messages about your courses and orders still arrive.</p>
+        <form method="post" action="/newsletter/unsubscribe">
+            <input type="hidden" name="_token" value="{{csrf}}">
+            <input type="hidden" name="e" value="{{email}}">
+            <input type="hidden" name="t" value="{{token}}">
+            <button type="submit" class="dm-btn dm-btn--ink dm-btn--lg">Unsubscribe</button>
+            <a href="/" class="dm-btn dm-btn--line dm-btn--lg">Keep me subscribed</a>
+        </form>
+        {{/confirm}}
+        {{#done}}
+        <h1>You're unsubscribed</h1>
+        <p><b>{{email}}</b> won't receive the newsletter any more. Changed your mind? You can subscribe again at the bottom of any page.</p>
+        <a href="/" class="dm-btn dm-btn--ink dm-btn--lg">Back to ArtistikCity</a>
+        {{/done}}
+    </div>
+</main>
+</body>
+</html>

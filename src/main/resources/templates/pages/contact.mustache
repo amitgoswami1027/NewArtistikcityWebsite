@@ -161,33 +161,29 @@
                 </div>
 
                 <div class="addressCol">
+                    {{#hasConnect}}
                     <div class="widget">
                         <h3>Connect with us</h3>
                         <ul class="connect">
-                            <li><a href="tel:9876543201"><img src="assets/images/tel-icon.png" alt=""> <span>9876
-                                        543 201</span></a></li>
-                            <li><a href="mailto:info@artistickcity.com"><img src="assets/images/email-icon.png"
-                                        alt=""><span>info@artistickcity.com</span></a></li>
-                            <li><a href="tel:9876543201"><img src="assets/images/whatsapp-icon.png" alt="">
-                                    <span>9876 543 201</span></a></li>
+                            {{#contact.phone}}<li><a href="tel:{{contactPhoneLink}}"><img src="assets/images/tel-icon.png" alt=""> <span>{{contact.phone}}</span></a></li>{{/contact.phone}}
+                            {{#contact.email}}<li><a href="mailto:{{contact.email}}"><img src="assets/images/email-icon.png" alt=""><span>{{contact.email}}</span></a></li>{{/contact.email}}
+                            {{#contact.phone}}<li><a href="https://wa.me/{{contactPhoneLink}}"><img src="assets/images/whatsapp-icon.png" alt=""> <span>WhatsApp {{contact.phone}}</span></a></li>{{/contact.phone}}
                         </ul>
                     </div>
+                    {{/hasConnect}}
 
                     <div class="widget office">
                         <h3><img src="assets/images/office-icon.png" alt=""> Office</h3>
-                        <p>505, Agate, MyHomes Jewel,<br>
-                            Madinguda, Hyderabad - 540017<br>
-                            Telanganma, India.</p>
-                        <h6><a href="#">View on Google map <i class="fa fa-angle-right"></i> </a></h6>
+                        <p>{{#addressLines}}{{.}}<br>{{/addressLines}}</p>
+                        {{#mapUrl}}<h6><a href="{{mapUrl}}" target="_blank" rel="noopener">View on Google map <i class="fa fa-angle-right"></i> </a></h6>{{/mapUrl}}
                     </div>
 
                     <div class="widget">
                         <h3>Follow Us</h3>
                         <ul class="followus">
-                            <li><a href="#"><img src="assets/images/facebook-icon.png" alt=""></a></li>
-                            <li><a href="#"><img src="assets/images/instagram-icon.png" alt=""></a></li>
-                            <li><a href="#"><img src="assets/images/youtube-icon.png" alt=""></a></li>
-                            <li><a href="#"><img src="assets/images/pintrest-icon.png" alt=""></a></li>
+                            {{#social.facebook}}<li><a href="{{social.facebook}}" target="_blank" rel="noopener"><img src="assets/images/facebook-icon.png" alt="Facebook"></a></li>{{/social.facebook}}
+                            {{#social.instagram}}<li><a href="{{social.instagram}}" target="_blank" rel="noopener"><img src="assets/images/instagram-icon.png" alt="Instagram"></a></li>{{/social.instagram}}
+                            {{#social.youtube}}<li><a href="{{social.youtube}}" target="_blank" rel="noopener"><img src="assets/images/youtube-icon.png" alt="YouTube"></a></li>{{/social.youtube}}
                         </ul>
                     </div>
                 </div>

@@ -67,6 +67,8 @@ public final class Personas {
         m.put("persona", of(admin));
         m.put("personaLabel", label(of(admin)));
         m.put("photo", admin.get("profile_photo"));
+        m.put("photoUrl", admin.str("profile_photo", "").isBlank() ? null
+                : "/storage/uploads/teachers/" + admin.get("id") + "/" + admin.str("profile_photo"));
         m.put("capabilities", capabilities(admin));
         return m;
     }

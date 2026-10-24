@@ -7,7 +7,7 @@ This is the Java port of the original **Laravel 8 + Inertia.js + React** applica
 | Backend | PHP 7/8, Laravel 8, Eloquent | **Java 17+, Spring Boot 3.3**, plain JDBC (`Db` helper) |
 | Database | MySQL | **MySQL 8.4 LTS** (schema in `database/`; the same table and column names as Laravel) |
 | Public site + student area UI | React 17 pages via Inertia.js | **Unchanged React pages.** The Java backend speaks the Inertia protocol and publishes the Ziggy `route()` list |
-| Server-rendered pages (checkout, static pages, admin, e-mails) | Blade | **Mustache** templates (same HTML/CSS) |
+| Server-rendered pages (static pages, admin sign-in, e-mails) | Blade | **Mustache** templates (same HTML/CSS) |
 | Auth | Laravel guards `web` + `admin`, bcrypt | Session auth with the same two guards. **Existing Laravel bcrypt hashes still work** |
 | PDF certificates | dompdf | OpenHTMLtoPDF |
 | Payments | razorpay-php, paypal/rest-api-sdk-php | Java `HttpClient` REST clients (Razorpay, PayPal v1 Payments API) |
@@ -233,6 +233,28 @@ alongside. Prices always come from `course_prices` (INR via Razorpay, USD via Pa
 - Students who are already enrolled see "Go to course" instead of paying again. Receipts are e-mailed, and every order is listed under
   My account › Your orders.
 
+### 4c. Admin console
+
+Sign in at `/admin/login`. Everything an admin manages lives in one console with a sidebar (collapsible; a drawer on tablets
+and phones) and the account menu and **Log out** in the top-right corner:
+
+| Area | URL | What it does |
+|---|---|---|
+| Courses / Workshops | `/admin/courses`, `/admin/workshop` | Searchable, sortable lists; editor in sections (basics, category, schedule, pricing, page content, lists, photos & videos) and a **Curriculum** tab for modules, lessons (notes, PDF), practice tasks and projects. Duplicate copies the curriculum too. Paid courses can be hidden but not deleted. |
+| Free lessons | `/admin/free-courses` | Free video lessons for new students. |
+| Course orders | `/admin/orders` | Filters (status, course, method, currency, dates), CSV export, order details, manual *paid* / *refunded* with a required note (history is kept), certificates. |
+| Newsletter | `/admin/newsletter` | Subscribers (add in bulk, unsubscribe, export) and newsletters (write, preview, send a test, send to everyone). Every e-mail has a signed unsubscribe link. |
+| Blog | `/admin/blog/post` | Drafts and published posts, rich text with preview, URL slug, featured, categories, tags, cover image, SEO title and description. Drafts are not public. |
+| Catalog / blog lists | `/admin/catalog`, `/admin/blog/taxonomy` | Mediums, genres, skill levels, course types, blog categories and tags. |
+| FAQ, Contact messages | `/admin/faq`, `/admin/contacts` | The public `/faq` page; the contact-form inbox. |
+| Site settings & SEO | `/admin/settings` | Site title, meta description, share image, homepage highlights, contact details, social links. |
+| Instructor profiles | `/admin/instructors` | Admin accounts, roles and the public `/teacher/...` profiles. |
+| Student tasks | `/admin/tasks` | Answers to lesson tasks; reply with feedback. |
+
+What each person sees depends on their role (super admin, instructor, gallery moderator). Instructors only see their own
+courses. Newsletter unsubscribe links are signed with `NEWSLETTER_SECRET` (falls back to `OTP_SECRET`, then to a random key
+stored in the database). Without `MAIL_HOST`, e-mails are written to `logs/mail-outbox/` instead of being sent.
+
 ## 5. Front-end (React)
 
 The React/Inertia source is in `frontend/resources/js` (the Laravel project's pages plus the new sign-in pages in `Pages/Auth`, `Components/Auth` and `Pages/Students/LinkedAccounts.js`). To rebuild the bundle:
@@ -262,12 +284,15 @@ src/main/java/com/artistikcity/
   service/       CourseService, PostService, CertificateService, PaymentGateways, Mailer
   web/           public site: Welcome, Pages, Courses, Blog, Profiles, Auth, Social, Checkout
   web/user/      student area: courses, lessons, tasks, account, certificates
-  web/admin/     admin panel: dashboard, courses/workshops, free courses, people, orders,
-                 taxonomies/testimonials/blog (resource CRUD), blog posts
-  web/api/       JSON API used by the React footer/newsletter and the admin course editor
+  web/admin/     admin sign-in
+  admin/         admin console (React pages in Pages/Admin): courses & workshops with curriculum, free lessons,
+                 orders, newsletter, blog, catalog lists, FAQ, contact messages, site settings & SEO,
+                 instructor profiles, student tasks; shared AdminKit, Grid (server-side tables), Audit
+  lifecycle/     admin console overview, verification desk, people, gallery, testimonials
+  web/api/       JSON API used by the React footer and newsletter sign-up
 src/main/resources/
   templates/inertia/   root HTML for the React app ("app" and "user" layouts)
-  templates/pages|orders|admin|emails|certificates   Mustache versions of the Blade views
+  templates/pages|admin|emails|certificates   Mustache views (the old admin screens were replaced by the React console)
   static/              original public/ assets (css, js/app.js, fonts, images)
 ```
 
@@ -282,7 +307,7 @@ src/main/resources/
 | `Auth/*` (Breeze), `UserAuthController`, `SocialController` | `web/AuthController`, `web/SocialController` |
 | `CartController`, `OrderController`, `PaymentController`, `PaypalController` | `web/CheckoutController` + `service/PaymentGateways` |
 | `User/*` | `web/user/UserCoursesController`, `UserTaskController`, `UserAccountController` |
-| `Admin/*` | `web/admin/*` (includes the admin login and blog controllers that were missing from the Laravel repo) |
+| `Admin/*` | `admin/*` React console + `web/admin/AdminAuthController` |
 | `Api/*` | `web/api/ApiController` |
 | Middleware (`auth`, `guest`, `admin`, CSRF, Inertia) | `http/*` interceptors + `inertia/Inertia` |
 | Blade views | `src/main/resources/templates/**/*.mustache` |

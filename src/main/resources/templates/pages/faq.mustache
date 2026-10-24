@@ -88,70 +88,14 @@
 <div class="faqpage">
     <div class="container">
         <div class="faqList">
-            <h3>How do I make payment for the PRO subscription?</h3>
-            <div class="answer">
-                <p>The vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                    deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
-                    provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
-                    fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
-                    est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis
-                    voluptas assumenda est, omnis dolor repellendus.</p>
-            </div>
-            <h3>How is the PRO subscription renewed?</h3>
-            <div class="answer">
-                <p>The vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                    deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
-                    provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
-                    fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
-                    est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis
-                    voluptas assumenda est, omnis dolor repellendus.</p>
-            </div>
-            <h3>I don't want to renew my subscription, how do I do it?</h3>
-            <div class="answer">
-                <p>The vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                    deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
-                    provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
-                    fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
-                    est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis
-                    voluptas assumenda est, omnis dolor repellendus.</p>
-            </div>
-            <h3>How is the additional 20% PRO discount applied?</h3>
-            <div class="answer">
-                <p>The vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                    deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
-                    provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
-                    fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
-                    est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis
-                    voluptas assumenda est, omnis dolor repellendus.</p>
-            </div>
-
-            <h3>How can I access to Airtistik City PRO's open courses?</h3>
-            <div class="answer">
-                <p>The vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                    deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
-                    provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
-                    fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
-                    est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis
-                    voluptas assumenda est, omnis dolor repellendus.</p>
-            </div>
-            <h3>I am PRO and I use the App, how can I take advantage of my benefits?</h3>
-            <div class="answer">
-                <p>The vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                    deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
-                    provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
-                    fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
-                    est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis
-                    voluptas assumenda est, omnis dolor repellendus.</p>
-            </div>
-            <h3>Gifting Airtistik City PRO</h3>
-            <div class="answer">
-                <p>The vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                    deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
-                    provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
-                    fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
-                    est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis
-                    voluptas assumenda est, omnis dolor repellendus.</p>
-            </div>
+            {{#groups}}
+            {{#category}}<h2 class="faqCat">{{category}}</h2>{{/category}}
+            {{#items}}
+            <h3>{{question}}</h3>
+            <div class="answer">{{{answer}}}</div>
+            {{/items}}
+            {{/groups}}
+            {{^groups}}<p>Questions and answers will appear here soon. Meanwhile, <a href="/contact">contact us</a> with any question.</p>{{/groups}}
         </div>
     </div>
 </div>

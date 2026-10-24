@@ -107,7 +107,7 @@ public class UserCoursesController {
         nav.put("course_module_id", module.get("id"));
         nav.put("course_module_title", module.get("module_title"));
         List<Row> lessons = new ArrayList<>();
-        for (Row l : db.select("select id, lesson_title from course_module_lessons where module_id = ? order by id", moduleId)) {
+        for (Row l : db.select("select id, lesson_title from course_module_lessons where module_id = ? order by sort_order, id", moduleId)) {
             lessons.add(Row.of("lesson_id", l.get("id"), "module_id", module.get("id"), "lesson_title", l.get("lesson_title")));
         }
         nav.put("course_module_lesson", lessons);
@@ -122,7 +122,7 @@ public class UserCoursesController {
         nav.put("course_title", course.get("title"));
         nav.put("course_sub_title", course.get("sub_title"));
         List<Row> modules = new ArrayList<>();
-        for (Row m : db.select("select id, module_title from course_modules where course_id = ? order by id", courseId)) {
+        for (Row m : db.select("select id, module_title from course_modules where course_id = ? order by sort_order, id", courseId)) {
             modules.add(Row.of("module_id", m.get("id"), "module_title", m.get("module_title")));
         }
         nav.put("course_module", modules);

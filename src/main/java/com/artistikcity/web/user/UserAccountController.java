@@ -222,7 +222,7 @@ public class UserAccountController {
             m.put("amount", o.get("price"));
             m.put("currency", o.str("price_type") == null ? "INR" : o.str("price_type").toUpperCase(java.util.Locale.ROOT));
             m.put("date", o.get("created_at"));
-            m.put("status", ps == 1 ? "Paid" : ps == 2 ? "Payment failed" : "Payment pending");
+            m.put("status", ps == 1 ? "Paid" : ps == 2 ? "Payment failed" : ps == 3 ? "Refunded" : "Payment pending");
             m.put("payment", o.get("payment_option"));
             m.put("billing", java.util.stream.Stream.of(o.str("billing_name"), o.str("billing_address"), o.str("billing_city"), o.str("billing_state"),
                     o.str("billing_zipcode"), o.str("billing_country")).filter(x -> x != null && !x.isBlank()).collect(java.util.stream.Collectors.joining(", ")));

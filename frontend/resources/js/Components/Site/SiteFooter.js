@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { usePage } from '@inertiajs/inertia-react';
 import { API_URL } from '@/Components/Constants';
 import { catalogUrl, AGE_GROUPS } from '@/Components/Site/SiteHeader';
 
+const SOCIAL = [
+    ['facebook', 'Facebook', 'fa-facebook', 'https://www.facebook.com/StudioVaishaliArts/'],
+    ['instagram', 'Instagram', 'fa-instagram', 'https://www.instagram.com/artistikcity/'],
+    ['youtube', 'YouTube', 'fa-youtube-play', 'https://www.youtube.com/@artistikcityYT'],
+    ['linkedin', 'LinkedIn', 'fa-linkedin', 'https://in.linkedin.com/in/vaishali-jetly-goswami-4b5874233'],
+];
+
 export default function SiteFooter() {
+    const { site } = usePage().props;
+    // links come from Admin > Site settings; without saved settings the original links are used
+    const social = site && site.social && Object.keys(site.social).length
+        ? SOCIAL.filter(([k]) => site.social[k]).map(([k, l, i]) => [k, l, i, site.social[k]])
+        : SOCIAL;
     const [mediums, setMediums] = useState([]);
     useEffect(() => {
         axios.get(`${API_URL}/get_mediums`).then((r) => setMediums(Array.isArray(r.data) ? r.data : [])).catch(() => {});
@@ -18,10 +31,7 @@ export default function SiteFooter() {
                         <a href="/"><img src="/assets/images/footerlogo.png" alt="ArtistikCity" /></a>
                         <p style={{ maxWidth: 320 }}>Online art courses taught live by a working artist. Learn to draw and paint at your own pace, in any medium, at any age.</p>
                         <div className="ac-social">
-                            <a href="https://www.facebook.com/StudioVaishaliArts/" target="_blank" rel="noopener" aria-label="Facebook"><i className="fa fa-facebook"></i></a>
-                            <a href="https://www.instagram.com/artistikcity/" target="_blank" rel="noopener" aria-label="Instagram"><i className="fa fa-instagram"></i></a>
-                            <a href="https://www.youtube.com/@artistikcityYT" target="_blank" rel="noopener" aria-label="YouTube"><i className="fa fa-youtube-play"></i></a>
-                            <a href="https://in.linkedin.com/in/vaishali-jetly-goswami-4b5874233" target="_blank" rel="noopener" aria-label="LinkedIn"><i className="fa fa-linkedin"></i></a>
+                            {social.map(([k, label, icon, href]) => <a key={k} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}><i className={`fa ${icon}`}></i></a>)}
                         </div>
                     </div>
                     <div>

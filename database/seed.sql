@@ -140,7 +140,26 @@ INSERT INTO settings (meta_tag, meta_key, meta_value, created_at, updated_at) VA
 ('home', 'course_text_3', 'Certificate of completion', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('home', 'workshop_text_1', 'Weekend sessions', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('home', 'workshop_text_2', 'All materials list provided', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('home', 'workshop_text_3', 'Small batches', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('home', 'workshop_text_3', 'Small batches', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('seo', 'site_title', 'ArtistikCity - Live online art classes', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('seo', 'meta_description', 'Learn to draw and paint online with live classes, personal feedback and certificates. Courses and workshops in watercolour, acrylic, sketching and more.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('seo', 'meta_keywords', 'online art classes, painting course, drawing course, watercolour, acrylic', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('seo', 'og_image', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('contact', 'email', 'info@artistickcity.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('contact', 'phone', '9876 543 201', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('contact', 'address', '505, Agate, MyHomes Jewel,\nMadinguda, Hyderabad - 540017\nTelanganma, India.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('social', 'facebook', 'https://www.facebook.com/StudioVaishaliArts/', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('social', 'instagram', 'https://www.instagram.com/artistikcity/', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('social', 'youtube', 'https://www.youtube.com/@artistikcityYT', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('social', 'linkedin', 'https://in.linkedin.com/in/vaishali-jetly-goswami-4b5874233', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- ---- FAQ (Admin > FAQ) ----------------------------------------------------
+INSERT INTO faqs (category, question, answer, sort_order, status, created_at, updated_at) VALUES
+('Classes', 'How do the live classes work?', '<p>Each course runs as a series of live online sessions with your instructor. After you enrol, the schedule, lessons and tasks appear under <strong>My studio &gt; My courses</strong>.</p>', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Classes', 'What do I need to start?', '<p>Every course page lists the materials you need. A phone, tablet or computer with a good internet connection is enough to join the sessions.</p>', 2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Payments', 'Which payment methods can I use?', '<p>In India you can pay with UPI, cards and NetBanking. From other countries you can pay with PayPal.</p>', 3, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Certificates', 'Will I get a certificate?', '<p>Yes. When you complete the lessons and your final work is approved, a verifiable certificate is added to <strong>My studio &gt; Certificates &amp; reports</strong>.</p>', 4, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Marketplace', 'Can I sell my artwork on ArtistikCity?', '<p>Approved student work can be listed as a 1-of-1 original in the marketplace from your portfolio.</p>', 5, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---- blog ------------------------------------------------------------------
 INSERT INTO posts (title, subtitle, slug, body, status, posted_by, image, featured, `like`, dislike, created_at, updated_at) VALUES

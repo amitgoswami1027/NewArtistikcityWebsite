@@ -359,11 +359,16 @@ public class AdminConsoleController {
 
     /** Sidebar counters shared by every console page (also used by the marketplace console). */
     public static Map<String, Object> badges(LifecycleRepository repo) {
-        return Map.of(
-                "submissions", repo.count("select count(*) from student_submissions where admin_status = 'Pending Review'"),
-                "commissions", repo.count("select count(*) from commission_orders where order_status = 'QUEUED'"),
-                "marketplace", repo.count("select (select count(*) from paintings where stock_status = 'PENDING_REVIEW')"
-                        + " + (select count(*) from marketplace_orders where status in ('PAID', 'REFUND_REQUIRED'))"));
+        Map<String, Object> b = new LinkedHashMap<>();
+        b.put("submissions", repo.count("select count(*) from student_submissions where admin_status = 'Pending Review'"));
+        b.put("commissions", repo.count("select count(*) from commission_orders where order_status = 'QUEUED'"));
+        b.put("marketplace", repo.count("select (select count(*) from paintings where stock_status = 'PENDING_REVIEW')"
+                + " + (select count(*) from marketplace_orders where status in ('PAID', 'REFUND_REQUIRED'))"));
+        // inbox counters for the console menu (Contact messages, Student tasks waiting for a reply)
+        b.put("contacts", repo.count("select count(*) from contacts where status = 1"));
+        b.put("tasks", repo.count("select count(*) from student_teacher_connects x where exists (select 1 from student_tasks s where s.student_teacher_connect_id = x.id"
+                + " and s.deleted_at is null and s.from_type = 'Student' and s.id = (select max(s2.id) from student_tasks s2 where s2.student_teacher_connect_id = x.id and s2.deleted_at is null))"));
+        return b;
     }
 
     /** Instructors only see their own courses; other personas see everything (null). */

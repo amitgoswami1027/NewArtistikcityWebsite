@@ -10,6 +10,9 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP VIEW IF EXISTS courses_workshops;
+DROP TABLE IF EXISTS admin_audit;
+DROP TABLE IF EXISTS faqs;
+DROP TABLE IF EXISTS newsletter_campaigns;
 DROP TABLE IF EXISTS wishlist_items;
 DROP TABLE IF EXISTS marketplace_orders;
 DROP TABLE IF EXISTS cart_reservations;
@@ -395,6 +398,7 @@ CREATE TABLE course_modules (
     course_id       BIGINT NOT NULL,
     module_title    VARCHAR(255) NOT NULL,
     module_duration VARCHAR(255) NULL,
+    sort_order      INT NOT NULL DEFAULT 0,
     status          VARCHAR(20) NOT NULL DEFAULT '0',
     created_at      DATETIME NULL,
     updated_at      DATETIME NULL,
@@ -410,6 +414,7 @@ CREATE TABLE course_module_lessons (
     lesson_title       VARCHAR(255) NOT NULL,
     lesson_description LONGTEXT NULL,
     lesson_pdf         VARCHAR(500) NULL,
+    sort_order         INT NOT NULL DEFAULT 0,
     status             VARCHAR(20) NOT NULL DEFAULT '0',
     created_at         DATETIME NULL,
     updated_at         DATETIME NULL,
@@ -522,6 +527,7 @@ CREATE TABLE orders (
 );
 CREATE INDEX orders_gateway_ref_index ON orders (gateway_ref);
 CREATE INDEX orders_user_course_index ON orders (user_id, course_id);
+CREATE INDEX orders_created_index ON orders (created_at);
 
 CREATE TABLE payment_logs (
     id              BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -657,10 +663,53 @@ CREATE TABLE testimonials (
 );
 
 CREATE TABLE newsletters (
-    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    email      VARCHAR(255) NOT NULL,
+    id              BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    email           VARCHAR(255) NOT NULL,
+    source          VARCHAR(50) NULL,
+    unsubscribed_at DATETIME NULL,
+    created_at      DATETIME NULL,
+    updated_at      DATETIME NULL
+);
+CREATE INDEX newsletters_email_index ON newsletters (email);
+
+-- e-mails sent to the subscribers from Admin > Newsletter
+CREATE TABLE newsletter_campaigns (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    subject      VARCHAR(255) NOT NULL,
+    preheader    VARCHAR(255) NULL,
+    body         LONGTEXT NULL,
+    status       VARCHAR(20) NOT NULL DEFAULT 'draft',
+    recipients   INT NOT NULL DEFAULT 0,
+    sent_count   INT NOT NULL DEFAULT 0,
+    failed_count INT NOT NULL DEFAULT 0,
+    created_by   BIGINT NULL,
+    sent_at      DATETIME NULL,
+    created_at   DATETIME NULL,
+    updated_at   DATETIME NULL
+);
+
+-- the public FAQ page (Admin > FAQ)
+CREATE TABLE faqs (
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    category   VARCHAR(100) NULL,
+    question   VARCHAR(500) NOT NULL,
+    answer     LONGTEXT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    status     TINYINT NOT NULL DEFAULT 1,
     created_at DATETIME NULL,
     updated_at DATETIME NULL
+);
+
+-- who changed what in the admin console (shown as history on orders)
+CREATE TABLE admin_audit (
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    admin_id   BIGINT NULL,
+    entity     VARCHAR(50) NOT NULL,
+    entity_id  BIGINT NULL,
+    action     VARCHAR(50) NOT NULL,
+    details    VARCHAR(1000) NULL,
+    created_at DATETIME NULL,
+    INDEX admin_audit_entity_index (entity, entity_id)
 );
 
 CREATE TABLE contacts (
@@ -670,6 +719,7 @@ CREATE TABLE contacts (
     email      VARCHAR(255) NULL,
     message    LONGTEXT NULL,
     status     TINYINT NULL DEFAULT 1,
+    read_at    DATETIME NULL,
     created_at DATETIME NULL,
     updated_at DATETIME NULL
 );
@@ -689,12 +739,14 @@ CREATE TABLE settings (
 CREATE TABLE posts (
     id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     title      VARCHAR(256) NOT NULL,
-    subtitle   VARCHAR(100) NOT NULL,
+    subtitle   VARCHAR(500) NOT NULL DEFAULT '',
     slug       VARCHAR(100) NOT NULL,
     body       LONGTEXT NOT NULL,
     status     TINYINT NULL,
     posted_by  BIGINT NULL,
     image      VARCHAR(500) NULL,
+    meta_title       VARCHAR(255) NULL,
+    meta_description VARCHAR(500) NULL,
     featured   TINYINT NULL,
     `like`     INT NULL,
     dislike    INT NULL,
