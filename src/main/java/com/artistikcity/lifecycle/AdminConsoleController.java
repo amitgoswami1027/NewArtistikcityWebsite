@@ -364,6 +364,9 @@ public class AdminConsoleController {
         b.put("commissions", repo.count("select count(*) from commission_orders where order_status = 'QUEUED'"));
         b.put("marketplace", repo.count("select (select count(*) from paintings where stock_status = 'PENDING_REVIEW')"
                 + " + (select count(*) from marketplace_orders where status in ('PAID', 'REFUND_REQUIRED'))"));
+        // art shop: collectors' messages waiting for the artist, cart orders to ship and refunds still owed
+        b.put("shop", repo.count("select (select count(*) from artist_threads where staff_unread > 0 and status = 'OPEN')"
+                + " + (select count(*) from shop_orders where status in ('PAID', 'REFUND_REQUIRED') or refund_due_inr > 0)"));
         // inbox counters for the console menu (Contact messages, Student tasks waiting for a reply)
         b.put("contacts", repo.count("select count(*) from contacts where status = 1"));
         b.put("tasks", repo.count("select count(*) from student_teacher_connects x where exists (select 1 from student_tasks s where s.student_teacher_connect_id = x.id"

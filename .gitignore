@@ -7,6 +7,8 @@ frontend/node_modules/
 .DS_Store
 # user uploads (keep the demo images under storage/uploads in version control if you like)
 storage/certificates/
+# paid downloads (high-resolution artwork files)
+storage-private/
 .tools/
 .env
 # transfer / download leftovers

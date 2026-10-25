@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ArtistikCity Marketplace</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Helvetica,Arial,sans-serif;color:#111;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr><td align="center" style="padding:32px 12px;">
+        <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;">
+            <tr><td style="background:#111;padding:24px 32px;color:#fff;font-size:13px;letter-spacing:2px;text-transform:uppercase;">ArtistikCity &middot; Marketplace</td></tr>
+            <tr><td style="padding:32px;">
+                {{#allRefund}}
+                <h1 style="margin:0 0 12px;font-size:24px;">About your order {{order_id}}</h1>
+                <p style="font-size:15px;line-height:1.6;">Your payment reached us, but the artwork{{#multi}}s{{/multi}} had already gone to another collector by then. We're sorry. We will refund the full amount (&#8377;{{refund_due_inr}}) to your original payment method within 5&ndash;7 working days.</p>
+                {{/allRefund}}
+                {{^allRefund}}
+                <h1 style="margin:0 0 12px;font-size:24px;">Thank you, {{buyer_name}}</h1>
+                <p style="font-size:15px;line-height:1.6;">Your payment is confirmed. {{#needs_shipping}}We'll pack your artwork with care and e-mail you the courier tracking number when it ships.{{/needs_shipping}}{{^needs_shipping}}Your download is ready below.{{/needs_shipping}}</p>
+                {{#partialRefund}}<p style="font-size:14px;line-height:1.6;background:#fff7e6;border:1px solid #f5d38a;border-radius:8px;padding:12px;">One item could no longer be supplied when your payment arrived. We'll refund &#8377;{{refund_due_inr}} for it within 5&ndash;7 working days.</p>{{/partialRefund}}
+                {{/allRefund}}
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:20px;border-top:1px solid #eee;font-size:14px;">
+                    {{#items}}
+                    <tr><td style="padding:12px 0;border-bottom:1px solid #f0f0f0;">
+                        <strong>{{title}}</strong> <span style="color:#666;">by {{artist_name}}</span><br>
+                        <span style="color:#666;font-size:13px;">{{variant_label}}{{#edition_no}} &middot; edition no. {{edition_no}}{{/edition_no}} &middot; qty {{quantity}}</span>
+                        {{#download_url}}<br><a href="{{download_url}}" style="display:inline-block;margin-top:8px;background:#e5156b;color:#fff;text-decoration:none;font-weight:bold;padding:8px 14px;border-radius:999px;font-size:13px;">Download high-resolution file</a>{{/download_url}}
+                        {{#refund}}<br><span style="color:#b45309;font-size:13px;">Refund due: no longer available</span>{{/refund}}
+                    </td><td align="right" valign="top" style="padding:12px 0;border-bottom:1px solid #f0f0f0;white-space:nowrap;">&#8377;{{line_total_inr}}</td></tr>
+                    {{/items}}
+                    <tr><td style="padding:8px 0;color:#666;">Subtotal</td><td align="right" style="padding:8px 0;">&#8377;{{subtotal_inr}}</td></tr>
+                    {{#coupon_code}}<tr><td style="padding:8px 0;color:#666;">Coupon {{coupon_code}}</td><td align="right" style="padding:8px 0;">&minus;&#8377;{{discount_inr}}</td></tr>{{/coupon_code}}
+                    {{#needs_shipping}}<tr><td style="padding:8px 0;color:#666;">Shipping</td><td align="right" style="padding:8px 0;">&#8377;{{shipping_inr}}</td></tr>{{/needs_shipping}}
+                    <tr><td style="padding:8px 0;font-weight:bold;">Paid</td><td align="right" style="padding:8px 0;font-weight:bold;">{{currency}} {{amount}}</td></tr>
+                    {{#needs_shipping}}<tr><td style="padding:8px 0;color:#666;">Ship to</td><td align="right" style="padding:8px 0;">{{address_line1}}, {{city}} {{postal_code}}, {{country}}</td></tr>{{/needs_shipping}}
+                    <tr><td style="padding:8px 0;color:#666;">Order</td><td align="right" style="padding:8px 0;font-family:monospace;">{{order_id}}</td></tr>
+                </table>
+                <p style="margin-top:20px;"><a href="{{orderUrl}}" style="color:#e5156b;font-weight:bold;">View your order</a></p>
+            </td></tr>
+            <tr><td style="padding:20px 32px;background:#fafafa;font-size:12px;color:#888;">Questions? Reply to this email and quote your order number.{{#hasDownloads}} Download links work for 30 days (up to 10 downloads).{{/hasDownloads}}</td></tr>
+        </table>
+    </td></tr>
+</table>
+</body>
+</html>

@@ -6,6 +6,8 @@ import ZoomViewer from '@/Components/Marketplace/ZoomViewer';
 import RoomView from '@/Components/Marketplace/RoomView';
 import ArtCard from '@/Components/Marketplace/ArtCard';
 import SaveButton from '@/Components/Wishlist/SaveButton';
+import ArtistHub, { useConversation } from '@/Components/Shop/ArtistHub';
+import { FORMAT_INFO } from '@/Components/Shop/shop';
 import { Price, TrustBadges, StatusChip, HoldBanner, useCountdown, mmss, dims, dimsCm, num, errorText, Spinner, inr } from '@/Components/Marketplace/shared';
 
 function Spec({ label, value, hint }) {
@@ -17,7 +19,26 @@ function Spec({ label, value, hint }) {
     );
 }
 
-function BuyBox({ p, hold, serverNow, preview }) {
+/** "Prefer a print?": canvas editions, posters and downloads of this artwork. */
+function PrintOptions({ p, prints, sold }) {
+    if (!prints || prints.length === 0) return null;
+    return (
+        <div className={`pz-prints ${sold ? 'is-lead' : ''}`}>
+            <p className="pz-prints__title">{sold ? 'Prints are still available' : 'Prefer a print?'}</p>
+            <div className="pz-prints__list">
+                {prints.map((x) => (
+                    <a key={x.format} href={`/purchase/step-1?artwork=${p.slug}&format=${x.format}`} className="pz-printopt">
+                        <i className={`fa ${FORMAT_INFO[x.format].icon}`} aria-hidden="true"></i>
+                        <span><b>{FORMAT_INFO[x.format].name}</b><small>from {inr(x.from)}</small></span>
+                        <i className="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function BuyBox({ p, hold, serverNow, preview, prints }) {
     const { saved } = usePage().props;
     const [busy, setBusy] = useState(false);
     const [err, setErr] = useState(null);
@@ -31,7 +52,7 @@ function BuyBox({ p, hold, serverNow, preview }) {
     const reserve = (switchHold = false) => {
         setBusy(true); setErr(null);
         axios.post(`/api/v1/marketplace/paintings/${p.id}/reserve`, { switch: switchHold })
-            .then((r) => { window.location.href = r.data.checkoutUrl; })
+            .then(() => { window.location.href = `/purchase/step-1?artwork=${p.slug}&format=ORIGINAL`; })
             .catch((e) => {
                 setBusy(false);
                 const d = e.response && e.response.data;
@@ -61,6 +82,7 @@ function BuyBox({ p, hold, serverNow, preview }) {
                     <>
                         <p className="text-2xl font-black text-ink">This original has found its collector.</p>
                         <p className="mt-2 text-gray-600">Love the style? Commission something similar, made for you.</p>
+                        <PrintOptions p={p} prints={prints} sold />
                         <a href="/commission/step-1" className="mt-5 flex items-center justify-center h-14 rounded-full bg-ink text-white text-lg font-bold hover:bg-gray-800">Commission a similar piece</a>
                     </>
                 ) : (
@@ -77,7 +99,7 @@ function BuyBox({ p, hold, serverNow, preview }) {
                                     <i className="fa fa-lock text-pink-300 text-xl" aria-hidden="true"></i>
                                     <p className="text-sm">Held exclusively for you for <span className="font-mono font-bold text-lg">{mmss(mineLeft)}</span></p>
                                 </div>
-                                <a href={`/marketplace/${p.slug}/checkout`} className="mt-3 flex items-center justify-center h-14 rounded-full bg-brand text-white text-lg font-bold hover:bg-brand-dark">Continue to checkout</a>
+                                <a href={`/purchase/step-1?artwork=${p.slug}&format=ORIGINAL`} className="mt-3 flex items-center justify-center h-14 rounded-full bg-brand text-white text-lg font-bold hover:bg-brand-dark">Continue: framing & checkout</a>
                                 <button type="button" onClick={release} disabled={busy} className="mt-2 w-full h-11 rounded-full text-sm font-bold text-gray-600 hover:text-ink">Release my hold</button>
                             </div>
                         ) : heldByOther ? (
@@ -95,13 +117,14 @@ function BuyBox({ p, hold, serverNow, preview }) {
                             </div>
                         ) : null}
                         {err && <p className="mt-3 rounded-xl bg-red-50 border border-red-200 p-3 text-sm font-semibold text-red-700" role="alert">{err}</p>}
+                        {!preview && <PrintOptions p={p} prints={prints} />}
                         {conflict && (
                             <div className="mt-3 rounded-xl border border-gray-300 p-4 text-sm" role="alertdialog" aria-label="You're already holding a piece">
                                 <p className="font-bold text-ink">You're already holding “{conflict.heldTitle}”.</p>
                                 <p className="mt-1 text-gray-600">You can hold one original at a time. Switch your hold to this piece?</p>
                                 <div className="mt-3 flex flex-wrap gap-2">
                                     <button type="button" onClick={() => { setConflict(null); reserve(true); }} className="h-10 px-4 rounded-full bg-ink text-white font-bold">Switch to this piece</button>
-                                    <a href={`/marketplace/${conflict.heldSlug}/checkout`} className="inline-flex items-center h-10 px-4 rounded-full border border-gray-300 font-bold hover:border-ink">Go to my held piece</a>
+                                    <a href="/purchase/checkout" className="inline-flex items-center h-10 px-4 rounded-full border border-gray-300 font-bold hover:border-ink">Go to my cart</a>
                                 </div>
                             </div>
                         )}
@@ -114,15 +137,16 @@ function BuyBox({ p, hold, serverNow, preview }) {
             <ul className="mt-6 pt-6 border-t border-gray-100 space-y-3 text-sm text-gray-700">
                 <li className="flex gap-3"><i className="fa fa-shield text-brand mt-0.5 w-4" aria-hidden="true"></i>Secure payment: UPI, cards and NetBanking (Razorpay) or PayPal</li>
                 <li className="flex gap-3"><i className="fa fa-truck text-brand mt-0.5 w-4" aria-hidden="true"></i>Insured, tracked shipping · India 5–8 days · worldwide 10–15 days</li>
-                <li className="flex gap-3"><i className="fa fa-comments-o text-brand mt-0.5 w-4" aria-hidden="true"></i>Questions? <a href="/contact" className="font-bold underline">Ask the studio</a> before you buy</li>
+                <li className="flex gap-3"><i className="fa fa-comments-o text-brand mt-0.5 w-4" aria-hidden="true"></i>Questions? <a href="#meet-the-artist" className="font-bold underline">Ask the artist</a> before you buy</li>
             </ul>
         </div>
     );
 }
 
 export default function MarketplaceShow() {
-    const { painting: p, hold, holds = [], related = [], serverNow, preview, notice } = usePage().props;
+    const { painting: p, hold, holds = [], related = [], serverNow, preview, notice, prints = [], contact, conversation: conv0, customer, openChat } = usePage().props;
     const [tab, setTab] = useState('room');
+    const conversation = useConversation(p.id, conv0);
 
     return (
         <SiteLayout title={`${p.title} by ${p.artist_name}`}>
@@ -146,7 +170,7 @@ export default function MarketplaceShow() {
                         <ZoomViewer images={p.images} title={p.title} />
                     </div>
                     <aside className="lg:col-span-5">
-                        <div className="lg:sticky lg:top-24"><BuyBox p={p} hold={hold} serverNow={serverNow} preview={preview} /></div>
+                        <div className="lg:sticky lg:top-24"><BuyBox p={p} hold={hold} serverNow={serverNow} preview={preview} prints={prints} /></div>
                     </aside>
                 </section>
 
@@ -210,6 +234,14 @@ export default function MarketplaceShow() {
                         </div>
                     </div>
                 </section>
+
+                {!preview && contact && (
+                    <section className="ac-wide py-16" id="meet-the-artist">
+                        <div className="pz-hubwrap">
+                            <ArtistHub painting={p} contact={contact} conversation={conversation} customer={customer} autoOpenChat={!!openChat} />
+                        </div>
+                    </section>
+                )}
 
                 {related.length > 0 && (
                     <section className="ac-wide py-16">

@@ -22,10 +22,11 @@ COPY database /app/database
 COPY deploy /app/deploy
 # demo images for local docker compose (mounted as a volume there). On AWS uploads live in S3 instead.
 COPY storage /app/storage
-RUN mkdir -p /app/logs && chown -R app:app /app/storage /app/logs && chmod 0755 /app/deploy/*.sh
+RUN mkdir -p /app/logs /app/storage-private && chown -R app:app /app/storage /app/storage-private /app/logs && chmod 0755 /app/deploy/*.sh
 USER app
 ENV PORT=8080 \
     STORAGE_DIR=/app/storage \
+    PRIVATE_STORAGE_DIR=/app/storage-private \
     JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError -Djava.awt.headless=true -Djava.security.egd=file:/dev/urandom"
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

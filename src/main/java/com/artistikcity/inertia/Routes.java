@@ -44,6 +44,11 @@ public class Routes {
         get("marketplace.show", "marketplace/{slug}");
         get("marketplace.checkout", "marketplace/{slug}/checkout");
         get("marketplace.order", "marketplace/orders/{orderId}");
+        get("purchase.step1", "purchase/step-1");
+        get("purchase.step2", "purchase/step-2");
+        get("purchase.preview", "purchase/preview");
+        get("purchase.checkout", "purchase/checkout");
+        get("purchase.order", "purchase/orders/{orderId}");
         get("teacher.profile", "teacher/{slug}");
         get("instructor", "instructor");
         get("home", "home");

@@ -72,8 +72,9 @@ frontend/resources/js/   React source: Pages/, Components/, Layouts/, Interface/
 database/       schema.sql (drops + recreates everything), seed.sql (demo data), migrations/ (dated MySQL scripts), demo/ (optional demo pack)
 deploy/         ec2-deploy.sh, db-migrate.sh (AWS server scripts, shipped inside the image)
 infra/          CloudFormation: certificate.yml (us-east-1), artistikcity.yml (ap-south-1)
-docs/           AWS-DEPLOY.md
+docs/           AWS-DEPLOY.md, awsarchitecture.md, marketplace-shop.md
 storage/        uploaded files, served at /storage/**  (storage/certificates is git-ignored)
+storage-private/ paid download files (git-ignored, never served directly; S3 key prefix private/)
 ```
 
 ## Conventions and gotchas
@@ -145,6 +146,17 @@ storage/        uploaded files, served at /storage/**  (storage/certificates is 
   DB, else pending migrations - same rules as the launcher). `http/CloudFrontFilter` (`TRUST_CLOUDFRONT`) takes the visitor IP and
   https from CloudFront headers and rejects requests without `X-Origin-Verify`. `GET /healthz` is the health check.
   Migrations must stay compatible with the previous release (rollback only swaps the image).
+- **Marketplace shop** (package `shop/`, docs/marketplace-shop.md): every listing can also sell a numbered canvas edition, a poster and a
+  digital download (`paintings.shop_formats`), priced from the global list `shop_price_options` by `ShopPricing` (the one source of prices;
+  `Components/Shop/shop.js` only mirrors it for live UI). Purchase tunnel `/purchase/step-1?artwork=<slug>` → `step-2` (room visualiser,
+  `Components/Shop/RoomStage`) → `preview` (estimate, coupon, "Meet the artist" `ArtistHub`) → `checkout` (whole cart); the step's choice is
+  the session draft `purchase.draft`. Cart: `shop_carts` per owner key (`U:<id>` / guest `S:<token>`, same keys as holds, guest cart merged
+  on sign-in), JSON API `/api/v1/cart/**`, client store `Components/Shop/CartStore` (module-level, no provider) + header bag/drawer
+  `CartDrawer`. An original in the cart is a 15-minute hold (one at a time). Orders: `shop_orders` / `shop_order_items`, finalised by
+  `ShopOrderService.finalizeSale` (idempotent; lines that can't be supplied become REFUND_REQUIRED with `refund_due_inr`); the marketplace
+  webhook also resolves shop orders. Downloads stream from private storage (`Storage.putPrivate/openPrivate`, never /storage/**) at
+  `/shop/download/{token}`. Admin: Sales > Art shop (`/admin/dashboard/shop`, `ShopAdminController`). The old single-original checkout
+  page now forwards into the cart checkout.
 - Blog posts are public only when `status = 1`; drafts 404 for visitors (admins can preview). `/faq` reads the `faqs` table.
   Order `payment_status`: 0 pending, 1 paid, 2 failed, 3 refunded; course access needs 1.
 - Wish list: table `wishlist_items` (type `course` or `painting`), `POST /wishlist {type, id, saved}`, page `/user/wishlist`

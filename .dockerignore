@@ -14,6 +14,7 @@ frontend/node_modules/
 .env.*
 logs/
 storage/certificates/
+storage-private/
 _backup_before_*/
 redesign-backup*/
 .github/

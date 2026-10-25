@@ -3,6 +3,7 @@ import { usePage, InertiaLink } from '@inertiajs/inertia-react';
 import axios from 'axios';
 import { API_URL } from '@/Components/Constants';
 import { accountNav } from '@/Components/Account/nav';
+import { CartButton } from '@/Components/Shop/CartDrawer';
 
 export const AGE_GROUPS = ['Sub-junior - 8 to 12 yrs', 'Junior - 12 to 15 yrs', 'Adult - 16 yrs and above'];
 
@@ -160,6 +161,8 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                             </>
                         )}
                     </nav>
+
+                    <CartButton />
 
                     <button type="button" className="ac-burger" aria-label="Menu" onClick={() => setDrawer(!drawer)}>
                         <i className={`fa ${drawer ? 'fa-times' : 'fa-bars'}`}></i>

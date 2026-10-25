@@ -68,11 +68,23 @@ public class MarketplaceController {
     private final MarketplaceService market;
     private final CommissionPayments payments;
     private final com.artistikcity.web.user.WishlistService wishlist;
+    private final com.artistikcity.shop.ShopOrderService shopOrders;
+    private final com.artistikcity.shop.PurchaseController purchase;
+    private final com.artistikcity.shop.CartService cart;
+    private final com.artistikcity.shop.ShopRepository shopRepo;
+    private final com.artistikcity.shop.ArtistHubService hub;
 
     public MarketplaceController(Inertia inertia, Json json, Auth auth, Redirects redirect, Environment env, Mailer mailer,
                                  MarketplaceRepository repo, MarketplaceService market, CommissionPayments payments,
-                                 com.artistikcity.web.user.WishlistService wishlist) {
+                                 com.artistikcity.web.user.WishlistService wishlist, com.artistikcity.shop.ShopOrderService shopOrders,
+                                 com.artistikcity.shop.PurchaseController purchase, com.artistikcity.shop.CartService cart,
+                                 com.artistikcity.shop.ShopRepository shopRepo, com.artistikcity.shop.ArtistHubService hub) {
+        this.shopRepo = shopRepo;
+        this.hub = hub;
         this.wishlist = wishlist;
+        this.shopOrders = shopOrders;
+        this.purchase = purchase;
+        this.cart = cart;
         this.inertia = inertia;
         this.json = json;
         this.auth = auth;
@@ -134,6 +146,17 @@ public class MarketplaceController {
         props.put("serverNow", System.currentTimeMillis());
         props.put("notice", request.getParameter("hold"));
         props.put("saved", wishlist.isSaved(auth.userId(request), com.artistikcity.web.user.WishlistService.PAINTING, id));
+        // prints and downloads of this artwork, and "Meet the artist"
+        Map<String, Object> full = shopRepo.painting(id);
+        Map<String, Object> offer = com.artistikcity.shop.ShopPricing.offer(com.artistikcity.shop.ShopRepository.art(full), shopRepo.options(), true, null);
+        props.put("prints", ((List<?>) offer.get("formats")).stream().map(o -> (Map<?, ?>) o)
+                .filter(f -> !"ORIGINAL".equals(f.get("format")) && Boolean.TRUE.equals(f.get("available")))
+                .map(f -> Map.of("format", f.get("format"), "from", f.get("from"))).toList());
+        props.put("contact", hub.contact(full));
+        props.put("conversation", hub.conversation(Holders.all(request, auth), id));
+        Row viewer = auth.user(request);
+        props.put("customer", viewer == null ? null : Map.of("name", viewer.str("name", ""), "email", viewer.str("email", "")));
+        props.put("openChat", "1".equals(request.getParameter("chat")));
         return inertia.render(request, "Marketplace/Show", props);
     }
 
@@ -145,6 +168,15 @@ public class MarketplaceController {
         MarketplaceService.Hold hold = market.activeHold(id, Holders.all(request, auth));
         if (hold == null) {
             return redirect.to(request, "/marketplace/" + slug + "?hold=expired");
+        }
+        // the cart checkout replaced this single-original page: put the held original in the cart and go there
+        if (!"single".equals(request.getParameter("mode"))) {
+            try {
+                cart.add(request, id, com.artistikcity.shop.ShopPricing.Selection.of("ORIGINAL", "", "", "NONE", 1), false);
+                return redirect.to(request, "/purchase/checkout");
+            } catch (MarketplaceException e) {
+                log.info("Could not move hold on {} into the cart: {}", id, e.getMessage());
+            }
         }
         Row user = auth.user(request);
         Map<String, Object> props = new LinkedHashMap<>();
@@ -381,7 +413,20 @@ public class MarketplaceController {
                 Map<String, Object> payment = (Map<String, Object>) path(event, "payload", "payment", "entity");
                 if (payment == null) return ok(Map.of("ignored", "no payment entity"));
                 Map<String, Object> o = market.orderByProviderRef(String.valueOf(payment.get("order_id")));
-                if (o == null) return ok(Map.of("ignored", "not a marketplace order"));
+                if (o == null) {
+                    Map<String, Object> so = shopOrders.orderByProviderRef(String.valueOf(payment.get("order_id")));
+                    if (so == null) return ok(Map.of("ignored", "not a marketplace order"));
+                    long expectedPaise = ((BigDecimal) so.get("amount")).movePointRight(2).longValue();
+                    long paidPaise = payment.get("amount") instanceof Number pn ? pn.longValue() : -1;
+                    if (expectedPaise != paidPaise || !"INR".equalsIgnoreCase(String.valueOf(payment.get("currency")))) {
+                        log.warn("Shop Razorpay amount mismatch for {}: expected {} got {}", so.get("order_id"), expectedPaise, paidPaise);
+                        return error(HttpStatus.UNPROCESSABLE_ENTITY, "Amount mismatch.");
+                    }
+                    String sid = String.valueOf(so.get("order_id"));
+                    com.artistikcity.shop.ShopOrderService.Outcome sout = shopOrders.finalizeSale(sid, String.valueOf(payment.get("id")));
+                    purchase.afterSale(request, sid, sout);
+                    return ok(Map.of("orderId", sid, "outcome", sout.name()));
+                }
                 long expected = ((BigDecimal) o.get("amount")).movePointRight(2).longValue();
                 long paid = payment.get("amount") instanceof Number n ? n.longValue() : -1;
                 if (expected != paid || !"INR".equalsIgnoreCase(String.valueOf(payment.get("currency")))) {
@@ -409,7 +454,13 @@ public class MarketplaceController {
                 String txn = null;
                 if ("CHECKOUT.ORDER.APPROVED".equals(type)) {
                     o = market.orderByProviderRef(String.valueOf(resource.get("id")));
-                    if (o == null) return ok(Map.of("ignored", "not a marketplace order"));
+                    if (o == null) {
+                        Map<String, Object> so = shopOrders.orderByProviderRef(String.valueOf(resource.get("id")));
+                        if (so == null) return ok(Map.of("ignored", "not a marketplace order"));
+                        String[] cap = payments.paypalCapture(String.valueOf(resource.get("id")));
+                        if (!"COMPLETED".equals(cap[0]) || !amountMatches(so, cap[2], cap[3])) return ok(Map.of("status", String.valueOf(cap[0])));
+                        return shopPaid(request, so, cap[1]);
+                    }
                     String[] cap = payments.paypalCapture(String.valueOf(resource.get("id")));
                     if (!"COMPLETED".equals(cap[0]) || !amountMatches(o, cap[2], cap[3])) return ok(Map.of("status", String.valueOf(cap[0])));
                     txn = cap[1];
@@ -417,7 +468,16 @@ public class MarketplaceController {
                     Object related = path(resource, "supplementary_data", "related_ids", "order_id");
                     o = related == null ? null : market.orderByProviderRef(String.valueOf(related));
                     if (o == null && resource.get("custom_id") != null) o = market.order(String.valueOf(resource.get("custom_id")));
-                    if (o == null) return ok(Map.of("ignored", "not a marketplace order"));
+                    if (o == null) {
+                        Map<String, Object> so = related == null ? null : shopOrders.orderByProviderRef(String.valueOf(related));
+                        if (so == null && resource.get("custom_id") != null) so = shopOrders.order(String.valueOf(resource.get("custom_id")));
+                        if (so == null) return ok(Map.of("ignored", "not a marketplace order"));
+                        Map<String, Object> amt = (Map<String, Object>) resource.get("amount");
+                        if (amt == null || !amountMatches(so, String.valueOf(amt.get("value")), String.valueOf(amt.get("currency_code")))) {
+                            return error(HttpStatus.UNPROCESSABLE_ENTITY, "Amount mismatch.");
+                        }
+                        return shopPaid(request, so, String.valueOf(resource.get("id")));
+                    }
                     Map<String, Object> amount = (Map<String, Object>) resource.get("amount");
                     if (amount == null || !amountMatches(o, String.valueOf(amount.get("value")), String.valueOf(amount.get("currency_code")))) {
                         return error(HttpStatus.UNPROCESSABLE_ENTITY, "Amount mismatch.");
@@ -439,6 +499,13 @@ public class MarketplaceController {
     }
 
     // ================================================================ helpers
+
+    private ResponseEntity<String> shopPaid(HttpServletRequest request, Map<String, Object> so, String txn) {
+        String sid = String.valueOf(so.get("order_id"));
+        com.artistikcity.shop.ShopOrderService.Outcome out = shopOrders.finalizeSale(sid, txn);
+        purchase.afterSale(request, sid, out);
+        return ok(Map.of("orderId", sid, "outcome", out.name()));
+    }
 
     private ResponseEntity<String> outcome(String orderId, MarketplaceService.Outcome out) {
         afterSale(orderId, out);

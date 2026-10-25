@@ -435,8 +435,10 @@ Resources:
               - Sid: UploadsReadWrite
                 Effect: Allow
                 Action: [s3:GetObject, s3:PutObject, s3:DeleteObject]
-                Resource: !Sub '${UploadsBucket.Arn}/storage/*'
-              - Sid: UploadsList            # lets S3 answer 404 (not 403) for files that do not exist
+                Resource:
+                  - !Sub '${UploadsBucket.Arn}/storage/*'
+                  - !Sub '${UploadsBucket.Arn}/private/*'    # paid downloads; CloudFront has no route to these
+              - Sid: UploadsList           # lets S3 answer 404 (not 403) for files that do not exist
                 Effect: Allow
                 Action: s3:ListBucket
                 Resource: !GetAtt UploadsBucket.Arn

@@ -24,6 +24,7 @@ export const NAV = [
         { href: '/admin/orders', label: 'Course orders', icon: 'fa-shopping-cart', cap: 'revenue', also: ['/admin/orders/'] },
         { href: '/admin/dashboard/commissions', label: 'Commissions', icon: 'fa-paint-brush', cap: 'commissions', badge: 'commissions' },
         { href: '/admin/dashboard/marketplace', label: 'Marketplace', icon: 'fa-tags', cap: 'marketplace', badge: 'marketplace', also: ['/admin/dashboard/marketplace/'] },
+        { href: '/admin/dashboard/shop', label: 'Art shop', icon: 'fa-shopping-bag', cap: 'marketplace', badge: 'shop' },
     ] },
     { group: 'Community', items: [
         { href: '/admin/dashboard/people', label: 'People & roles', icon: 'fa-users', cap: 'people' },

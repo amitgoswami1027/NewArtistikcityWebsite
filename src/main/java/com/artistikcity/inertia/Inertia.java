@@ -48,6 +48,7 @@ public class Inertia {
     private final com.artistikcity.admin.SiteSettings site;
     private final Json json;
     private final com.artistikcity.web.user.WishlistService wishlist;
+    private final org.springframework.beans.factory.ObjectProvider<com.artistikcity.shop.CartService> cart;
     private final Auth auth;
     private final Routes routes;
     private final Views views;
@@ -56,8 +57,10 @@ public class Inertia {
     private final String ziggyScript;
 
     public Inertia(Json json, Auth auth, Routes routes, Views views, Environment env,
-                   com.artistikcity.web.user.WishlistService wishlist, com.artistikcity.admin.SiteSettings site) {
+                   com.artistikcity.web.user.WishlistService wishlist, com.artistikcity.admin.SiteSettings site,
+                   org.springframework.beans.factory.ObjectProvider<com.artistikcity.shop.CartService> cart) {
         this.site = site;
+        this.cart = cart;
         this.json = json;
         this.wishlist = wishlist;
         this.auth = auth;
@@ -95,6 +98,18 @@ public class Inertia {
             Supplier<Object> nav = () -> wishlist.nav(uid);
             all.put("nav", nav);
         }
+        // marketplace cart badge in the header (signed-in collectors and guests with a cart)
+        Supplier<Object> cartCount = () -> {
+            com.artistikcity.shop.CartService c = cart.getIfAvailable();
+            try {
+                return Row.of("count", c == null ? 0 : c.count(request));
+            } catch (RuntimeException e) {
+                // the badge must never break a page
+                org.slf4j.LoggerFactory.getLogger(Inertia.class).warn("Could not count the cart", e);
+                return Row.of("count", 0);
+            }
+        };
+        all.put("cart", cartCount);
         Supplier<Object> flashMessage = () -> Flash.get(request, "message");
         // contact details and social links managed in Admin > Site settings (footer, contact page)
         Supplier<Object> siteInfo = site::publicInfo;

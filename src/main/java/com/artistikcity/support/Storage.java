@@ -37,12 +37,14 @@ public class Storage {
     static final String CACHE_CONTROL = "public, max-age=86400";
 
     private final Path root;
+    private final Path privateRoot;
     private final S3Client s3;
     private final String prefix;
 
     @Autowired
     public Storage(Environment env) {
         this.root = Path.of(env.getProperty("app.storage-dir", "storage")).toAbsolutePath().normalize();
+        this.privateRoot = Path.of(env.getProperty("app.private-storage-dir", "storage-private")).toAbsolutePath().normalize();
         String driver = env.getProperty("app.storage.driver", "local").trim().toLowerCase(Locale.ROOT);
         if ("s3".equals(driver)) {
             this.s3 = new S3Client(env.getProperty("app.storage.s3.bucket", ""), env.getProperty("app.storage.s3.region", ""),
@@ -60,6 +62,7 @@ public class Storage {
     /** For tests. */
     Storage(Path root, S3Client s3, String prefix) {
         this.root = root;
+        this.privateRoot = root.resolveSibling(root.getFileName() + "-private");
         this.s3 = s3;
         this.prefix = prefix;
     }
@@ -158,6 +161,76 @@ public class Storage {
             throw new IllegalStateException("open() is for the S3 driver");
         }
         return s3.get(prefix + clean(relativePath), range);
+    }
+
+    // ------------------------------------------------------------------ private files
+
+    /**
+     * Private files (paid downloads such as high-resolution artwork) are never served at /storage/**: locally they live
+     * in {@code app.private-storage-dir} (default ./storage-private, a sibling of the public folder), on S3 under the key
+     * prefix {@code private/}, which CloudFront has no route to. The app streams them after checking the buyer.
+     */
+    public void putPrivate(String relativePath, InputStream in, long length) {
+        String rel = clean(relativePath);
+        if (s3 != null) {
+            s3.put(PRIVATE_PREFIX + rel, in, length, contentType(rel), "private, no-store");
+            return;
+        }
+        Path target = privateLocal(rel);
+        try {
+            Files.createDirectories(target.getParent());
+            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /** A private file to stream to the buyer, or empty when it is missing. The caller closes the stream. */
+    public Optional<PrivateFile> openPrivate(String relativePath) {
+        String rel = clean(relativePath);
+        if (s3 != null) {
+            return s3.get(PRIVATE_PREFIX + rel).map(o -> new PrivateFile(o.body(), o.length(), contentType(rel)));
+        }
+        Path p = privateLocal(rel);
+        if (!Files.isRegularFile(p)) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(new PrivateFile(Files.newInputStream(p), Files.size(p), contentType(rel)));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public boolean existsPrivate(String relativePath) {
+        String rel = clean(relativePath);
+        return s3 != null ? s3.exists(PRIVATE_PREFIX + rel) : Files.isRegularFile(privateLocal(rel));
+    }
+
+    public void deletePrivate(String relativePath) {
+        String rel = clean(relativePath);
+        if (s3 != null) {
+            s3.delete(PRIVATE_PREFIX + rel);
+            return;
+        }
+        try {
+            Files.deleteIfExists(privateLocal(rel));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public record PrivateFile(InputStream body, long length, String contentType) {
+    }
+
+    static final String PRIVATE_PREFIX = "private/";
+
+    private Path privateLocal(String rel) {
+        Path p = privateRoot.resolve(rel).normalize();
+        if (!p.startsWith(privateRoot)) {
+            throw new IllegalArgumentException("Path escapes private storage: " + rel);
+        }
+        return p;
     }
 
     /** Public URL path of a stored file, e.g. {@code /storage/uploads/x.jpg}. */

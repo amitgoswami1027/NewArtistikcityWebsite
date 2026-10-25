@@ -257,6 +257,16 @@ INSERT INTO painting_images (painting_id, image_url, is_primary, sort_order, alt
 (9, '/assets/images/portfolio-7.jpg', 1, 0, 'Rose in Monochrome'),
 (10, '/assets/images/portfolio-3.jpg', 1, 0, 'Glass Jars on the Sill');
 
+-- every demo original also sells canvas and poster prints; the first one has artist contact links for the "Meet the artist" hub
+UPDATE paintings SET shop_formats = 'CANVAS,POSTER';
+UPDATE paintings SET artist_whatsapp = '+919876543201', artist_instagram = 'artistikcity' WHERE id = 1;
+
+-- an artist coupon code for the purchase flow
+INSERT INTO shop_coupons (code, description, discount_type, discount_value, painting_id, artist_name, min_subtotal, max_uses, used_count,
+    starts_at, expires_at, is_active, created_at, updated_at) VALUES
+('WELCOME10', '10% off your first artwork', 'PERCENT', 10, NULL, NULL, NULL, NULL, 0, NULL, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('VAISHALI500', 'Rs 500 off Vaishali''s originals and prints', 'FLAT', 500, NULL, 'Vaishali J Goswami', 3000, 100, 0, NULL, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
 -- a live 15-minute hold by another collector, so the "on hold" state is visible after start-up
 INSERT INTO cart_reservations (session_or_user_id, painting_id, user_id, reserved_at, expires_at) VALUES
 ('S:demo-collector', 5, NULL, CURRENT_TIMESTAMP, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 15 MINUTE));

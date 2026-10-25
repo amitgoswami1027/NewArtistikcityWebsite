@@ -2918,7 +2918,8 @@ const NAV = [
   { group: "Sales", items: [
     { href: "/admin/orders", label: "Course orders", icon: "fa-shopping-cart", cap: "revenue", also: ["/admin/orders/"] },
     { href: "/admin/dashboard/commissions", label: "Commissions", icon: "fa-paint-brush", cap: "commissions", badge: "commissions" },
-    { href: "/admin/dashboard/marketplace", label: "Marketplace", icon: "fa-tags", cap: "marketplace", badge: "marketplace", also: ["/admin/dashboard/marketplace/"] }
+    { href: "/admin/dashboard/marketplace", label: "Marketplace", icon: "fa-tags", cap: "marketplace", badge: "marketplace", also: ["/admin/dashboard/marketplace/"] },
+    { href: "/admin/dashboard/shop", label: "Art shop", icon: "fa-shopping-bag", cap: "marketplace", badge: "shop" }
   ] },
   { group: "Community", items: [
     { href: "/admin/dashboard/people", label: "People & roles", icon: "fa-users", cap: "people" },
@@ -8651,6 +8652,7 @@ var import_inertia_react = __webpack_require__("../../febuild/node_modules/@iner
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_Constants = __webpack_require__("./resources/js/Components/Constants.js");
 var import_nav = __webpack_require__("./resources/js/Components/Account/nav.js");
+var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
 const AGE_GROUPS = ["Sub-junior - 8 to 12 yrs", "Junior - 12 to 15 yrs", "Adult - 16 yrs and above"];
 function catalogUrl(params = {}) {
   const qs = new URLSearchParams(Object.assign({ type: "all" }, params)).toString();
@@ -8817,6 +8819,7 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: loginUrl(), children: "Log in" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("join"), className: "dm-btn dm-btn--brand", style: { marginLeft: 6 }, children: "Join for free" })
       ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.CartButton, {}),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "ac-burger", "aria-label": "Menu", onClick: () => setDrawer(!drawer), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${drawer ? "fa-times" : "fa-bars"}` }) })
     ] }) }),
     showCategories && mediums.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-cats", "aria-label": "Categories", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
@@ -8859,55 +8862,57 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
 /***/ }),
 
 /***/ "./resources/js/Components/Site/SiteLayout.js":
-/*!****************************************************!*\
-  !*** ./resources/js/Components/Site/SiteLayout.js ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ SiteLayout)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Site/SiteHeader */ "./resources/js/Components/Site/SiteHeader.js");
-/* harmony import */ var _Components_Site_SiteFooter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Site/SiteFooter */ "./resources/js/Components/Site/SiteFooter.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-function SiteLayout(_ref) {
-  var title = _ref.title,
-    children = _ref.children,
-    _ref$showCategories = _ref.showCategories,
-    showCategories = _ref$showCategories === void 0 ? false : _ref$showCategories,
-    _ref$activeMedium = _ref.activeMedium,
-    activeMedium = _ref$activeMedium === void 0 ? null : _ref$activeMedium;
-  var flash = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props.flash;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-    className: "ac",
-    children: [title && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.Head, {
-      title: title
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_2__["default"], {
-      showCategories: showCategories,
-      activeMedium: activeMedium
-    }), flash && flash.message && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-      className: "ac-wide",
-      style: {
-        marginTop: 16
-      },
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-        className: "ac-alert ac-alert--ok",
-        children: flash.message
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("main", {
-      children: children
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Site_SiteFooter__WEBPACK_IMPORTED_MODULE_3__["default"], {})]
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SiteLayout_exports = {};
+__export(SiteLayout_exports, {
+  default: () => SiteLayout
+});
+module.exports = __toCommonJS(SiteLayout_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteHeader = __toESM(__webpack_require__("./resources/js/Components/Site/SiteHeader.js"));
+var import_SiteFooter = __toESM(__webpack_require__("./resources/js/Components/Site/SiteFooter.js"));
+function SiteLayout({ title, children, showCategories = false, activeMedium = null }) {
+  const { flash } = (0, import_inertia_react.usePage)().props;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac", children: [
+    title && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteHeader.default, { showCategories, activeMedium }),
+    flash && flash.message && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide", style: { marginTop: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--ok", children: flash.message }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { children }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteFooter.default, {})
+  ] });
 }
+
 
 /***/ }),
 
@@ -20359,6 +20364,3137 @@ function VideoPlayer({ url, title, autoplay = false, className, poster }) {
 
 /***/ }),
 
+/***/ "./resources/js/Components/Shop/shop.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var shop_exports = {};
+__export(shop_exports, {
+  FORMAT_INFO: () => FORMAT_INFO,
+  FRAME_INFO: () => FRAME_INFO,
+  errorText: () => errorText,
+  formatOf: () => formatOf,
+  frameCost: () => frameCost,
+  inr: () => inr,
+  loadRazorpay: () => loadRazorpay,
+  normalise: () => normalise,
+  num: () => num,
+  priceOf: () => priceOf,
+  variantLine: () => variantLine
+});
+module.exports = __toCommonJS(shop_exports);
+const inr = (n) => "\u20B9" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+const num = (n) => {
+  const v = Number(n);
+  if (!isFinite(v)) return "";
+  return Number.isInteger(v) ? String(v) : v.toFixed(1).replace(/\.0$/, "");
+};
+const errorText = (e, fallback = "Something went wrong. Please try again.") => e && e.response && e.response.data && e.response.data.message || fallback;
+const FORMAT_INFO = {
+  ORIGINAL: { name: "Original painting", icon: "fa-diamond", blurb: "The one-of-one artwork, signed by the artist and shipped insured.", tag: "1 of 1" },
+  CANVAS: { name: "Limited edition canvas", icon: "fa-th-large", blurb: "Museum-grade gicl\xE9e on cotton canvas, hand-numbered.", tag: "Numbered" },
+  POSTER: { name: "Fine art poster", icon: "fa-file-image-o", blurb: "Archival paper print in matte or glossy. Budget friendly.", tag: "Paper print" },
+  DIGITAL: { name: "Digital download", icon: "fa-cloud-download", blurb: "High-resolution file for personal use. Instant access, no shipping.", tag: "Instant" }
+};
+const FRAME_INFO = {
+  NONE: { name: "No frame", swatch: "pz-sw--none" },
+  BLACK_WOOD: { name: "Black wood", swatch: "pz-sw--black" },
+  OAK: { name: "Natural oak", swatch: "pz-sw--oak" },
+  WHITE_FLOAT: { name: "White canvas float", swatch: "pz-sw--white" }
+};
+const formatOf = (offer, format) => (offer && offer.formats ? offer.formats.find((f) => f.format === format) : null) || null;
+function normalise(offer, sel) {
+  const f = formatOf(offer, sel.format);
+  if (!f) return sel;
+  const out = __spreadValues({}, sel);
+  if (sel.format === "ORIGINAL") out.size = "";
+  else if (!f.sizes.some((s) => s.code === sel.size)) out.size = f.sizes.length ? f.sizes[Math.min(1, f.sizes.length - 1)].code : "";
+  if (sel.format === "CANVAS") out.finish = sel.finish === "ROLLED" && (!sel.frame || sel.frame === "NONE") ? "ROLLED" : "STRETCHED";
+  else if (sel.format === "POSTER") out.finish = sel.finish === "GLOSSY" ? "GLOSSY" : "MATTE";
+  else out.finish = "";
+  if (!f.frames.includes(sel.frame || "NONE")) out.frame = "NONE";
+  out.frame = out.frame || "NONE";
+  out.qty = Math.max(1, Math.min(Number(sel.qty) || 1, f.maxQty || 1));
+  return out;
+}
+function priceOf(offer, sel) {
+  const f = formatOf(offer, sel.format);
+  if (!f) return null;
+  const size = sel.format === "ORIGINAL" ? f.sizes[0] : f.sizes.find((s) => s.code === sel.size) || (sel.format === "DIGITAL" ? f.sizes[0] : null);
+  if (!size) return null;
+  let unit = Number(size.price);
+  if (sel.format === "CANVAS" && sel.finish !== "ROLLED") unit += Number(size.extra || 0);
+  let framePrice = 0;
+  if (sel.frame && sel.frame !== "NONE" && size.width) {
+    const rate = (offer.frameRates || []).find((r) => r.code === sel.frame);
+    framePrice = rate ? Math.round(Number(rate.perInch) * 2 * (Number(size.width) + Number(size.height))) : 0;
+  }
+  unit += framePrice;
+  return { unit, total: unit * (sel.qty || 1), width: size.width, height: size.height, framePrice, size };
+}
+function frameCost(offer, sel, frame) {
+  const p = priceOf(offer, __spreadProps(__spreadValues({}, sel), { frame, finish: frame !== "NONE" && sel.format === "CANVAS" ? "STRETCHED" : sel.finish }));
+  const base = priceOf(offer, __spreadProps(__spreadValues({}, sel), { frame: "NONE" }));
+  return p && base ? p.unit - base.unit : 0;
+}
+function variantLine(sel, price) {
+  const parts = [FORMAT_INFO[sel.format] ? FORMAT_INFO[sel.format].name : "Artwork"];
+  if (price && price.width) parts.push(`${num(price.width)} \xD7 ${num(price.height)} in`);
+  if (sel.format === "CANVAS") parts.push(sel.finish === "ROLLED" ? "rolled" : "stretched");
+  if (sel.format === "POSTER") parts.push((sel.finish || "MATTE").toLowerCase());
+  if (sel.frame && sel.frame !== "NONE") parts.push(FRAME_INFO[sel.frame].name.toLowerCase() + " frame");
+  return parts.join(" \xB7 ");
+}
+function loadRazorpay() {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) return resolve(window.Razorpay);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(window.Razorpay);
+    s.onerror = () => reject(new Error("Could not load Razorpay"));
+    document.body.appendChild(s);
+    return void 0;
+  });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Shop/CartStore.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var CartStore_exports = {};
+__export(CartStore_exports, {
+  CartProvider: () => CartProvider,
+  seedCart: () => seedCart,
+  useCart: () => useCart
+});
+module.exports = __toCommonJS(CartStore_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+const store = { data: null, isOpen: false, busy: false, error: null, serverNow: Date.now() };
+const listeners = /* @__PURE__ */ new Set();
+let loading = null;
+function set(patch) {
+  Object.assign(store, patch);
+  listeners.forEach((l) => l());
+}
+function accept(d) {
+  set({ data: d, serverNow: d && d.serverNow || store.serverNow, error: null });
+  return d;
+}
+function refresh(country) {
+  if (loading) return loading;
+  loading = import_axios.default.get("/api/v1/cart" + (country ? `?country=${encodeURIComponent(country)}` : "")).then((r) => accept(r.data)).catch((e) => {
+    set({ error: (0, import_shop.errorText)(e, "We couldn\u2019t load your cart.") });
+    return null;
+  }).finally(() => {
+    loading = null;
+  });
+  return loading;
+}
+function run(promise) {
+  set({ busy: true, error: null });
+  return promise.then((r) => accept(r.data)).catch((e) => {
+    set({ error: (0, import_shop.errorText)(e) });
+    throw e;
+  }).finally(() => set({ busy: false }));
+}
+const actions = {
+  open: () => {
+    set({ isOpen: true });
+    refresh();
+  },
+  close: () => set({ isOpen: false }),
+  refresh,
+  clearError: () => set({ error: null }),
+  add: (item, { openDrawer = true } = {}) => run(import_axios.default.post("/api/v1/cart/items", item)).then((d) => {
+    if (openDrawer) set({ isOpen: true });
+    return d;
+  }),
+  setQty: (id, qty) => run(import_axios.default.patch(`/api/v1/cart/items/${id}`, { qty })),
+  remove: (id) => run(import_axios.default.delete(`/api/v1/cart/items/${id}`)),
+  applyCoupon: (code, country) => run(import_axios.default.post("/api/v1/cart/coupon", { code, country })),
+  removeCoupon: () => run(import_axios.default.delete("/api/v1/cart/coupon"))
+};
+function seedCart(data) {
+  if (data && data.lines) Object.assign(store, { data, serverNow: data.serverNow || store.serverNow, error: null });
+}
+function useCart() {
+  const [, force] = (0, import_react.useState)(0);
+  (0, import_react.useEffect)(() => {
+    const l = () => force((n) => n + 1);
+    listeners.add(l);
+    return () => {
+      listeners.delete(l);
+    };
+  }, []);
+  const page = (0, import_inertia_react.usePage)();
+  const shared = page && page.props && page.props.cart;
+  return __spreadProps(__spreadValues({}, actions), {
+    data: store.data,
+    busy: store.busy,
+    error: store.error,
+    serverNow: store.serverNow,
+    isOpen: store.isOpen,
+    count: store.data ? store.data.count : shared && shared.count || 0
+  });
+}
+function CartProvider({ children, initial = null }) {
+  const [seeded] = (0, import_react.useState)(() => {
+    if (initial) seedCart(initial);
+    return true;
+  });
+  return seeded ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children }) : null;
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Shop/CartDrawer.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var CartDrawer_exports = {};
+__export(CartDrawer_exports, {
+  CartButton: () => CartButton,
+  CartLine: () => CartLine,
+  HoldTicker: () => HoldTicker,
+  Qty: () => Qty,
+  Totals: () => Totals,
+  default: () => CartDrawer
+});
+module.exports = __toCommonJS(CartDrawer_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_react_dom = __webpack_require__("../../febuild/node_modules/react-dom/index.js");
+var import_CartStore = __webpack_require__("./resources/js/Components/Shop/CartStore.js");
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
+function HoldTicker({ expiresAt, serverNow }) {
+  const left = (0, import_shared.useCountdown)(expiresAt, serverNow);
+  if (!expiresAt) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `pz-hold ${left <= 120 ? "is-urgent" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+    left > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      "Held for you \xB7 ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_shared.mmss)(left) })
+    ] }) : "Hold ended"
+  ] });
+}
+function Qty({ value, max, onChange, disabled, label = "Quantity" }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-qty", role: "group", "aria-label": label, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onChange(value - 1), disabled: disabled || value <= 1, "aria-label": "One less", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-minus", "aria-hidden": "true" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("output", { "aria-live": "polite", children: value }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onChange(value + 1), disabled: disabled || value >= max, "aria-label": "One more", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-plus", "aria-hidden": "true" }) })
+  ] });
+}
+function CartLine({ line, serverNow, compact = false, onQty, onRemove, onReserve, busy }) {
+  const bad = line.status !== "ok";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: `pz-line ${bad ? "is-bad" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${line.slug}`, className: "pz-line__img", tabIndex: -1, "aria-hidden": "true", children: line.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: line.image, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-line__body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${line.slug}`, className: "pz-line__title", children: line.title }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-line__by", children: [
+        "by ",
+        line.artist
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-line__variant", children: line.label }),
+      line.format === "ORIGINAL" && line.status === "ok" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HoldTicker, { expiresAt: line.holdExpiresAt, serverNow }),
+      bad && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-line__warn", role: "alert", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-circle", "aria-hidden": "true" }),
+        line.message
+      ] }),
+      !compact && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-line__actions", children: [
+        line.maxQty > 1 && !bad && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Qty, { value: line.qty, max: line.maxQty, onChange: (q) => onQty(line, q), disabled: busy, label: `Quantity of ${line.title}` }),
+        line.status === "hold_expired" && onReserve && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-link", onClick: () => onReserve(line), disabled: busy, children: "Reserve again" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-link pz-link--muted", onClick: () => onRemove(line), disabled: busy, children: "Remove" })
+      ] }),
+      compact && line.qty > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-line__variant", children: [
+        "Qty ",
+        line.qty,
+        " \xD7 ",
+        (0, import_shop.inr)(line.unitPrice)
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-line__price", children: [
+      bad ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-muted", children: "\u2014" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_shop.inr)(line.lineTotal) }),
+      Number(line.discount) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+        "\u2212",
+        (0, import_shop.inr)(line.discount)
+      ] })
+    ] })
+  ] });
+}
+function Totals({ totals, showShippingNote = true }) {
+  if (!totals) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "pz-totals", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Subtotal" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_shop.inr)(totals.subtotal) })
+    ] }),
+    Number(totals.discount) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "is-green", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dt", { children: [
+        "Coupon ",
+        totals.coupon && totals.coupon.code
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+        "\u2212",
+        (0, import_shop.inr)(totals.discount)
+      ] })
+    ] }),
+    totals.needsShipping && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dt", { children: [
+        "Shipping",
+        showShippingNote && totals.hasPrints ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          " (",
+          totals.country === "India" ? "India" : "worldwide",
+          ")"
+        ] }) : null
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: Number(totals.shipping) > 0 ? (0, import_shop.inr)(totals.shipping) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "is-green", children: "Free" }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "is-total", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Total" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_shop.inr)(totals.total) })
+    ] })
+  ] });
+}
+function CartDrawer() {
+  const cart = (0, import_CartStore.useCart)();
+  const panel = (0, import_react.useRef)(null);
+  const [notice, setNotice] = (0, import_react.useState)(null);
+  const { data } = cart;
+  (0, import_react.useEffect)(() => {
+    if (!cart.isOpen) return void 0;
+    const onKey = (e) => {
+      if (e.key === "Escape") cart.close();
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.classList.add("pz-noscroll");
+    const t = setTimeout(() => {
+      if (panel.current) panel.current.focus();
+    }, 20);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.classList.remove("pz-noscroll");
+      clearTimeout(t);
+    };
+  }, [cart.isOpen]);
+  if (!cart.isOpen) return null;
+  const lines = data ? data.lines : [];
+  const reserve = (l) => cart.add({ paintingId: l.paintingId, format: "ORIGINAL", frame: l.frame, qty: 1 }, { openDrawer: false }).then(() => setNotice("It\u2019s held for you again for 15 minutes.")).catch((e) => setNotice((0, import_shop.errorText)(e)));
+  const node = /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-overlay", onMouseDown: (e) => {
+    if (e.target === e.currentTarget) cart.close();
+  }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "pz-drawer", role: "dialog", "aria-modal": "true", "aria-labelledby": "pz-drawer-title", tabIndex: -1, ref: panel, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "pz-drawer__head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { id: "pz-drawer-title", children: [
+        "Your cart ",
+        data && data.count > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: data.count })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-iconbtn", onClick: cart.close, "aria-label": "Close cart", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-drawer__body", "aria-busy": cart.busy ? "true" : "false", children: [
+      !data && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-skeleton", "aria-label": "Loading your cart", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {})
+      ] }),
+      data && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-empty", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-empty__art", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Your cart is empty" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Originals, numbered canvases, posters and downloads you add will wait for you here." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "pz-btn pz-btn--ink", children: "Browse the marketplace" })
+      ] }),
+      (cart.error || notice) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: `pz-note ${cart.error ? "is-error" : ""}`, role: "status", children: cart.error || notice }),
+      lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "pz-lines", children: lines.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        CartLine,
+        {
+          line: l,
+          serverNow: cart.serverNow,
+          busy: cart.busy,
+          onQty: (line, q) => cart.setQty(line.id, q).catch(() => {
+          }),
+          onRemove: (line) => cart.remove(line.id).catch(() => {
+          }),
+          onReserve: reserve
+        },
+        l.id
+      )) })
+    ] }),
+    data && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("footer", { className: "pz-drawer__foot", children: [
+      data.totals.coupon && data.totals.coupon.error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-note", children: [
+        "Code ",
+        data.totals.coupon.code,
+        ": ",
+        data.totals.coupon.error
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Totals, { totals: data.totals }),
+      data.totals.hasPrints && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine", children: "Shipping shown for delivery in India; worldwide rates apply at checkout." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+        "a",
+        {
+          href: "/purchase/checkout",
+          className: `pz-btn pz-btn--brand pz-btn--block ${data.totals.blocked ? "is-disabled" : ""}`,
+          "aria-disabled": data.totals.blocked ? "true" : void 0,
+          onClick: (e) => {
+            if (data.totals.blocked) {
+              e.preventDefault();
+              setNotice("Remove or fix the items marked in red first.");
+            }
+          },
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+            " Checkout \xB7 ",
+            (0, import_shop.inr)(data.totals.total)
+          ]
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ghost pz-btn--block", onClick: cart.close, children: "Keep browsing" })
+    ] })
+  ] }) });
+  return typeof document !== "undefined" ? (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac", children: node }), document.body) : node;
+}
+function CartButtonInner() {
+  const cart = (0, import_CartStore.useCart)();
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-cartbtn", onClick: cart.open, "aria-label": `Cart, ${cart.count} item${cart.count === 1 ? "" : "s"}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag", "aria-hidden": "true" }),
+    cart.count > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-cartbtn__count", children: cart.count > 99 ? "99+" : cart.count })
+  ] });
+}
+function CartButton() {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CartButtonInner, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CartDrawer, {})
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Shop/RoomStage.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var RoomStage_exports = {};
+__export(RoomStage_exports, {
+  SCENES: () => SCENES,
+  U: () => U,
+  default: () => RoomStage
+});
+module.exports = __toCommonJS(RoomStage_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+const U = 6.25;
+const W = 1e3;
+const H = 680;
+const FLOOR = 600;
+const FRAMES = {
+  NONE: { t: 0, depth: 0.75 },
+  BLACK_WOOD: { t: 1.25, depth: 1.5 },
+  OAK: { t: 1.25, depth: 1.5 },
+  WHITE_FLOAT: { t: 1.1, gap: 0.45, depth: 1.75 }
+};
+const SCENES = {
+  living: {
+    label: "Modern living room",
+    icon: "fa-home",
+    wall: ["#efe9e1", "#e4dbcf"],
+    floor: ["#c79f78", "#a17a55"],
+    hang: FLOOR - 42 * U,
+    light: { x: 860, y: FLOOR - 52 * U },
+    note: "above an 84-inch sofa",
+    back: () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "0", y: FLOOR - 4, width: W, height: "6", fill: "#d9cdbd" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ellipse", { cx: "500", cy: FLOOR + 62, rx: "360", ry: "26", fill: "#e6dccd", opacity: ".9" })
+    ] }),
+    front: () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 42 * U, y: FLOOR - 30 * U, width: 84 * U, height: 16 * U, rx: "22", fill: "#6d7f74" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 44 * U, y: FLOOR - 22 * U, width: 9 * U, height: 18 * U, rx: "16", fill: "#5f7166" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 + 35 * U, y: FLOOR - 22 * U, width: 9 * U, height: 18 * U, rx: "16", fill: "#5f7166" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 36 * U, y: FLOOR - 17 * U, width: 72 * U, height: 11 * U, rx: "12", fill: "#77897e" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 38 * U, y: FLOOR - 4 * U, width: "10", height: 4 * U, fill: "#2f2a25" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 + 38 * U - 10, y: FLOOR - 4 * U, width: "10", height: 4 * U, fill: "#2f2a25" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 26 * U, y: FLOOR - 25 * U, width: 13 * U, height: 9 * U, rx: "9", fill: "#e9c46a", transform: `rotate(-6 ${500 - 20 * U} ${FLOOR - 21 * U})` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 + 13 * U, y: FLOOR - 25 * U, width: 13 * U, height: 9 * U, rx: "9", fill: "#e9e1d6", transform: `rotate(5 ${500 + 20 * U} ${FLOOR - 21 * U})` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "805", y: FLOOR - 24 * U, width: 18 * U, height: "8", rx: "3", fill: "#3b3128" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 805 + 8.5 * U, y: FLOOR - 24 * U, width: "6", height: 24 * U, fill: "#3b3128" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 805 + 2 * U, y: FLOOR - 1.5 * U, width: 14 * U, height: "6", rx: "3", fill: "#3b3128" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 805 + 8.5 * U, y: FLOOR - 44 * U, width: "4", height: 20 * U, fill: "#2b2b2b" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: `M${805 + 3 * U} ${FLOOR - 44 * U} L${805 + 15 * U} ${FLOOR - 44 * U} L${805 + 12.5 * U} ${FLOOR - 53 * U} L${805 + 5.5 * U} ${FLOOR - 53 * U} Z`, fill: "#f7ecd2" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ellipse", { cx: 805 + 9 * U, cy: FLOOR - 44 * U, rx: 6.5 * U, ry: "5", fill: "#fff3d6", opacity: ".9" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "70", y: FLOOR - 14 * U, width: 10 * U, height: 14 * U, rx: "8", fill: "#d8c8b4" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: `M101 ${FLOOR - 14 * U}c-34-46-40-104-6-140 6 46 22 86 6 140zm0 0c30-42 58-74 34-122-18 40-34 70-34 122zm0 0c-46-22-80-8-92 14 34 2 60-4 92-14z`, fill: "#4f7d5c" })
+    ] })
+  },
+  bedroom: {
+    label: "Minimalist bedroom",
+    icon: "fa-bed",
+    wall: ["#e6ece6", "#d8e1d8"],
+    floor: ["#d9c7ad", "#bea686"],
+    hang: FLOOR - 52 * U,
+    light: { x: 60, y: 260 },
+    note: "above a 64-inch queen bed",
+    back: () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "20", y: "130", width: 26 * U, height: 48 * U, rx: "4", fill: "#f7fbff", stroke: "#c9d3c9", strokeWidth: "6" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: 20 + 13 * U, x2: 20 + 13 * U, y1: "130", y2: 130 + 48 * U, stroke: "#c9d3c9", strokeWidth: "4" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "20", y: "130", width: 26 * U, height: 48 * U, fill: "url(#pz-sun)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "0", y: FLOOR - 4, width: W, height: "6", fill: "#cfd8cf" })
+    ] }),
+    front: () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 34 * U, y: FLOOR - 44 * U, width: 68 * U, height: 30 * U, rx: "14", fill: "#c7b9a6" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 32 * U, y: FLOOR - 25 * U, width: 64 * U, height: 14 * U, rx: "10", fill: "#f4f1ec" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 32 * U, y: FLOOR - 15 * U, width: 64 * U, height: 10 * U, rx: "6", fill: "#9fb3a4" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 26 * U, y: FLOOR - 30 * U, width: 20 * U, height: 8 * U, rx: "10", fill: "#fff" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 + 6 * U, y: FLOOR - 30 * U, width: 20 * U, height: 8 * U, rx: "10", fill: "#fff" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 33 * U, y: FLOOR - 5 * U, width: "10", height: 5 * U, fill: "#8c7b66" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 + 33 * U - 10, y: FLOOR - 5 * U, width: "10", height: 5 * U, fill: "#8c7b66" }),
+      [-1, 1].map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 + s * 44 * U - 9 * U, y: FLOOR - 22 * U, width: 18 * U, height: 22 * U, rx: "4", fill: "#d9cbb8" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: 500 + s * 44 * U - 9 * U, x2: 500 + s * 44 * U + 9 * U, y1: FLOOR - 11 * U, y2: FLOOR - 11 * U, stroke: "#bfae98", strokeWidth: "3" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: 500 + s * 44 * U, cy: FLOOR - 26.5 * U, r: 4.5 * U, fill: "#f6efe2", stroke: "#e1d5c2", strokeWidth: "2" })
+      ] }, s))
+    ] })
+  },
+  office: {
+    label: "Professional office",
+    icon: "fa-briefcase",
+    wall: ["#e7eaee", "#d9dee5"],
+    floor: ["#7b8088", "#5f646c"],
+    hang: FLOOR - 50 * U,
+    light: { x: 762, y: FLOOR - 37 * U },
+    note: "above a 60-inch desk",
+    back: () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "70", y: "250", width: 28 * U, height: "10", fill: "#4b3b2e" }),
+      [0, 1, 2, 3, 4].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 80 + i * 15, y: 250 - (40 + i % 3 * 8), width: "12", height: 40 + i % 3 * 8, fill: ["#c2410c", "#1f2937", "#a3a3a3", "#0e7490", "#e5c07b"][i] }, i)),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "0", y: FLOOR - 4, width: W, height: "6", fill: "#c9ced6" })
+    ] }),
+    front: () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 30 * U, y: FLOOR - 30 * U, width: 60 * U, height: 2.5 * U, fill: "#8b5e3c" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 28 * U, y: FLOOR - 27.5 * U, width: 2 * U, height: 27.5 * U, fill: "#5c3d27" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 + 26 * U, y: FLOOR - 27.5 * U, width: 2 * U, height: 27.5 * U, fill: "#5c3d27" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 12 * U, y: FLOOR - 46 * U, width: 24 * U, height: 14 * U, rx: "4", fill: "#111827" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 1 * U, y: FLOOR - 32 * U, width: 2 * U, height: 2 * U, fill: "#374151" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 + 20 * U, y: FLOOR - 31 * U, width: 6 * U, height: "5", rx: "2", fill: "#374151" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", { x1: 500 + 23 * U, y1: FLOOR - 31 * U, x2: 500 + 19 * U, y2: FLOOR - 40 * U, stroke: "#374151", strokeWidth: "4" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: `M${500 + 17 * U} ${FLOOR - 40 * U} l${8 * U} -3 l-2 ${4 * U} z`, fill: "#374151" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: 500 + 22 * U, cy: FLOOR - 37 * U, r: 3 * U, fill: "#fde68a", opacity: ".55" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 10 * U, y: FLOOR - 36 * U, width: 20 * U, height: 14 * U, rx: "10", fill: "#1f2937" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 11 * U, y: FLOOR - 20 * U, width: 22 * U, height: 4 * U, rx: "8", fill: "#111827" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 1 * U, y: FLOOR - 16 * U, width: 2 * U, height: 13 * U, fill: "#111827" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 9 * U, y: FLOOR - 3 * U, width: 18 * U, height: 1.5 * U, rx: "4", fill: "#111827" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "880", y: FLOOR - 12 * U, width: 9 * U, height: 12 * U, rx: "6", fill: "#e5e7eb" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: `M908 ${FLOOR - 12 * U}c-24-34-28-80-4-106 4 34 16 64 4 106zm0 0c22-30 42-54 24-92-14 28-24 52-24 92z`, fill: "#3f6b4f" })
+    ] })
+  },
+  gallery: {
+    label: "Blank gallery wall",
+    icon: "fa-square-o",
+    wall: ["#fbfbfa", "#f0efec"],
+    floor: ["#d4d0c8", "#bcb7ad"],
+    hang: FLOOR - 38 * U,
+    center: 57,
+    light: { x: 500, y: -60 },
+    note: "centred at eye level, 57 in from the floor",
+    back: () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "140", y: "0", width: "720", height: "8", fill: "#2b2b2b" }),
+      [260, 500, 740].map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: x - 6, y: "8", width: "12", height: "18", fill: "#2b2b2b" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: `M${x - 14} 26 h28 l-6 22 h-16z`, fill: "#3a3a3a" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: `M${x - 8} 48 L${x - 120} 420 L${x + 120} 420 L${x + 8} 48 Z`, fill: "url(#pz-beam)" })
+      ] }, x)),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: "0", y: FLOOR - 4, width: W, height: "6", fill: "#e2dfd8" })
+    ] }),
+    front: () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 24 * U, y: FLOOR - 18 * U, width: 48 * U, height: 3 * U, rx: "3", fill: "#e8e2d6", stroke: "#cfc6b6" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 - 21 * U, y: FLOOR - 15 * U, width: 2 * U, height: 15 * U, fill: "#9a8f7e" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 500 + 19 * U, y: FLOOR - 15 * U, width: 2 * U, height: 15 * U, fill: "#9a8f7e" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { opacity: ".18", fill: "#0e1a3a", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: "880", cy: FLOOR - 63 * U, r: 4.5 * U }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 880 - 7 * U, y: FLOOR - 57 * U, width: 14 * U, height: 26 * U, rx: "20" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 880 - 5 * U, y: FLOOR - 33 * U, width: 4 * U, height: 33 * U, rx: "8" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { x: 880 + 1 * U, y: FLOOR - 33 * U, width: 4 * U, height: 33 * U, rx: "8" })
+      ] })
+    ] })
+  }
+};
+function RoomStage({ image, title, widthIn, heightIn, frame = "NONE", surface = "canvas", scene = "living", showSize = true, resetToken = 0 }) {
+  const s = SCENES[scene] || SCENES.living;
+  const f = FRAMES[frame] || FRAMES.NONE;
+  const outerW = (Number(widthIn) + 2 * (f.t + (f.gap || 0))) * U;
+  const outerH = (Number(heightIn) + 2 * (f.t + (f.gap || 0))) * U;
+  const stage = (0, import_react.useRef)(null);
+  const [scale, setScale] = (0, import_react.useState)(1);
+  const [pos, setPos] = (0, import_react.useState)(null);
+  const drag = (0, import_react.useRef)(null);
+  const clamp = (0, import_react.useCallback)((p2) => ({
+    x: Math.min(W - outerW / 2 - 4, Math.max(outerW / 2 + 4, p2.x)),
+    y: Math.min(FLOOR - outerH / 2 - 6, Math.max(outerH / 2 + 10, p2.y))
+  }), [outerW, outerH]);
+  const home = (0, import_react.useCallback)(() => clamp({ x: 500, y: s.center ? FLOOR - s.center * U : s.hang - outerH / 2 }), [clamp, s, outerH]);
+  (0, import_react.useLayoutEffect)(() => {
+    const el = stage.current;
+    if (!el) return void 0;
+    const update = () => setScale(el.clientWidth / W);
+    update();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    }
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  (0, import_react.useEffect)(() => {
+    setPos(home());
+  }, [scene, resetToken]);
+  (0, import_react.useEffect)(() => {
+    setPos((p2) => p2 ? clamp(p2) : home());
+  }, [outerW, outerH]);
+  const p = pos || home();
+  const onDown = (e) => {
+    if (e.button !== void 0 && e.button !== 0) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { sx: e.clientX, sy: e.clientY, p0: p };
+  };
+  const onMove = (e) => {
+    if (!drag.current) return;
+    const d = drag.current;
+    setPos(clamp({ x: d.p0.x + (e.clientX - d.sx) / scale, y: d.p0.y + (e.clientY - d.sy) / scale }));
+  };
+  const onUp = () => {
+    drag.current = null;
+  };
+  const onKey = (e) => {
+    const step = e.shiftKey ? 40 : 10;
+    const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+    if (e.key === "Home") {
+      e.preventDefault();
+      setPos(home());
+      return;
+    }
+    if (!moves[e.key]) return;
+    e.preventDefault();
+    setPos(clamp({ x: p.x + moves[e.key][0], y: p.y + moves[e.key][1] }));
+  };
+  const dx = p.x - s.light.x;
+  const dy = p.y - s.light.y;
+  const dist = Math.max(1, Math.hypot(dx, dy));
+  const depthPx = (f.depth * U * 0.9 + 3) * scale;
+  const sx = dx / dist * depthPx;
+  const sy = dy / dist * depthPx + 2 * scale;
+  const blur = (8 + dist / 60) * scale;
+  const shadow = `${sx.toFixed(1)}px ${sy.toFixed(1)}px ${blur.toFixed(1)}px rgba(20, 16, 10, ${Math.max(0.22, 0.42 - dist / 3e3).toFixed(2)})`;
+  const sheenAngle = Math.round(Math.atan2(dy, dx) * 180 / Math.PI + 90);
+  const box = {
+    left: `${(p.x - outerW / 2) / W * 100}%`,
+    top: `${(p.y - outerH / 2) / H * 100}%`,
+    width: `${outerW / W * 100}%`,
+    height: `${outerH / H * 100}%`,
+    boxShadow: shadow
+  };
+  const pad = (inches) => `${inches / (Number(widthIn) + 2 * (f.t + (f.gap || 0))) * 100}%`;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-stage", ref: stage, style: { aspectRatio: `${W} / ${H}` }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { className: "pz-stage__layer", viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "xMidYMid slice", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("defs", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("linearGradient", { id: "pz-wall", x1: "0", y1: "0", x2: "0", y2: "1", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "0", stopColor: s.wall[0] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "1", stopColor: s.wall[1] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("linearGradient", { id: "pz-floor", x1: "0", y1: "0", x2: "0", y2: "1", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "0", stopColor: s.floor[0] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "1", stopColor: s.floor[1] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("radialGradient", { id: "pz-glow", cx: s.light.x / W, cy: Math.max(0, s.light.y) / FLOOR, r: ".55", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "0", stopColor: "#fff8e7", stopOpacity: ".55" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "1", stopColor: "#fff8e7", stopOpacity: "0" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("linearGradient", { id: "pz-sun", x1: "0", y1: "0", x2: "1", y2: "1", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "0", stopColor: "#fff", stopOpacity: ".7" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "1", stopColor: "#dfeaf5", stopOpacity: ".5" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("linearGradient", { id: "pz-beam", x1: "0", y1: "0", x2: "0", y2: "1", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "0", stopColor: "#fff6dc", stopOpacity: ".55" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "1", stopColor: "#fff6dc", stopOpacity: "0" })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { width: W, height: FLOOR, fill: "url(#pz-wall)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { width: W, height: FLOOR, fill: "url(#pz-glow)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", { y: FLOOR, width: W, height: H - FLOOR, fill: "url(#pz-floor)" }),
+      s.back()
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "div",
+      {
+        className: `pz-art pz-art--${frame.toLowerCase()} pz-art--${surface}`,
+        style: box,
+        role: "slider",
+        tabIndex: 0,
+        "aria-label": `${title}, ${(0, import_shop.num)(widthIn)} by ${(0, import_shop.num)(heightIn)} inches. Drag or use the arrow keys to move it on the wall.`,
+        "aria-valuetext": `${Math.round(p.x)}, ${Math.round(p.y)}`,
+        onPointerDown: onDown,
+        onPointerMove: onMove,
+        onPointerUp: onUp,
+        onPointerCancel: onUp,
+        onKeyDown: onKey,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-art__frame", style: { padding: pad(f.t) }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-art__float", style: { padding: f.gap ? pad(f.gap) : 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-art__canvas", children: [
+            image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: image, alt: "", draggable: "false" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-art__blank" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-art__sheen", style: { background: `linear-gradient(${sheenAngle}deg, rgba(255,255,255,.16), rgba(255,255,255,0) 55%)` } })
+          ] }) }) }),
+          showSize && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-art__size", "aria-hidden": "true", children: [
+            (0, import_shop.num)(widthIn),
+            "\u2033 \xD7 ",
+            (0, import_shop.num)(heightIn),
+            "\u2033"
+          ] })
+        ]
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", { className: "pz-stage__layer pz-stage__front", viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "xMidYMid slice", "aria-hidden": "true", children: s.front() }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-stage__hint", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-hand-pointer-o" }),
+      " Drag to move"
+    ] })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Shop/PurchaseLayout.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var PurchaseLayout_exports = {};
+__export(PurchaseLayout_exports, {
+  HoldBar: () => HoldBar,
+  PurchaseStepper: () => PurchaseStepper,
+  STEPS: () => STEPS,
+  default: () => PurchaseLayout
+});
+module.exports = __toCommonJS(PurchaseLayout_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
+const STEPS = [
+  { n: 1, label: "Choose format", href: "/purchase/step-1" },
+  { n: 2, label: "See it on your wall", href: "/purchase/step-2" },
+  { n: 3, label: "Review & meet the artist", href: "/purchase/preview" },
+  { n: 4, label: "Checkout", href: "/purchase/checkout" }
+];
+function PurchaseStepper({ current, skipRoom = false }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "pz-stepper", "aria-label": "Purchase progress", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: STEPS.map((s) => {
+    const done = s.n < current;
+    const skipped = skipRoom && s.n === 2;
+    const linkable = done && !skipped && s.n < 4;
+    const inner = /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-stepper__dot", "aria-hidden": "true", children: done && !skipped ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }) : s.n }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-stepper__label", children: [
+        s.label,
+        skipped ? " (not needed)" : ""
+      ] })
+    ] });
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "li",
+      {
+        className: `${s.n === current ? "is-current" : ""} ${done ? "is-done" : ""} ${skipped ? "is-skipped" : ""}`,
+        "aria-current": s.n === current ? "step" : void 0,
+        children: linkable ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: s.href, children: inner }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: inner })
+      },
+      s.n
+    );
+  }) }) });
+}
+function HoldBar({ hold, serverNow }) {
+  const left = (0, import_shared.useCountdown)(hold ? hold.expiresAt : null, serverNow);
+  if (!hold || left <= 0) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `pz-holdbar ${left <= 120 ? "is-urgent" : ""}`, role: "timer", "aria-live": left <= 120 ? "assertive" : "off", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "The original is held for you." }),
+      " It goes back to the gallery in"
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-holdbar__time", children: (0, import_shared.mmss)(left) })
+  ] });
+}
+function PurchaseLayout({ painting, step, skipRoom, hold, serverNow, title, children }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: `${title} \xB7 ${painting.title}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HoldBar, { hold, serverNow }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "dm-crumbs", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: "Home" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", children: "Marketplace" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${painting.slug}`, children: painting.title }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: title })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "pz-head", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-eyebrow", children: [
+          "Buy \u201C",
+          painting.title,
+          "\u201D \xB7 Step ",
+          step,
+          " of 4"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: title })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PurchaseStepper, { current: step, skipRoom }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-body", children })
+    ] }) })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Shop/ArtistHub.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var ArtistHub_exports = {};
+__export(ArtistHub_exports, {
+  ChatWindow: () => ChatWindow,
+  default: () => ArtistHub,
+  useConversation: () => useConversation
+});
+module.exports = __toCommonJS(ArtistHub_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+const when = (ms) => ms ? new Date(ms).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
+function initials(name) {
+  return String(name || "A").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+}
+function useConversation(paintingId, initial) {
+  const [conv, setConv] = (0, import_react.useState)(initial || { thread: null, messages: [] });
+  const reload = () => import_axios.default.get(`/api/v1/artist-hub/${paintingId}`).then((r) => {
+    setConv(r.data);
+    return r.data;
+  }).catch(() => null);
+  const send = (payload) => import_axios.default.post(`/api/v1/artist-hub/${paintingId}/messages`, payload).then((r) => {
+    setConv(r.data);
+    return r.data;
+  });
+  return { conv, reload, send };
+}
+function Messages({ messages, artist }) {
+  const end = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (end.current && end.current.scrollIntoView) end.current.scrollIntoView({ block: "end" });
+  }, [messages.length]);
+  if (!messages.length) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-chat__empty", children: [
+      "Say hello. ",
+      artist,
+      " or the studio usually replies within a day, here and by e-mail."
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ol", { className: "pz-chat__list", children: [
+    messages.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: m.sender === "BUYER" ? "is-me" : "is-artist", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: m.body }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+        m.sender === "BUYER" ? "You" : m.by,
+        " \xB7 ",
+        when(m.at)
+      ] })
+    ] }, m.id)),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { ref: end, "aria-hidden": "true", className: "pz-chat__end" })
+  ] });
+}
+function ChatWindow({ painting, conversation, customer, context, onClose }) {
+  const { conv, reload, send } = conversation;
+  const [text, setText] = (0, import_react.useState)("");
+  const [name, setName] = (0, import_react.useState)(customer && customer.name || "");
+  const [email, setEmail] = (0, import_react.useState)(customer && customer.email || "");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [err, setErr] = (0, import_react.useState)(null);
+  const needIdentity = !conv.thread && !(customer && customer.name && customer.email);
+  (0, import_react.useEffect)(() => {
+    reload();
+    const t = setInterval(reload, 1e4);
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      clearInterval(t);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, []);
+  const submit = (e) => {
+    e.preventDefault();
+    if (text.trim().length < 2) {
+      setErr("Write your message first.");
+      return;
+    }
+    setBusy(true);
+    setErr(null);
+    send({ body: text, name, email, context }).then(() => setText("")).catch((x) => setErr((0, import_shop.errorText)(x))).finally(() => setBusy(false));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-chat", role: "dialog", "aria-label": `Chat with ${painting.artist_name}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "pz-chat__head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-avatar", "aria-hidden": "true", children: initials(painting.artist_name) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: painting.artist_name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          "About \u201C",
+          painting.title,
+          "\u201D"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-iconbtn", onClick: onClose, "aria-label": "Close chat", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-chat__body", "aria-live": "polite", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Messages, { messages: conv.messages || [], artist: painting.artist_name }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "pz-chat__form", onSubmit: submit, children: [
+      needIdentity && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-chat__who", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: name, onChange: (e) => setName(e.target.value), placeholder: "Your name", "aria-label": "Your name", autoComplete: "name" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "email", value: email, onChange: (e) => setEmail(e.target.value), placeholder: "E-mail for replies", "aria-label": "Your e-mail", autoComplete: "email" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-chat__send", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "textarea",
+          {
+            rows: "2",
+            value: text,
+            onChange: (e) => setText(e.target.value),
+            placeholder: "Type a message\u2026",
+            "aria-label": "Message",
+            maxLength: 2e3,
+            onKeyDown: (e) => {
+              if (e.key === "Enter" && !e.shiftKey) submit(e);
+            }
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", disabled: busy, "aria-label": "Send", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${busy ? "fa-circle-o-notch fa-spin" : "fa-paper-plane"}`, "aria-hidden": "true" }) })
+      ] }),
+      err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err })
+    ] })
+  ] });
+}
+function ArtistHub({ painting, contact = {}, conversation, customer, context, autoOpenChat = false }) {
+  const [chat, setChat] = (0, import_react.useState)(autoOpenChat);
+  const [q, setQ] = (0, import_react.useState)("");
+  const [name, setName] = (0, import_react.useState)(customer && customer.name || "");
+  const [email, setEmail] = (0, import_react.useState)(customer && customer.email || "");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [sent, setSent] = (0, import_react.useState)(null);
+  const [err, setErr] = (0, import_react.useState)(null);
+  const url = typeof window !== "undefined" ? `${window.location.origin}/marketplace/${painting.slug}` : `/marketplace/${painting.slug}`;
+  const intro = `Hi ${painting.artist_name.split(" ")[0]}, I'm interested in \u201C${painting.title}\u201D${context ? ` (${context})` : ""}. ${url}`;
+  const hasThread = conversation.conv && conversation.conv.thread;
+  const unread = hasThread ? (conversation.conv.messages || []).filter((m) => m.sender === "ARTIST").length : 0;
+  const ask = (e) => {
+    e.preventDefault();
+    setErr(null);
+    setSent(null);
+    if (q.trim().length < 5) {
+      setErr("Write your question for the artist.");
+      return;
+    }
+    setBusy(true);
+    conversation.send({ body: q, name, email, context }).then((d) => {
+      setSent(d.message || "Sent.");
+      setQ("");
+    }).catch((x) => setErr((0, import_shop.errorText)(x))).finally(() => setBusy(false));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-hub", "aria-labelledby": "pz-hub-title", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-hub__artist", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-avatar pz-avatar--lg", "aria-hidden": "true", children: initials(painting.artist_name) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-eyebrow", children: "Meet the artist" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "pz-hub-title", children: painting.artist_name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-muted", children: [
+          "Questions about size, colours or framing? Talk to ",
+          contact.own ? "the artist" : "the artist through our studio",
+          " before you buy."
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-hub__channels", children: [
+      contact.whatsapp && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { className: "pz-channel pz-channel--wa", href: `https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(intro)}`, target: "_blank", rel: "noopener noreferrer", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-whatsapp", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "WhatsApp" })
+      ] }),
+      contact.instagram && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { className: "pz-channel pz-channel--ig", href: `https://ig.me/m/${contact.instagram}`, target: "_blank", rel: "noopener noreferrer", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-instagram", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Instagram DM" })
+      ] }),
+      contact.email && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { className: "pz-channel pz-channel--mail", href: `mailto:${contact.email}?subject=${encodeURIComponent(`Question about \u201C${painting.title}\u201D`)}&body=${encodeURIComponent(intro + "\n\n")}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-envelope-o", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "E-mail" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-channel pz-channel--chat", onClick: () => setChat(true), "aria-haspopup": "dialog", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-comments-o", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Live chat" }),
+        unread > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: unread })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "pz-hub__ask", onSubmit: ask, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "pz-ask", className: "pz-label", children: "Ask the artist a question" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "textarea",
+        {
+          id: "pz-ask",
+          rows: "3",
+          value: q,
+          onChange: (e) => setQ(e.target.value),
+          maxLength: 2e3,
+          placeholder: "e.g. Is the blue as deep in person? Could the canvas come in 30 inches?"
+        }
+      ),
+      !(customer && customer.name && customer.email) && !hasThread && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-grid2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: name, onChange: (e) => setName(e.target.value), placeholder: "Your name", "aria-label": "Your name", autoComplete: "name" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "email", value: email, onChange: (e) => setEmail(e.target.value), placeholder: "Your e-mail", "aria-label": "Your e-mail", autoComplete: "email" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine", children: [
+        "We send the artist the artwork details",
+        context ? " and the option you picked" : "",
+        ", so you don\u2019t have to."
+      ] }),
+      err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err }),
+      sent && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-ok", role: "status", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check-circle", "aria-hidden": "true" }),
+        " ",
+        sent,
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-link", onClick: () => setChat(true), children: "Open chat" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "submit", className: "pz-btn pz-btn--line", disabled: busy, children: [
+        busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paper-plane-o", "aria-hidden": "true" }),
+        " Send question"
+      ] })
+    ] }),
+    chat && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChatWindow, { painting, conversation, customer, context, onClose: () => setChat(false) })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Purchase/Step1Variant.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Step1Variant_exports = {};
+__export(Step1Variant_exports, {
+  default: () => Step1Variant
+});
+module.exports = __toCommonJS(Step1Variant_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_PurchaseLayout = __toESM(__webpack_require__("./resources/js/Components/Shop/PurchaseLayout.js"));
+var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+function Step1Variant() {
+  const { painting: p, offer, draft, hold, serverNow } = (0, import_inertia_react.usePage)().props;
+  const firstAvailable = (offer.formats.find((f2) => f2.available) || offer.formats[0]).format;
+  const start = draft && draft.format && (0, import_shop.formatOf)(offer, draft.format) && (0, import_shop.formatOf)(offer, draft.format).available ? draft.format : firstAvailable;
+  const [sel, setSel] = (0, import_react.useState)(() => (0, import_shop.normalise)(offer, {
+    format: start,
+    size: draft && draft.size,
+    finish: draft && draft.finish,
+    frame: draft && draft.frame || "NONE",
+    qty: draft && draft.qty || 1
+  }));
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [err, setErr] = (0, import_react.useState)(null);
+  const [conflict, setConflict] = (0, import_react.useState)(null);
+  const f = (0, import_shop.formatOf)(offer, sel.format);
+  const price = (0, import_react.useMemo)(() => (0, import_shop.priceOf)(offer, sel), [offer, sel]);
+  const update = (patch) => setSel((s) => (0, import_shop.normalise)(offer, __spreadValues(__spreadValues({}, s), patch)));
+  const choose = (format) => {
+    const fo = (0, import_shop.formatOf)(offer, format);
+    if (!fo || !fo.available) return;
+    setErr(null);
+    setSel((s) => (0, import_shop.normalise)(offer, __spreadProps(__spreadValues({}, s), { format, size: s.format === format ? s.size : "", finish: "", qty: 1 })));
+  };
+  const next = (switchHold = false) => {
+    setBusy(true);
+    setErr(null);
+    import_axios.default.post("/api/v1/purchase/draft", __spreadProps(__spreadValues({ paintingId: p.id }, sel), { switch: switchHold })).then(() => import_inertia.Inertia.visit(sel.format === "DIGITAL" ? "/purchase/preview" : "/purchase/step-2")).catch((e) => {
+      setBusy(false);
+      const d = e.response && e.response.data;
+      if (d && d.code === "HOLD_LIMIT") setConflict(d);
+      else setErr((0, import_shop.errorText)(e));
+    });
+  };
+  const edition = offer.edition || {};
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_PurchaseLayout.default, { painting: p, step: 1, title: "Choose how you'd like it", hold, serverNow, skipRoom: sel.format === "DIGITAL", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-split", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "pz-split__aside", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figure", { className: "pz-artcard", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-artcard__img", children: p.image_url && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: p.image_url, alt: p.title }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figcaption", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: p.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          p.artist_name,
+          " \xB7 ",
+          p.year_created
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          p.medium,
+          " on ",
+          String(p.surface).toLowerCase(),
+          " \xB7 ",
+          (0, import_shop.num)(p.height_inches),
+          " \xD7 ",
+          (0, import_shop.num)(p.width_inches),
+          " in"
+        ] })
+      ] })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-split__main", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "pz-formats", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "pz-legend", children: "Format" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-formats__grid", children: offer.formats.map((fo) => {
+          const info = import_shop.FORMAT_INFO[fo.format];
+          const on = sel.format === fo.format;
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `pz-format ${on ? "is-on" : ""} ${fo.available ? "" : "is-off"}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "format", value: fo.format, checked: on, disabled: !fo.available, onChange: () => choose(fo.format) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-format__icon", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${info.icon}` }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-format__text", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-format__name", children: [
+                info.name,
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: info.tag })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-format__blurb", children: fo.available ? info.blurb : fo.reason })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-format__price", children: fo.from && fo.available ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              fo.format === "ORIGINAL" ? "" : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "from" }),
+              " ",
+              (0, import_shop.inr)(fo.from)
+            ] }) : "\u2014" })
+          ] }, fo.format);
+        }) })
+      ] }),
+      f && f.available && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-options", children: [
+        sel.format === "ORIGINAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-option", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-legend", children: "What you get" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "pz-ticks", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+              "The one-of-one original, ",
+              (0, import_shop.num)(p.height_inches),
+              " \xD7 ",
+              (0, import_shop.num)(p.width_inches),
+              " in"
+            ] }),
+            p.is_signed && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+              "Hand-signed by ",
+              p.artist_name
+            ] }),
+            p.has_certificate && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Certificate of authenticity" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Insured, tracked shipping included" })
+          ] }),
+          !hold && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+            " Continuing holds it only for you for 15 minutes. No payment is taken yet."
+          ] })
+        ] }),
+        sel.format !== "ORIGINAL" && sel.format !== "DIGITAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "pz-option", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "pz-legend", children: "Size" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-sizes", children: f.sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `pz-size ${sel.size === s.code ? "is-on" : ""}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "size", value: s.code, checked: sel.size === s.code, onChange: () => update({ size: s.code }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: s.label }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              (0, import_shop.num)(s.width),
+              " \xD7 ",
+              (0, import_shop.num)(s.height),
+              " in"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: (0, import_shop.inr)(s.price) })
+          ] }, s.code)) })
+        ] }),
+        f.finishes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "pz-option", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "pz-legend", children: sel.format === "CANVAS" ? "Finish" : "Paper" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-seg", role: "radiogroup", children: f.finishes.map((x) => {
+            const extra = sel.format === "CANVAS" && x.code === "STRETCHED" && price && price.size ? Number(price.size.extra) : 0;
+            const locked = sel.format === "CANVAS" && x.code === "ROLLED" && sel.frame !== "NONE";
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `${sel.finish === x.code ? "is-on" : ""} ${locked ? "is-off" : ""}`, title: locked ? "Framed canvases come stretched" : void 0, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "finish", value: x.code, checked: sel.finish === x.code, disabled: locked, onChange: () => update({ finish: x.code }) }),
+              x.label,
+              extra > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                " +",
+                (0, import_shop.inr)(extra)
+              ] })
+            ] }, x.code);
+          }) })
+        ] }),
+        sel.format === "CANVAS" && edition.size > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-edition", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-hashtag", "aria-hidden": "true" }),
+          " Limited edition of ",
+          edition.size,
+          " \xB7 ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+            edition.left,
+            " left"
+          ] }),
+          ". Each canvas is numbered and signed on the back."
+        ] }),
+        sel.format === "DIGITAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "pz-ticks", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Full-resolution file, ready to print up to 24 \xD7 36 in" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Download link by e-mail, valid for 30 days" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Personal use: print it for your home or set it as wallpaper. Not for resale." })
+        ] }),
+        f.maxQty > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-option pz-option--row", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-legend", children: "Quantity" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.Qty, { value: sel.qty, max: f.maxQty, onChange: (q) => update({ qty: q }) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-pricebar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-pricebar__label", children: [
+            import_shop.FORMAT_INFO[sel.format].name,
+            price && price.width && sel.format !== "ORIGINAL" ? ` \xB7 ${(0, import_shop.num)(price.width)} \xD7 ${(0, import_shop.num)(price.height)} in` : "",
+            sel.qty > 1 ? ` \xB7 ${sel.qty} pcs` : ""
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-pricebar__price", children: price ? (0, import_shop.inr)(price.total) : "\u2014" }),
+          sel.format !== "DIGITAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine", children: "You can add a frame on the next step." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand pz-btn--lg", onClick: () => next(false), disabled: busy || !f || !f.available || !price, children: [
+          busy && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }),
+          sel.format === "DIGITAL" ? "Next: Review" : "Next: See it on your wall",
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+        ] })
+      ] }),
+      err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err }),
+      conflict && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-conflict", role: "alertdialog", "aria-label": "You're already holding an original", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+            "You're already holding \u201C",
+            conflict.heldTitle,
+            "\u201D."
+          ] }),
+          " You can hold one original at a time. Switch your hold to this piece?"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ink", onClick: () => {
+            setConflict(null);
+            next(true);
+          }, children: "Switch to this piece" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/purchase/checkout", className: "pz-btn pz-btn--line", children: "Go to my cart" })
+        ] })
+      ] })
+    ] })
+  ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Purchase/Step2Room.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Step2Room_exports = {};
+__export(Step2Room_exports, {
+  default: () => Step2Room
+});
+module.exports = __toCommonJS(Step2Room_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_PurchaseLayout = __toESM(__webpack_require__("./resources/js/Components/Shop/PurchaseLayout.js"));
+var import_RoomStage = __toESM(__webpack_require__("./resources/js/Components/Shop/RoomStage.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+const ROOM_KEY = "artistikcity.room";
+function Step2Room() {
+  const { painting: p, offer, draft, hold, serverNow } = (0, import_inertia_react.usePage)().props;
+  const [sel, setSel] = (0, import_react.useState)(() => (0, import_shop.normalise)(offer, __spreadValues({}, draft)));
+  const [scene, setScene] = (0, import_react.useState)(() => {
+    try {
+      return window.sessionStorage.getItem(ROOM_KEY) || "living";
+    } catch (e) {
+      return "living";
+    }
+  });
+  const [reset, setReset] = (0, import_react.useState)(0);
+  const [measure, setMeasure] = (0, import_react.useState)(true);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [err, setErr] = (0, import_react.useState)(null);
+  const f = (0, import_shop.formatOf)(offer, sel.format);
+  const price = (0, import_react.useMemo)(() => (0, import_shop.priceOf)(offer, sel), [offer, sel]);
+  const update = (patch) => setSel((s) => (0, import_shop.normalise)(offer, __spreadValues(__spreadValues({}, s), patch)));
+  const pickScene = (k) => {
+    setScene(k);
+    try {
+      window.sessionStorage.setItem(ROOM_KEY, k);
+    } catch (e) {
+    }
+  };
+  const surface = sel.format === "POSTER" || sel.format === "ORIGINAL" && !/canvas|panel|linen/i.test(p.surface) ? "paper" : "canvas";
+  const save = (to) => {
+    setBusy(true);
+    setErr(null);
+    return import_axios.default.post("/api/v1/purchase/draft", __spreadValues({ paintingId: p.id }, sel)).then(() => import_inertia.Inertia.visit(to)).catch((e) => {
+      setBusy(false);
+      setErr((0, import_shop.errorText)(e));
+    });
+  };
+  if (!f || !price) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_PurchaseLayout.default, { painting: p, step: 2, title: "See it on your wall", hold, serverNow, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-room", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-room__stage", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-rooms", role: "tablist", "aria-label": "Room", children: Object.entries(import_RoomStage.SCENES).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "tab", "aria-selected": scene === k, className: scene === k ? "is-on" : "", onClick: () => pickScene(k), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${v.icon}`, "aria-hidden": "true" }),
+        v.label
+      ] }, k)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_RoomStage.default,
+        {
+          image: p.image_url,
+          title: p.title,
+          widthIn: price.width,
+          heightIn: price.height,
+          frame: sel.frame,
+          surface,
+          scene,
+          showSize: measure,
+          resetToken: reset
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-room__tools", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine", children: [
+          "Drawn to scale, ",
+          import_RoomStage.SCENES[scene].note,
+          ". Drag the artwork, or focus it and use the arrow keys."
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "pz-check", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: measure, onChange: (e) => setMeasure(e.target.checked) }),
+            " Show size"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-link", onClick: () => setReset((n) => n + 1), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-undo", "aria-hidden": "true" }),
+            " Reset position"
+          ] })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "pz-room__panel", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-eyebrow", children: import_shop.FORMAT_INFO[sel.format].name }),
+      sel.format === "ORIGINAL" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-option", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-legend", children: "Size" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-static", children: [
+          (0, import_shop.num)(price.width),
+          " \xD7 ",
+          (0, import_shop.num)(price.height),
+          " in ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-muted", children: "\xB7 the original's real size" })
+        ] })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "pz-option", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "pz-legend", children: "Size" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-chips", children: f.sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", "aria-pressed": sel.size === s.code, className: sel.size === s.code ? "is-on" : "", onClick: () => update({ size: s.code }), children: [
+          (0, import_shop.num)(s.width),
+          " \xD7 ",
+          (0, import_shop.num)(s.height),
+          "\u2033"
+        ] }, s.code)) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "pz-option", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "pz-legend", children: "Frame" }),
+        f.frames.length <= 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-static pz-muted", children: p.is_framed ? "This original arrives framed." : "Not available for this format." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-frames", children: f.frames.map((code) => {
+          const extra = code === "NONE" ? 0 : (0, import_shop.frameCost)(offer, sel, code);
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `pz-frame ${sel.frame === code ? "is-on" : ""}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "frame", value: code, checked: sel.frame === code, onChange: () => update({ frame: code }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `pz-sw ${import_shop.FRAME_INFO[code].swatch}`, "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-frame__name", children: import_shop.FRAME_INFO[code].name }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-frame__price", children: code === "NONE" ? "Included" : `+${(0, import_shop.inr)(extra)}` })
+          ] }, code);
+        }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-summary", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: sel.qty > 1 ? `${sel.qty} \xD7 ${(0, import_shop.inr)(price.unit)}` : "Price" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_shop.inr)(price.total) })
+        ] }),
+        price.framePrice > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine", children: [
+          "Includes ",
+          (0, import_shop.inr)(price.framePrice),
+          " for the ",
+          import_shop.FRAME_INFO[sel.frame].name.toLowerCase(),
+          " frame",
+          sel.qty > 1 ? " each" : "",
+          "."
+        ] })
+      ] }),
+      err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-nav", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: () => save("/purchase/step-1"), disabled: busy, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-left", "aria-hidden": "true" }),
+          " Back"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand", onClick: () => save("/purchase/preview"), disabled: busy, children: [
+          busy && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }),
+          " Next: Review ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+        ] })
+      ] })
+    ] })
+  ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Purchase/Preview.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Preview_exports = {};
+__export(Preview_exports, {
+  default: () => Preview
+});
+module.exports = __toCommonJS(Preview_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_PurchaseLayout = __toESM(__webpack_require__("./resources/js/Components/Shop/PurchaseLayout.js"));
+var import_ArtistHub = __toESM(__webpack_require__("./resources/js/Components/Shop/ArtistHub.js"));
+var import_CartStore = __webpack_require__("./resources/js/Components/Shop/CartStore.js");
+var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+function Preview() {
+  const { painting: p, draft, estimate: initial, contact, conversation: conv0, customer, hold, serverNow } = (0, import_inertia_react.usePage)().props;
+  const cart = (0, import_CartStore.useCart)();
+  const conversation = (0, import_ArtistHub.useConversation)(p.id, conv0);
+  const [estimate, setEstimate] = (0, import_react.useState)(initial);
+  const [country, setCountry] = (0, import_react.useState)("India");
+  const [code, setCode] = (0, import_react.useState)("");
+  const [codeMsg, setCodeMsg] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const [err, setErr] = (0, import_react.useState)(null);
+  const line = estimate.line;
+  const t = estimate.totals;
+  const skipRoom = draft.format === "DIGITAL";
+  const context = line ? `${line.label} \xB7 ${(0, import_shop.inr)(line.lineTotal)}` : import_shop.FORMAT_INFO[draft.format].name;
+  const reestimate = (c = country) => import_axios.default.post("/api/v1/purchase/estimate", { country: c }).then((r) => setEstimate(r.data)).catch(() => {
+  });
+  const pickCountry = (c) => {
+    setCountry(c);
+    reestimate(c);
+  };
+  const apply = (e) => {
+    e.preventDefault();
+    if (!code.trim()) return;
+    setBusy("coupon");
+    setCodeMsg(null);
+    cart.applyCoupon(code.trim(), country).then(() => reestimate()).then(() => {
+      setCode("");
+    }).catch((x) => setCodeMsg({ error: true, text: (0, import_shop.errorText)(x) })).finally(() => setBusy(null));
+  };
+  const removeCode = () => {
+    setBusy("coupon");
+    cart.removeCoupon().then(() => reestimate()).finally(() => setBusy(null));
+  };
+  const add = (thenCheckout) => {
+    setBusy(thenCheckout ? "checkout" : "add");
+    setErr(null);
+    cart.add({ paintingId: p.id, format: draft.format, size: draft.size, finish: draft.finish, frame: draft.frame, qty: draft.qty }, { openDrawer: !thenCheckout }).then(() => {
+      if (thenCheckout) import_inertia.Inertia.visit("/purchase/checkout");
+      else {
+        setBusy(null);
+        reestimate();
+      }
+    }).catch((x) => {
+      setBusy(null);
+      setErr((0, import_shop.errorText)(x));
+    });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_PurchaseLayout.default, { painting: p, step: 3, title: "Review & meet the artist", hold, serverNow, skipRoom, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-review", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-review__main", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "pz-card__head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Your selection" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: skipRoom ? "/purchase/step-1" : "/purchase/step-2", className: "pz-link", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-pencil", "aria-hidden": "true" }),
+            " Change"
+          ] })
+        ] }),
+        line && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-pick", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `pz-pick__img pz-pick__img--${String(draft.frame || "NONE").toLowerCase()}`, children: p.image_url && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: p.image_url, alt: p.title }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-pick__body", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: p.title }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-muted", children: [
+              "by ",
+              p.artist_name
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: line.label }),
+            line.qty > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-muted", children: [
+              line.qty,
+              " \xD7 ",
+              (0, import_shop.inr)(line.unitPrice)
+            ] }),
+            line.status !== "ok" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", children: line.message }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "pz-ticks pz-ticks--sm", children: [
+              draft.format === "ORIGINAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                "One of one",
+                p.has_certificate ? ", with certificate of authenticity" : ""
+              ] }),
+              draft.format === "CANVAS" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Numbered limited edition, signed on the back" }),
+              draft.format === "POSTER" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Archival inks, rolled in a sturdy tube" }),
+              draft.format === "DIGITAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Download link by e-mail straight after payment" }),
+              draft.format !== "DIGITAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                "Ships in ",
+                draft.format === "ORIGINAL" ? "2\u20133" : "4\u20136",
+                " working days, tracked"
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-pick__price", children: (0, import_shop.inr)(line.lineTotal) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "pz-card__head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Cost estimate" }),
+          estimate.inCart > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-muted", children: [
+            "Includes ",
+            estimate.inCart,
+            " item",
+            estimate.inCart > 1 ? "s" : "",
+            " already in your cart"
+          ] })
+        ] }),
+        t.hasPrints && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-seg pz-seg--sm", role: "radiogroup", "aria-label": "Delivery to", children: ["India", "Outside India"].map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: country === c ? "is-on" : "", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "country", checked: country === c, onChange: () => pickCountry(c) }),
+          c
+        ] }, c)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.Totals, { totals: t, showShippingNote: false }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "pz-coupon", onSubmit: apply, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "pz-code", className: "pz-label", children: "Artist coupon code" }),
+          t.coupon ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `pz-coupon__on ${t.coupon.error ? "is-warn" : ""}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-tag", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.coupon.code }),
+              " ",
+              t.coupon.error ? `\xB7 ${t.coupon.error}` : t.coupon.description ? `\xB7 ${t.coupon.description}` : "applied"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-link", onClick: removeCode, disabled: busy === "coupon", children: "Remove" })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-coupon__row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "pz-code", type: "text", value: code, onChange: (e) => setCode(e.target.value.toUpperCase()), placeholder: "e.g. WELCOME10", autoComplete: "off", maxLength: 40 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "pz-btn pz-btn--ink", disabled: busy === "coupon" || !code.trim(), children: busy === "coupon" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : "Apply" })
+          ] }),
+          codeMsg && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: codeMsg.error ? "pz-error" : "pz-ok", role: "status", children: codeMsg.text })
+        ] }),
+        err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-cta", children: estimate.added ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-ok", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check-circle", "aria-hidden": "true" }),
+            " This is in your cart."
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/purchase/checkout", className: "pz-btn pz-btn--brand pz-btn--lg pz-btn--block", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+            " Go to checkout"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "pz-btn pz-btn--line pz-btn--block", children: "Keep browsing" })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand pz-btn--lg pz-btn--block", onClick: () => add(true), disabled: !!busy || line && line.status !== "ok", children: [
+            busy === "checkout" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+            " Add to cart & checkout"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--line pz-btn--block", onClick: () => add(false), disabled: !!busy || line && line.status !== "ok", children: [
+            busy === "add" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag", "aria-hidden": "true" }),
+            " Add to cart, keep browsing"
+          ] })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "pz-trust", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shield", "aria-hidden": "true" }),
+            "UPI, cards, NetBanking or PayPal"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-truck", "aria-hidden": "true" }),
+            "Insured, tracked delivery"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-refresh", "aria-hidden": "true" }),
+            "Prints replaced free if damaged"
+          ] })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "pz-review__aside", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ArtistHub.default, { painting: p, contact, conversation, customer, context }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine pz-center", children: [
+        (0, import_shop.num)(p.height_inches),
+        " \xD7 ",
+        (0, import_shop.num)(p.width_inches),
+        " in original \xB7 ",
+        p.medium
+      ] })
+    ] })
+  ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Purchase/Checkout.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Checkout_exports = {};
+__export(Checkout_exports, {
+  default: () => PurchaseCheckout
+});
+module.exports = __toCommonJS(Checkout_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_CartStore = __webpack_require__("./resources/js/Components/Shop/CartStore.js");
+var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
+var import_PurchaseLayout = __webpack_require__("./resources/js/Components/Shop/PurchaseLayout.js");
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+const COUNTRIES = [
+  "India",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "United Arab Emirates",
+  "Singapore",
+  "Germany",
+  "France",
+  "Netherlands",
+  "Italy",
+  "Spain",
+  "Switzerland",
+  "Sweden",
+  "Ireland",
+  "New Zealand",
+  "Japan",
+  "Hong Kong",
+  "Malaysia",
+  "Saudi Arabia",
+  "Qatar",
+  "South Africa",
+  "Other"
+];
+function Field({ id, label, error, hint, children, className = "" }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `pz-field ${className} ${error ? "has-error" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: id, children: label }),
+    children,
+    hint && !error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: hint }),
+    error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "pz-field__err", id: `${id}-err`, children: error })
+  ] });
+}
+function CouponBox({ totals, country }) {
+  const cart = (0, import_CartStore.useCart)();
+  const [code, setCode] = (0, import_react.useState)("");
+  const [err, setErr] = (0, import_react.useState)(null);
+  const apply = (e) => {
+    e.preventDefault();
+    if (!code.trim()) return;
+    setErr(null);
+    cart.applyCoupon(code.trim(), country).then(() => {
+      setCode("");
+      cart.refresh(country);
+    }).catch((x) => setErr((0, import_shop.errorText)(x)));
+  };
+  if (totals.coupon) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `pz-coupon__on ${totals.coupon.error ? "is-warn" : ""}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-tag", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: totals.coupon.code }),
+        " ",
+        totals.coupon.error ? `\xB7 ${totals.coupon.error}` : totals.coupon.description ? `\xB7 ${totals.coupon.description}` : "applied"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-link", onClick: () => cart.removeCoupon().then(() => cart.refresh(country)), children: "Remove" })
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "pz-coupon", onSubmit: apply, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-coupon__row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: code, onChange: (e) => setCode(e.target.value.toUpperCase()), placeholder: "Coupon code", "aria-label": "Coupon code", autoComplete: "off", maxLength: 40 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "pz-btn pz-btn--line", disabled: !code.trim() || cart.busy, children: "Apply" })
+    ] }),
+    err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err })
+  ] });
+}
+function CheckoutBody() {
+  const { customer, gateways = {}, payment, inrPerUsd } = (0, import_inertia_react.usePage)().props;
+  const cart = (0, import_CartStore.useCart)();
+  const data = cart.data;
+  const [tab, setTab] = (0, import_react.useState)("DOMESTIC");
+  const [f, setF] = (0, import_react.useState)({
+    name: customer && customer.name || "",
+    email: customer && customer.email || "",
+    phone: customer && customer.phone || "",
+    line1: "",
+    line2: "",
+    city: "",
+    state: "",
+    postal: "",
+    country: "India"
+  });
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [notice, setNotice] = (0, import_react.useState)(payment === "failed" ? { type: "error", text: "Your PayPal payment did not complete. No money was taken. You can try again." } : payment === "cancelled" ? { type: "info", text: "You cancelled the PayPal payment. Your cart is still here." } : null);
+  const [testOrder, setTestOrder] = (0, import_react.useState)(null);
+  const set = (k, v) => setF((x) => __spreadProps(__spreadValues({}, x), { [k]: v }));
+  (0, import_react.useEffect)(() => {
+    cart.refresh(f.country);
+  }, [f.country]);
+  (0, import_react.useEffect)(() => {
+    if (f.country === "India" && tab !== "DOMESTIC") setTab("DOMESTIC");
+    if (f.country !== "India" && tab !== "INTERNATIONAL") setTab("INTERNATIONAL");
+  }, [f.country]);
+  const switchTab = (t) => {
+    setTab(t);
+    if (t === "DOMESTIC") set("country", "India");
+    else if (f.country === "India") set("country", "United States");
+  };
+  if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-skeleton", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {})
+  ] });
+  const lines = data.lines;
+  const totals = data.totals;
+  if (lines.length === 0) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-empty pz-empty--page", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-empty__art", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Your cart is empty" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Find an original, a numbered canvas or a print you love." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "pz-btn pz-btn--brand", children: "Browse the marketplace" })
+    ] });
+  }
+  const ship = totals.needsShipping;
+  const validate = () => {
+    const e = {};
+    if (f.name.trim().length < 2) e.name = "Enter your full name.";
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(f.email.trim())) e.email = ship ? "Enter a valid email for your receipt." : "Enter a valid email: your download link goes there.";
+    if (ship) {
+      if (tab === "DOMESTIC" && !/^\d{10,13}$/.test(f.phone.replace(/\D/g, ""))) e.phone = "Enter a 10-digit mobile number for delivery updates.";
+      if (f.line1.trim().length < 3) e.line1 = "Enter the street address.";
+      if (f.city.trim().length < 2) e.city = "Enter the city.";
+      if (tab === "DOMESTIC" && !/^\d{6}$/.test(f.postal.trim())) e.postal = "Enter the 6-digit PIN code.";
+      if (tab !== "DOMESTIC" && (f.postal.trim().length < 3 || f.postal.trim().length > 12)) e.postal = "Enter the postal code.";
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+  const confirm = (payload) => import_axios.default.post("/api/v1/purchase/confirm", payload).then((r) => {
+    window.location.href = r.data.redirect;
+  }).catch((x) => {
+    setBusy(false);
+    setNotice({ type: "error", text: (0, import_shop.errorText)(x, "We could not confirm your payment.") });
+  });
+  const pay = (ev) => {
+    ev.preventDefault();
+    setNotice(null);
+    if (totals.blocked) {
+      setNotice({ type: "error", text: "Remove or fix the items marked in red first." });
+      return;
+    }
+    if (!validate()) {
+      setNotice({ type: "error", text: "Please fix the highlighted fields." });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setBusy(true);
+    import_axios.default.post("/api/v1/purchase/checkout", __spreadValues({ gateway: tab === "DOMESTIC" ? "RAZORPAY" : "PAYPAL" }, f)).then(async (r) => {
+      const d = r.data;
+      if (d.provider === "test") {
+        setTestOrder(d);
+        setBusy(false);
+        return;
+      }
+      if (d.provider === "paypal") {
+        window.location.href = d.approveUrl;
+        return;
+      }
+      const Razorpay = await (0, import_shop.loadRazorpay)();
+      const rzp = new Razorpay({
+        key: d.key,
+        amount: d.amountPaise,
+        currency: "INR",
+        order_id: d.razorpayOrderId,
+        name: "ArtistikCity",
+        description: d.description,
+        image: "/assets/images/logo.png",
+        prefill: d.prefill,
+        theme: { color: "#e5156b" },
+        notes: { shop_order_id: d.orderId },
+        handler: (resp) => confirm(__spreadValues({ orderId: d.orderId, provider: "razorpay" }, resp)),
+        modal: { ondismiss: () => {
+          setBusy(false);
+          setNotice({ type: "info", text: "Payment window closed. Nothing was charged, so you can try again." });
+        } }
+      });
+      rzp.on("payment.failed", (resp) => {
+        setBusy(false);
+        setNotice({ type: "error", text: resp.error && resp.error.description || "The payment failed. No money was taken." });
+      });
+      rzp.open();
+    }).catch((x) => {
+      setBusy(false);
+      const d = x.response && x.response.data;
+      if (d && d.errors) setErrors(d.errors);
+      if (d && d.code === "CART_CHANGED" && d.cart) cart.refresh(f.country);
+      setNotice({ type: "error", text: (0, import_shop.errorText)(x) });
+    });
+  };
+  const unavailable = tab === "DOMESTIC" ? !gateways.razorpay && !gateways.testMode : !gateways.paypal && !gateways.testMode;
+  const usd = (Number(totals.total) / Number(inrPerUsd || 84)).toFixed(2);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-checkout", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "pz-checkout__form", onSubmit: pay, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Checkout" }),
+      notice && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: `pz-note ${notice.type === "error" ? "is-error" : ""}`, role: "alert", children: notice.text }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { className: "pz-card__title", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "1" }),
+          " Contact"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-grid2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-name", label: "Full name", error: errors.name, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-name", value: f.name, onChange: (e) => set("name", e.target.value), autoComplete: "name" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-email", label: "Email", error: errors.email, hint: ship ? "For your receipt and tracking." : "Your download link goes here.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-email", type: "email", value: f.email, onChange: (e) => set("email", e.target.value), autoComplete: "email" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-phone", label: `Mobile${ship && tab === "DOMESTIC" ? "" : " (optional)"}`, error: errors.phone, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-phone", type: "tel", value: f.phone, onChange: (e) => set("phone", e.target.value), autoComplete: "tel" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-country", label: "Country", error: errors.country, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { id: "co-country", value: f.country, onChange: (e) => set("country", e.target.value), children: COUNTRIES.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: c }, c)) }) })
+        ] })
+      ] }),
+      ship ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { className: "pz-card__title", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "2" }),
+          " Delivery address"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-grid2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-line1", label: "Street address", error: errors.line1, className: "pz-span2", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-line1", value: f.line1, onChange: (e) => set("line1", e.target.value), autoComplete: "address-line1" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-line2", label: "Apartment, floor (optional)", className: "pz-span2", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-line2", value: f.line2, onChange: (e) => set("line2", e.target.value), autoComplete: "address-line2" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-city", label: "City", error: errors.city, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-city", value: f.city, onChange: (e) => set("city", e.target.value), autoComplete: "address-level2" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-state", label: "State (optional)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-state", value: f.state, onChange: (e) => set("state", e.target.value), autoComplete: "address-level1" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, { id: "co-postal", label: tab === "DOMESTIC" ? "PIN code" : "Postal code", error: errors.postal, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "co-postal", value: f.postal, onChange: (e) => set("postal", e.target.value), autoComplete: "postal-code" }) })
+        ] })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "pz-card pz-card--soft", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-cloud-download", "aria-hidden": "true" }),
+        " Nothing to ship: your download link arrives by email right after payment."
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { className: "pz-card__title", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: ship ? 3 : 2 }),
+          " Payment"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-paytabs", role: "tablist", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "tab", "aria-selected": tab === "DOMESTIC", className: tab === "DOMESTIC" ? "is-on" : "", onClick: () => switchTab("DOMESTIC"), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "India" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "UPI \xB7 cards \xB7 NetBanking (Razorpay)" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "tab", "aria-selected": tab === "INTERNATIONAL", className: tab === "INTERNATIONAL" ? "is-on" : "", onClick: () => switchTab("INTERNATIONAL"), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "International" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              "PayPal \xB7 cards \xB7 about $",
+              usd
+            ] })
+          ] })
+        ] }),
+        unavailable && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-note is-error", children: "This payment option isn't available right now. Please try the other one or contact us." }),
+        testOrder ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-testpay", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Test mode:" }),
+            " no payment gateway is configured, so you can simulate the payment for order ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: testOrder.orderId }),
+            "."
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand pz-btn--block", onClick: () => {
+            setBusy(true);
+            confirm({ orderId: testOrder.orderId, provider: "test" });
+          }, disabled: busy, children: [
+            busy && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }),
+            " Simulate successful payment"
+          ] })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "submit", className: "pz-btn pz-btn--brand pz-btn--lg pz-btn--block", disabled: busy || unavailable || totals.blocked, children: [
+          busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+          " ",
+          "Pay ",
+          tab === "DOMESTIC" ? (0, import_shop.inr)(totals.total) : `$${usd}`
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine pz-center", children: [
+          "Payments are processed securely by ",
+          tab === "DOMESTIC" ? "Razorpay" : "PayPal",
+          ". We never see your card details."
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "pz-checkout__summary", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { className: "pz-card__head", children: [
+          "Order summary ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-muted", children: [
+            data.count,
+            " item",
+            data.count === 1 ? "" : "s"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "pz-lines", children: lines.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_CartDrawer.CartLine,
+          {
+            line: l,
+            serverNow: cart.serverNow,
+            busy: cart.busy,
+            onQty: (line, q) => cart.setQty(line.id, q).then(() => cart.refresh(f.country)).catch(() => {
+            }),
+            onRemove: (line) => cart.remove(line.id).then(() => cart.refresh(f.country)).catch(() => {
+            }),
+            onReserve: (line) => cart.add({ paintingId: line.paintingId, format: "ORIGINAL", frame: line.frame, qty: 1 }, { openDrawer: false }).then(() => cart.refresh(f.country)).catch(() => {
+            })
+          },
+          l.id
+        )) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CouponBox, { totals, country: f.country }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.Totals, { totals }),
+        cart.error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: cart.error })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "pz-trust", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shield", "aria-hidden": "true" }),
+          "Secure payment"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate", "aria-hidden": "true" }),
+          "Authentic artist works"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-comments-o", "aria-hidden": "true" }),
+          "Questions? ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/contact", children: "Contact us" })
+        ] })
+      ] })
+    ] })
+  ] });
+}
+function PurchaseCheckout() {
+  const { cart, serverNow } = (0, import_inertia_react.usePage)().props;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: "Checkout \xB7 ArtistikCity" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartStore.CartProvider, { initial: __spreadProps(__spreadValues({}, cart), { serverNow }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz pz--shell", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", { className: "pz-shellhead", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", "aria-label": "Back to the marketplace", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/logo.png", alt: "ArtistikCity" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+          " Secure checkout"
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", { className: "ac-wide", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_PurchaseLayout.PurchaseStepper, { current: 4 }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckoutBody, {})
+      ] })
+    ] }) })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Purchase/ThankYou.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var ThankYou_exports = {};
+__export(ThankYou_exports, {
+  default: () => ThankYou
+});
+module.exports = __toCommonJS(ThankYou_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+const STATUS = {
+  PAID: "Paid \xB7 being prepared",
+  PACKED: "Packed",
+  SHIPPED: "Shipped",
+  DELIVERED: "Delivered",
+  REFUND_REQUIRED: "Refund in progress",
+  REFUNDED: "Refunded",
+  PAYMENT_PENDING: "Waiting for payment",
+  CANCELLED: "Cancelled",
+  EXPIRED: "Expired"
+};
+function ThankYou() {
+  const { order: o } = (0, import_inertia_react.usePage)().props;
+  const paid = ["PAID", "PACKED", "SHIPPED", "DELIVERED"].includes(o.status);
+  const refund = Number(o.refund_due_inr) > 0;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: `Order ${o.order_id}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide pz-thanks", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "pz-thanks__head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `pz-thanks__icon ${paid ? "" : "is-warn"}`, "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${paid ? "fa-check" : "fa-info"}` }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-eyebrow", children: [
+        "Order ",
+        o.order_id
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: paid ? `Thank you, ${String(o.buyer_name).split(" ")[0]}!` : o.status === "REFUND_REQUIRED" ? "We\u2019re sorry" : "Your order" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-lead", children: o.status === "REFUND_REQUIRED" ? `Your payment arrived after the artwork had gone to another collector. We\u2019ll refund ${(0, import_shop.inr)(o.refund_due_inr)} within 5\u20137 working days.` : paid ? o.needs_shipping ? `We\u2019ve emailed your receipt to ${o.buyer_email}. We\u2019ll send the tracking number when it ships.` : `Your download is ready below, and we\u2019ve emailed the link to ${o.buyer_email}.` : STATUS[o.status] }),
+      refund && o.status !== "REFUND_REQUIRED" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-note", children: [
+        "One item couldn\u2019t be supplied when your payment arrived. We\u2019ll refund ",
+        (0, import_shop.inr)(o.refund_due_inr),
+        " for it within 5\u20137 working days."
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "pz-card__head", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "What you bought" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-badge", children: STATUS[o.status] || o.status })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "pz-lines", children: o.items.map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: `pz-line ${i.status === "REFUND_REQUIRED" ? "is-bad" : ""}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${i.slug}`, className: "pz-line__img", tabIndex: -1, "aria-hidden": "true", children: i.image_url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: i.image_url, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-line__body", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${i.slug}`, className: "pz-line__title", children: i.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-line__by", children: [
+            "by ",
+            i.artist_name
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-line__variant", children: [
+            i.variant_label,
+            i.quantity > 1 ? ` \xB7 qty ${i.quantity}` : ""
+          ] }),
+          i.edition_no && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-line__variant", children: [
+            "Edition no. ",
+            i.edition_no,
+            i.quantity > 1 ? `\u2013${i.edition_no + i.quantity - 1}` : ""
+          ] }),
+          i.status === "REFUND_REQUIRED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-line__warn", children: "No longer available: refund due" }),
+          i.download_url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: i.download_url, className: "pz-btn pz-btn--brand pz-btn--sm", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-download", "aria-hidden": "true" }),
+            " Download high-resolution file"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-line__price", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_shop.inr)(i.line_total_inr) }) })
+      ] }, i.id)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "pz-totals", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Subtotal" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_shop.inr)(o.subtotal_inr) })
+        ] }),
+        Number(o.discount_inr) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "is-green", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dt", { children: [
+            "Coupon ",
+            o.coupon_code
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+            "\u2212",
+            (0, import_shop.inr)(o.discount_inr)
+          ] })
+        ] }),
+        o.needs_shipping && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Shipping" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: Number(o.shipping_inr) > 0 ? (0, import_shop.inr)(o.shipping_inr) : "Free" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "is-total", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Paid" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: o.currency === "USD" ? `$${Number(o.amount).toFixed(2)}` : (0, import_shop.inr)(o.total_inr) })
+        ] })
+      ] })
+    ] }),
+    o.needs_shipping && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "pz-card__head", children: "Delivery" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+        o.buyer_name,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        o.address_line1,
+        o.address_line2 ? `, ${o.address_line2}` : "",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        o.city,
+        o.state ? `, ${o.state}` : "",
+        " ",
+        o.postal_code,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        o.country
+      ] }),
+      o.tracking_number && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Tracking:" }),
+        " ",
+        o.courier,
+        " ",
+        o.tracking_number
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-thanks__next", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "pz-btn pz-btn--ink", children: "Back to the marketplace" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/commission/step-1", className: "pz-btn pz-btn--line", children: "Commission an artwork" })
+    ] })
+  ] }) }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Shop.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Shop_exports = {};
+__export(Shop_exports, {
+  default: () => AdminShop
+});
+module.exports = __toCommonJS(Shop_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+const STATUS = {
+  PAID: ["Paid \xB7 to pack", "pink"],
+  PACKED: ["Packed", "blue"],
+  SHIPPED: ["Shipped", "blue"],
+  DELIVERED: ["Delivered", "green"],
+  REFUND_REQUIRED: ["Refund required", "red"],
+  REFUNDED: ["Refunded", "grey"],
+  CANCELLED: ["Cancelled", "grey"],
+  EXPIRED: ["Expired", "grey"]
+};
+const NEXT = { PACKED: "Mark packed", SHIPPED: "Mark shipped", DELIVERED: "Mark delivered", REFUNDED: "Record full refund" };
+const KIND = { CANVAS: "Canvas prints (limited edition)", POSTER: "Poster prints", DIGITAL: "Digital download", FRAME: "Frames (price per inch of perimeter)", SHIPPING: "Shipping for prints (per order)" };
+const FORMATS = [{ value: "CANVAS", label: "Canvas edition" }, { value: "POSTER", label: "Poster" }, { value: "DIGITAL", label: "Digital download" }];
+const when = (ms) => ms ? new Date(ms).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "\u2014";
+const inr = (n) => (0, import_kit.money)(n, "INR");
+function OrderDrawer({ order, flow, can, onClose, onSaved, toast }) {
+  const [courier, setCourier] = (0, import_react.useState)(order.courier || "");
+  const [tracking, setTracking] = (0, import_react.useState)(order.tracking_number || "");
+  const [notes, setNotes] = (0, import_react.useState)("");
+  const [relist, setRelist] = (0, import_react.useState)(true);
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const next = (flow[order.status] || []).filter((s) => order.needs_shipping || !["PACKED", "SHIPPED"].includes(s));
+  const go = (status) => {
+    setBusy(status);
+    import_axios.default.post(`/admin/console/api/shop/orders/${order.order_id}`, { status, courier, tracking, notes, relist }).then((r) => {
+      onSaved(r.data);
+      toast("Order updated.");
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(null));
+  };
+  const settle = () => {
+    setBusy("settle");
+    import_axios.default.post(`/admin/console/api/shop/orders/${order.order_id}/refund-settled`, { notes }).then((r) => {
+      onSaved(r.data);
+      toast("Refund recorded.");
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(null));
+  };
+  const hasOriginal = order.items.some((i) => i.format === "ORIGINAL" && i.status === "OK");
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Drawer, { open: true, title: `Order ${order.order_id}`, subtitle: `${order.buyer_name} \xB7 ${when(order.paid_at || order.created_at)}`, onClose, size: "lg", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: (STATUS[order.status] || [])[1], children: (STATUS[order.status] || [order.status])[0] }),
+      Number(order.refund_due_inr) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Badge, { tone: "red", children: [
+        "Refund due ",
+        inr(order.refund_due_inr)
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted", children: [
+        order.gateway,
+        " \xB7 ",
+        order.currency,
+        " ",
+        order.amount
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "adm-list", children: order.items.map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "adm-list__row", children: [
+      i.image_url && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: i.image_url, alt: "", className: "adm-thumb" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grow", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: i.title }),
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted", children: [
+          "by ",
+          i.artist_name
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-small", children: [
+          i.variant_label,
+          " \xB7 qty ",
+          i.quantity,
+          i.edition_no ? ` \xB7 edition no. ${i.edition_no}` : ""
+        ] }),
+        i.status !== "OK" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: i.status === "REFUND_REQUIRED" ? "red" : "grey", children: i.status.replace("_", " ").toLowerCase() }),
+        i.format === "DIGITAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-small", children: [
+          "Downloaded ",
+          i.download_count,
+          " time",
+          i.download_count === 1 ? "" : "s"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: inr(i.line_total_inr) })
+    ] }, i.id)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "adm-dl", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Subtotal" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: inr(order.subtotal_inr) }),
+      Number(order.discount_inr) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dt", { children: [
+          "Coupon ",
+          order.coupon_code
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+          "\u2212",
+          inr(order.discount_inr)
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Shipping" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: inr(order.shipping_inr) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Total" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: inr(order.total_inr) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Buyer" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+        order.buyer_name,
+        " \xB7 ",
+        order.buyer_email,
+        order.buyer_phone ? ` \xB7 ${order.buyer_phone}` : ""
+      ] }),
+      order.needs_shipping && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Ship to" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+          order.address_line1,
+          order.address_line2 ? `, ${order.address_line2}` : "",
+          ", ",
+          order.city,
+          " ",
+          order.postal_code,
+          ", ",
+          order.state ? `${order.state}, ` : "",
+          order.country
+        ] })
+      ] }),
+      order.transaction_id && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Payment ref" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: order.transaction_id }) })
+      ] }),
+      order.staff_notes && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Notes" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: order.staff_notes })
+      ] })
+    ] }),
+    can.orders && (next.length > 0 || Number(order.refund_due_inr) > 0) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+      order.needs_shipping && next.includes("SHIPPED") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Courier", name: "courier", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-courier", className: "adm-input", value: courier, onChange: (e) => setCourier(e.target.value) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Tracking number", name: "tracking", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-tracking", className: "adm-input", value: tracking, onChange: (e) => setTracking(e.target.value) }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Note for the team", name: "notes", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-notes", className: "adm-input", rows: "2", value: notes, onChange: (e) => setNotes(e.target.value) }) }),
+      next.includes("REFUNDED") && hasOriginal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: relist, onChange: setRelist, label: "Put the original back on sale after a full refund", description: "Otherwise it goes to the archive." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+        next.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: s === "REFUNDED" ? "dangerline" : "dark", busy: busy === s, onClick: () => go(s), children: NEXT[s] }, s)),
+        Number(order.refund_due_inr) > 0 && order.status !== "REFUND_REQUIRED" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Button, { variant: "line", busy: busy === "settle", onClick: settle, children: [
+          "Partial refund paid (",
+          inr(order.refund_due_inr),
+          ")"
+        ] })
+      ] })
+    ] })
+  ] }) });
+}
+function Orders({ orders, setOrders, flow, can, toast }) {
+  const [filter, setFilter] = (0, import_react.useState)("open");
+  const [open, setOpen] = (0, import_react.useState)(null);
+  const counts = {
+    open: orders.filter((o) => ["PAID", "PACKED", "REFUND_REQUIRED"].includes(o.status) || Number(o.refund_due_inr) > 0).length,
+    shipped: orders.filter((o) => ["SHIPPED", "DELIVERED"].includes(o.status)).length,
+    all: orders.length
+  };
+  const rows = orders.filter((o) => filter === "all" ? true : filter === "open" ? ["PAID", "PACKED", "REFUND_REQUIRED"].includes(o.status) || Number(o.refund_due_inr) > 0 : ["SHIPPED", "DELIVERED"].includes(o.status));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Card,
+    {
+      title: "Orders",
+      subtitle: "Paid cart orders. Digital-only orders are delivered automatically.",
+      flush: true,
+      actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: filter, onChange: setFilter, label: "Orders", options: [
+        { value: "open", label: "To do", count: counts.open },
+        { value: "shipped", label: "Shipped", count: counts.shipped },
+        { value: "all", label: "All", count: counts.all }
+      ] }),
+      children: [
+        rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-shopping-bag", title: "No orders here", children: "Paid orders from the marketplace cart appear here." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table__scroll", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Order" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Buyer" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Items" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { className: "is-right", children: "Total" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Status" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {})
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: rows.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { className: "is-clickable", onClick: () => setOpen(o), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Order", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: o.order_id }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-small adm-muted", children: when(o.paid_at || o.created_at) })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Buyer", children: [
+              o.buyer_name,
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-small adm-muted", children: o.country })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "Items", children: o.items.map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-small", children: [
+              i.quantity > 1 ? `${i.quantity} \xD7 ` : "",
+              i.title,
+              " \xB7 ",
+              i.format.toLowerCase()
+            ] }, i.id)) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Total", className: "is-right", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: inr(o.total_inr) }),
+              o.currency === "USD" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-small adm-muted", children: [
+                "$",
+                o.amount
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Status", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: (STATUS[o.status] || [])[1], children: (STATUS[o.status] || [o.status])[0] }),
+              Number(o.refund_due_inr) > 0 && o.status !== "REFUND_REQUIRED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Badge, { tone: "red", children: [
+                "Refund ",
+                inr(o.refund_due_inr)
+              ] }) })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "is-right", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => setOpen(o), children: "Open" }) })
+          ] }, o.order_id)) })
+        ] }) }) }),
+        open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          OrderDrawer,
+          {
+            order: open,
+            flow,
+            can,
+            toast,
+            onClose: () => setOpen(null),
+            onSaved: (o) => {
+              setOrders(orders.map((x) => x.order_id === o.order_id ? o : x));
+              setOpen(o);
+            }
+          }
+        )
+      ]
+    }
+  );
+}
+function Messages({ threads, setThreads, initial, toast }) {
+  const [sel, setSel] = (0, import_react.useState)(initial ? Number(initial) : threads[0] && threads[0].id || null);
+  const [msgs, setMsgs] = (0, import_react.useState)([]);
+  const [status, setStatus] = (0, import_react.useState)("OPEN");
+  const [reply, setReply] = (0, import_react.useState)("");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const thread = threads.find((t) => t.id === sel);
+  (0, import_react.useEffect)(() => {
+    if (!sel) return;
+    import_axios.default.get(`/admin/console/api/shop/threads/${sel}`).then((r) => {
+      setMsgs(r.data.messages);
+      setStatus(r.data.status);
+      setThreads((ts) => ts.map((t) => t.id === sel ? __spreadProps(__spreadValues({}, t), { staff_unread: 0 }) : t));
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  }, [sel]);
+  const send = (e) => {
+    e.preventDefault();
+    if (reply.trim().length < 2) return;
+    setBusy(true);
+    import_axios.default.post(`/admin/console/api/shop/threads/${sel}/reply`, { body: reply }).then((r) => {
+      setMsgs(r.data.messages);
+      setReply("");
+      toast(r.data.message);
+      setThreads((ts) => ts.map((t) => t.id === sel ? __spreadProps(__spreadValues({}, t), { last_body: reply, last_sender: "ARTIST", last_message_at: Date.now() }) : t));
+    }).catch((x) => toast((0, import_AdminLayout.errorText)(x), "error")).finally(() => setBusy(false));
+  };
+  const flip = () => {
+    const to = status === "OPEN" ? "CLOSED" : "OPEN";
+    import_axios.default.post(`/admin/console/api/shop/threads/${sel}/status`, { status: to }).then(() => {
+      setStatus(to);
+      setThreads((ts) => ts.map((t) => t.id === sel ? __spreadProps(__spreadValues({}, t), { status: to }) : t));
+    });
+  };
+  if (threads.length === 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-comments-o", title: "No messages yet", children: "Questions collectors send from \u201CMeet the artist\u201D land here." }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pzadm-inbox", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Conversations", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "pzadm-threads", children: threads.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: `${t.id === sel ? "is-on" : ""} ${t.staff_unread > 0 ? "is-unread" : ""}`, onClick: () => setSel(t.id), children: [
+      t.image_url && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: t.image_url, alt: "" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+          t.buyer_name,
+          t.guest ? " (guest)" : ""
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: t.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("em", { children: [
+          t.last_sender === "ARTIST" ? "You: " : "",
+          t.last_body
+        ] })
+      ] }),
+      t.staff_unread > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "pzadm-dot", children: t.staff_unread }) : t.status === "CLOSED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "closed" })
+    ] }) }, t.id)) }) }),
+    thread && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      import_kit.Card,
+      {
+        title: thread.buyer_name,
+        subtitle: `${thread.buyer_email} \xB7 about \u201C${thread.title}\u201D by ${thread.artist_name}`,
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `/marketplace/${thread.slug}`, target: "_blank", rel: "noopener", icon: "fa-external-link", children: "Artwork" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: flip, children: status === "OPEN" ? "Close" : "Reopen" })
+        ] }),
+        children: [
+          thread.context && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-small adm-muted", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-tag", "aria-hidden": "true" }),
+            " Looking at: ",
+            thread.context
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "pzadm-msgs", children: msgs.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: m.sender === "ARTIST" ? "is-me" : "", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: m.body }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+              m.sender === "ARTIST" ? m.by : thread.buyer_name,
+              " \xB7 ",
+              when(m.at)
+            ] })
+          ] }, m.id)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: send, className: "adm-stack", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Reply", name: "reply", hint: "The collector sees it in the chat on the artwork page and gets it by e-mail.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-reply", className: "adm-input", rows: "3", value: reply, onChange: (e) => setReply(e.target.value), maxLength: 2e3 }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { type: "submit", variant: "brand", busy, icon: "fa-paper-plane", children: "Send reply" }) })
+          ] })
+        ]
+      }
+    )
+  ] });
+}
+function Prices({ prices, setPrices, can, toast }) {
+  const [rows, setRows] = (0, import_react.useState)(prices);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const dirty = JSON.stringify(rows) !== JSON.stringify(prices);
+  const set = (id, k, v) => setRows(rows.map((r) => r.id === id ? __spreadProps(__spreadValues({}, r), { [k]: v }) : r));
+  const save = () => {
+    setBusy(true);
+    setErrors({});
+    import_axios.default.put("/admin/console/api/shop/prices", { rows: rows.map((r) => __spreadProps(__spreadValues({}, r), { is_active: !!r.is_active })) }).then((r) => {
+      setPrices(r.data.prices);
+      setRows(r.data.prices);
+      toast(r.data.message);
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const kinds = Object.keys(KIND);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+    kinds.map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: KIND[k], flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table__scroll", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Name" }),
+        ["CANVAS", "POSTER"].includes(k) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Long side (in)" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: k === "FRAME" ? "\u20B9 per inch" : "Price \u20B9" }),
+        k === "CANVAS" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Stretching \u20B9" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "On sale" })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: rows.filter((r) => r.kind === k).map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Name", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", value: r.label, disabled: !can.prices, onChange: (e) => set(r.id, "label", e.target.value), "aria-label": `${r.code} name` }),
+          errors[`${r.id}.label`] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", children: errors[`${r.id}.label`] })
+        ] }),
+        ["CANVAS", "POSTER"].includes(k) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Long side", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", type: "number", min: "4", max: "120", step: "0.5", value: r.long_side_in || "", disabled: !can.prices, onChange: (e) => set(r.id, "long_side_in", e.target.value), "aria-label": `${r.code} long side` }),
+          errors[`${r.id}.long_side_in`] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", children: errors[`${r.id}.long_side_in`] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Price", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", type: "number", min: "0", step: "1", value: r.price_inr, disabled: !can.prices, onChange: (e) => set(r.id, "price_inr", e.target.value), "aria-label": `${r.code} price` }),
+          errors[`${r.id}.price_inr`] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", children: errors[`${r.id}.price_inr`] })
+        ] }),
+        k === "CANVAS" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "Stretching", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", type: "number", min: "0", step: "1", value: r.extra_inr, disabled: !can.prices, onChange: (e) => set(r.id, "extra_inr", e.target.value), "aria-label": `${r.code} stretching price` }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "On sale", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: !!r.is_active, disabled: !can.prices, onChange: (v) => set(r.id, "is_active", v), label: r.is_active ? "Yes" : "No" }) })
+      ] }, r.id)) })
+    ] }) }) }) }, k)),
+    can.prices ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-savebar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-savebar__status", children: dirty ? "Unsaved changes" : "All changes saved" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-savebar__actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => setRows(prices), disabled: !dirty, children: "Discard" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy, disabled: !dirty, onClick: save, children: "Save price list" })
+      ] })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Only a super admin can change prices." })
+  ] });
+}
+const BLANK = { code: "", description: "", discount_type: "PERCENT", discount_value: "", painting_id: "", artist_name: "", min_subtotal: "", max_uses: "", starts_at: "", expires_at: "", is_active: true };
+function CouponDrawer({ coupon, listings, onClose, onSaved, toast }) {
+  const [f, setF] = (0, import_react.useState)(__spreadValues(__spreadValues({}, BLANK), Object.fromEntries(Object.entries(coupon || {}).map(([k, v]) => [k, v === null ? "" : v]))));
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const set = (k, v) => setF((x) => __spreadProps(__spreadValues({}, x), { [k]: v }));
+  const artists = (0, import_react.useMemo)(() => Array.from(new Set(listings.map((l) => l.artist_name))).sort(), [listings]);
+  const save = () => {
+    setBusy(true);
+    setErrors({});
+    const body = __spreadProps(__spreadValues({}, f), { painting_id: f.painting_id ? Number(f.painting_id) : null });
+    (coupon ? import_axios.default.put(`/admin/console/api/shop/coupons/${coupon.id}`, body) : import_axios.default.post("/admin/console/api/shop/coupons", body)).then((r) => {
+      onSaved(r.data.coupons);
+      toast(r.data.message);
+      onClose();
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const input = (k, props = {}) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", __spreadValues({ id: `f-${k}`, className: "adm-input", value: f[k], onChange: (e) => set(k, e.target.value) }, props));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Drawer,
+    {
+      open: true,
+      title: coupon ? `Coupon ${coupon.code}` : "New coupon",
+      onClose,
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy, onClick: save, children: "Save coupon" })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Code", name: "code", error: errors.code, required: true, hint: "Collectors type this at checkout.", children: input("code", { onChange: (e) => set("code", e.target.value.toUpperCase()), maxLength: 40 }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Discount", name: "discount_value", error: errors.discount_value, required: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "adm-input", value: f.discount_type, onChange: (e) => set("discount_type", e.target.value), "aria-label": "Discount type", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "PERCENT", children: "% off" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "FLAT", children: "\u20B9 off" })
+            ] }),
+            input("discount_value", { type: "number", min: 1, step: 1 })
+          ] }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Description", name: "description", error: errors.description, optional: true, hint: "Shown to the collector when the code is applied.", children: input("description", { maxLength: 255 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Only for this artwork", name: "painting_id", error: errors.painting_id, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-painting_id", className: "adm-input", value: f.painting_id, onChange: (e) => set("painting_id", e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Any artwork" }),
+            listings.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: l.id, children: l.title }, l.id))
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Only for this artist", name: "artist_name", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-artist_name", className: "adm-input", value: f.artist_name, onChange: (e) => set("artist_name", e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Any artist" }),
+            artists.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: a, children: a }, a))
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Minimum order (\u20B9)", name: "min_subtotal", error: errors.min_subtotal, optional: true, children: input("min_subtotal", { type: "number", min: 0 }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Maximum uses", name: "max_uses", error: errors.max_uses, optional: true, hint: "Leave empty for unlimited.", children: input("max_uses", { type: "number", min: 1 }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Starts", name: "starts_at", error: errors.starts_at, optional: true, children: input("starts_at", { type: "date" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Ends", name: "expires_at", error: errors.expires_at, optional: true, children: input("expires_at", { type: "date" }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: !!f.is_active, onChange: (v) => set("is_active", v), label: "Active", description: "Switch off to stop new orders from using it." })
+      ] })
+    }
+  );
+}
+function Coupons({ coupons, setCoupons, listings, can, toast }) {
+  const [edit, setEdit] = (0, import_react.useState)(void 0);
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const del = async (c) => {
+    if (!await confirm({ title: `Delete ${c.code}?`, body: "Collectors will no longer be able to use it.", confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`/admin/console/api/shop/coupons/${c.id}`).then((r) => {
+      setCoupons(r.data.coupons);
+      toast(r.data.message);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Card,
+    {
+      title: "Artist coupon codes",
+      subtitle: "Percent or flat discounts, optionally limited to one artwork or artist.",
+      flush: true,
+      actions: can.prices && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEdit(null), children: "New coupon" }),
+      children: [
+        coupons.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-tag", title: "No coupons yet" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table__scroll", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Code" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Discount" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Applies to" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Used" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Valid" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Status" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {})
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: coupons.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Code", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: c.code }),
+              c.description && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-small adm-muted", children: c.description })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Discount", children: [
+              c.discount_type === "PERCENT" ? `${Number(c.discount_value)}%` : inr(c.discount_value),
+              c.min_subtotal ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-small adm-muted", children: [
+                "min ",
+                inr(c.min_subtotal)
+              ] }) : null
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "Applies to", children: c.painting_title || c.artist_name || "Everything" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Used", children: [
+              c.used_count,
+              c.max_uses ? ` / ${c.max_uses}` : ""
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "Valid", children: c.starts_at || c.expires_at ? `${c.starts_at || "\u2026"} \u2192 ${c.expires_at || "\u2026"}` : "Always" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "Status", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: c.is_active ? "green" : "grey", children: c.is_active ? "Active" : "Off" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "is-right", children: can.prices && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => setEdit(c), children: "Edit" }),
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "dangerline", onClick: () => del(c), children: "Delete" })
+            ] }) })
+          ] }, c.id)) })
+        ] }) }) }),
+        edit !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CouponDrawer, { coupon: edit, listings, toast, onClose: () => setEdit(void 0), onSaved: setCoupons }),
+        dialog
+      ]
+    }
+  );
+}
+function ListingDrawer({ l, onClose, onSaved, toast }) {
+  const [f, setF] = (0, import_react.useState)({ formats: l.formats, edition_size: l.edition_size, artist_whatsapp: l.artist_whatsapp || "", artist_instagram: l.artist_instagram || "", artist_email: l.artist_email || "" });
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [upload, setUpload] = (0, import_react.useState)(null);
+  const set = (k, v) => setF((x) => __spreadProps(__spreadValues({}, x), { [k]: v }));
+  const save = () => {
+    setBusy(true);
+    setErrors({});
+    import_axios.default.put(`/admin/console/api/shop/listings/${l.id}`, f).then((r) => {
+      onSaved(r.data.listings);
+      toast(r.data.message);
+      onClose();
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const sendFile = (file) => {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    setUpload(0);
+    import_axios.default.post(`/admin/console/api/shop/listings/${l.id}/hires`, fd, { onUploadProgress: (p) => setUpload(Math.round(p.loaded / (p.total || 1) * 100)) }).then((r) => {
+      onSaved(r.data.listings);
+      toast(r.data.message);
+      setUpload(null);
+    }).catch((e) => {
+      setUpload(null);
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Drawer,
+    {
+      open: true,
+      title: l.title,
+      subtitle: `${l.artist_name} \xB7 ${l.height_inches} \xD7 ${l.width_inches} in`,
+      onClose,
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy, onClick: save, children: "Save" })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Sell as well as the original", name: "formats", error: errors.formats, hint: "Prices come from the price list.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.ChoiceChips, { name: "formats", options: FORMATS, value: f.formats, onChange: (v) => set("formats", v) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Canvas edition size", name: "edition_size", error: errors.edition_size, hint: `${l.editions_sold} sold so far.`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-edition_size", className: "adm-input", type: "number", min: Math.max(1, l.editions_sold), max: "1000", value: f.edition_size, onChange: (e) => set("edition_size", e.target.value) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          import_form.Field,
+          {
+            label: "High-resolution file (digital downloads)",
+            name: "file",
+            error: errors.file,
+            hint: l.has_hires ? `Current file: ${l.hires_name}. Uploading replaces it.` : "JPEG, PNG, TIFF or PDF up to 200 MB. Kept private: buyers get an expiring link.",
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-file", type: "file", accept: ".jpg,.jpeg,.png,.tif,.tiff,.pdf", onChange: (e) => sendFile(e.target.files[0]), disabled: upload !== null }),
+              upload !== null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-progress", role: "progressbar", "aria-valuenow": upload, "aria-valuemin": "0", "aria-valuemax": "100", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: `${upload}%` } }) })
+            ]
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-small adm-muted", children: "\u201CMeet the artist\u201D links. Leave empty to use the studio\u2019s contact details." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "WhatsApp number", name: "artist_whatsapp", error: errors.artist_whatsapp, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-artist_whatsapp", className: "adm-input", value: f.artist_whatsapp, onChange: (e) => set("artist_whatsapp", e.target.value), placeholder: "+91 98765 43210" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Instagram handle", name: "artist_instagram", error: errors.artist_instagram, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-artist_instagram", className: "adm-input", value: f.artist_instagram, onChange: (e) => set("artist_instagram", e.target.value), placeholder: "@artistname" }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "E-mail for questions", name: "artist_email", error: errors.artist_email, optional: true, hint: "Also gets a copy of every chat message.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-artist_email", className: "adm-input", type: "email", value: f.artist_email, onChange: (e) => set("artist_email", e.target.value) }) })
+      ] })
+    }
+  );
+}
+function Listings({ listings, setListings, can, toast }) {
+  const [edit, setEdit] = (0, import_react.useState)(null);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Listings", subtitle: "What each artwork sells besides the original, and who collectors can contact.", flush: true, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table__scroll", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Artwork" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Formats" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Canvas edition" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Download file" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {})
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: listings.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "Artwork", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell", children: [
+          l.image_url && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: l.image_url, alt: "", className: "adm-thumb" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell__text", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: l.title }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-small adm-muted", children: [
+              l.artist_name,
+              " \xB7 ",
+              l.stock_status.toLowerCase()
+            ] })
+          ] })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "Formats", children: l.formats.length ? l.formats.map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "blue", children: x.toLowerCase() }, x)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "Original only" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Edition", children: [
+          l.editions_sold,
+          " / ",
+          l.edition_size
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "File", children: l.has_hires ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: "Uploaded" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "is-right", children: can.listings && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => setEdit(l), children: "Edit" }) })
+      ] }, l.id)) })
+    ] }) }) }),
+    edit && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ListingDrawer, { l: edit, toast, onClose: () => setEdit(null), onSaved: (ls) => {
+      setListings(ls);
+      const again = ls.find((x) => x.id === edit.id);
+      if (again) setEdit(again);
+    } })
+  ] });
+}
+function AdminShop() {
+  const props = (0, import_inertia_react.usePage)().props;
+  const [tab, setTab] = (0, import_react.useState)(props.tab || "orders");
+  const [orders, setOrders] = (0, import_react.useState)(props.orders);
+  const [threads, setThreads] = (0, import_react.useState)(props.threads);
+  const [prices, setPrices] = (0, import_react.useState)(props.prices);
+  const [coupons, setCoupons] = (0, import_react.useState)(props.coupons);
+  const [listings, setListings] = (0, import_react.useState)(props.listings);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const unread = threads.filter((t) => t.staff_unread > 0).length;
+  const toDo = orders.filter((o) => ["PAID", "PACKED", "REFUND_REQUIRED"].includes(o.status) || Number(o.refund_due_inr) > 0).length;
+  const revenue = orders.filter((o) => ["PAID", "PACKED", "SHIPPED", "DELIVERED"].includes(o.status)).reduce((s, o) => s + Number(o.total_inr) - Number(o.refund_due_inr || 0), 0);
+  const pick = (t) => {
+    setTab(t);
+    try {
+      window.history.replaceState(null, "", `?tab=${t}`);
+    } catch (e) {
+    }
+  };
+  const tabs = [
+    { value: "orders", label: "Orders", count: toDo },
+    { value: "messages", label: "Artist messages", count: unread },
+    { value: "prices", label: "Price list" },
+    { value: "coupons", label: "Coupons" },
+    { value: "listings", label: "Listings" }
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Art shop", crumbs: [{ label: "Sales" }, { label: "Art shop" }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AdminLayout.PageHeader, { eyebrow: "Sales", title: "Art shop", subtitle: "Cart orders, prints and downloads, coupons, and collectors' questions for the artists." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stats", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Orders to handle", value: toDo, icon: "fa-shopping-bag", tone: toDo ? "pink" : void 0 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Unread messages", value: unread, icon: "fa-comments-o", tone: unread ? "pink" : void 0 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Shop revenue", value: inr(revenue), icon: "fa-inr" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Listings selling prints", value: (0, import_kit.plural)(listings.filter((l) => l.formats.length).length, "artwork"), icon: "fa-th-large" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pzadm-tabs", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: tab, onChange: pick, label: "Art shop sections", options: tabs }) }),
+    tab === "orders" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Orders, { orders, setOrders, flow: props.orderFlow, can: props.can, toast }),
+    tab === "messages" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Messages, { threads, setThreads, initial: props.openThread, toast }),
+    tab === "prices" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Prices, { prices, setPrices, can: props.can, toast }),
+    tab === "coupons" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Coupons, { coupons, setCoupons, listings, can: props.can, toast }),
+    tab === "listings" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Listings, { listings, setListings, can: props.can, toast }),
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
 /***/ "./resources/js/Pages/Auth/Login.js":
 /***/ ((module, exports, __webpack_require__) => {
 
@@ -26284,6 +29420,8 @@ var import_ZoomViewer = __toESM(__webpack_require__("./resources/js/Components/M
 var import_RoomView = __toESM(__webpack_require__("./resources/js/Components/Marketplace/RoomView.js"));
 var import_ArtCard = __toESM(__webpack_require__("./resources/js/Components/Marketplace/ArtCard.js"));
 var import_SaveButton = __toESM(__webpack_require__("./resources/js/Components/Wishlist/SaveButton.js"));
+var import_ArtistHub = __toESM(__webpack_require__("./resources/js/Components/Shop/ArtistHub.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
 var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
 function Spec({ label, value, hint }) {
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "py-4 border-b border-gray-100 grid grid-cols-3 gap-4", children: [
@@ -26294,7 +29432,24 @@ function Spec({ label, value, hint }) {
     ] })
   ] });
 }
-function BuyBox({ p, hold, serverNow, preview }) {
+function PrintOptions({ p, prints, sold }) {
+  if (!prints || prints.length === 0) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `pz-prints ${sold ? "is-lead" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-prints__title", children: sold ? "Prints are still available" : "Prefer a print?" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-prints__list", children: prints.map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/purchase/step-1?artwork=${p.slug}&format=${x.format}`, className: "pz-printopt", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${import_shop.FORMAT_INFO[x.format].icon}`, "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: import_shop.FORMAT_INFO[x.format].name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          "from ",
+          (0, import_shared.inr)(x.from)
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-right", "aria-hidden": "true" })
+    ] }, x.format)) })
+  ] });
+}
+function BuyBox({ p, hold, serverNow, preview, prints }) {
   const { saved } = (0, import_inertia_react.usePage)().props;
   const [busy, setBusy] = (0, import_react.useState)(false);
   const [err, setErr] = (0, import_react.useState)(null);
@@ -26307,8 +29462,8 @@ function BuyBox({ p, hold, serverNow, preview }) {
   const reserve = (switchHold = false) => {
     setBusy(true);
     setErr(null);
-    import_axios.default.post(`/api/v1/marketplace/paintings/${p.id}/reserve`, { switch: switchHold }).then((r) => {
-      window.location.href = r.data.checkoutUrl;
+    import_axios.default.post(`/api/v1/marketplace/paintings/${p.id}/reserve`, { switch: switchHold }).then(() => {
+      window.location.href = `/purchase/step-1?artwork=${p.slug}&format=ORIGINAL`;
     }).catch((e) => {
       setBusy(false);
       const d = e.response && e.response.data;
@@ -26354,6 +29509,7 @@ function BuyBox({ p, hold, serverNow, preview }) {
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-6 pt-6 border-t border-gray-100", children: sold ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-2xl font-black text-ink", children: "This original has found its collector." }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: "Love the style? Commission something similar, made for you." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PrintOptions, { p, prints, sold: true }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/commission/step-1", className: "mt-5 flex items-center justify-center h-14 rounded-full bg-ink text-white text-lg font-bold hover:bg-gray-800", children: "Commission a similar piece" })
     ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.Price, { p, size: "lg" }),
@@ -26376,7 +29532,7 @@ function BuyBox({ p, hold, serverNow, preview }) {
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono font-bold text-lg", children: (0, import_shared.mmss)(mineLeft) })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${p.slug}/checkout`, className: "mt-3 flex items-center justify-center h-14 rounded-full bg-brand text-white text-lg font-bold hover:bg-brand-dark", children: "Continue to checkout" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/purchase/step-1?artwork=${p.slug}&format=ORIGINAL`, className: "mt-3 flex items-center justify-center h-14 rounded-full bg-brand text-white text-lg font-bold hover:bg-brand-dark", children: "Continue: framing & checkout" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: release, disabled: busy, className: "mt-2 w-full h-11 rounded-full text-sm font-bold text-gray-600 hover:text-ink", children: "Release my hold" })
       ] }) : heldByOther ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-5 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900", role: "status", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-bold", children: [
@@ -26405,6 +29561,7 @@ function BuyBox({ p, hold, serverNow, preview }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 text-center text-xs text-gray-500", children: "Reserving holds it only for you for 15 minutes while you check out. No payment is taken yet." })
       ] }) : null,
       err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 rounded-xl bg-red-50 border border-red-200 p-3 text-sm font-semibold text-red-700", role: "alert", children: err }),
+      !preview && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PrintOptions, { p, prints }),
       conflict && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-3 rounded-xl border border-gray-300 p-4 text-sm", role: "alertdialog", "aria-label": "You're already holding a piece", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-bold text-ink", children: [
           "You're already holding \u201C",
@@ -26417,7 +29574,7 @@ function BuyBox({ p, hold, serverNow, preview }) {
             setConflict(null);
             reserve(true);
           }, className: "h-10 px-4 rounded-full bg-ink text-white font-bold", children: "Switch to this piece" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${conflict.heldSlug}/checkout`, className: "inline-flex items-center h-10 px-4 rounded-full border border-gray-300 font-bold hover:border-ink", children: "Go to my held piece" })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/purchase/checkout", className: "inline-flex items-center h-10 px-4 rounded-full border border-gray-300 font-bold hover:border-ink", children: "Go to my cart" })
         ] })
       ] })
     ] }) }),
@@ -26434,15 +29591,16 @@ function BuyBox({ p, hold, serverNow, preview }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-comments-o text-brand mt-0.5 w-4", "aria-hidden": "true" }),
         "Questions? ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/contact", className: "font-bold underline", children: "Ask the studio" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "#meet-the-artist", className: "font-bold underline", children: "Ask the artist" }),
         " before you buy"
       ] })
     ] })
   ] });
 }
 function MarketplaceShow() {
-  const { painting: p, hold, holds = [], related = [], serverNow, preview, notice } = (0, import_inertia_react.usePage)().props;
+  const { painting: p, hold, holds = [], related = [], serverNow, preview, notice, prints = [], contact, conversation: conv0, customer, openChat } = (0, import_inertia_react.usePage)().props;
   const [tab, setTab] = (0, import_react.useState)("room");
+  const conversation = (0, import_ArtistHub.useConversation)(p.id, conv0);
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: `${p.title} by ${p.artist_name}`, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "tw", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide pt-6", children: [
@@ -26462,7 +29620,7 @@ function MarketplaceShow() {
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide py-8 grid grid-cols-1 lg:grid-cols-12 gap-10", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lg:col-span-7", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ZoomViewer.default, { images: p.images, title: p.title }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "lg:col-span-5", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lg:sticky lg:top-24", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuyBox, { p, hold, serverNow, preview }) }) })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "lg:col-span-5", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lg:sticky lg:top-24", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuyBox, { p, hold, serverNow, preview, prints }) }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide pb-8", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex gap-2 border-b border-gray-200 overflow-x-auto", role: "tablist", children: [["room", "View in a room", "fa-home"], ["specs", "Specifications", "fa-th-list"], ["shipping", "Shipping & care", "fa-truck"]].map(([k, l, i]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
@@ -26552,6 +29710,7 @@ function MarketplaceShow() {
           ] })
         ] })
       ] }) }),
+      !preview && contact && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "ac-wide py-16", id: "meet-the-artist", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-hubwrap", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ArtistHub.default, { painting: p, contact, conversation, customer, autoOpenChat: !!openChat }) }) }),
       related.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide py-16", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-end justify-between gap-4 mb-8", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-3xl font-black tracking-tight text-ink", children: "You may also love" }),
@@ -106652,6 +109811,18 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Admin/Shop": "./resources/js/Pages/Admin/Shop.js",
+	"./Admin/Shop.js": "./resources/js/Pages/Admin/Shop.js",
+	"./Purchase/ThankYou": "./resources/js/Pages/Purchase/ThankYou.js",
+	"./Purchase/ThankYou.js": "./resources/js/Pages/Purchase/ThankYou.js",
+	"./Purchase/Checkout": "./resources/js/Pages/Purchase/Checkout.js",
+	"./Purchase/Checkout.js": "./resources/js/Pages/Purchase/Checkout.js",
+	"./Purchase/Preview": "./resources/js/Pages/Purchase/Preview.js",
+	"./Purchase/Preview.js": "./resources/js/Pages/Purchase/Preview.js",
+	"./Purchase/Step2Room": "./resources/js/Pages/Purchase/Step2Room.js",
+	"./Purchase/Step2Room.js": "./resources/js/Pages/Purchase/Step2Room.js",
+	"./Purchase/Step1Variant": "./resources/js/Pages/Purchase/Step1Variant.js",
+	"./Purchase/Step1Variant.js": "./resources/js/Pages/Purchase/Step1Variant.js",
 	"./Admin/Profile": "./resources/js/Pages/Admin/Profile.js",
 	"./Admin/Profile.js": "./resources/js/Pages/Admin/Profile.js",
 	"./Admin/Tasks": "./resources/js/Pages/Admin/Tasks.js",
