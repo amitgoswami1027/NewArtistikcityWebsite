@@ -1,0 +1,46 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial, Helvetica, sans-serif", "fontSize": "15px", "actorBkg": "#E0F4F4", "actorBorder": "#01A88D", "actorTextColor": "#06433A", "signalColor": "#232F3E", "signalTextColor": "#232F3E", "noteBkgColor": "#FFF4E5", "noteBorderColor": "#FF9900", "activationBkgColor": "#FFE8D1", "activationBorderColor": "#ED7100", "sequenceNumberColor": "#ffffff"}}}%%
+sequenceDiagram
+    autonumber
+    actor Dev as 👨‍💻 Developer
+    participant GH as 🐙 GitHub Actions
+    participant ECR as 📦 ECR
+    participant SSM as 🛰️ SSM Run Command
+    participant EC2 as 🖥️ EC2 server
+    participant RDS as 🗄️ RDS MySQL
+    participant CF as ⚡ CloudFront
+
+    Dev->>GH: git push to main
+    rect rgb(232, 245, 214)
+        Note over GH: TEST job
+        GH->>GH: unit tests · MySQL 8.4 migrations (fresh + re-run) · start app, check /healthz
+    end
+    rect rgb(224, 244, 244)
+        Note over GH,ECR: BUILD job (signs in with OIDC, no stored keys)
+        GH->>ECR: docker build + push artistikcity:<commit-sha>
+    end
+    rect rgb(255, 232, 209)
+        Note over GH,EC2: DEPLOY job
+        GH->>SSM: send-command deploy-image.sh <image>
+        SSM->>EC2: run deploy script as root
+        activate EC2
+        EC2->>ECR: docker pull image
+        EC2->>EC2: settings from Secrets Manager + Parameter Store
+        EC2->>RDS: run pending database migrations
+        alt migration fails
+            EC2-->>SSM: stop · live site untouched
+        else migrations OK
+            EC2->>EC2: replace container · wait for /healthz
+            alt healthy within 3 min
+                EC2-->>SSM: success · new version live
+            else not healthy
+                EC2->>EC2: start the previous image again (automatic rollback)
+                EC2-->>SSM: failed · previous version live
+            end
+        end
+        deactivate EC2
+        SSM-->>GH: result + server log
+        GH->>CF: invalidate /assets/* /fonts/*
+        GH->>CF: GET https://www.artistikcity.com/healthz
+        CF-->>GH: 200 {"status":"UP"}
+    end
+    GH-->>Dev: ✅ deployed (or ❌ with the reason)

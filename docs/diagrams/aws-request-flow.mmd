@@ -1,0 +1,35 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial, Helvetica, sans-serif", "fontSize": "15px", "actorBkg": "#EDE4FF", "actorBorder": "#8C4FFF", "actorTextColor": "#2B1A5A", "signalColor": "#232F3E", "signalTextColor": "#232F3E", "noteBkgColor": "#FFF4E5", "noteBorderColor": "#FF9900", "sequenceNumberColor": "#ffffff"}}}%%
+sequenceDiagram
+    autonumber
+    actor B as 👩‍🎨 Browser
+    participant DNS as 🌐 DNS
+    participant CF as ⚡ CloudFront edge
+    participant APP as 🖥️ EC2 · app container
+    participant DB as 🗄️ RDS MySQL
+    participant S3 as 🪣 S3 bucket
+
+    B->>DNS: where is www.artistikcity.com?
+    DNS-->>B: CNAME → dxxxx.cloudfront.net → nearest edge IP
+    rect rgb(237, 228, 255)
+        Note over B,CF: HTTPS handshake with the ACM certificate
+        B->>CF: GET /courses (cookies included)
+        CF->>APP: GET /courses + X-Origin-Verify + CloudFront-Viewer-Address (plain HTTP inside AWS, port 80)
+        APP->>APP: CloudFrontFilter checks the secret, takes visitor IP + https
+        APP->>DB: SELECT courses … (TLS)
+        DB-->>APP: rows
+        APP-->>CF: HTML page (gzip) · never cached
+        CF-->>B: page
+    end
+    rect rgb(232, 245, 214)
+        Note over B,S3: The page's images and videos
+        B->>CF: GET /storage/uploads/courses/110/cover.jpg
+        alt already in this edge's cache
+            CF-->>B: image (cache hit, ~10 ms)
+        else first request at this edge
+            CF->>S3: GetObject storage/uploads/… (signed by Origin Access Control)
+            S3-->>CF: image + Cache-Control: max-age=86400
+            CF-->>B: image (kept at the edge for a day)
+        end
+        B->>CF: GET /js/app.js?v=3f2a… · /css/ac-theme.css?v=…
+        CF-->>B: from edge cache (fetched from the app once per version)
+    end

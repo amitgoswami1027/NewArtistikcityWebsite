@@ -1,0 +1,25 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial, Helvetica, sans-serif", "fontSize": "15px", "actorBkg": "#FFE8D1", "actorBorder": "#ED7100", "actorTextColor": "#5A2A00", "signalColor": "#232F3E", "signalTextColor": "#232F3E", "noteBkgColor": "#E8F5D6", "noteBorderColor": "#7AA116", "sequenceNumberColor": "#ffffff"}}}%%
+sequenceDiagram
+    autonumber
+    actor A as 🧑‍🏫 Admin / student
+    participant CF as ⚡ CloudFront
+    participant APP as 🖥️ App container
+    participant IMDS as 🔐 EC2 metadata (role credentials)
+    participant S3 as 🪣 S3 bucket
+    participant DB as 🗄️ RDS MySQL
+
+    A->>CF: POST /admin/api/courses/110/videos (multipart, up to 500 MB)
+    CF->>APP: same request + X-Origin-Verify
+    APP->>APP: check login, permission, file type (MP4/MOV/WebM signature)
+    opt credentials missing or about to expire (every few hours)
+        APP->>IMDS: IMDSv2 token → role credentials
+        IMDS-->>APP: temporary key + session token
+    end
+    APP->>S3: PUT storage/uploads/courses/110/videos/<time>_clip.mp4 (SigV4 signed, streamed)
+    S3-->>APP: 200 OK (encrypted at rest, versioned)
+    APP-->>CF: {"url": "/storage/uploads/courses/110/videos/…"}
+    CF-->>A: upload done
+    A->>CF: Save lesson (the URL is stored with the lesson)
+    CF->>APP: POST /admin/api/courses/110/lessons
+    APP->>DB: UPDATE course_module_lessons SET video_url = '/storage/…'
+    Note over A,DB: Students later play it from /storage/… → CloudFront → S3 (not through the server)
