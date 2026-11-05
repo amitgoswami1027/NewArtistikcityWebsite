@@ -1,5 +1,7 @@
 package com.artistikcity.web.api;
 
+import com.artistikcity.http.Auth;
+import com.artistikcity.http.Csrf;
 import com.artistikcity.support.Db;
 import com.artistikcity.support.Input;
 import com.artistikcity.support.Json;
@@ -34,8 +36,10 @@ public class ApiController {
     private final Json json;
     private final Validator validator;
     private final Storage storage;
+    private final Auth auth;
 
-    public ApiController(Db db, Json json, Validator validator, Storage storage) {
+    public ApiController(Db db, Json json, Validator validator, Storage storage, Auth auth) {
+        this.auth = auth;
         this.db = db;
         this.json = json;
         this.validator = validator;
@@ -69,18 +73,63 @@ public class ApiController {
     }
 
     /** Saves a certificate image (base64 data URL) generated in the browser. */
+    /** Largest share image the certificate page may store (a 1200x900 PNG of the certificate is ~1-2 MB). */
+    static final int MAX_CERT_IMAGE = 5 * 1024 * 1024;
+
+    /**
+     * The certificate share page renders the certificate to an image in the browser and stores it here, so social
+     * networks can show it. Only the signed-in owner may store the image of their own certificate: the file name must
+     * be that certificate's image name ({@code <certificate>.jpeg}), the request must carry the CSRF token, and the
+     * bytes must be a PNG or JPEG of at most 5 MB. (It used to accept any name and any bytes from anyone, which let
+     * strangers overwrite other students' share images or the public certificate PDFs.)
+     */
     @PostMapping("/api/save_cert_img")
     public ResponseEntity<String> saveCertImg(HttpServletRequest request) {
+        Long userId = auth.userId(request);
+        if (userId == null) {
+            return status(401, Row.of("status", "error", "message", "Please sign in."));
+        }
+        if (!Csrf.matches(request)) {
+            return status(419, Row.of("status", "error", "message", "Your session expired. Refresh the page and try again."));
+        }
         Input in = Input.of(request, json);
         String data = in.get("imgBase64");
         String name = in.get("imgName");
-        if (data == null || name == null || !name.matches("[A-Za-z0-9._-]+")) {
-            return ok(Row.of("status", "error"));
+        if (data == null || name == null || !name.matches("[A-Za-z0-9._-]{1,120}\\.jpe?g")) {
+            return status(422, Row.of("status", "error", "message", "Bad image name."));
         }
-        byte[] image = Base64.getDecoder().decode(data.substring(data.indexOf(',') + 1));
+        // the name must be the image of a certificate this student owns
+        boolean owns = false;
+        for (Row c : db.select("select certificate_name from certificates where user_id = ?", userId)) {
+            String base = c.str("certificate_name", "");
+            if (!base.isBlank() && Str.replaceExtension(base, "jpeg").equals(name)) {
+                owns = true;
+                break;
+            }
+        }
+        if (!owns) {
+            return status(403, Row.of("status", "error", "message", "That isn't your certificate."));
+        }
+        if (data.length() > MAX_CERT_IMAGE / 3 * 4 + 64) {
+            return status(413, Row.of("status", "error", "message", "The image is too large."));
+        }
+        byte[] image;
+        try {
+            image = Base64.getDecoder().decode(data.substring(data.indexOf(',') + 1));
+        } catch (IllegalArgumentException e) {
+            return status(422, Row.of("status", "error", "message", "Not an image."));
+        }
+        boolean png = image.length > 8 && (image[0] & 0xFF) == 0x89 && image[1] == 'P' && image[2] == 'N' && image[3] == 'G';
+        boolean jpeg = image.length > 3 && (image[0] & 0xFF) == 0xFF && (image[1] & 0xFF) == 0xD8 && (image[2] & 0xFF) == 0xFF;
+        if (!(png || jpeg) || image.length > MAX_CERT_IMAGE) {
+            return status(422, Row.of("status", "error", "message", "Not a PNG or JPEG image."));
+        }
         storage.put("certificates/" + name, image);
-        // the public URL (it used to be the server's file path, which leaked the install folder)
         return ok(Row.of("status", "success", "imgPath", Storage.url("certificates/" + name)));
+    }
+
+    private ResponseEntity<String> status(int code, Object body) {
+        return ResponseEntity.status(code).contentType(MediaType.APPLICATION_JSON).body(json.encode(body));
     }
 
     // --------------------------------------------------------- newsletter

@@ -1,8 +1,8 @@
 package com.artistikcity.marketplace;
 
+import com.artistikcity.support.DbErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -96,9 +96,14 @@ public class MarketplaceService {
             return serializable.execute(s -> doReserve(paintingId, holderKey, myKeys, userId, switchHold));
         } catch (MarketplaceException e) {
             throw e;
-        } catch (DataIntegrityViolationException | ConcurrencyFailureException e) {
-            log.info("Reservation race lost for painting {}: {}", paintingId, e.getClass().getSimpleName());
-            throw new MarketplaceException(409, "JUST_TAKEN", "Another collector reserved this piece a moment ago.");
+        } catch (RuntimeException e) {
+            // a lost race: the UNIQUE hold row, a deadlock victim or a serialization failure (the driver may throw its
+            // own exception type for these, see DbErrors)
+            if (e instanceof DataIntegrityViolationException || DbErrors.isDuplicateKey(e) || DbErrors.isConcurrencyConflict(e)) {
+                log.info("Reservation race lost for painting {}: {}", paintingId, e.getClass().getSimpleName());
+                throw new MarketplaceException(409, "JUST_TAKEN", "Another collector reserved this piece a moment ago.");
+            }
+            throw e;
         }
     }
 
@@ -303,6 +308,13 @@ public class MarketplaceService {
      * arrive for the same order.
      */
     public Outcome finalizeSale(String orderId, String transactionId) {
+        return finalizeSale(orderId, transactionId, 0);
+    }
+
+    /** Retries after a lost serialization race at most a few times (each retry re-reads the order). */
+    static final int FINALIZE_RETRIES = 3;
+
+    private Outcome finalizeSale(String orderId, String transactionId, int attempt) {
         Outcome[] result = new Outcome[1];
         long[] paintingId = new long[1];
         try {
@@ -344,11 +356,14 @@ public class MarketplaceService {
                         ts(now), pid, orderId);
                 result[0] = Outcome.SOLD;
             });
-        } catch (ConcurrencyFailureException e) {
+        } catch (RuntimeException e) {
+            if (!DbErrors.isConcurrencyConflict(e)) throw e;
             // a simultaneous webhook + browser confirmation: let the other one win, then report what happened
             log.info("Concurrent finalisation for {} - re-reading", orderId);
             Map<String, Object> o = order(orderId);
-            return o != null && PAID_STATES.contains(String.valueOf(o.get("status"))) ? Outcome.ALREADY_PAID : finalizeSale(orderId, transactionId);
+            if (o != null && PAID_STATES.contains(String.valueOf(o.get("status")))) return Outcome.ALREADY_PAID;
+            if (attempt >= FINALIZE_RETRIES) throw e;   // the gateway retries the webhook later; nothing half-written
+            return finalizeSale(orderId, transactionId, attempt + 1);
         }
         if (result[0] == Outcome.SOLD) {
             repo.syncStudentListing(paintingId[0]);

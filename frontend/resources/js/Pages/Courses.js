@@ -4,8 +4,8 @@ import SiteLayout from '@/Components/Site/SiteLayout';
 import CourseCard from '@/Components/Site/CourseCard';
 import { isWorkshop } from '@/Components/Site/ProgramCard';
 import { useAgeGroups } from '@/Components/Site/SiteHeader';
+import { toSet, fromQuery, writeQuery, DEFAULT_SORT } from '@/Components/Site/catalogQuery';
 
-const toSet = (v) => new Set(v === undefined || v === null || v === '' ? [] : [String(v)]);
 
 /** A course belongs to an age group when it picked that group (exact name, set in the course editor). */
 function ageMatches(courseAge, filterAge) {
@@ -55,7 +55,13 @@ export default function Courses() {
     const ageGroups = useAgeGroups();
     const [fAge, setFAge] = useState(toSet(filters.age));
     const [fType, setFType] = useState(new Set(typeKey === 'course' || typeKey === 'workshop' ? [typeKey] : []));
-    const [sort, setSort] = useState('popular');
+    // the sort isn't sent to the server; it comes back from the address bar on a refresh or a shared link
+    const [sort, setSort] = useState(() => (typeof window === 'undefined' ? DEFAULT_SORT : fromQuery(window.location.search).sort));
+
+    // every filter change is mirrored into the address bar (no reload, no extra history entry)
+    useEffect(() => {
+        writeQuery({ q, medium: fMedium, genre: fGenre, skill: fSkill, age: fAge, type: fType, sort });
+    }, [q, fMedium, fGenre, fSkill, fAge, fType, sort]);
 
     const toggle = (setter) => (value) => setter((prev) => {
         const next = new Set(prev);

@@ -41,6 +41,9 @@ Unit tests cover the auth crypto (`src/test/java/com/artistikcity/auth`: tokens,
 rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/VideoUploadCheckTest`), S3 request signing against
 AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing (`shop/ShopPricingTest`) and
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc): `mvn test`. Browser tests for the purchase flow live in `tests/e2e`.
+The database race test `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
+the rest get 409 or REFUND_REQUIRED) runs only with `ARTISTIK_IT_DB_URL` set: `mvn test -Dtest=MarketplaceConcurrencyIT`.
+React unit tests (Jest + React Testing Library, own React 17 copy) live in `tests/frontend`: `cd tests/frontend && npm install && npm test`.
 For everything else, run the app against MySQL and check the pages by hand. Use the demo logins below.
 
 **Local database access:** `127.0.0.1:3306`, database `artistikcity`, app user `artistik` / `Artistik@2026`,
@@ -109,6 +112,13 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   (`auth/SessionService`, resolved by `AuthSessionFilter`). `admin` (admins/teachers) uses the HttpSession. Passwords are bcrypt
   in `users.password_hash` (nullable: passwordless accounts exist) and compatible with Laravel `$2y$`. Read the user with
   `auth.user(request)`, which never contains secrets. Start a login only through `auth.login(request, userId, method, remember)`.
+- **Lost races:** MySQL Connector/J 8 can throw its own unchecked `CJException` through `JdbcTemplate` (deadlock victims,
+  duplicate keys), so Spring never maps it to `ConcurrencyFailureException`. Decide with `support/DbErrors.isConcurrencyConflict`
+  / `isDuplicateKey`, never by catching only Spring's types (see `MarketplaceService.reserve` / `finalizeSale`).
+- `/api/**` is outside the global CSRF check (`SessionInterceptor`): every state-changing `/api` endpoint must call
+  `Csrf.matches` itself (webhooks verify the gateway signature instead) and check who is signed in.
+- Course catalogue filters are mirrored into the address bar (`Components/Site/catalogQuery.js`: comma-separated values,
+  `history.replaceState` keeping Inertia's state), so refresh / Back / shared links keep the view.
 - Users are unique by e-mail **and** by verified phone (`phone_number`, E.164 via `PhoneNumbers.normalize`). Google/Facebook
   identities live in `linked_accounts`. Merge accounts only through `AccountService`, which applies the verified-e-mail rules.
 - Auth JSON endpoints (`web/AuthApiController`, `/auth/**`) return `{message, errors, retryAfter, reauth}` on failure. Changing

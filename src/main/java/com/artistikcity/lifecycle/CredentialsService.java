@@ -42,7 +42,7 @@ public class CredentialsService {
     // light document palette: charcoal text on white, pale grey panels and hairlines, one brand accent used sparingly
     static final String INK = "#2C3E50";       // headings, names, key figures
     static final String SOFT = "#34495E";      // body text, secondary headings
-    static final String MUTED = "#6C7A89";     // captions, labels
+    static final String MUTED = "#566573";     // captions, labels (5.2:1 or better on every PDF background: WCAG AA)
     static final String RULE = "#DDE3E8";      // hairlines and borders
     static final String PANEL = "#F8F9FA";     // panels, cover background
     static final String PAPER = "#FFFFFF";     // certificate sheet

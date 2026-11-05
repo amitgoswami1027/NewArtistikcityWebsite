@@ -24156,6 +24156,86 @@ function Listings({ listings, setListings, can, toast }) {
 
 /***/ }),
 
+/***/ "./resources/js/Components/Site/catalogQuery.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var catalogQuery_exports = {};
+__export(catalogQuery_exports, {
+  DEFAULT_SORT: () => DEFAULT_SORT,
+  SORTS: () => SORTS,
+  fromQuery: () => fromQuery,
+  toQuery: () => toQuery,
+  toSet: () => toSet,
+  typeParam: () => typeParam,
+  writeQuery: () => writeQuery
+});
+module.exports = __toCommonJS(catalogQuery_exports);
+const SORTS = ["popular", "rated", "price-asc", "price-desc", "newest"];
+const DEFAULT_SORT = "popular";
+function toSet(v) {
+  if (v === void 0 || v === null || v === "") return /* @__PURE__ */ new Set();
+  const parts = Array.isArray(v) ? v : String(v).split(",");
+  return new Set(parts.map((s) => String(s).trim()).filter(Boolean));
+}
+function typeParam(types) {
+  if (types && types.size === 1) return types.has("workshop") ? "workshop" : "course";
+  return "all";
+}
+function toQuery(f) {
+  const p = new URLSearchParams();
+  p.set("type", typeParam(f.type));
+  const q = (f.q || "").trim();
+  if (q) p.set("q", q);
+  for (const key of ["medium", "genre", "skill", "age"]) {
+    const s = f[key];
+    if (s && s.size) p.set(key, [...s].sort().join(","));
+  }
+  if (f.sort && f.sort !== DEFAULT_SORT && SORTS.includes(f.sort)) p.set("sort", f.sort);
+  return p.toString();
+}
+function fromQuery(search) {
+  const p = new URLSearchParams(search || "");
+  const type = (p.get("type") || "").toLowerCase();
+  const sort = p.get("sort");
+  return {
+    q: p.get("q") || "",
+    medium: toSet(p.get("medium")),
+    genre: toSet(p.get("genre")),
+    skill: toSet(p.get("skill")),
+    age: toSet(p.get("age")),
+    type: new Set(type === "course" || type === "workshop" ? [type] : []),
+    sort: SORTS.includes(sort) ? sort : DEFAULT_SORT
+  };
+}
+function writeQuery(f, win = typeof window === "undefined" ? null : window) {
+  if (!win) return;
+  const qs = toQuery(f);
+  const next = win.location.pathname + (qs ? "?" + qs : "") + (win.location.hash || "");
+  const now = win.location.pathname + win.location.search + (win.location.hash || "");
+  if (next !== now) win.history.replaceState(win.history.state, "", next);
+}
+
+
+/***/ }),
+
 /***/ "./resources/js/Pages/Auth/Login.js":
 /***/ ((module, exports, __webpack_require__) => {
 
@@ -27381,7 +27461,7 @@ var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/S
 var import_CourseCard = __toESM(__webpack_require__("./resources/js/Components/Site/CourseCard.js"));
 var import_ProgramCard = __webpack_require__("./resources/js/Components/Site/ProgramCard.js");
 var import_SiteHeader = __webpack_require__("./resources/js/Components/Site/SiteHeader.js");
-const toSet = (v) => new Set(v === void 0 || v === null || v === "" ? [] : [String(v)]);
+var import_catalogQuery = __webpack_require__("./resources/js/Components/Site/catalogQuery.js");
 function ageMatches(courseAge, filterAge) {
   if (!courseAge) return false;
   return String(courseAge).trim().toLowerCase() === String(filterAge).trim().toLowerCase();
@@ -27417,13 +27497,16 @@ function Courses() {
   const all = courses && courses.data || [];
   const typeKey = String(type || "All").toLowerCase();
   const [q, setQ] = (0, import_react.useState)(filters.q || "");
-  const [fMedium, setFMedium] = (0, import_react.useState)(toSet(filters.medium));
-  const [fGenre, setFGenre] = (0, import_react.useState)(toSet(filters.genre));
-  const [fSkill, setFSkill] = (0, import_react.useState)(toSet(filters.skill));
+  const [fMedium, setFMedium] = (0, import_react.useState)((0, import_catalogQuery.toSet)(filters.medium));
+  const [fGenre, setFGenre] = (0, import_react.useState)((0, import_catalogQuery.toSet)(filters.genre));
+  const [fSkill, setFSkill] = (0, import_react.useState)((0, import_catalogQuery.toSet)(filters.skill));
   const ageGroups = (0, import_SiteHeader.useAgeGroups)();
-  const [fAge, setFAge] = (0, import_react.useState)(toSet(filters.age));
+  const [fAge, setFAge] = (0, import_react.useState)((0, import_catalogQuery.toSet)(filters.age));
   const [fType, setFType] = (0, import_react.useState)(new Set(typeKey === "course" || typeKey === "workshop" ? [typeKey] : []));
-  const [sort, setSort] = (0, import_react.useState)("popular");
+  const [sort, setSort] = (0, import_react.useState)(() => typeof window === "undefined" ? import_catalogQuery.DEFAULT_SORT : (0, import_catalogQuery.fromQuery)(window.location.search).sort);
+  (0, import_react.useEffect)(() => {
+    (0, import_catalogQuery.writeQuery)({ q, medium: fMedium, genre: fGenre, skill: fSkill, age: fAge, type: fType, sort });
+  }, [q, fMedium, fGenre, fSkill, fAge, fType, sort]);
   const toggle = (setter) => (value) => setter((prev) => {
     const next = new Set(prev);
     next.has(value) ? next.delete(value) : next.add(value);

@@ -2672,7 +2672,7 @@ body.adm-noscroll { overflow: hidden; }
 .mk-card__artist { margin: 0; font-size: 14px; color: var(--ac-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mk-card__meta { margin: 0; font-size: 12.5px; color: var(--ac-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mk-card__price { margin-top: auto; padding-top: 10px; }
-.mk-card__sold { font-size: 15px; font-weight: 800; color: #9aa1b2; }
+.mk-card__sold { font-size: 15px; font-weight: 800; color: var(--ac-muted); }
 @media (max-width: 639.98px) {
   .mk-card__media { aspect-ratio: 1 / 1; padding: 16px; }
   .ac .mk-card__title, .mk-card__title { font-size: 17px; white-space: normal; }

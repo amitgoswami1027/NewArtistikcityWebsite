@@ -4,7 +4,7 @@ import com.artistikcity.marketplace.MarketplaceException;
 import com.artistikcity.marketplace.MarketplaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.ConcurrencyFailureException;
+import com.artistikcity.support.DbErrors;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -149,6 +149,13 @@ public class ShopOrderService {
     public enum Outcome { PAID, PARTIAL, REFUND_REQUIRED, ALREADY_PAID, NOT_FOUND, IGNORED }
 
     public Outcome finalizeSale(String orderId, String transactionId) {
+        return finalizeSale(orderId, transactionId, 0);
+    }
+
+    /** Retries after a lost serialization race at most a few times (each retry re-reads the order). */
+    static final int FINALIZE_RETRIES = 3;
+
+    private Outcome finalizeSale(String orderId, String transactionId, int attempt) {
         Outcome[] result = new Outcome[1];
         List<Long> touched = new ArrayList<>();
         try {
@@ -213,11 +220,15 @@ public class ShopOrderService {
                     jdbc.update("update shop_coupons set used_count = used_count + 1, updated_at = ? where code = ?", ts(now), o.get("coupon_code"));
                 }
             });
-        } catch (ConcurrencyFailureException e) {
+        } catch (RuntimeException e) {
+            if (!DbErrors.isConcurrencyConflict(e)) throw e;
             log.info("Concurrent finalisation for shop order {} - re-reading", orderId);
             Map<String, Object> o = order(orderId);
-            return o != null && !"PAYMENT_PENDING".equals(o.get("status")) && !"EXPIRED".equals(o.get("status")) && !"CANCELLED".equals(o.get("status"))
-                    ? Outcome.ALREADY_PAID : finalizeSale(orderId, transactionId);
+            if (o != null && !"PAYMENT_PENDING".equals(o.get("status")) && !"EXPIRED".equals(o.get("status")) && !"CANCELLED".equals(o.get("status"))) {
+                return Outcome.ALREADY_PAID;
+            }
+            if (attempt >= FINALIZE_RETRIES) throw e;    // the gateway retries the webhook later; nothing was half-written
+            return finalizeSale(orderId, transactionId, attempt + 1);
         }
         for (Long pid : touched) marketRepo.syncStudentListing(pid);
         if (result[0] == Outcome.PAID || result[0] == Outcome.PARTIAL || result[0] == Outcome.REFUND_REQUIRED) {

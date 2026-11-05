@@ -24,6 +24,8 @@ TEST-CERTIFICATES.bat
 tools/*.tgz
 # browser tests (tests/e2e): installed packages and run output
 tests/e2e/node_modules/
+tests/frontend/node_modules/
+tests/frontend/coverage/
 tests/e2e/test-results/
 tests/e2e/playwright-report/
 # room renderer output (tools/room-renderer)
