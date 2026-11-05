@@ -1,5 +1,6 @@
 import React from 'react';
 import { programImage, programPrice, isWorkshop } from '@/Components/Site/ProgramCard';
+import { seatBadge } from '@/Components/Site/Seats';
 
 export function formatCount(n) {
     const v = Number(n || 0);
@@ -8,6 +9,8 @@ export function formatCount(n) {
 }
 
 function badgeFor(course, index) {
+    const seats = seatBadge(course);
+    if (seats) return seats;
     if (isWorkshop(course)) return { label: 'Workshop', cls: 'dm-badge--accent' };
     if (Number(course.students || 0) >= 10) return { label: 'Bestseller', cls: 'dm-badge--brand' };
     if (index !== undefined && index < 2) return { label: 'New', cls: '' };

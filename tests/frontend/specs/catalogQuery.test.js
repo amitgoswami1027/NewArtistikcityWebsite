@@ -59,3 +59,21 @@ describe('catalogQuery', () => {
         expect(win.history.replaceState).toHaveBeenCalledWith(state, '', '/courses?type=workshop&q=tree#grid');
     });
 });
+
+describe('fuzzyScore', () => {
+    const { fuzzyScore, normalise } = require('@/Components/Site/catalogQuery');
+    test('accents, case and punctuation do not matter', () => {
+        expect(normalise('Aquarelle, Café!')).toBe('aquarelle cafe');
+        expect(fuzzyScore('Café sketching', 'cafe')).toBeGreaterThan(0);
+    });
+    test('every word must match; small typos are forgiven on longer words', () => {
+        expect(fuzzyScore('Pencil Sketching Essentials', 'pencl skeching')).toBeGreaterThan(0);
+        expect(fuzzyScore('Watercolour Landscapes', 'watercolor')).toBeGreaterThan(0);
+        expect(fuzzyScore('Pencil Sketching', 'oil')).toBe(0);
+        expect(fuzzyScore('Oil Painting', 'oli')).toBe(0);         // 3 letters: no typo allowed
+    });
+    test('exact words rank above prefixes and typos', () => {
+        expect(fuzzyScore('oil painting', 'oil')).toBeGreaterThan(fuzzyScore('oils on paper', 'oil'));
+        expect(fuzzyScore('pencil', 'pencil')).toBeGreaterThan(fuzzyScore('pencil', 'pencl'));
+    });
+});

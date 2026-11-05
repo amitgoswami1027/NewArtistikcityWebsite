@@ -87,7 +87,9 @@ public class AdminKit {
     public ResponseEntity<String> page(HttpServletRequest request, String capability, String component, Supplier<Map<String, ?>> props) {
         Row admin = admin(request);
         if (!can(admin, capability)) {
-            return inertia.render(request, "Admin/Denied", base(admin));
+            // 403, so the security log sees the refusal (Inertia still shows the page for an Inertia response)
+            ResponseEntity<String> denied = inertia.render(request, "Admin/Denied", base(admin));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).headers(denied.getHeaders()).body(denied.getBody());
         }
         return page(request, component, props.get());
     }

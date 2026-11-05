@@ -5,9 +5,10 @@ import axios from 'axios';
 import AdminLayout, { PageHeader, useToast, errorText } from '@/Components/Admin/AdminLayout';
 import { Button, Badge, useConfirm } from '@/Components/Admin/kit';
 import {
-    useForm, useUnsavedGuard, uploadImage, FormSection, Field, VideoField, TextField, SelectField, Toggle, ChoiceChips, SlugField, ListEditor, DropZone, RichText, SaveBar, Row2, Row3,
+    useForm, useUnsavedGuard, uploadImage, FormSection, Field, VideoField, TextField, SelectField, Toggle, ChoiceChips, SlugField, ListEditor, DropZone, RichText, SaveBar, Row2, Row3, TagPicker,
 } from '@/Components/Admin/form';
 import Curriculum from '@/Components/Admin/Curriculum';
+import CourseStudents from '@/Components/Admin/CourseStudents';
 
 const LISTS = [
     ['course_highlights', 'Highlights', 'Short selling points shown near the top of the page.'],
@@ -47,7 +48,7 @@ export default function CourseEditor() {
     const isNew = !saved;
     const noun = kind === 'workshop' ? 'workshop' : 'course';
     const base = kind === 'workshop' ? '/admin/workshop' : '/admin/courses';
-    const [tab, setTab] = useState(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab') === 'curriculum' && course ? 'curriculum' : 'details'));
+    const [tab, setTab] = useState(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab') && course ? new URLSearchParams(window.location.search).get('tab') : 'details'));
     const [cur, setCur] = useState(curriculum);
     const [photos, setPhotos] = useState([]);
     const [schedule, setSchedule] = useState([]);
@@ -126,7 +127,13 @@ export default function CourseEditor() {
                     onClick={() => setTab('curriculum')} title={isNew ? 'Save first to add modules and lessons' : undefined}>
                     Curriculum{!isNew && cur && <Badge>{cur.modules.length}</Badge>}
                 </button>
+                <button type="button" role="tab" aria-selected={tab === 'students'} className={tab === 'students' ? 'is-on' : ''} disabled={isNew}
+                    onClick={() => setTab('students')} title={isNew ? 'Save first' : undefined}>
+                    Students{!isNew && saved.enrolled ? <Badge>{saved.enrolled}</Badge> : null}
+                </button>
             </div>
+
+            {tab === 'students' && !isNew && <CourseStudents courseId={saved.id} noun={noun} toast={toast} />}
 
             {tab === 'curriculum' && !isNew && <Curriculum courseId={saved.id} initial={cur} toast={toast} confirm={confirm} noun={noun} onChange={setCur} />}
 
@@ -155,8 +162,8 @@ export default function CourseEditor() {
                             <SelectField form={form} name="medium_id" label="Medium" options={mediums.map((m) => ({ value: String(m.value), label: m.label }))} />
                             <SelectField form={form} name="skill_id" label="Skill level" options={skills.map((m) => ({ value: String(m.value), label: m.label }))} optional />
                         </Row2>
-                        <Field label="Genres" name="genre_ids" hint="Pick all that apply." optional>
-                            <ChoiceChips name="genre_ids" options={genres.map((g) => ({ value: String(g.value), label: g.label }))} value={v.genre_ids} onChange={(x) => form.set('genre_ids', x)} />
+                        <Field label="Genres" name="genre_ids" hint={<>Type to find one, Enter to add. Nest or archive genres in <a href="/admin/catalog?type=genres">Catalog › Genres</a>.</>} optional>
+                            <TagPicker name="genre_ids" options={genres.map((g) => ({ value: String(g.value), label: g.label, parent_id: g.parent_id, uses: g.uses, archived: !!Number(g.archived) }))} value={v.genre_ids} onChange={(x) => form.set('genre_ids', x)} />
                         </Field>
                         <SelectField form={form} name="age_group" label="Age group" options={ageGroups} optional
                                      placeholder="Choose an age group"

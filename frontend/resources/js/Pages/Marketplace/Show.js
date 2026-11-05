@@ -4,6 +4,7 @@ import SiteLayout from '@/Components/Site/SiteLayout';
 import ZoomViewer from '@/Components/Marketplace/ZoomViewer';
 import ArtCard from '@/Components/Marketplace/ArtCard';
 import SaveButton from '@/Components/Wishlist/SaveButton';
+import ReportButton from '@/Components/Site/ReportButton';
 import ArtistHub, { useConversation } from '@/Components/Shop/ArtistHub';
 import BuyPanel, { startSelection } from '@/Components/Shop/BuyPanel';
 import RoomStage, { RoomSwitcher, usePreloadRooms } from '@/Components/Shop/RoomStage';
@@ -20,7 +21,8 @@ function Spec({ label, value, hint }) {
 }
 
 function BuyBox({ p, hold, serverNow, preview, offer, sel, setSel, contact, conversation, customer }) {
-    const { saved } = usePage().props;
+    const { saved, auth } = usePage().props;
+    const signedIn = !!(auth && auth.user);
     const sold = p.stock_status === 'SOLD';
     const anything = offer && offer.formats.some((f) => f.available && (f.format !== 'ORIGINAL' || !sold));
     return (
@@ -50,6 +52,7 @@ function BuyBox({ p, hold, serverNow, preview, offer, sel, setSel, contact, conv
             </div>
 
             {!preview && <div className="mt-3"><SaveButton type="painting" id={p.id} saved={saved} className="dm-heart--block" /></div>}
+            {!preview && <div className="mt-2"><ReportButton type="PAINTING" id={p.id} label="Report this listing" signedIn={!!signedIn} /></div>}
 
             <ul className="mt-6 pt-6 border-t border-gray-100 space-y-3 text-sm text-gray-700">
                 <li className="flex gap-3"><i className="fa fa-shield text-brand mt-0.5 w-4" aria-hidden="true"></i>Secure payment: UPI, cards and NetBanking (Razorpay) or PayPal</li>

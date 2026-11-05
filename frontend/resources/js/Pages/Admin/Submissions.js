@@ -23,7 +23,7 @@ function ZoomFrame({ src, alt }) {
             </div>
             <div className="mt-3 flex items-center gap-3">
                 <button type="button" onClick={() => setZoom((z) => Math.max(1, z - 0.5))} className="w-9 h-9 rounded-lg border border-gray-300 hover:border-ink" aria-label="Zoom out"><i className="fa fa-search-minus" aria-hidden="true"></i></button>
-                <input type="range" min="1" max="4" step="0.25" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} className="flex-1" style={{ accentColor: '#e5156b' }} aria-label="Zoom" />
+                <input type="range" min="1" max="4" step="0.25" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} className="flex-1" style={{ accentColor: '#9c0d48' }} aria-label="Zoom" />
                 <button type="button" onClick={() => setZoom((z) => Math.min(4, z + 0.5))} className="w-9 h-9 rounded-lg border border-gray-300 hover:border-ink" aria-label="Zoom in"><i className="fa fa-search-plus" aria-hidden="true"></i></button>
                 <a href={src} target="_blank" rel="noopener" className="h-9 px-3 inline-flex items-center rounded-lg border border-gray-300 text-sm font-bold hover:border-ink">Full size</a>
             </div>

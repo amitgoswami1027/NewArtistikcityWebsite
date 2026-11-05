@@ -53,6 +53,10 @@ import java.util.regex.Pattern;
 @Controller
 public class MarketplaceController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.artistikcity.ledger.LedgerService> ledger;
+
+
     private static final Logger log = LoggerFactory.getLogger(MarketplaceController.class);
     private static final String SESSION_ORDERS = "marketplace.orders";
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -416,6 +420,11 @@ public class MarketplaceController {
                     return error(HttpStatus.UNAUTHORIZED, "Invalid signature.");
                 }
                 String type = String.valueOf(event.get("event"));
+                if (type.startsWith("payment.dispute.")) {
+                    // chargebacks: the artist's share of that order is held out of payouts (ledger/LedgerService)
+                    com.artistikcity.ledger.LedgerService l = ledger.getIfAvailable();
+                    return ok(Map.of("dispute", l == null ? "ledger unavailable" : l.onRazorpayDispute(type, event)));
+                }
                 if (!"payment.captured".equals(type) && !"order.paid".equals(type)) return ok(Map.of("ignored", type));
                 Map<String, Object> payment = (Map<String, Object>) path(event, "payload", "payment", "entity");
                 if (payment == null) return ok(Map.of("ignored", "no payment entity"));
@@ -526,7 +535,8 @@ public class MarketplaceController {
     }
 
     /** Receipt to the collector and a heads-up to the studio (logged when mail isn't configured). */
-    private void afterSale(String orderId, MarketplaceService.Outcome out) {
+    /** Buyer + staff e-mails after a sale or a refund-required outcome (also used by the payment reconciler). */
+    public void afterSale(String orderId, MarketplaceService.Outcome out) {
         if (out != MarketplaceService.Outcome.SOLD && out != MarketplaceService.Outcome.REFUND_REQUIRED) return;
         try {
             Map<String, Object> o = market.order(orderId);

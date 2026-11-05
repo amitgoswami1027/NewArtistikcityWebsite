@@ -1,0 +1,26 @@
+# System tests (HTTP + database)
+
+End-to-end checks of the production-readiness work that need the database and a fake payment gateway, so they run
+against a real app rather than in the browser. Python 3 with `requests`; a `mysql` client on the PATH.
+
+| Script | What it proves |
+|---|---|
+| `test_security.py` | Security log: sign-ins (and failures) are AUTH entries; a change has before/after JSON; a teacher refused 5 times is signed out; a student session calling the admin API gets 401 JSON and is signed out; CSV export is an EXPORT entry; "Verify integrity" passes, then finds a row edited in the database. |
+| `test_platform.py` | Newsletter CSRF (419) and rate limit (429, no "already subscribed" leak); payment reconciliation (a captured payment whose callback and webhook were lost is found and completed; idempotent); a second payment for a course is flagged, refunded once through the gateway by staff; seat cap (409 SOLD_OUT, waitlist, invitation e-mail with a priority link that keeps the seat); messages to enrolled students with read receipts; reschedule; cancel with refunds queued; escrow ledger split, dispute hold, payout batch; content reports, bulk hide, ban and lift. |
+| `fake_gateway.py` | A stand-in for the Razorpay endpoints those tests use (orders, order payments, capture, refund). |
+
+Run each against a freshly loaded database (`START-ArtistikCity.bat -ResetDatabase`, or schema + seed + migrations) - they sign the demo teacher out on purpose, so one run affects the next:
+
+```bash
+# test_security.py: the app with the dev profile
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+MYSQL_CMD="mysql -h 127.0.0.1 -u root -pArtistikRoot@2026 artistikcity" python3 tests/system/test_security.py
+
+# test_platform.py: the fake gateway on :9998, and the app pointed at it
+python3 tests/system/fake_gateway.py 9998 &
+java -jar target/artistikcity-1.0.0.jar --spring.profiles.active=dev --app.url=http://localhost:8080 \
+  --razorpay.key=rzp_test_fake --razorpay.secret=fake_secret --razorpay.webhook-secret=test-wh-secret \
+  --app.payments.razorpay.api-base=http://127.0.0.1:9998 --app.payments.reconcile.enabled=false
+python3 tests/system/test_platform.py      # run from the repo root (it reads logs/mail-outbox)
+```
+Both print one PASS/FAIL line per check and end with `ALL PASSED`.

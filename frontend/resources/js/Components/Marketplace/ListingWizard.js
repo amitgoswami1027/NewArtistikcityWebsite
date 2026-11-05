@@ -341,7 +341,7 @@ export default function ListingWizard({ painting, defaults = {}, mode, endpoints
                                     <span className="font-mono text-2xl font-black text-brand" aria-live="polite">{Number(f.discountPercentage)}%</span>
                                 </div>
                                 <input id="disc" type="range" min="0" max="90" step="1" value={f.discountPercentage} onChange={(e) => set('discountPercentage', Number(e.target.value))}
-                                       className="mk-range w-full mt-3" style={{ background: `linear-gradient(to right, #e5156b ${(f.discountPercentage / 90) * 100}%, #e5e7eb ${(f.discountPercentage / 90) * 100}%)` }}
+                                       className="mk-range w-full mt-3" style={{ background: `linear-gradient(to right, #9c0d48 ${(f.discountPercentage / 90) * 100}%, #e5e7eb ${(f.discountPercentage / 90) * 100}%)` }}
                                        aria-valuetext={`${f.discountPercentage} percent`} />
                                 <div className="mt-2 flex justify-between text-xs text-gray-400 font-mono"><span>0%</span><span>30%</span><span>60%</span><span>90%</span></div>
                                 <div className="mt-3 flex flex-wrap gap-2">

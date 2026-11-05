@@ -64,16 +64,21 @@ public class AdminAuthController {
         }
         if (!auth.attemptAdmin(request, in.get("email"), in.get("password"))) {
             limiter.hit("admin:login:pair:" + email + "|" + ip, 5, 900);
-            events.fail(request, null, "admin_login_failed", "password", email);
+            events.admin(request, null, "admin_login_failed", false, email);
             throw ValidationException.withMessage("email", "These credentials do not match our records.");
         }
         limiter.reset("admin:login:pair:" + email + "|" + ip);
+        events.admin(request, auth.admin(request), "admin_login", true, null);
         return redirect.route(request, "admin.dashboard");
     }
 
     @PostMapping("/admin/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
+        var admin = auth.admin(request);
         auth.logoutAdmin(request);
+        if (admin != null) {
+            events.admin(request, admin, "admin_logout", true, null);
+        }
         return redirect.route(request, "admin.login");
     }
 

@@ -10,6 +10,7 @@ const STATUS = {
     1: { key: 'paid', label: 'Paid', tone: 'green' },
     2: { key: 'failed', label: 'Failed', tone: 'red' },
     3: { key: 'refunded', label: 'Refunded', tone: 'blue' },
+    4: { key: 'refund_due', label: 'Refund due', tone: 'pink' },
 };
 const statusOf = (s) => STATUS[Number(s)] || STATUS[0];
 
@@ -52,7 +53,7 @@ export default function Orders() {
                 <Stat icon="fa-certificate" label="Paid, certificate not issued" value={stats.certificatesDue || 0} />
             </div>
             <Toolbar end={<Segments label="Status" value={g.filter('status')} onChange={(v) => g.go({ status: v })}
-                options={[{ value: '', label: 'All', count: stats.all }, { value: 'paid', label: 'Paid', count: stats.paid }, { value: 'pending', label: 'Pending', count: stats.pending }, { value: 'failed', label: 'Failed', count: stats.failed }, { value: 'refunded', label: 'Refunded', count: stats.refunded }]} />}>
+                options={[{ value: '', label: 'All', count: stats.all }, { value: 'paid', label: 'Paid', count: stats.paid }, { value: 'pending', label: 'Pending', count: stats.pending }, { value: 'failed', label: 'Failed', count: stats.failed }, { value: 'refunded', label: 'Refunded', count: stats.refunded }, { value: 'refund_due', label: 'Refund due', count: stats.refundDue }]} />}>
                 <SearchBox value={g.meta.q} onSearch={g.search} placeholder="Order no., student, e-mail or payment id" />
             </Toolbar>
             <Toolbar>
@@ -101,7 +102,7 @@ function OrderDrawer({ id, onClose, toast, onChanged }) {
         axios.post(`/admin/api/orders/${id}/certificate`).then((r) => { setData(r.data); toast(r.data.message); onChanged(); })
             .catch((e) => toast(errorText(e), 'error')).finally(() => setBusy(false));
     };
-    const actions = o ? Object.values(STATUS).filter((x) => x.key !== s.key) : [];
+    const actions = o ? Object.values(STATUS).filter((x) => x.key !== s.key && x.key !== 'refund_due') : [];
     const verb = { paid: 'Mark as paid', pending: 'Mark as pending', failed: 'Mark as failed', refunded: 'Mark as refunded' };
 
     return (

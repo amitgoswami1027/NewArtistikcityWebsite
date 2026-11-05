@@ -84,7 +84,7 @@ function UploadStep() {
                         <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 border-t border-gray-100">
                             <label htmlFor="intensity" className="text-sm font-bold text-ink whitespace-nowrap">Texture strength</label>
                             <input id="intensity" type="range" min="0.2" max="1" step="0.05" value={state.intensity}
-                                   onChange={(e) => update({ intensity: Number(e.target.value) })} className="w-full" style={{ accentColor: "#e5156b" }} />
+                                   onChange={(e) => update({ intensity: Number(e.target.value) })} className="w-full" style={{ accentColor: "#9c0d48" }} />
                             <button type="button" onClick={() => update({ photoUrl: null, photoName: null })}
                                     className="text-sm font-bold underline whitespace-nowrap text-gray-700 hover:text-ink">Replace photo</button>
                         </div>

@@ -41,8 +41,9 @@ Unit tests cover the auth crypto (`src/test/java/com/artistikcity/auth`: tokens,
 rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/VideoUploadCheckTest`), S3 request signing against
 AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing (`shop/ShopPricingTest`) and
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc): `mvn test`. Browser tests for the purchase flow live in `tests/e2e`.
-The database race test `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
-the rest get 409 or REFUND_REQUIRED) runs only with `ARTISTIK_IT_DB_URL` set: `mvn test -Dtest=MarketplaceConcurrencyIT`.
+The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
+the rest get 409 or REFUND_REQUIRED) and `seats/SeatRaceIT` (20 students, 5 seats: exactly 5 get one) run only with
+`ARTISTIK_IT_DB_URL` set: `mvn test -Dtest=MarketplaceConcurrencyIT,SeatRaceIT` (the deploy workflow runs both).
 React unit tests (Jest + React Testing Library, own React 17 copy) live in `tests/frontend`: `cd tests/frontend && npm install && npm test`.
 For everything else, run the app against MySQL and check the pages by hand. Use the demo logins below.
 
@@ -206,5 +207,36 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   column defaults, because the DB server may run in a different time zone than the app.
 - Payments only mark an order paid after a **verified gateway response**. The dev profile / `PAYMENT_TEST_MODE=true`
   enables simulated payments when no keys are set.
-- Configuration comes from environment variables (see README §4 and `.env.example`). Never commit `.env` or real keys.
+- **Configuration: one central file, `config/artistikcity.yml`** (packaged into the jar as defaults; `./config/artistikcity.yml`
+  next to the running app overrides it; environment variables override single values through each `${ENV:default}`).
+  The `dev` profile is its last section. New settings go there, with a comment and an env name, and are read through
+  `config/Settings` (typed getters), never as raw strings in feature code. `application.properties` only imports it.
+  Never commit `.env` or real keys (README §4, `.env.example`).
+- **Security log** (`security/AuditLog`, Admin > Setup > Security log, capability `security`): every `Audit.log` also writes the
+  append-only, hash-chained `audit_logs` (actor, action type CREATE/UPDATE/DELETE/AUTH/EXPORT/DENIED, resource, IP + CloudFront
+  country/city). Use `audit.change(admin, entity, id, action, details, before, after)` with `audit.snapshot(table, id)` for
+  updates, so the drawer can show the JSON diff. Never update or delete `audit_logs` rows ("Verify integrity" re-hashes the chain).
+  `security/SecurityWatch` logs every 401/403 under `/admin/**` as DENIED, signs out a staff session after 5 refusals in 10 minutes
+  and any student session that calls the admin API; the admin guard answers 401 JSON `{reauth}` for `/admin/api/**`.
+- **Payments** (`payments/`): `PaymentReconciler` asks Razorpay (`GET /v1/orders/{id}/payments`) / PayPal about orders still
+  waiting (10 min - 7 days old) every 5 minutes and completes them through the same idempotent code as the webhooks. Refunds are
+  never automatic: `RefundQueue.flag` queues them (course paid twice -> `orders.payment_status` 4, sold-out seat, cancelled course;
+  marketplace/shop REFUND_REQUIRED rows are synced in), staff confirm each in Admin > Sales > Refunds, which calls the gateway.
+- **Seats** (`seats/SeatService`): `courses.seat_limit` caps live courses; checkout holds a seat (15 min) under a row lock on the
+  course, 409 `SOLD_OUT` when full; waitlist invitations and staff priority links are `access_grants` (only the SHA-256 is stored).
+- **Course notices** (`notices/`): course editor > Students: message enrolled students (studio notice + e-mail + delivery log),
+  move the start date, cancel the run (refunds queued, waitlist closed).
+- **Ledger** (`ledger/LedgerService`): append-only `ledger_entries` with idempotency keys; each artwork sale splits into
+  commission (`app.ledger.commission-percent`) and artist share (payable after `payout-after-days`); weekly draft payout batches
+  staff mark paid; open disputes (Razorpay `payment.dispute.*` or manual) hold the artist's share. Admin > Sales > Payouts & ledger.
+- **Moderation** (`moderation/`): `account_restrictions` (BAN ends sessions and blocks sign-in in `Auth.login`; POSTING / SELLING
+  checked with `Moderation.assertAllowed`) and the Report button -> `content_reports` queue (Admin > Community > Reports & bans).
+- **Course filters** (`Pages/Courses.js`): Medium and Age pills visible, Format / Level / Subject in the "More filters" drawer,
+  `catalogQuery.fuzzyScore` search (accents, small typos), removable chips, zero-results "one change brings courses back".
+  Filter lists can be nested (`parent_id`) and archived (`archived_at`) in Admin > Catalog; the editor's genres use `TagPicker`.
+- Public pages: `SiteLayout` wraps content in an error boundary, opens a sign-in sheet on any 401 (`SignInSheet`), shows
+  skeletons for slow visits and an Undo toast (`showUndo`). Brand colour for text/buttons is #9C0D48 and muted text #4A5866
+  (WCAG AAA); a global `:focus-visible` ring is defined at the end of `ac-theme.css`.
+- Reference only: `docs/sqlserver-ddl.sql` (SQL Server version of courses / taxonomy / audit log), `frontend/resources/js/types/catalog.d.ts`,
+  `docs/prototype/` (one-file React + Tailwind prototype of the filters, tag manager and audit viewer).
 - `logs/`, `target/`, `.tools/` and `frontend/node_modules/` are local-only and git-ignored.

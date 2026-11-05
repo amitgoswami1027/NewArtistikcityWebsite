@@ -29,6 +29,10 @@ import java.util.Map;
 @Controller
 public class UserTaskController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.artistikcity.moderation.Moderation> moderation;
+
+
     private final Inertia inertia;
     private final Db db;
     private final Json json;
@@ -135,6 +139,7 @@ public class UserTaskController {
         Input in = Input.of(request, json);
         validator.validate(in, "reply", "required");
         Long me = auth.userId(request);
+        if (moderation.getIfAvailable() != null) moderation.getIfAvailable().assertAllowed(me, "POSTING");
         Long taskId = in.lng("task_id");
         if (!me.equals(in.lng("from_id")) || taskId == null) {
             return redirect.back(request);

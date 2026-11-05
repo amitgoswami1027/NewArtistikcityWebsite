@@ -11,7 +11,7 @@ export default function HowItWorks() {
             <div className="tw">
                 {/* ---------- hero ---------- */}
                 <section className="relative overflow-hidden bg-ink text-white">
-                    <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 85% 20%, #e5156b 0, transparent 45%), radial-gradient(circle at 10% 90%, #3b5bdb 0, transparent 40%)' }} aria-hidden="true"></div>
+                    <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 85% 20%, #9c0d48 0, transparent 45%), radial-gradient(circle at 10% 90%, #3b5bdb 0, transparent 40%)' }} aria-hidden="true"></div>
                     <div className="ac-wide relative py-20 sm:py-28">
                         <p className="font-mono text-xs tracking-widest uppercase text-pink-300">The ArtistikCity creative lifecycle</p>
                         <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-none text-white">

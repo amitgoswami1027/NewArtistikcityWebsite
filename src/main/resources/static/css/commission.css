@@ -11,7 +11,7 @@
     border-color: #e5e7eb;
     --tw-ring-offset-width: 0px;
     --tw-ring-offset-color: #fff;
-    --tw-ring-color: rgba(229, 21, 107, 0.45);
+    --tw-ring-color: rgba(156, 13, 72, 0.45);
     --tw-ring-offset-shadow: 0 0 #0000;
     --tw-ring-shadow: 0 0 #0000;
     --tw-shadow: 0 0 #0000;
@@ -1079,7 +1079,7 @@
 
 .tw .border-brand {
     --tw-border-opacity: 1;
-    border-color: rgba(229, 21, 107, var(--tw-border-opacity));
+    border-color: rgba(156, 13, 72, var(--tw-border-opacity));
 }
 
 .tw .border-gray-100 {
@@ -1191,7 +1191,7 @@
 
 .tw .bg-brand {
     --tw-bg-opacity: 1;
-    background-color: rgba(229, 21, 107, var(--tw-bg-opacity));
+    background-color: rgba(156, 13, 72, var(--tw-bg-opacity));
 }
 
 .tw .bg-gray-50 {
@@ -1834,7 +1834,7 @@
 
 .tw .text-brand {
     --tw-text-opacity: 1;
-    color: rgba(229, 21, 107, var(--tw-text-opacity));
+    color: rgba(156, 13, 72, var(--tw-text-opacity));
 }
 
 .tw .text-gray-300 {
@@ -1904,7 +1904,7 @@
 
 .tw .text-brand-dark {
     --tw-text-opacity: 1;
-    color: rgba(184, 15, 85, var(--tw-text-opacity));
+    color: rgba(122, 10, 56, var(--tw-text-opacity));
 }
 
 .tw .text-indigo-800 {
@@ -2168,7 +2168,7 @@
 
 .tw .hover\:border-brand:hover {
     --tw-border-opacity: 1;
-    border-color: rgba(229, 21, 107, var(--tw-border-opacity));
+    border-color: rgba(156, 13, 72, var(--tw-border-opacity));
 }
 
 .tw .hover\:bg-gray-100:hover {
@@ -2183,7 +2183,7 @@
 
 .tw .hover\:bg-brand-dark:hover {
     --tw-bg-opacity: 1;
-    background-color: rgba(184, 15, 85, var(--tw-bg-opacity));
+    background-color: rgba(122, 10, 56, var(--tw-bg-opacity));
 }
 
 .tw .hover\:bg-white:hover {
@@ -2227,7 +2227,7 @@
 
 .tw .hover\:text-brand:hover {
     --tw-text-opacity: 1;
-    color: rgba(229, 21, 107, var(--tw-text-opacity));
+    color: rgba(156, 13, 72, var(--tw-text-opacity));
 }
 
 .tw .hover\:text-red-600:hover {
@@ -2281,7 +2281,7 @@
 
 .tw .focus\:border-brand:focus {
     --tw-border-opacity: 1;
-    border-color: rgba(229, 21, 107, var(--tw-border-opacity));
+    border-color: rgba(156, 13, 72, var(--tw-border-opacity));
 }
 
 .tw .focus\:bg-gray-100:focus {
@@ -2333,7 +2333,7 @@
 
 .tw .focus\:ring-brand:focus {
     --tw-ring-opacity: 1;
-    --tw-ring-color: rgba(229, 21, 107, var(--tw-ring-opacity));
+    --tw-ring-color: rgba(156, 13, 72, var(--tw-ring-opacity));
 }
 
 .tw .focus\:ring-opacity-50:focus {
@@ -2388,7 +2388,7 @@
 
 .tw .group:hover .group-hover\:text-brand {
     --tw-text-opacity: 1;
-    color: rgba(229, 21, 107, var(--tw-text-opacity));
+    color: rgba(156, 13, 72, var(--tw-text-opacity));
 }
 
 @media (min-width: 640px) {

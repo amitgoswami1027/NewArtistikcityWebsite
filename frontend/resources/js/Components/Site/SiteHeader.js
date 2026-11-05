@@ -196,7 +196,7 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                 <div className="ac-drawer" style={{ top: 68 }}>
                     <form className="dm-hero__search" onSubmit={search} style={{ border: '1px solid var(--dm-line)' }}>
                         <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search courses" />
-                        <button className="dm-btn dm-btn--ink" type="submit"><i className="fa fa-search"></i></button>
+                        <button className="dm-btn dm-btn--ink" type="submit" aria-label="Search"><i className="fa fa-search" aria-hidden="true"></i></button>
                     </form>
                     <a href={route('how.it.works')} style={{ fontWeight: 700 }}>How it works</a>
                     <h6>Courses</h6>

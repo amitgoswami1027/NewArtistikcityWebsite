@@ -807,7 +807,7 @@ select {
 }
 .tw .hover\:border-brand:hover {
 	--tw-border-opacity: 1;
-	border-color: rgba(229, 21, 107, var(--tw-border-opacity));
+	border-color: rgba(156, 13, 72, var(--tw-border-opacity));
 }
 .tw .hover\:bg-gray-100:hover {
 	--tw-bg-opacity: 1;
@@ -819,7 +819,7 @@ select {
 }
 .tw .hover\:bg-brand-dark:hover {
 	--tw-bg-opacity: 1;
-	background-color: rgba(184, 15, 85, var(--tw-bg-opacity));
+	background-color: rgba(122, 10, 56, var(--tw-bg-opacity));
 }
 .tw .hover\:bg-white:hover {
 	--tw-bg-opacity: 1;
@@ -854,7 +854,7 @@ select {
 }
 .tw .hover\:text-brand:hover {
 	--tw-text-opacity: 1;
-	color: rgba(229, 21, 107, var(--tw-text-opacity));
+	color: rgba(156, 13, 72, var(--tw-text-opacity));
 }
 .tw .hover\:text-red-600:hover {
 	--tw-text-opacity: 1;
@@ -897,7 +897,7 @@ select {
 }
 .tw .focus\:border-brand:focus {
 	--tw-border-opacity: 1;
-	border-color: rgba(229, 21, 107, var(--tw-border-opacity));
+	border-color: rgba(156, 13, 72, var(--tw-border-opacity));
 }
 .tw .focus\:bg-gray-100:focus {
 	--tw-bg-opacity: 1;
@@ -939,7 +939,7 @@ select {
 }
 .tw .focus\:ring-brand:focus {
 	--tw-ring-opacity: 1;
-	--tw-ring-color: rgba(229, 21, 107, var(--tw-ring-opacity));
+	--tw-ring-color: rgba(156, 13, 72, var(--tw-ring-opacity));
 }
 .tw .focus\:ring-opacity-50:focus {
 	--tw-ring-opacity: 0.5;
@@ -982,7 +982,7 @@ select {
 }
 .tw .group:hover .group-hover\:text-brand {
 	--tw-text-opacity: 1;
-	color: rgba(229, 21, 107, var(--tw-text-opacity));
+	color: rgba(156, 13, 72, var(--tw-text-opacity));
 }
 @media (min-width: 640px) {
 

@@ -1,5 +1,6 @@
 package com.artistikcity.auth;
 
+import com.artistikcity.security.AuditLog;
 import com.artistikcity.support.Db;
 import com.artistikcity.support.Row;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,9 +20,11 @@ public class AuthEvents {
     private static final Logger log = LoggerFactory.getLogger(AuthEvents.class);
 
     private final Db db;
+    private final AuditLog auditLog;
 
-    public AuthEvents(Db db) {
+    public AuthEvents(Db db, AuditLog auditLog) {
         this.db = db;
+        this.auditLog = auditLog;
     }
 
     public void record(HttpServletRequest request, Long userId, String event, String method, boolean success, String detail) {
@@ -38,8 +41,29 @@ public class AuthEvents {
         } catch (RuntimeException e) {
             log.warn("Could not record auth event {}", event, e);
         }
+        String email = null;
+        if (userId != null) {
+            try {
+                Object e = db.scalar("select email from users where id = ?", userId);
+                email = e == null ? null : String.valueOf(e);
+            } catch (RuntimeException ignored) {
+                // the e-mail is only a convenience for the security log
+            }
+        }
+        auditLog.write(AuditLog.entry(AuditLog.Type.AUTH, event).request(request).actor(AuditLog.Actor.student(userId, email))
+                .resource(method == null ? "auth" : "auth:" + method, userId).summary(detail).outcome(success ? "OK" : "FAIL"));
         if (!success) {
             log.info("auth event {} ({}) failed for user {}: {}", event, method, userId, detail);
+        }
+    }
+
+    /** Staff sign-in events (admins are not in the users table, so they only go to the security audit log). */
+    public void admin(HttpServletRequest request, Row admin, String event, boolean success, String detail) {
+        auditLog.write(AuditLog.entry(AuditLog.Type.AUTH, event).request(request)
+                .actor(admin == null ? new AuditLog.Actor("anonymous", null, detail, null) : AuditLog.Actor.admin(admin))
+                .resource("auth:admin", admin == null ? null : admin.get("id")).summary(detail).outcome(success ? "OK" : "FAIL"));
+        if (!success) {
+            log.info("admin auth event {} failed: {}", event, detail);
         }
     }
 

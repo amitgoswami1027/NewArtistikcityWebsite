@@ -278,6 +278,7 @@ public class ContentAdminController {
         if (og != null) {
             clean.get("seo").put("og_image", "/storage/uploads/site/" + storage.storeUpload(og, "uploads/site"));
         }
+        Map<String, Object> before = settingsSnapshot(clean.keySet());
         for (Map.Entry<String, Map<String, String>> e : clean.entrySet()) {
             for (Map.Entry<String, String> kv : e.getValue().entrySet()) {
                 if (db.updateWhere("settings", Row.of("meta_value", kv.getValue()), "meta_tag = ? and meta_key = ?", e.getKey(), kv.getKey()) == 0) {
@@ -286,7 +287,18 @@ public class ContentAdminController {
             }
         }
         site.invalidate();
-        audit.log(admin, "settings", 0, "updated", null);
+        audit.change(admin, "settings", 0, "updated", String.join(", ", clean.keySet()), before, settingsSnapshot(clean.keySet()));
         return kit.ok(Map.of("values", clean, "message", "Settings saved. The site uses them straight away."));
+    }
+
+    /** The saved values of these settings groups as {"tag.key": value}, for the before/after diff of the security log. */
+    private Map<String, Object> settingsSnapshot(java.util.Collection<String> tags) {
+        Map<String, Object> m = new java.util.TreeMap<>();
+        for (String tag : tags) {
+            for (Row r : db.select("select meta_key, meta_value from settings where meta_tag = ?", tag)) {
+                m.put(tag + "." + r.str("meta_key"), r.get("meta_value"));
+            }
+        }
+        return m;
     }
 }

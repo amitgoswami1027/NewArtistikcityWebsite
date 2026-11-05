@@ -1,3 +1,4 @@
+import SiteErrorBoundary from '@/Components/Site/SiteErrorBoundary';
 import React from 'react';
 import SiteLayout from '@/Components/Site/SiteLayout';
 import { useCountdown, mmss } from '@/Components/Marketplace/shared';
@@ -66,7 +67,7 @@ export default function PurchaseLayout({ painting, step, skipRoom, hold, serverN
                         <h1>{title}</h1>
                     </header>
                     <PurchaseStepper current={step} skipRoom={skipRoom} />
-                    <div className="pz-body">{children}</div>
+                    <div className="pz-body"><SiteErrorBoundary checkout>{children}</SiteErrorBoundary></div>
                 </div>
             </div>
         </SiteLayout>

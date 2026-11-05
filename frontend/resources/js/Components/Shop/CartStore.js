@@ -54,7 +54,13 @@ const actions = {
     refresh,
     clearError: () => set({ error: null }),
     add: (item, { openDrawer = true } = {}) => run(axios.post('/api/v1/cart/items', item)).then((d) => { if (openDrawer) set({ isOpen: true }); return d; }),
-    setQty: (id, qty) => run(axios.patch(`/api/v1/cart/items/${id}`, { qty })),
+    // optimistic: the new quantity shows at once; if the server refuses (e.g. not enough editions left) the line goes
+    // back to what it was and the reason is shown
+    setQty: (id, qty) => {
+        const before = store.data;
+        if (before && before.lines) set({ data: { ...before, lines: before.lines.map((l) => (l.id === id ? { ...l, qty } : l)) } });
+        return run(axios.patch(`/api/v1/cart/items/${id}`, { qty })).catch((e) => { if (before) set({ data: before }); throw e; });
+    },
     remove: (id) => run(axios.delete(`/api/v1/cart/items/${id}`)),
     applyCoupon: (code, country) => run(axios.post('/api/v1/cart/coupon', { code, country })),
     removeCoupon: () => run(axios.delete('/api/v1/cart/coupon')),

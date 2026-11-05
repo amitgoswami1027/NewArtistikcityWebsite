@@ -65,11 +65,11 @@ export default function Posts() {
                         <Pagination links={posts.links} />
                         {/* <div className="pagination">
                             <ul>
-                                <li className="prev"><a href="#"><i className="fa fa-angle-left"></i></a></li>
+                                <li className="prev"><a href="#" aria-label="Previous page"><i className="fa fa-angle-left" aria-hidden="true"></i></a></li>
                                 <li className="current"><a href="#">1</a></li>
                                 <li><a href="#">2</a></li>
                                 <li><a href="#">3</a></li>
-                                <li className="next"><a href="#"><i className="fa fa-angle-right"></i></a></li>
+                                <li className="next"><a href="#" aria-label="Next page"><i className="fa fa-angle-right" aria-hidden="true"></i></a></li>
                             </ul>
                         </div> */}
                     </div>

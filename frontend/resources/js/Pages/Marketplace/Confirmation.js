@@ -2,6 +2,7 @@ import React from 'react';
 import { usePage } from '@inertiajs/inertia-react';
 import SiteLayout from '@/Components/Site/SiteLayout';
 import { inr, usd, num } from '@/Components/Marketplace/shared';
+import PaymentPending from '@/Components/Site/PaymentPending';
 
 const FLOW = [['PAID', 'Payment confirmed', 'fa-check'], ['PACKED', 'Packed with care', 'fa-cube'], ['SHIPPED', 'On its way', 'fa-truck'], ['DELIVERED', 'Delivered', 'fa-home']];
 
@@ -16,6 +17,7 @@ export default function MarketplaceConfirmation() {
         <SiteLayout title={`Order ${o.order_id}`}>
             <div className="tw">
                 <section className="ac-wide py-12 max-w-5xl">
+                    <PaymentPending pending={o.status === 'PAYMENT_PENDING'} only={['order']} email={o.buyer_email} />
                     {refund ? (
                         <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-8">
                             <p className="font-mono text-xs uppercase tracking-widest text-yellow-800">Order {o.order_id}</p>

@@ -38,7 +38,7 @@ module.exports = {
                 sans: ['Plus Jakarta Sans', 'Nunito', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                brand: { DEFAULT: '#e5156b', dark: '#b80f55', soft: '#fde7f0' },
+                brand: { DEFAULT: '#9c0d48', dark: '#7a0a38', soft: '#fde7f0' },
                 ink: '#111111',
             },
         },

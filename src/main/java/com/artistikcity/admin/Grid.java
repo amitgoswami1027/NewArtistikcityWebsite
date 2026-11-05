@@ -53,6 +53,8 @@ public final class Grid {
     private String tieBreak;
     private int defaultPer = 20;
     private Function<Row, Row> map = r -> r;
+    /** GROUP BY expression (trusted, from code): rows are groups and the total counts groups. */
+    private String groupBy;
 
     private Grid(Db db, HttpServletRequest request) {
         this.db = db;
@@ -107,6 +109,16 @@ public final class Grid {
             fixed.add(clause);
         }
         return this;
+    }
+
+    /** Rows are groups (e.g. one row per reported item); sort keys may then use aggregates. */
+    public Grid groupBy(String expression) {
+        this.groupBy = expression;
+        return this;
+    }
+
+    private String group() {
+        return groupBy == null ? "" : " group by " + groupBy;
     }
 
     public Grid perPage(int n) {
@@ -180,7 +192,8 @@ public final class Grid {
         } catch (NumberFormatException ignored) {
             // default page size
         }
-        long total = db.count("select count(*) from " + from + b.where(), b.params().toArray());
+        long total = groupBy == null ? db.count("select count(*) from " + from + b.where(), b.params().toArray())
+                : db.count("select count(*) from (select 1 from " + from + b.where() + group() + ") g", b.params().toArray());
         int pages = (int) Math.max(1, (total + per - 1) / per);
         int page = 1;
         try {
@@ -193,7 +206,7 @@ public final class Grid {
         params.add(per);
         params.add((page - 1) * per);
         List<Row> rows = new ArrayList<>();
-        for (Row r : db.select("select " + columns + " from " + from + b.where() + orderBy(sortKey, dir) + " limit ? offset ?", params.toArray())) {
+        for (Row r : db.select("select " + columns + " from " + from + b.where() + group() + orderBy(sortKey, dir) + " limit ? offset ?", params.toArray())) {
             rows.add(map.apply(r));
         }
         Map<String, Object> meta = new LinkedHashMap<>();
@@ -219,7 +232,7 @@ public final class Grid {
         List<Object> params = new ArrayList<>(b.params());
         params.add(limit);
         List<Row> rows = new ArrayList<>();
-        for (Row r : db.select("select " + columns + " from " + from + b.where() + orderBy(sortKey, dir) + " limit ?", params.toArray())) {
+        for (Row r : db.select("select " + columns + " from " + from + b.where() + group() + orderBy(sortKey, dir) + " limit ?", params.toArray())) {
             rows.add(map.apply(r));
         }
         return rows;

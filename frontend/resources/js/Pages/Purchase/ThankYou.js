@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/inertia-react';
 import SiteLayout from '@/Components/Site/SiteLayout';
 import { PurchaseStepper } from '@/Components/Shop/PurchaseLayout';
 import { inr } from '@/Components/Shop/shop';
+import PaymentPending from '@/Components/Site/PaymentPending';
 
 const STATUS = {
     PAID: 'Paid · being prepared', PACKED: 'Packed', SHIPPED: 'Shipped', DELIVERED: 'Delivered', REFUND_REQUIRED: 'Refund in progress',
@@ -30,6 +31,7 @@ export default function ThankYou() {
                                 : paid ? (o.needs_shipping ? `We’ve emailed your receipt to ${o.buyer_email}. We’ll send the tracking number when it ships.` : `Your download is ready below, and we’ve emailed the link to ${o.buyer_email}.`)
                                 : STATUS[o.status]}
                         </p>
+                        <PaymentPending pending={o.status === 'PAYMENT_PENDING'} only={['order']} email={o.buyer_email} />
                         {refund && o.status !== 'REFUND_REQUIRED' && <p className="pz-note">One item couldn’t be supplied when your payment arrived. We’ll refund {inr(o.refund_due_inr)} for it within 5–7 working days.</p>}
                     </header>
 

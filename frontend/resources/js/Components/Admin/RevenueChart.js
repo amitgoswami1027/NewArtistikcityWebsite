@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const SERIES = [
     { key: 'coursesInr', label: 'Course sales', color: '#3b5bdb' },
-    { key: 'commissionsInr', label: 'Commissions', color: '#e5156b' },
+    { key: 'commissionsInr', label: 'Commissions', color: '#9c0d48' },
 ];
 const inr = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
 const monthLabel = (m) => { const [y, mm] = m.split('-'); return new Date(Number(y), Number(mm) - 1, 1).toLocaleDateString('en-IN', { month: 'short' }); };

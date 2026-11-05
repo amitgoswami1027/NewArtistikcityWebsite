@@ -91,7 +91,7 @@ export default function Classroom() {
 
                     {/* ---------- next step (adapts to where the student is) ---------- */}
                     {approved && finished ? (
-                        <section className="mt-10 rounded-2xl p-8 text-white relative overflow-hidden" style={{ background: 'linear-gradient(120deg,#111,#3b0a24 60%,#e5156b)' }}>
+                        <section className="mt-10 rounded-2xl p-8 text-white relative overflow-hidden" style={{ background: 'linear-gradient(120deg,#111,#3b0a24 60%,#9c0d48)' }}>
                             <p className="font-mono text-xs tracking-widest uppercase text-pink-200">Course complete · Step 06</p>
                             <h3 className="mt-2 text-3xl font-black tracking-tight text-white">You've earned your certificate</h3>
                             <p className="mt-2 text-lg text-gray-200 max-w-xl">Every lesson is done and your milestone is approved. Download your ArtistikCity certificate and a printable portfolio of this course.</p>
@@ -114,7 +114,7 @@ export default function Classroom() {
                             <a href={`/dashboard/submissions?course=${course.id}`} className="mt-5 inline-flex items-center h-11 px-6 rounded-full bg-ink text-white font-bold">View submissions</a>
                         </section>
                     ) : (
-                        <section className="mt-10 rounded-2xl p-8 text-white relative overflow-hidden" style={{ background: 'linear-gradient(120deg,#e5156b,#b80f55 55%,#111)' }}>
+                        <section className="mt-10 rounded-2xl p-8 text-white relative overflow-hidden" style={{ background: 'linear-gradient(120deg,#9c0d48,#7a0a38 55%,#111)' }}>
                             <p className="font-mono text-xs tracking-widest uppercase text-pink-100">Milestone · Step 05</p>
                             <h3 className="mt-2 text-3xl font-black tracking-tight text-white">{finished ? 'All lessons done. Submit your milestone' : 'Ready to pass this module milestone?'}</h3>
                             <p className="mt-2 text-lg text-pink-50 max-w-xl">Upload your assignment for a personal review. Approved work counts toward your certificate.</p>

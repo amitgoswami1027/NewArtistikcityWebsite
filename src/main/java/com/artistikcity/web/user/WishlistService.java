@@ -78,6 +78,11 @@ public class WishlistService {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("orders", orderCount(userId));
         m.put("wishlist", count(userId));
+        try {
+            m.put("notices", db.count("select count(*) from course_message_deliveries where user_id = ? and read_at is null", userId));
+        } catch (RuntimeException e) {
+            m.put("notices", 0);
+        }
         return m;
     }
 

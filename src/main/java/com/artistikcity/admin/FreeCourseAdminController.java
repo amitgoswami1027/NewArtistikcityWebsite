@@ -145,8 +145,9 @@ public class FreeCourseAdminController {
             id = db.insert("free_courses", v);
             audit.log(admin, "free_course", id, "created", title);
         } else {
+            Row before = audit.snapshot("free_courses", id);
             db.updateById("free_courses", id, v);
-            audit.log(admin, "free_course", id, "updated", title);
+            audit.change(admin, "free_course", id, "updated", title, before, audit.snapshot("free_courses", id));
         }
         if (photo != null) {
             db.updateById("free_courses", id, Row.of("photo", storage.storeUpload(photo, "uploads/free-courses/" + id)));

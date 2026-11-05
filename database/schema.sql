@@ -19,6 +19,21 @@ DROP TABLE IF EXISTS shop_cart_items;
 DROP TABLE IF EXISTS shop_carts;
 DROP TABLE IF EXISTS shop_price_options;
 DROP TABLE IF EXISTS admin_audit;
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS account_restrictions;
+DROP TABLE IF EXISTS content_reports;
+DROP TABLE IF EXISTS ledger_entries;
+DROP TABLE IF EXISTS payout_batches;
+DROP TABLE IF EXISTS payout_lines;
+DROP TABLE IF EXISTS ledger_disputes;
+DROP TABLE IF EXISTS course_messages;
+DROP TABLE IF EXISTS course_message_deliveries;
+DROP TABLE IF EXISTS seat_holds;
+DROP TABLE IF EXISTS course_waitlist;
+DROP TABLE IF EXISTS access_grants;
+DROP TABLE IF EXISTS payment_refunds;
+DROP TABLE IF EXISTS payment_reconciliations;
+DROP TABLE IF EXISTS audit_chain_head;
 DROP TABLE IF EXISTS faqs;
 DROP TABLE IF EXISTS newsletter_campaigns;
 DROP TABLE IF EXISTS student_documents;
@@ -370,6 +385,9 @@ CREATE TABLE courses (
     course_start_date      DATE NULL,
     course_based           VARCHAR(50) NULL,
     intro_video_url        VARCHAR(1000) NULL,   -- trailer on the public course page (link or /storage/... file)
+    seat_limit             INT NULL,             -- live courses / workshops: at most this many students (NULL = no cap)
+    cancelled_at           DATETIME NULL,        -- the run was cancelled (Admin > course > Cancel); cancel_reason is shown to students
+    cancel_reason          VARCHAR(500) NULL,
     is_free_course         TINYINT NOT NULL DEFAULT 0,
     status                 TINYINT NOT NULL DEFAULT 1,
     created_at             DATETIME NULL,
@@ -547,7 +565,7 @@ CREATE TABLE orders (
     payment_option    VARCHAR(50) NULL,
     payment_id        VARCHAR(255) NULL,
     gateway_ref       VARCHAR(255) NULL,           -- Razorpay / PayPal order id created for this order
-    payment_status    TINYINT NOT NULL DEFAULT 0,  -- 0 = not paid, 1 = success, 2 = failed
+    payment_status    TINYINT NOT NULL DEFAULT 0,  -- 0 = not paid, 1 = success, 2 = failed, 3 = refunded, 4 = refund due
     payment_details   LONGTEXT NULL,
     issue_certificate TINYINT NOT NULL DEFAULT 0,  -- 0 = not issued, 1 = issued
     certificate_name  VARCHAR(500) NULL,
@@ -759,6 +777,258 @@ CREATE TABLE admin_audit (
     created_at DATETIME NULL,
     INDEX admin_audit_entity_index (entity, entity_id)
 );
+
+-- account restrictions + content reports (see migrations/2026-11-05_moderation.sql)
+CREATE TABLE account_restrictions (
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    user_id    BIGINT       NOT NULL,
+    kind       VARCHAR(10)  NOT NULL,                 -- BAN | POSTING | SELLING
+    reason     VARCHAR(500) NOT NULL,
+    until      DATETIME     NULL,
+    created_by BIGINT       NULL,
+    created_at DATETIME     NOT NULL,
+    lifted_at  DATETIME     NULL,
+    lifted_by  BIGINT       NULL,
+    INDEX account_restrictions_user_index (user_id, kind, lifted_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE content_reports (
+    id               BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    target_type      VARCHAR(12)  NOT NULL,           -- PAINTING | ARTWORK | REVIEW | SUBMISSION | USER
+    target_id        BIGINT       NOT NULL,
+    reason_code      VARCHAR(20)  NOT NULL,           -- SPAM | OFFENSIVE | COPYRIGHT | MISLEADING | PERSONAL_INFO | OTHER
+    detail           VARCHAR(1000) NULL,
+    reporter_user_id BIGINT       NULL,
+    reporter_ip      VARCHAR(45)  NULL,
+    status           VARCHAR(10)  NOT NULL DEFAULT 'OPEN',  -- OPEN | ACTIONED | DISMISSED
+    action           VARCHAR(10)  NULL,               -- HIDDEN | NONE
+    decided_by       BIGINT       NULL,
+    decided_at       DATETIME     NULL,
+    note             VARCHAR(500) NULL,
+    created_at       DATETIME     NOT NULL,
+    UNIQUE INDEX content_reports_once_unique (target_type, target_id, reporter_user_id),
+    INDEX content_reports_status_index (status, target_type, target_id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- escrow ledger, payouts, disputes (see migrations/2026-11-05_ledger_payouts.sql)
+CREATE TABLE ledger_entries (
+    id           BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    idem_key     VARCHAR(160)   NOT NULL,
+    entry_type   VARCHAR(20)    NOT NULL,  -- SALE | COMMISSION | ARTIST_SHARE | REFUND | PAYOUT | DISPUTE_LOSS | ADJUSTMENT
+    account      VARCHAR(10)    NOT NULL,  -- ESCROW | PLATFORM | ARTIST
+    source       VARCHAR(20)    NOT NULL,  -- MARKETPLACE | SHOP | COURSE | PAYOUT | MANUAL
+    source_ref   VARCHAR(60)    NOT NULL,
+    payee_type   VARCHAR(6)     NULL,      -- USER (student artist) | ADMIN (studio artist); NULL for platform rows
+    payee_id     BIGINT         NULL,
+    payee_name   VARCHAR(255)   NULL,
+    amount       DECIMAL(12, 2) NOT NULL,  -- signed, in INR
+    available_at DATETIME       NULL,      -- ARTIST rows: when it may be paid out
+    payout_id    BIGINT         NULL,
+    memo         VARCHAR(300)   NULL,
+    created_by   BIGINT         NULL,
+    created_at   DATETIME       NOT NULL,
+    UNIQUE INDEX ledger_entries_idem_unique (idem_key),
+    INDEX ledger_entries_payee_index (payee_type, payee_id, account, available_at),
+    INDEX ledger_entries_source_index (source, source_ref),
+    INDEX ledger_entries_time_index (created_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE payout_batches (
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    period_end DATETIME       NOT NULL,
+    status     VARCHAR(8)     NOT NULL DEFAULT 'DRAFT',  -- DRAFT | PAID | VOID
+    total      DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    line_count INT            NOT NULL DEFAULT 0,
+    reference  VARCHAR(200)   NULL,
+    paid_by    BIGINT         NULL,
+    paid_at    DATETIME       NULL,
+    created_at DATETIME       NOT NULL,
+    INDEX payout_batches_status_index (status, id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE payout_lines (
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    batch_id   BIGINT         NOT NULL,
+    payee_type VARCHAR(6)     NOT NULL,
+    payee_id   BIGINT         NOT NULL,
+    payee_name VARCHAR(255)   NULL,
+    payee_email VARCHAR(255)  NULL,
+    amount     DECIMAL(12, 2) NOT NULL,
+    entries    INT            NOT NULL DEFAULT 0,
+    UNIQUE INDEX payout_lines_unique (batch_id, payee_type, payee_id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE ledger_disputes (
+    id                 BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    source             VARCHAR(20)    NOT NULL,
+    source_ref         VARCHAR(60)    NOT NULL,
+    payment_ref        VARCHAR(255)   NULL,
+    gateway_dispute_id VARCHAR(255)   NULL,
+    reason             VARCHAR(300)   NULL,
+    amount             DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    status             VARCHAR(6)     NOT NULL DEFAULT 'OPEN',  -- OPEN | WON | LOST
+    opened_by          BIGINT         NULL,                     -- NULL = gateway webhook
+    closed_by          BIGINT         NULL,
+    note               VARCHAR(500)   NULL,
+    created_at         DATETIME       NOT NULL,
+    closed_at          DATETIME       NULL,
+    UNIQUE INDEX ledger_disputes_gateway_unique (gateway_dispute_id),
+    INDEX ledger_disputes_source_index (source, source_ref, status)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- messages to course students (see migrations/2026-11-05_course_messages.sql)
+CREATE TABLE course_messages (
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    course_id  BIGINT       NOT NULL,
+    admin_id   BIGINT       NULL,
+    kind       VARCHAR(12)  NOT NULL DEFAULT 'MESSAGE',  -- MESSAGE | CANCELLED | RESCHEDULED
+    subject    VARCHAR(200) NOT NULL,
+    body       LONGTEXT     NOT NULL,                    -- plain text
+    send_email TINYINT(1)   NOT NULL DEFAULT 1,
+    recipients INT          NOT NULL DEFAULT 0,
+    emailed    INT          NOT NULL DEFAULT 0,
+    failed     INT          NOT NULL DEFAULT 0,
+    created_at DATETIME     NOT NULL,
+    INDEX course_messages_course_index (course_id, id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE course_message_deliveries (
+    id           BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    message_id   BIGINT       NOT NULL,
+    user_id      BIGINT       NOT NULL,
+    email        VARCHAR(255) NULL,
+    email_status VARCHAR(8)   NOT NULL DEFAULT 'SKIPPED', -- SENT | FAILED | SKIPPED (studio only)
+    error        VARCHAR(300) NULL,
+    read_at      DATETIME     NULL,
+    created_at   DATETIME     NOT NULL,
+    UNIQUE INDEX course_message_deliveries_unique (message_id, user_id),
+    INDEX course_message_deliveries_user_index (user_id, read_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- seats, waitlist and priority access (see migrations/2026-11-05_seats_waitlist.sql)
+CREATE TABLE seat_holds (
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    course_id  BIGINT      NOT NULL,
+    user_id    BIGINT      NOT NULL,
+    order_id   BIGINT      NULL,
+    grant_id   BIGINT      NULL,
+    status     VARCHAR(10) NOT NULL DEFAULT 'HELD',     -- HELD | PAID | EXPIRED | RELEASED
+    expires_at DATETIME    NOT NULL,
+    created_at DATETIME    NOT NULL,
+    updated_at DATETIME    NOT NULL,
+    UNIQUE INDEX seat_holds_course_user_unique (course_id, user_id),
+    INDEX seat_holds_status_index (course_id, status, expires_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE course_waitlist (
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    course_id  BIGINT       NOT NULL,
+    user_id    BIGINT       NOT NULL,
+    email      VARCHAR(255) NOT NULL,
+    status     VARCHAR(10)  NOT NULL DEFAULT 'WAITING', -- WAITING | INVITED | JOINED | EXPIRED | LEFT
+    grant_id   BIGINT       NULL,
+    created_at DATETIME     NOT NULL,
+    updated_at DATETIME     NOT NULL,
+    UNIQUE INDEX course_waitlist_course_user_unique (course_id, user_id),
+    INDEX course_waitlist_status_index (course_id, status, id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE access_grants (
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    course_id  BIGINT       NOT NULL,
+    user_id    BIGINT       NULL,
+    email      VARCHAR(255) NOT NULL,
+    kind       VARCHAR(10)  NOT NULL,                   -- WAITLIST | PRIORITY
+    token_hash CHAR(64)     NOT NULL,
+    holds_seat TINYINT(1)   NOT NULL DEFAULT 1,
+    expires_at DATETIME     NOT NULL,
+    used_at    DATETIME     NULL,
+    revoked_at DATETIME     NULL,
+    created_by BIGINT       NULL,                       -- admins.id (NULL = the waitlist)
+    note       VARCHAR(255) NULL,
+    created_at DATETIME     NOT NULL,
+    UNIQUE INDEX access_grants_token_unique (token_hash),
+    INDEX access_grants_course_index (course_id, expires_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- refunds queue + reconciliation log (see migrations/2026-11-05_payments_refunds.sql)
+CREATE TABLE payment_refunds (
+    id                BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    source            VARCHAR(20)    NOT NULL,                 -- COURSE | MARKETPLACE | SHOP
+    source_ref        VARCHAR(50)    NOT NULL,                 -- orders.id / marketplace_orders.order_id / shop_orders.order_id
+    payment_ref       VARCHAR(255)   NOT NULL,                 -- Razorpay payment id / PayPal capture id / test id
+    gateway           VARCHAR(20)    NOT NULL,                 -- RAZORPAY | PAYPAL | TEST | MANUAL
+    amount            DECIMAL(12, 2) NOT NULL,
+    currency          VARCHAR(3)     NOT NULL,
+    reason            VARCHAR(40)    NOT NULL,                 -- DUPLICATE_PAYMENT | SOLD_TO_OTHER | NOT_SUPPLIED | COURSE_CANCELLED | OTHER
+    detail            VARCHAR(500)   NULL,
+    buyer_email       VARCHAR(255)   NULL,
+    user_id           BIGINT         NULL,
+    status            VARCHAR(12)    NOT NULL DEFAULT 'PENDING', -- PENDING | PROCESSING | REFUNDED | FAILED | DISMISSED
+    gateway_refund_id VARCHAR(255)   NULL,
+    error             VARCHAR(500)   NULL,
+    decided_by        BIGINT         NULL,                     -- admins.id
+    note              VARCHAR(500)   NULL,
+    created_at        DATETIME       NOT NULL,
+    decided_at        DATETIME       NULL,
+    UNIQUE INDEX payment_refunds_source_unique (source, source_ref, payment_ref),
+    INDEX payment_refunds_status_index (status, created_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- one row per reconciliation pass that changed something, so staff can see late matches
+CREATE TABLE payment_reconciliations (
+    id          BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    source      VARCHAR(20)   NOT NULL,
+    source_ref  VARCHAR(50)   NOT NULL,
+    gateway     VARCHAR(20)   NOT NULL,
+    payment_ref VARCHAR(255)  NULL,
+    outcome     VARCHAR(30)   NOT NULL,                        -- PAID | REFUND_REQUIRED | CAPTURED | AMOUNT_MISMATCH | ERROR
+    minutes_late INT          NOT NULL DEFAULT 0,
+    detail      VARCHAR(500)  NULL,
+    created_at  DATETIME      NOT NULL,
+    INDEX payment_reconciliations_time_index (created_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- security audit log: append-only, hash-chained (see migrations/2026-11-05_security_audit.sql)
+CREATE TABLE audit_logs (
+    id            BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    occurred_at   DATETIME(3)   NOT NULL,
+    actor_type    VARCHAR(20)   NOT NULL,             -- admin | student | system | anonymous
+    actor_id      BIGINT        NULL,
+    actor_email   VARCHAR(255)  NULL,
+    actor_role    VARCHAR(30)   NULL,                 -- admin | teacher | moderator | student
+    action_type   VARCHAR(10)   NOT NULL,             -- CREATE | UPDATE | DELETE | AUTH | EXPORT | DENIED
+    action        VARCHAR(120)  NOT NULL,             -- what happened, e.g. "course updated", "admin_login"
+    resource_type VARCHAR(50)   NULL,
+    resource_id   VARCHAR(64)   NULL,
+    summary       VARCHAR(1000) NULL,
+    before_json   LONGTEXT      NULL,                 -- text, not JSON: MySQL would reorder keys and break the hash
+    after_json    LONGTEXT      NULL,
+    ip            VARCHAR(45)   NULL,
+    country       VARCHAR(8)    NULL,                 -- CloudFront-Viewer-Country
+    city          VARCHAR(100)  NULL,                 -- CloudFront-Viewer-City
+    user_agent    VARCHAR(500)  NULL,
+    http_method   VARCHAR(10)   NULL,
+    path          VARCHAR(500)  NULL,
+    outcome       VARCHAR(10)   NOT NULL,             -- OK | FAIL | DENIED
+    prev_hash     CHAR(64)      NOT NULL,
+    row_hash      CHAR(64)      NOT NULL,
+    INDEX audit_logs_time_index (occurred_at),
+    INDEX audit_logs_actor_index (actor_id, occurred_at),
+    INDEX audit_logs_type_index (action_type, occurred_at),
+    INDEX audit_logs_resource_index (resource_type, resource_id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- the end of the chain: locked (SELECT ... FOR UPDATE) while a row is appended, so rows join the chain one at a time
+CREATE TABLE audit_chain_head (
+    id         INT          NOT NULL PRIMARY KEY,
+    last_id    BIGINT       NOT NULL,
+    last_hash  CHAR(64)     NOT NULL,
+    updated_at DATETIME(3)  NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+INSERT INTO audit_chain_head (id, last_id, last_hash, updated_at)
+VALUES (1, 0, '0000000000000000000000000000000000000000000000000000000000000000', '2026-11-06 00:00:00.000');
 
 CREATE TABLE contacts (
     id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -1259,3 +1529,9 @@ SELECT c.id, c.title, c.introduction AS description,
        (SELECT cp.price_inr FROM course_prices cp WHERE cp.course_id = c.id ORDER BY cp.id LIMIT 1) AS price,
        c.course_start_date AS schedule_date
 FROM courses c JOIN course_types ct ON ct.id = c.course_type_id;
+
+-- Tag & hierarchy manager: nesting and archiving of the course filter lists (see migrations/2026-11-05_taxonomy_hierarchy.sql)
+ALTER TABLE mediums ADD COLUMN parent_id BIGINT NULL, ADD COLUMN archived_at DATETIME NULL, ADD INDEX mediums_parent_index (parent_id);
+ALTER TABLE genres ADD COLUMN parent_id BIGINT NULL, ADD COLUMN archived_at DATETIME NULL, ADD INDEX genres_parent_index (parent_id);
+ALTER TABLE skills ADD COLUMN parent_id BIGINT NULL, ADD COLUMN archived_at DATETIME NULL, ADD INDEX skills_parent_index (parent_id);
+ALTER TABLE age_groups ADD COLUMN parent_id BIGINT NULL, ADD COLUMN archived_at DATETIME NULL, ADD INDEX age_groups_parent_index (parent_id);

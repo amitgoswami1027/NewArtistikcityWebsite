@@ -1,0 +1,243 @@
+# =====================================================================
+#  ArtistikCity - test, build and deploy to AWS on every push to main.
+#
+#    test    unit tests, database migrations against MySQL 8.4 (empty DB + rerun), start the app and check /healthz
+#    build   Docker image -> Amazon ECR, tagged with the commit SHA
+#    deploy  AWS Systems Manager runs /opt/artistikcity/deploy-image.sh on the EC2 server: migrations, new container,
+#            health check, automatic rollback to the previous image if the new one is not healthy. Then a public
+#            health check through CloudFront.
+#
+#  Manual runs (Actions > Deploy to AWS > Run workflow):
+#    * rollback = true          go back to the version that ran before the current one (no build)
+#    * image_tag = <git sha>    deploy an image built earlier (e.g. a known good commit), no build
+#
+#  Repository settings > Secrets and variables > Actions > Variables (values come from the CloudFormation outputs):
+#    AWS_DEPLOY_ROLE_ARN, ECR_REPOSITORY, EC2_INSTANCE_ID, CLOUDFRONT_DISTRIBUTION_ID, SITE_DOMAIN
+#  No AWS keys are stored in GitHub: the jobs sign in with OpenID Connect.
+#  Until AWS_DEPLOY_ROLE_ARN is set, a push only runs the tests (nothing is built or deployed).
+# =====================================================================
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      rollback:
+        description: Roll back to the previous version (no build)
+        type: boolean
+        default: false
+      image_tag:
+        description: Deploy an existing image tag (git SHA) instead of building this commit
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+  id-token: write          # OpenID Connect sign-in to AWS
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false   # never stop a deploy half way
+
+env:
+  AWS_REGION: ap-south-1
+
+jobs:
+  test:
+    name: Test
+    if: github.event_name == 'push' || (!inputs.rollback && inputs.image_tag == '')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root-password
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -pci-root-password --silent"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Unit tests
+        run: mvn -B -ntp test
+
+      - name: Build the jar
+        run: mvn -B -ntp -DskipTests package
+
+      - name: Database - fresh install, then the upgrade path again (must be a no-op)
+        env:
+          DB_HOST: 127.0.0.1
+          DB_NAME: artistikcity
+          DB_USER: root
+          MYSQL_PWD: ci-root-password
+          DB_SSL_MODE: REQUIRED
+        run: |
+          LOAD_SEED=true LOAD_DEMO=true bash deploy/db-migrate.sh
+          bash deploy/db-migrate.sh | tee second-run.txt
+          grep -q "0 migration(s) applied" second-run.txt
+
+      - name: Start the app and check it answers
+        env:
+          DB_URL: jdbc:mysql://127.0.0.1:3306/artistikcity?useUnicode=true&characterEncoding=UTF-8&sslMode=REQUIRED
+          DB_USERNAME: root
+          DB_PASSWORD: ci-root-password
+          OTP_SECRET: ci-otp-secret-0123456789abcdef
+        run: |
+          java -jar target/artistikcity-1.0.0.jar --server.port=8080 > app.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8080/healthz; then echo; break; fi
+            if [ "$i" = 60 ]; then echo "the app did not start"; tail -n 100 app.log; exit 1; fi
+            sleep 2
+          done
+          for path in / /courses /login /admin/login /faq; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080$path")
+            echo "$path -> $code"
+            [ "$code" = 200 ] || { tail -n 100 app.log; exit 1; }
+          done
+
+      - name: App log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-log
+          path: app.log
+          if-no-files-found: ignore
+
+  build:
+    name: Build and push image
+    needs: test
+    # until AWS is set up (docs/AWS-DEPLOY.md, step 6) pushes only run the tests
+    if: vars.AWS_DEPLOY_ROLE_ARN != '' && (github.event_name == 'push' || (!inputs.rollback && inputs.image_tag == ''))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - id: image
+        run: echo "image=${{ steps.ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.image.outputs.image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+  deploy:
+    name: Deploy
+    needs: build
+    # after a successful build, or straight away for a manual rollback / image tag
+    if: >-
+      always() && !cancelled() &&
+      (needs.build.result == 'success' ||
+       (github.event_name == 'workflow_dispatch' && (inputs.rollback || inputs.image_tag != '')))
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: production
+      url: https://${{ vars.SITE_DOMAIN }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Choose what to run on the server
+        id: what
+        env:
+          BUILT_IMAGE: ${{ needs.build.outputs.image }}
+          ROLLBACK: ${{ inputs.rollback }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          REPO: ${{ vars.ECR_REPOSITORY }}
+        run: |
+          if [ "$ROLLBACK" = "true" ]; then
+            echo "command=/opt/artistikcity/ec2-deploy.sh --rollback" >> "$GITHUB_OUTPUT"
+            echo "label=rollback to the previous version" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -n "$BUILT_IMAGE" ]; then
+            image="$BUILT_IMAGE"
+          else
+            case "$IMAGE_TAG" in *[!A-Za-z0-9._-]*|'') echo "image_tag must be a tag such as a git SHA"; exit 1 ;; esac
+            # the tag must exist in ECR
+            aws ecr describe-images --repository-name "$REPO" --image-ids imageTag="$IMAGE_TAG" > /dev/null
+            registry="$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${AWS_REGION}.amazonaws.com"
+            image="$registry/$REPO:$IMAGE_TAG"
+          fi
+          echo "command=/opt/artistikcity/deploy-image.sh $image" >> "$GITHUB_OUTPUT"
+          echo "label=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy on EC2 (migrations, swap, health check, automatic rollback)
+        env:
+          INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          COMMAND: ${{ steps.what.outputs.command }}
+        run: |
+          params=$(jq -n --arg c "$COMMAND" '{commands: [$c], executionTimeout: ["1200"]}')
+          id=$(aws ssm send-command --instance-ids "$INSTANCE_ID" --document-name AWS-RunShellScript \
+                 --comment "artistikcity ${GITHUB_SHA::12}" --parameters "$params" --query Command.CommandId --output text)
+          echo "SSM command $id"
+          status=Pending
+          for i in $(seq 1 240); do
+            sleep 5
+            status=$(aws ssm get-command-invocation --command-id "$id" --instance-id "$INSTANCE_ID" \
+                       --query Status --output text 2>/dev/null || echo Pending)
+            case "$status" in Pending|InProgress|Delayed) continue ;; *) break ;; esac
+          done
+          aws ssm get-command-invocation --command-id "$id" --instance-id "$INSTANCE_ID" --query StandardOutputContent --output text || true
+          echo "----- errors -----"
+          aws ssm get-command-invocation --command-id "$id" --instance-id "$INSTANCE_ID" --query StandardErrorContent --output text || true
+          echo "Result: $status"
+          [ "$status" = Success ]
+
+      - name: Refresh cached static files
+        if: vars.CLOUDFRONT_DISTRIBUTION_ID != ''
+        run: |
+          aws cloudfront create-invalidation --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/assets/*" "/fonts/*" --query Invalidation.Id --output text
+
+      - name: Public health check through CloudFront
+        env:
+          SITE: ${{ vars.SITE_DOMAIN }}
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsS --max-time 10 "https://$SITE/healthz"; then echo; exit 0; fi
+            sleep 10
+          done
+          echo "https://$SITE/healthz did not answer 200"
+          exit 1
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### ${{ job.status == 'success' && 'Deployed' || 'Deploy failed' }}: ${{ steps.what.outputs.label }}"
+            echo ""
+            echo "Site: https://${{ vars.SITE_DOMAIN }}"
+            echo ""
+            echo "To undo: Actions > Deploy to AWS > Run workflow > tick **rollback**."
+          } >> "$GITHUB_STEP_SUMMARY"

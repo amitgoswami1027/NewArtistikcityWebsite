@@ -75,8 +75,61 @@ public class CommissionPayments {
         body.put("receipt", receipt);
         body.put("notes", notes);
         String auth = Base64.getEncoder().encodeToString((prop("razorpay.key") + ":" + prop("razorpay.secret")).getBytes(StandardCharsets.UTF_8));
-        HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create("https://api.razorpay.com/v1/orders"))
+        HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(razorpayBase() + "/v1/orders"))
                 .timeout(Duration.ofSeconds(20)).header("Authorization", "Basic " + auth).header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json.encode(body))).build(), HttpResponse.BodyHandlers.ofString());
+        return String.valueOf(checked(r).get("id"));
+    }
+
+    /** app.payments.razorpay.api-base (a test double can stand in for Razorpay). */
+    String razorpayBase() {
+        String b = prop("app.payments.razorpay.api-base");
+        if (b.isEmpty()) b = "https://api.razorpay.com";
+        return b.endsWith("/") ? b.substring(0, b.length() - 1) : b;
+    }
+
+    private String razorpayBasic() {
+        return "Basic " + Base64.getEncoder().encodeToString((prop("razorpay.key") + ":" + prop("razorpay.secret")).getBytes(StandardCharsets.UTF_8));
+    }
+
+    /** One payment attempt on a Razorpay order: id, status (created / authorized / captured / failed / refunded), amount in paise. */
+    public record RazorpayPayment(String id, String status, long amountPaise, String currency) {
+    }
+
+    /** GET /v1/orders/{id}/payments - every payment attempt made for one of our Razorpay orders (for reconciliation). */
+    @SuppressWarnings("unchecked")
+    public List<RazorpayPayment> razorpayOrderPayments(String razorpayOrderId) throws IOException, InterruptedException {
+        HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(razorpayBase() + "/v1/orders/" + razorpayOrderId + "/payments"))
+                .timeout(Duration.ofSeconds(20)).header("Authorization", razorpayBasic()).GET().build(), HttpResponse.BodyHandlers.ofString());
+        Map<String, Object> res = checked(r);
+        List<RazorpayPayment> out = new java.util.ArrayList<>();
+        if (res.get("items") instanceof List<?> items) {
+            for (Object o : items) {
+                if (o instanceof Map<?, ?> m) {
+                    out.add(new RazorpayPayment(String.valueOf(m.get("id")), String.valueOf(m.get("status")),
+                            m.get("amount") instanceof Number n ? n.longValue() : -1, String.valueOf(m.get("currency"))));
+                }
+            }
+        }
+        return out;
+    }
+
+    /** POST /v1/payments/{id}/capture - for a payment that was authorized but never captured. */
+    public boolean razorpayCapture(String paymentId, long amountPaise) throws IOException, InterruptedException {
+        HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(razorpayBase() + "/v1/payments/" + paymentId + "/capture"))
+                .timeout(Duration.ofSeconds(20)).header("Authorization", razorpayBasic()).header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json.encode(Map.of("amount", amountPaise, "currency", "INR")))).build(), HttpResponse.BodyHandlers.ofString());
+        return "captured".equals(String.valueOf(checked(r).get("status")));
+    }
+
+    /** POST /v1/payments/{id}/refund (amount in paise; the full payment when null). Returns the Razorpay refund id. */
+    public String razorpayRefund(String paymentId, Long amountPaise, Map<String, ?> notes) throws IOException, InterruptedException {
+        Map<String, Object> body = new LinkedHashMap<>();
+        if (amountPaise != null) body.put("amount", amountPaise);
+        body.put("speed", "normal");
+        body.put("notes", notes == null ? Map.of() : notes);
+        HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(razorpayBase() + "/v1/payments/" + paymentId + "/refund"))
+                .timeout(Duration.ofSeconds(30)).header("Authorization", razorpayBasic()).header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json.encode(body))).build(), HttpResponse.BodyHandlers.ofString());
         return String.valueOf(checked(r).get("id"));
     }
@@ -113,6 +166,8 @@ public class CommissionPayments {
     }
 
     private String paypalBase() {
+        String override = prop("app.payments.paypal.api-base");
+        if (!override.isEmpty()) return override.endsWith("/") ? override.substring(0, override.length() - 1) : override;
         return "live".equalsIgnoreCase(prop("paypal.mode")) ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
     }
 
@@ -173,6 +228,42 @@ public class CommissionPayments {
             // unusual payload - status alone decides
         }
         return new String[]{String.valueOf(res.get("status")), captureId, value, currency};
+    }
+
+    /** GET /v2/checkout/orders/{id}: [status, captureId, amountValue, currency] (status APPROVED = paid by the buyer, not yet captured). */
+    @SuppressWarnings("unchecked")
+    public String[] paypalOrder(String paypalOrderId) throws IOException, InterruptedException {
+        HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(paypalBase() + "/v2/checkout/orders/" + paypalOrderId))
+                .timeout(Duration.ofSeconds(20)).header("Authorization", "Bearer " + paypalToken()).GET().build(), HttpResponse.BodyHandlers.ofString());
+        Map<String, Object> res = checked(r);
+        String captureId = null, value = null, currency = null;
+        try {
+            Map<String, Object> pu = (Map<String, Object>) ((List<Object>) res.get("purchase_units")).get(0);
+            Map<String, Object> amount = (Map<String, Object>) pu.get("amount");
+            if (amount != null) {
+                value = String.valueOf(amount.get("value"));
+                currency = String.valueOf(amount.get("currency_code"));
+            }
+            Object payments = pu.get("payments");
+            if (payments instanceof Map<?, ?> pm && pm.get("captures") instanceof List<?> caps && !caps.isEmpty()) {
+                captureId = String.valueOf(((Map<String, Object>) caps.get(0)).get("id"));
+            }
+        } catch (RuntimeException ignored) {
+            // status alone decides
+        }
+        return new String[]{String.valueOf(res.get("status")), captureId, value, currency};
+    }
+
+    /** POST /v2/payments/captures/{id}/refund (the whole capture when amount is null). Returns [refundId, status]. */
+    public String[] paypalRefund(String captureId, BigDecimal amount, String currency, String note) throws IOException, InterruptedException {
+        Map<String, Object> body = new LinkedHashMap<>();
+        if (amount != null) body.put("amount", Map.of("value", amount.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString(), "currency_code", currency));
+        if (note != null) body.put("note_to_payer", note.length() > 255 ? note.substring(0, 255) : note);
+        HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(paypalBase() + "/v2/payments/captures/" + captureId + "/refund"))
+                .timeout(Duration.ofSeconds(30)).header("Authorization", "Bearer " + paypalToken()).header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json.encode(body))).build(), HttpResponse.BodyHandlers.ofString());
+        Map<String, Object> res = checked(r);
+        return new String[]{String.valueOf(res.get("id")), String.valueOf(res.get("status"))};
     }
 
     /** Asks PayPal to verify a webhook's transmission signature (POST /v1/notifications/verify-webhook-signature). */

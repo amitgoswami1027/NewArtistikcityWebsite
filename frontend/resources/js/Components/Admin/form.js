@@ -574,3 +574,68 @@ export function SaveBar({ dirty, busy, onSave, saveLabel = 'Save changes', child
         </div>
     );
 }
+
+/**
+ * Fast tagging for long lists (course genres): type to search, arrow keys + Enter to pick, Backspace removes the last
+ * chip; with an empty box it suggests the most used items. Options {value, label, parent_id?, uses?, archived?}; nested
+ * items show their path ("Landscape › Seascape"). Value: array of value strings.
+ */
+export function TagPicker({ options = [], value = [], onChange, name, placeholder = 'Type to search, Enter to add', max = 30 }) {
+    const [q, setQ] = useState('');
+    const [open, setOpen] = useState(false);
+    const [hi, setHi] = useState(0);
+    const byId = {};
+    options.forEach((o) => { byId[String(o.value)] = o; });
+    const path = (o) => {
+        const names = [o.label];
+        let p = o.parent_id && byId[String(o.parent_id)];
+        for (let g = 0; p && g < 6; g++) { names.unshift(p.label); p = p.parent_id && byId[String(p.parent_id)]; }
+        return names.join(' › ');
+    };
+    const chosen = new Set(value.map(String));
+    const needle = q.trim().toLowerCase();
+    const matches = options.filter((o) => !chosen.has(String(o.value)) && !o.archived)
+        .filter((o) => !needle || path(o).toLowerCase().includes(needle))
+        .sort((a, b) => (needle ? (a.label.toLowerCase().startsWith(needle) ? -1 : 0) - (b.label.toLowerCase().startsWith(needle) ? -1 : 0) : Number(b.uses || 0) - Number(a.uses || 0)))
+        .slice(0, needle ? 12 : 8);
+    const add = (o) => { if (!o || value.length >= max) return; onChange([...value.map(String), String(o.value)]); setQ(''); setHi(0); };
+    const remove = (v) => onChange(value.map(String).filter((x) => x !== String(v)));
+    const onKey = (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); setOpen(true); setHi((h) => Math.min(h + 1, matches.length - 1)); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)); }
+        else if (e.key === 'Enter') { e.preventDefault(); add(matches[hi]); }
+        else if (e.key === 'Escape') { setOpen(false); }
+        else if (e.key === 'Backspace' && !q && value.length) { remove(value[value.length - 1]); }
+    };
+    const listId = `tp-${name}-list`;
+    return (
+        <div className="adm-tagpicker">
+            <div className="adm-tagpicker__chips">
+                {value.map((v) => {
+                    const o = byId[String(v)];
+                    return (
+                        <span key={v} className={`adm-tagchip${o && o.archived ? ' is-archived' : ''}`}>
+                            {o ? path(o) : `#${v}`}{o && o.archived ? ' (archived)' : ''}
+                            <button type="button" onClick={() => remove(v)} aria-label={`Remove ${o ? o.label : v}`}><i className="fa fa-times" aria-hidden="true"></i></button>
+                        </span>
+                    );
+                })}
+                <input id={`f-${name}`} className="adm-tagpicker__input" value={q} placeholder={value.length ? '' : placeholder}
+                    onChange={(e) => { setQ(e.target.value); setOpen(true); setHi(0); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 150)}
+                    onKeyDown={onKey} role="combobox" aria-expanded={open && matches.length > 0} aria-controls={listId} aria-autocomplete="list"
+                    aria-activedescendant={open && matches[hi] ? `${listId}-${matches[hi].value}` : undefined} />
+            </div>
+            {open && matches.length > 0 && (
+                <ul id={listId} role="listbox" className="adm-tagpicker__list">
+                    {!needle && <li className="adm-tagpicker__hint" role="presentation">Most used</li>}
+                    {matches.map((o, i) => (
+                        <li key={o.value} id={`${listId}-${o.value}`} role="option" aria-selected={i === hi} className={i === hi ? 'is-hi' : ''}
+                            onMouseDown={(e) => { e.preventDefault(); add(o); }} onMouseEnter={() => setHi(i)}>
+                            {path(o)}{o.uses ? <small>{o.uses}</small> : null}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+}

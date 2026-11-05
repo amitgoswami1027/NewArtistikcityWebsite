@@ -11,6 +11,7 @@ WORKDIR /src
 COPY pom.xml .
 RUN mvn -B -q dependency:go-offline || true
 COPY src ./src
+COPY config ./config
 RUN mvn -B -q -DskipTests package
 
 FROM eclipse-temurin:17-jre
@@ -18,6 +19,7 @@ RUN groupadd --system --gid 10001 app && useradd --system --uid 10001 --gid app 
 WORKDIR /app
 COPY --from=build /src/target/artistikcity-1.0.0.jar /app/app.jar
 # schema, seed data and migrations: used by deploy/db-migrate.sh (copied out of the image on every deploy)
+COPY config /app/config
 COPY database /app/database
 COPY deploy /app/deploy
 # demo images for local docker compose (mounted as a volume there). On AWS uploads live in S3 instead.

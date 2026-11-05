@@ -85,6 +85,13 @@ jobs:
           bash deploy/db-migrate.sh | tee second-run.txt
           grep -q "0 migration(s) applied" second-run.txt
 
+      - name: Race tests against the real database (one original, many buyers; the last seats of a live class)
+        env:
+          ARTISTIK_IT_DB_URL: jdbc:mysql://127.0.0.1:3306/artistikcity?useUnicode=true&characterEncoding=UTF-8&sslMode=REQUIRED
+          ARTISTIK_IT_DB_USER: root
+          ARTISTIK_IT_DB_PASSWORD: ci-root-password
+        run: mvn -B -ntp test -Dtest='MarketplaceConcurrencyIT,SeatRaceIT' -Dsurefire.failIfNoSpecifiedTests=false
+
       - name: Start the app and check it answers
         env:
           DB_URL: jdbc:mysql://127.0.0.1:3306/artistikcity?useUnicode=true&characterEncoding=UTF-8&sslMode=REQUIRED

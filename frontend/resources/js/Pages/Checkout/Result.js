@@ -14,13 +14,25 @@ const niceDate = (v) => {
 
 /** After payment: confirmation with next steps, or a friendly failure with a retry. */
 export default function CheckoutResult() {
-    const { paid, order, course } = usePage().props;
+    const { paid, order, course, duplicate, soldOut } = usePage().props;
     return (
         <SiteLayout title={paid ? 'You are enrolled' : 'Payment not completed'}>
             <div className="ac-wide co co-result">
                 <div className={`co-card co-result__card ${paid ? 'is-ok' : 'is-bad'}`}>
                     <span className="co-result__icon" aria-hidden="true"><i className={`fa ${paid ? 'fa-check' : 'fa-times'}`}></i></span>
-                    {paid ? (
+                    {soldOut ? (
+                        <>
+                            <span className="ac-eyebrow">Course full</span>
+                            <h1>The last seat went while you were paying</h1>
+                            <p className="co-result__lede" role="status">We're sorry: <b>{course && course.title}</b> filled up before your payment arrived. We have queued a full refund, which our team confirms within 2 working days. Join the waitlist on the course page and you'll be first to hear when a seat opens.</p>
+                        </>
+                    ) : paid && duplicate ? (
+                        <>
+                            <span className="ac-eyebrow">Already enrolled</span>
+                            <h1>You already have this course</h1>
+                            <p className="co-result__lede" role="status">Your new payment for <b>{course && course.title}</b> went through, but you were already enrolled. We have queued a full refund of that extra payment; our team confirms it within 2 working days and you'll get an e-mail when it's sent.</p>
+                        </>
+                    ) : paid ? (
                         <>
                             <span className="ac-eyebrow">Payment successful</span>
                             <h1>You're enrolled!</h1>

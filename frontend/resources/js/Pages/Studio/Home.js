@@ -2,9 +2,10 @@ import React from 'react';
 import { usePage } from '@inertiajs/inertia-react';
 import StudioLayout from '@/Components/Studio/StudioLayout';
 import { JOURNEY, statusStyle, shortDate } from '@/Components/Studio/Journey';
+import Notices from '@/Components/Studio/Notices';
 
 export default function Home() {
-    const { enrollments = [], submissions = [], stage = 3, auth, certificatesReady = 0 } = usePage().props;
+    const { enrollments = [], submissions = [], stage = 3, auth, certificatesReady = 0, notices = [] } = usePage().props;
     const name = auth && auth.user ? auth.user.name.split(' ')[0] : 'artist';
     const next = JOURNEY[Math.min(stage, JOURNEY.length) - 1];
     const approved = submissions.filter((s) => s.admin_status === 'Approved').length;
@@ -12,9 +13,10 @@ export default function Home() {
 
     return (
         <StudioLayout title="My studio" subtitle={`Welcome back, ${name}. Here's where you are on your creative journey.`} active="/dashboard" stage={stage}>
+            <Notices notices={notices} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 rounded-2xl bg-ink text-white p-8 relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 90% 10%, #e5156b 0, transparent 50%)' }} aria-hidden="true"></div>
+                    <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 90% 10%, #9c0d48 0, transparent 50%)' }} aria-hidden="true"></div>
                     <div className="relative">
                         <p className="font-mono text-xs tracking-widest uppercase text-pink-300">Next step · {next.n}</p>
                         <h2 className="mt-2 text-3xl font-black tracking-tight text-white">{next.title}{next.subtitle ? ` – ${next.subtitle}` : ''}</h2>
@@ -64,7 +66,7 @@ export default function Home() {
                             const pct = Number(e.progress_percentage || 0);
                             return (
                                 <article key={e.id} className="rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg transition">
-                                    <div className="relative h-40 overflow-hidden" style={{ background: 'linear-gradient(135deg,#111,#3b0a24 60%,#e5156b)' }}>
+                                    <div className="relative h-40 overflow-hidden" style={{ background: 'linear-gradient(135deg,#111,#3b0a24 60%,#9c0d48)' }}>
                                         {e.photo && <img src={`/storage/uploads/courses/${e.course_id}/${e.photo}`} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(ev) => { ev.currentTarget.style.display = 'none'; }} />}
                                         <span className={`absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-bold ${pct >= 100 ? 'bg-green-600 text-white' : pct > 0 ? 'bg-white text-ink' : 'bg-brand text-white'}`}>{pct >= 100 ? 'Completed' : pct > 0 ? 'In progress' : 'Not started'}</span>
                                     </div>

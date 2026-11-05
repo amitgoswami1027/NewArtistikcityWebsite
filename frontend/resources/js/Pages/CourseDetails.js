@@ -7,6 +7,8 @@ import { programImage, programPrice, isWorkshop } from '@/Components/Site/Progra
 import { catalogUrl } from '@/Components/Site/SiteHeader';
 import { Inertia } from '@inertiajs/inertia';
 import { authPost } from '@/Components/Auth/api';
+import { SeatsNote, WaitlistPanel } from '@/Components/Site/Seats';
+import ReportButton from '@/Components/Site/ReportButton';
 
 const asList = (v) => (Array.isArray(v) ? v.filter((x) => x !== null && String(x).trim() !== '') : []);
 const has = (v) => v !== undefined && v !== null && String(v).trim() !== '';
@@ -53,7 +55,8 @@ const PERKS = [
 ];
 
 export default function CourseDetails() {
-    const { course, curriculum = [], projects = [], reviews = [], gallery = [], videos = [], related = [], stats = {}, auth, saved: wishlisted } = usePage().props;
+    const { course, curriculum = [], projects = [], reviews = [], gallery = [], videos = [], related = [], stats = {}, auth, saved: wishlisted, seats } = usePage().props;
+    const soldOut = !!(seats && seats.soldOut);
     const data = course.data;
     const workshop = isWorkshop(data);
     const kind = workshop ? 'workshop' : 'course';
@@ -381,6 +384,7 @@ export default function CourseDetails() {
                                                     <i className={`fa fa-thumbs-o-${Number(r.rating || 5) >= 3 ? 'up' : 'down'} dm-review__thumb ${Number(r.rating || 5) >= 3 ? '' : 'is-bad'}`}></i>
                                                 </div>
                                                 <p>{r.review}</p>
+                                                <ReportButton type="REVIEW" id={r.id} label="Report review" signedIn={!!(auth && auth.user)} />
                                             </div>
                                         ))}
                                     </div>
@@ -439,8 +443,9 @@ export default function CourseDetails() {
                         <div className="dm-buy">
                             <div className="dm-buy__price"><strong>{price || ''}</strong></div>
                             <div className="dm-buy__note">One-time payment · {workshop ? 'Full workshop access' : 'Full course access'}</div>
-                            <BuyForm />
-                            {!(auth && auth.user) && <a href={route('join') + '?return_to=' + encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '/')} className="dm-btn dm-btn--line dm-btn--block dm-btn--lg">Join for free</a>}
+                            <SeatsNote seats={seats} />
+                            {soldOut ? <WaitlistPanel courseId={data.id} seats={seats} signedIn={!!(auth && auth.user)} /> : <BuyForm />}
+                            {!soldOut && !(auth && auth.user) && <a href={route('join') + '?return_to=' + encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '/')} className="dm-btn dm-btn--line dm-btn--block dm-btn--lg">Join for free</a>}
                             <div className="dm-buy__guarantee"><i className="fa fa-shield"></i><span>Secure checkout. Questions before you enroll? <a href={route('contact')} style={{ textDecoration: 'underline' }}>Ask us</a>.</span></div>
                         </div>
 
@@ -477,7 +482,7 @@ export default function CourseDetails() {
 
             <div className="dm-mobilebuy">
                 <strong>{price || ''}</strong>
-                <div style={{ flex: 1, maxWidth: 220 }}><BuyForm big={false} /></div>
+                <div style={{ flex: 1, maxWidth: 220 }}>{soldOut ? <a href="#top" className="dm-btn dm-btn--brand dm-btn--block" onClick={(e) => { e.preventDefault(); const w = document.querySelector('.ac-waitlist'); if (w) w.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}>Sold out · waitlist</a> : <BuyForm big={false} />}</div>
             </div>
         </SiteLayout>
     );

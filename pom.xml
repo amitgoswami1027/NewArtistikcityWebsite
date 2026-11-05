@@ -22,12 +22,6 @@
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
         <!-- Web (Spring MVC + embedded Tomcat) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -76,6 +70,18 @@
     </dependencies>
 
     <build>
+        <!-- src/main/resources plus the central configuration file config/artistikcity.yml (packaged as defaults) -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>config</directory>
+                <includes>
+                    <include>artistikcity.yml</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

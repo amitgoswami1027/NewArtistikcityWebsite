@@ -28,6 +28,8 @@ public class CoursesController {
     private final CourseService courses;
     private final com.artistikcity.http.Auth auth;
     private final com.artistikcity.web.user.WishlistService wishlist;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.seats.SeatService seatService;
 
     public CoursesController(Inertia inertia, Db db, CourseService courses, com.artistikcity.http.Auth auth,
                              com.artistikcity.web.user.WishlistService wishlist) {
@@ -63,9 +65,10 @@ public class CoursesController {
         props.put("courses", courses.collection(list));
         props.put("categories", db.select("select * from categories order by id"));
         props.put("course_types", db.select("select * from course_types order by id"));
-        props.put("genres", db.select("select * from genres order by id"));
-        props.put("mediums", db.select("select * from mediums order by id"));
-        props.put("skills", db.select("select * from skills order by id"));
+        // the filter lists: switched on and not archived; parent_id nests them (Admin > Catalog)
+        props.put("genres", db.select("select id, name, genre_slug, parent_id from genres where status = 1 and archived_at is null order by name"));
+        props.put("mediums", db.select("select id, name, medium_slug, parent_id from mediums where status = 1 and archived_at is null order by id"));
+        props.put("skills", db.select("select id, name, skill_slug, parent_id from skills where status = 1 and archived_at is null order by id"));
         props.put("type", Str.ucfirst(t));
         props.put("filters", filters);
         return inertia.render(request, "Courses", props);
@@ -118,6 +121,7 @@ public class CoursesController {
                 + " and course_start_date >= ? order by case when medium_id = ? then 0 else 1 end, id limit 4", id, java.time.LocalDate.now(),
                 course.get("medium_id")), true)));
         props.put("stats", stats);
+        props.put("seats", seatService.forStudent(id, auth.userId(request)));
         props.put("saved", wishlist.isSaved(auth.userId(request), com.artistikcity.web.user.WishlistService.COURSE, id));
         return inertia.render(request, "CourseDetails", props);
     }

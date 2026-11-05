@@ -216,6 +216,14 @@ public class Routes {
         get("admin.change.password", "admin/change-password");
         post("admin.update.password", "admin/update-password");
 
+        get("admin.seats", "admin/seats");
+        get("admin.moderation", "admin/moderation");
+        post("reports.store", "reports");
+        get("admin.finance", "admin/finance");
+        get("admin.finance.export", "admin/finance/export");
+        get("admin.refunds", "admin/payments/refunds");
+        get("admin.security.audit", "admin/security/audit");
+        get("admin.security.audit.export", "admin/security/audit/export");
         get("admin.orders", "admin/orders");
         get("admin.order.details", "admin/order/details/{order_id}");
         get("admin.order.issue.certificate", "admin/order/issue-certificate/{order_id}");

@@ -124,7 +124,7 @@ uploads, created with CloudFormation (`infra/`), and deployed by GitHub Actions 
    mysql -h 127.0.0.1 -u artistik -p artistikcity < database/seed.sql
    ```
    Alternatively, start the app **once** with `DB_INIT=always`. `schema.sql` drops and recreates every table.
-3. Start it. The defaults in `application.properties` already point at `127.0.0.1:3306` / `artistikcity` / `artistik`;
+3. Start it. The defaults in `config/artistikcity.yml` already point at `127.0.0.1:3306` / `artistikcity` / `artistik`;
    use environment variables for anything else:
    ```bash
    # Windows (PowerShell)
@@ -193,6 +193,14 @@ never created, plus the new marketplace, commission and student-lifecycle tables
 Existing user and admin passwords keep working. Also copy Laravel's `storage/app/public/*` (`uploads/…`, `certificates/…`) into this project's `storage/` folder.
 
 ## 4. Configuration (environment variables)
+
+**All settings are in one file: [`config/artistikcity.yml`](config/artistikcity.yml).** It is grouped by area (storage,
+database, mail, payments, sign-in, security, marketplace money, uploads) with a comment on every setting, and its last
+section is the `dev` profile. Each value reads `'${ENV_NAME:default}'`: edit the default in the file and restart, or
+set the environment variable (the way AWS and Docker pass secrets) - the variable wins. The copy inside the jar holds
+the defaults, so the file next to the app only needs what you change. Keep passwords and keys out of the file.
+`src/main/resources/application.properties` only imports it.
+
 
 | Variable | Purpose | Default |
 |---|---|---|

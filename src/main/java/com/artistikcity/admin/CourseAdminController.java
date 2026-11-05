@@ -152,9 +152,14 @@ public class CourseAdminController {
         p.put("kind", type == 2 ? "workshop" : "course");
         p.put("course", course == null ? null : view(course));
         p.put("curriculum", course == null ? null : curriculum(course.lng("id")));
-        p.put("mediums", db.select("select id as value, name as label from mediums order by name"));
-        p.put("genres", db.select("select id as value, name as label from genres order by name"));
-        p.put("skills", db.select("select id as value, name as label from skills order by id"));
+        // picklists: archived items only appear when this course already uses them
+        long cid = course == null ? 0 : course.lng("id");
+        p.put("mediums", db.select("select id as value, name as label, parent_id, archived_at is not null as archived from mediums"
+                + " where archived_at is null or id = (select medium_id from courses where id = ?) order by name", cid));
+        p.put("genres", db.select("select g.id as value, g.name as label, g.parent_id, g.archived_at is not null as archived,"
+                + " (select count(*) from courses c where find_in_set(g.id, c.genre_id) > 0) as uses from genres g"
+                + " where g.archived_at is null or find_in_set(g.id, (select genre_id from courses where id = ?)) > 0 order by g.name", cid));
+        p.put("skills", db.select("select id as value, name as label from skills where archived_at is null or id = (select skill_id from courses where id = ?) order by id", cid));
         // age groups by name (courses.age_group holds the name); a hand-typed value from before stays selectable
         List<Map<String, Object>> ages = new ArrayList<>();
         for (Row r : db.select("select name from age_groups where status = 1 order by sort_order, id")) {
@@ -385,9 +390,10 @@ public class CourseAdminController {
             courseId = db.insert("courses", c);
             audit.log(admin, "course", courseId, "created", title);
         } else {
+            Row before = audit.snapshot("courses", id);
             db.updateById("courses", id, c);
             courseId = id;
-            audit.log(admin, "course", courseId, "updated", title);
+            audit.change(admin, "course", courseId, "updated", title, before, audit.snapshot("courses", id));
         }
         // price: one row per course (the site reads the first row)
         Row price = db.first("select id from course_prices where course_id = ? order by id limit 1", courseId);

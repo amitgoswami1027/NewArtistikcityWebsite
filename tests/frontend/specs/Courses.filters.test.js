@@ -48,8 +48,11 @@ function open(search = '?type=all', filters = {}) {
 const titles = () => screen.queryAllByTestId('course-card').map((c) => c.textContent);
 const params = () => new URLSearchParams(window.location.search);
 
-function openPill(label) {
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${label}`) }));
+/** Age groups are visible pills; Format, Level and Subject sit in the "More filters" drawer. */
+const age = (label) => within(screen.getByRole('group', { name: 'Age group' })).getByRole('button', { name: label });
+function openDrawer() {
+    fireEvent.click(screen.getByRole('button', { name: /More filters/ }));
+    return screen.getByRole('dialog', { name: 'More filters' });
 }
 
 afterEach(() => {
@@ -67,20 +70,19 @@ describe('Courses page filters', () => {
 
     test('an age group narrows the list and is written into the URL', () => {
         open();
-        openPill('Age');
-        fireEvent.click(screen.getByLabelText('Junior - 12 to 15 yrs'));
+        fireEvent.click(age('Junior - 12 to 15 yrs'));
 
         expect(titles()).toEqual(['Weekend Watercolour Florals Workshop', 'Watercolour Landscapes for Beginners']);
         expect(params().get('age')).toBe('Junior - 12 to 15 yrs');
         expect(params().get('type')).toBe('all');
-        expect(screen.getByRole('button', { name: /^Age \(1\)/ })).toBeInTheDocument();
+        expect(age('Junior - 12 to 15 yrs')).toHaveAttribute('aria-pressed', 'true');
+        expect(screen.getByRole('button', { name: 'Remove age filter Junior - 12 to 15 yrs' })).toBeInTheDocument();
     });
 
     test('two age groups show both, joined with a comma in the URL', () => {
         open();
-        openPill('Age');
-        fireEvent.click(screen.getByLabelText('Junior - 12 to 15 yrs'));
-        fireEvent.click(screen.getByLabelText('Adult - 16 yrs and above'));
+        fireEvent.click(age('Junior - 12 to 15 yrs'));
+        fireEvent.click(age('Adult - 16 yrs and above'));
 
         expect(titles()).toHaveLength(3);
         expect(params().get('age')).toBe('Adult - 16 yrs and above,Junior - 12 to 15 yrs');
@@ -110,8 +112,8 @@ describe('Courses page filters', () => {
     test('a medium tab and the Format filter combine, and the URL holds both', () => {
         open();
         fireEvent.click(within(screen.getByRole('navigation', { name: 'Mediums' })).getByRole('button', { name: 'Watercolour' }));
-        openPill('Format');
-        fireEvent.click(screen.getByLabelText('Workshops'));
+        fireEvent.click(within(openDrawer()).getByLabelText(/^Workshops/));
+        fireEvent.keyDown(document, { key: 'Escape' });
 
         expect(titles()).toEqual(['Weekend Watercolour Florals Workshop']);
         expect(params().get('medium')).toBe('1');
@@ -123,16 +125,14 @@ describe('Courses page filters', () => {
 
         expect(titles()).toEqual(['Pencil Sketching Essentials']);
         expect(screen.getByLabelText('Sort by')).toHaveValue('newest');
-        openPill('Age');
-        expect(screen.getByLabelText('Sub-junior - 8 to 12 yrs')).toBeChecked();
+        expect(age('Sub-junior - 8 to 12 yrs')).toHaveAttribute('aria-pressed', 'true');
         expect(params().get('age')).toBe('Sub-junior - 8 to 12 yrs');
         expect(params().get('sort')).toBe('newest');
     });
 
     test('Clear filters empties the list filters and the URL', () => {
         open();
-        openPill('Age');
-        fireEvent.click(screen.getByLabelText('Adult - 16 yrs and above'));
+        fireEvent.click(age('Adult - 16 yrs and above'));
         fireEvent.change(screen.getByLabelText('Search in results'), { target: { value: 'oil' } });
         expect(titles()).toEqual(['Oil Painting Foundations']);
 
@@ -158,8 +158,7 @@ describe('Courses page filters', () => {
         const replace = jest.spyOn(window.history, 'replaceState');
         const push = jest.spyOn(window.history, 'pushState');
 
-        openPill('Age');
-        fireEvent.click(screen.getByLabelText('Junior - 12 to 15 yrs'));
+        fireEvent.click(age('Junior - 12 to 15 yrs'));
         fireEvent.change(screen.getByLabelText('Search in results'), { target: { value: 'water' } });
 
         expect(push).not.toHaveBeenCalled();
@@ -167,5 +166,33 @@ describe('Courses page filters', () => {
         for (const call of replace.mock.calls) expect(call[0]).toEqual(state);
         expect(window.history.length).toBe(before);
         expect(window.location.pathname).toBe('/courses');
+    });
+
+    test('search forgives typos and accents', () => {
+        open();
+        fireEvent.change(screen.getByLabelText('Search in results'), { target: { value: 'pencl skeching' } });
+        expect(titles()).toEqual(['Pencil Sketching Essentials']);
+        fireEvent.change(screen.getByLabelText('Search in results'), { target: { value: 'watercolor' } });
+        expect(titles()).toHaveLength(2);
+    });
+
+    test('zero results offer the one change that brings courses back', () => {
+        open();
+        fireEvent.click(age('Adult - 16 yrs and above'));
+        fireEvent.change(screen.getByLabelText('Search in results'), { target: { value: 'pencil' } });
+        expect(titles()).toHaveLength(0);
+        fireEvent.click(screen.getByRole('button', { name: /^Remove age “Adult/ }));
+        expect(titles()).toEqual(['Pencil Sketching Essentials']);
+    });
+
+    test('the drawer shows counts per option and closes with Escape', () => {
+        open();
+        const d = openDrawer();
+        expect(within(d).getByRole('group', { name: 'Format' })).toBeInTheDocument();
+        const format = within(d).getByRole('group', { name: 'Format' });
+        expect(within(format).getByLabelText(/^Workshops.*, 1 course$/)).toBeInTheDocument();       // one workshop
+        expect(within(format).getByLabelText(/^Live courses.*, 3 courses$/)).toBeInTheDocument();
+        fireEvent.keyDown(document, { key: 'Escape' });
+        expect(screen.queryByRole('dialog')).toBeNull();
     });
 });

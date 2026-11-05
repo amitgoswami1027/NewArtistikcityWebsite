@@ -1,6 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Head, usePage } from '@inertiajs/inertia-react';
 import ErrorBoundary from '@/Components/Admin/ErrorBoundary';
+import axios from 'axios';
+
+// the admin API answers 401 {reauth: true} when the staff session has ended (signed out, expired or revoked by the
+// security watch): go to the sign-in page instead of showing a confusing error on every button
+if (typeof window !== 'undefined' && !window.__acAdmin401) {
+    window.__acAdmin401 = true;
+    axios.interceptors.response.use((r) => r, (e) => {
+        if (e && e.response && e.response.status === 401 && e.response.data && e.response.data.reauth) {
+            window.location.href = '/admin/login';
+        }
+        return Promise.reject(e);
+    });
+}
 
 /*
  * Admin console shell: collapsible grouped sidebar, a sticky header with breadcrumbs and the
@@ -17,6 +30,7 @@ export const NAV = [
     { group: 'Learning', items: [
         { href: '/admin/courses', label: 'Courses', icon: 'fa-graduation-cap', cap: 'catalog', also: ['/admin/courses/'] },
         { href: '/admin/workshop', label: 'Workshops', icon: 'fa-calendar', cap: 'catalog', also: ['/admin/workshop/'] },
+        { href: '/admin/seats', label: 'Seats & waitlist', icon: 'fa-users', cap: 'catalog', badge: 'waitlist' },
         { href: '/admin/free-courses', label: 'Free lessons', icon: 'fa-gift', cap: 'settings', also: ['/admin/free-courses/'] },
         { href: '/admin/catalog', label: 'Mediums, genres & skills', icon: 'fa-sliders', cap: 'settings' },
     ] },
@@ -24,11 +38,14 @@ export const NAV = [
         { href: '/admin/orders', label: 'Course orders', icon: 'fa-shopping-cart', cap: 'revenue', also: ['/admin/orders/'] },
         { href: '/admin/dashboard/commissions', label: 'Commissions', icon: 'fa-paint-brush', cap: 'commissions', badge: 'commissions' },
         { href: '/admin/dashboard/marketplace', label: 'Marketplace', icon: 'fa-tags', cap: 'marketplace', badge: 'marketplace', also: ['/admin/dashboard/marketplace/'] },
+        { href: '/admin/payments/refunds', label: 'Refunds', icon: 'fa-undo', cap: 'revenue', badge: 'refunds' },
+        { href: '/admin/finance', label: 'Payouts & ledger', icon: 'fa-balance-scale', cap: 'revenue', badge: 'payouts', also: ['/admin/finance/'] },
     ] },
     { group: 'Community', items: [
         { href: '/admin/dashboard/people', label: 'People & roles', icon: 'fa-users', cap: 'people' },
         { href: '/admin/instructors', label: 'Instructor profiles', icon: 'fa-user', cap: 'people.manage', also: ['/admin/instructors/'] },
         { href: '/admin/dashboard/testimonials', label: 'Testimonials', icon: 'fa-quote-left', cap: 'testimonials' },
+        { href: '/admin/moderation', label: 'Reports & bans', icon: 'fa-flag', cap: 'moderation', badge: 'reports', also: ['/admin/moderation/'] },
         { href: '/admin/dashboard/gallery', label: 'Gallery', icon: 'fa-picture-o', cap: 'gallery' },
     ] },
     { group: 'Content', items: [
@@ -40,6 +57,7 @@ export const NAV = [
     ] },
     { group: 'Setup', items: [
         { href: '/admin/settings', label: 'Site settings & SEO', icon: 'fa-cog', cap: 'settings' },
+        { href: '/admin/security/audit', label: 'Security log', icon: 'fa-shield', cap: 'security' },
     ] },
 ];
 

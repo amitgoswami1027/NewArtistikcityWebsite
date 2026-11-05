@@ -64,3 +64,49 @@ export function writeQuery(f, win = typeof window === 'undefined' ? null : windo
     const now = win.location.pathname + win.location.search + (win.location.hash || '');
     if (next !== now) win.history.replaceState(win.history.state, '', next);
 }
+
+// ------------------------------------------------------------------ search
+
+/** Lower case, no accents, punctuation -> spaces ("Aquarelle, Café" -> "aquarelle cafe"). */
+export function normalise(s) {
+    return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+/** Levenshtein distance, stopping early once it passes max. */
+function within(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return false;
+    let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+        const cur = [i];
+        let best = i;
+        for (let j = 1; j <= b.length; j++) {
+            cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+            if (cur[j] < best) best = cur[j];
+        }
+        if (best > max) return false;
+        prev = cur;
+    }
+    return prev[b.length] <= max;
+}
+
+/**
+ * Forgiving search: every word typed must appear in the text, as the start of a word, inside one, or with a small
+ * typo (one letter off for words of 4+ letters, two for 8+): "watercolor", "aquarel" and "pencl" still find their
+ * courses. Returns a score (higher = better; 0 = no match) so results can be ranked.
+ */
+export function fuzzyScore(text, query) {
+    const terms = normalise(query).split(' ').filter(Boolean);
+    if (!terms.length) return 1;
+    const hay = normalise(text);
+    const words = hay.split(' ');
+    let score = 0;
+    for (const t of terms) {
+        if (words.some((w) => w === t)) { score += 3; continue; }
+        if (words.some((w) => w.startsWith(t))) { score += 2; continue; }
+        if (hay.includes(t)) { score += 1.5; continue; }
+        const max = t.length >= 8 ? 2 : t.length >= 4 ? 1 : 0;
+        if (max && words.some((w) => within(t, w.slice(0, t.length + max), max) || within(t, w, max))) { score += 1; continue; }
+        return 0;
+    }
+    return score;
+}

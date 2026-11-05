@@ -374,7 +374,20 @@ public class AdminConsoleController {
         b.put("contacts", repo.count("select count(*) from contacts where status = 1"));
         b.put("tasks", repo.count("select count(*) from student_teacher_connects x where exists (select 1 from student_tasks s where s.student_teacher_connect_id = x.id"
                 + " and s.deleted_at is null and s.from_type = 'Student' and s.id = (select max(s2.id) from student_tasks s2 where s2.student_teacher_connect_id = x.id and s2.deleted_at is null))"));
+        // newer modules: tables may be missing until their migration ran, so a badge never breaks the console
+        b.put("refunds", safeCount(repo, "select count(*) from payment_refunds where status in ('PENDING', 'FAILED')"));
+        b.put("reports", safeCount(repo, "select count(*) from content_reports where status = 'OPEN'"));
+        b.put("payouts", safeCount(repo, "select count(*) from ledger_disputes where status = 'OPEN'"));
+        b.put("waitlist", safeCount(repo, "select count(*) from course_waitlist where status = 'WAITING'"));
         return b;
+    }
+
+    private static long safeCount(LifecycleRepository repo, String sql) {
+        try {
+            return repo.count(sql);
+        } catch (RuntimeException e) {
+            return 0;
+        }
     }
 
     /** Instructors only see their own courses; other personas see everything (null). */

@@ -36,6 +36,10 @@ import java.util.Map;
 @Controller
 public class CartController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.artistikcity.moderation.Moderation> moderation;
+
+
     private final Json json;
     private final Auth auth;
     private final CartService cart;
@@ -131,6 +135,7 @@ public class CartController {
     public ResponseEntity<String> post(HttpServletRequest request, @PathVariable("paintingId") long paintingId) throws IOException {
         if (!Csrf.matches(request)) return expired();
         String owner = cart.ownerKey(request);
+        if (moderation.getIfAvailable() != null) moderation.getIfAvailable().assertAllowed(auth.userId(request), "POSTING");
         if (!limiter.hit("artist-hub:" + owner, 12, 900).allowed()) {
             return error(HttpStatus.TOO_MANY_REQUESTS, "You've sent a lot of messages. Give the artist a little time to reply.");
         }

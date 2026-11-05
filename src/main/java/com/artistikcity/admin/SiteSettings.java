@@ -61,7 +61,7 @@ public class SiteSettings {
         }
         List<String> out = new java.util.ArrayList<>();
         try {
-            for (Row r : db.select("select name from age_groups where status = 1 order by sort_order, id")) {
+            for (Row r : db.select("select name from age_groups where status = 1 and archived_at is null order by sort_order, id")) {
                 out.add(r.str("name"));
             }
         } catch (Db.DbException e) {

@@ -24,6 +24,13 @@ To change the schema of a database that already holds real data:
 | `2026-10-28_marketplace_shop.sql` | Marketplace shop: `paintings.shop_formats` (prints sold besides the original), `edition_size` / `editions_sold`, `hires_path` / `hires_name` (private download file) and artist contact links; tables `shop_price_options` (price list, with starter prices), `shop_carts`, `shop_cart_items`, `shop_coupons` (with `WELCOME10`), `shop_orders`, `shop_order_items`, `artist_threads`, `artist_thread_messages`. Existing listings start out selling canvas and poster prints. |
 | `2026-11-05_documents_s3.sql` | `student_documents` (every generated portfolio report and course certificate PDF, with its private S3 key); widens `shop_order_items.image_url`, `student_submissions.file_url` and `certificates.certificate_path` for full S3 / CDN URLs and keys. |
 | `2026-11-05_age_groups.sql` | Table `age_groups` (Admin > Catalog > Age groups) with the three groups the menus used so far; existing courses' hand-typed ages ("12+ years") are put in the matching group by their first number. |
+| `2026-11-05_security_audit.sql` | Security log: append-only, hash-chained `audit_logs` (every staff change with before/after JSON, sign-ins, exports, refused requests) and `audit_chain_head`. |
+| `2026-11-05_payments_refunds.sql` | `payment_refunds` (the refunds queue staff confirm in Admin > Sales > Refunds) and `payment_reconciliations` (payments the scheduled gateway check matched late); `orders.payment_status` 4 = refund due. |
+| `2026-11-05_seats_waitlist.sql` | `courses.seat_limit`, `seat_holds` (15-minute holds while paying, then PAID), `course_waitlist`, `access_grants` (hashed priority / waitlist links). |
+| `2026-11-05_course_messages.sql` | `courses.cancelled_at` / `cancel_reason`, `course_messages` and `course_message_deliveries` (studio notice + e-mail status + read receipt per student). |
+| `2026-11-05_ledger_payouts.sql` | Escrow ledger: append-only `ledger_entries` (sale, commission, artist share, refund, payout, dispute loss), `payout_batches`, `payout_lines`, `ledger_disputes`. |
+| `2026-11-05_moderation.sql` | `account_restrictions` (ban / no posting / no selling, with reason and end date) and `content_reports` (Report button queue with reason codes). |
+| `2026-11-05_taxonomy_hierarchy.sql` | Tag & hierarchy manager: `parent_id` (nesting) and `archived_at` on `mediums`, `genres`, `skills` and `age_groups`. |
 
 The earlier SQL Server (T-SQL) migrations were removed when the project moved to MySQL. Everything they did is
 already in `schema.sql`, and they remain available in git history.

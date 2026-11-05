@@ -106,7 +106,7 @@ export default function MarketplaceCheckout() {
                 const rzp = new Razorpay({
                     key: d.key, amount: d.amountPaise, currency: 'INR', order_id: d.razorpayOrderId,
                     name: 'ArtistikCity', description: d.description, image: '/assets/images/logo.png',
-                    prefill: d.prefill, theme: { color: '#e5156b' }, notes: { marketplace_order_id: d.orderId },
+                    prefill: d.prefill, theme: { color: '#9c0d48' }, notes: { marketplace_order_id: d.orderId },
                     handler: (resp) => confirm({ orderId: d.orderId, provider: 'razorpay', ...resp }),
                     modal: { ondismiss: () => { setBusy(false); setNotice({ type: 'info', text: 'Payment window closed. Your hold is still active, so you can try again.' }); } },
                 });

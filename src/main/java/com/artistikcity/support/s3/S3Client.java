@@ -151,6 +151,44 @@ public class S3Client {
         });
     }
 
+    /** Every key under a prefix (ListObjectsV2, followed page by page). For maintenance jobs, not request paths. */
+    public java.util.List<String> list(String prefix) {
+        java.util.List<String> keys = new java.util.ArrayList<>();
+        String token = null;
+        do {
+            String q = "list-type=2&prefix=" + SigV4.uriEncode(prefix == null ? "" : prefix, true)
+                    + (token == null ? "" : "&continuation-token=" + SigV4.uriEncode(token, true));
+            URI base = endpoint != null ? URI.create(endpoint + "/" + bucket + "/") : URI.create("https://" + bucket + ".s3." + region + ".amazonaws.com/");
+            URI uri = URI.create(base + "?" + q);
+            String host = uri.getPort() == -1 ? uri.getHost() : uri.getHost() + ":" + uri.getPort();
+            Map<String, String> h = new LinkedHashMap<>();
+            h.put("host", host);
+            Map<String, String> signed = SigV4.sign("GET", uri.getRawPath(), uri.getRawQuery(), h, SigV4.UNSIGNED_PAYLOAD, credentials.get(), region, "s3", clock.instant());
+            HttpRequest.Builder b = HttpRequest.newBuilder(uri).timeout(Duration.ofMinutes(2)).GET();
+            signed.forEach((n, v) -> { if (!n.equals("host")) b.header(n, v); });
+            String xml;
+            try {
+                HttpResponse<String> r = http.send(b.build(), HttpResponse.BodyHandlers.ofString());
+                if (r.statusCode() / 100 != 2) throw new S3Exception(r.statusCode(), errorCode(r.body()) + " (LIST " + prefix + ")");
+                xml = r.body();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new UncheckedIOException(new IOException("interrupted", e));
+            }
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("<Key>([^<]*)</Key>").matcher(xml);
+            while (m.find()) keys.add(xmlText(m.group(1)));
+            java.util.regex.Matcher t = java.util.regex.Pattern.compile("<NextContinuationToken>([^<]*)</NextContinuationToken>").matcher(xml);
+            token = xml.contains("<IsTruncated>true</IsTruncated>") && t.find() ? xmlText(t.group(1)) : null;
+        } while (token != null);
+        return keys;
+    }
+
+    private static String xmlText(String s) {
+        return s.replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&apos;", "'").replace("&amp;", "&");
+    }
+
     public void delete(String key) {
         retry(() -> {
             send("DELETE", key, Map.of(), HttpRequest.BodyPublishers.noBody(), 0, true);

@@ -40,6 +40,8 @@ public class TaxonomyAdminController {
 
     private static final Map<String, Type> TYPES = new LinkedHashMap<>();
     private static final String AGE = "age_groups";
+    /** Lists that can be nested (parent_id) and archived (archived_at): the course filter categories. */
+    static final List<String> HIER = List.of("mediums", "genres", "skills", "age_groups");
 
     static {
         add(new Type("mediums", "catalog", "mediums", "medium_slug", "medium", "Mediums", "uploads/mediums",
@@ -118,7 +120,7 @@ public class TaxonomyAdminController {
 
     private static Map<String, Object> meta(Type t) {
         return Map.of("key", t.key(), "label", t.label(), "plural", t.plural(), "hasPhoto", t.photoDir() != null, "hint", t.hint(),
-                "detachable", t.detach() != null, "locked", t.locked());
+                "detachable", t.detach() != null, "locked", t.locked(), "hierarchy", HIER.contains(t.key()));
     }
 
     private List<Row> items(Type t) {
@@ -128,6 +130,10 @@ public class TaxonomyAdminController {
             Row v = Row.of("id", r.get("id"), "name", r.str("name", ""), "slug", r.str(t.slugCol(), ""), "status", r.lng("status", 1) == 1,
                     "usage", db.count(t.usage(), "genres".equals(t.key()) ? String.valueOf(r.get("id")) : r.get("id")),
                     "updated_at", r.get("updated_at"));
+            if (HIER.contains(t.key())) {
+                v.put("parent_id", r.get("parent_id"));
+                v.put("archived", r.get("archived_at") != null);
+            }
             if (t.photoDir() != null) {
                 v.put("photo_url", r.str("photo", "").isBlank() ? null : "/storage/" + t.photoDir() + "/" + r.get("id") + "/" + r.str("photo"));
             }
@@ -169,10 +175,21 @@ public class TaxonomyAdminController {
         if (photoError != null) {
             errors.put("photo", photoError);
         }
+        Long parent = HIER.contains(t.key()) ? in.lng("parent_id") : null;
+        if (parent != null) {
+            if (db.find(t.table(), parent) == null) {
+                errors.put("parent_id", "Choose a parent from this list.");
+            } else if (id != null && createsCycle(t, id, parent)) {
+                errors.put("parent_id", "A " + t.label() + " can't sit inside itself or one of its own children.");
+            }
+        }
         if (!errors.isEmpty()) {
             return kit.invalid(errors);
         }
         Row v = Row.of("name", name, t.slugCol(), slug, "status", in.has("status") && !in.bool("status") ? 0 : 1);
+        if (HIER.contains(t.key())) {
+            v.put("parent_id", parent);
+        }
         if (id == null) {
             if (AGE.equals(t.key())) {
                 // new groups go to the end of the menus
@@ -181,13 +198,14 @@ public class TaxonomyAdminController {
             id = db.insert(t.table(), v);
             audit.log(admin, t.key(), id, "created", name);
         } else {
-            String before = db.find(t.table(), id).str("name");
+            Row old = audit.snapshot(t.table(), id);
+            String before = old.str("name");
             db.updateById(t.table(), id, v);
             if (AGE.equals(t.key()) && !before.equals(name)) {
                 // courses store the group's name: renaming the group renames it on every course
                 db.update("update courses set age_group = ? where age_group = ?", name, before);
             }
-            audit.log(admin, t.key(), id, "updated", name);
+            audit.change(admin, t.key(), id, "updated", name, old, audit.snapshot(t.table(), id));
         }
         if (AGE.equals(t.key())) {
             site.invalidate();
@@ -196,6 +214,45 @@ public class TaxonomyAdminController {
             db.updateById(t.table(), id, Row.of("photo", storage.storeUpload(photo, t.photoDir() + "/" + id)));
         }
         return kit.ok(Map.of("items", items(t), "message", in.lng("id") == null ? "Added “" + name + "”." : "Saved."));
+    }
+
+    /** Walks up from the new parent: reaching the item itself means the move would make a loop. */
+    private boolean createsCycle(Type t, long id, long parent) {
+        Long at = parent;
+        for (int guard = 0; at != null && guard < 50; guard++) {
+            if (at == id) return true;
+            Row r = db.first("select parent_id from " + t.table() + " where id = ?", at);
+            at = r == null ? null : r.lng("parent_id");
+        }
+        return at != null;
+    }
+
+    /**
+     * Archive / restore {archived: true|false}. Archived items leave the course filters and the editor's picklists but
+     * stay on the courses that use them; their children move up to the archived item's parent.
+     */
+    @PostMapping("/admin/api/taxonomy/{type}/{id}/archive")
+    public ResponseEntity<String> archive(HttpServletRequest request, @PathVariable("type") String key, @PathVariable("id") long id) {
+        Row admin = kit.admin(request);
+        if (!kit.can(admin, "settings")) {
+            return kit.forbidden();
+        }
+        Type t = type(key);
+        if (!HIER.contains(t.key())) {
+            throw new NotFoundException();
+        }
+        Row row = NotFoundException.orFail(db.find(t.table(), id));
+        boolean archive = Input.of(request, json).bool("archived");
+        Row before = audit.snapshot(t.table(), id);
+        if (archive) {
+            db.update("update " + t.table() + " set parent_id = ? where parent_id = ?", row.get("parent_id"), id);
+        }
+        db.update("update " + t.table() + " set archived_at = ? where id = ?", archive ? java.time.LocalDateTime.now() : null, id);
+        audit.change(admin, t.key(), id, archive ? "archived" : "restored", row.str("name"), before, audit.snapshot(t.table(), id));
+        if (AGE.equals(t.key())) {
+            site.invalidate();
+        }
+        return kit.ok(Map.of("items", items(t), "message", (archive ? "Archived “" : "Restored “") + row.str("name") + "”."));
     }
 
     @DeleteMapping("/admin/api/taxonomy/{type}/{id}")

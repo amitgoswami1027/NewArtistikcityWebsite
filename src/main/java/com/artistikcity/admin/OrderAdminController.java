@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 @Controller
 public class OrderAdminController {
 
-    static final Map<String, Integer> STATUS = Map.of("pending", 0, "paid", 1, "failed", 2, "refunded", 3);
+    static final Map<String, Integer> STATUS = Map.of("pending", 0, "paid", 1, "failed", 2, "refunded", 3, "refund_due", 4);
     private static final String AMOUNT = "cast(nullif(o.price, '') as decimal(12,2))";
 
     private final AdminKit kit;
@@ -40,6 +40,8 @@ public class OrderAdminController {
     private final CertificateService certificates;
     private final LifecycleRepository lifecycle;
     private final Audit audit;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.seats.SeatService seats;
 
     public OrderAdminController(AdminKit kit, Db db, Json json, CertificateService certificates, LifecycleRepository lifecycle, Audit audit) {
         this.kit = kit;
@@ -94,6 +96,7 @@ public class OrderAdminController {
                 s.put("pending", db.count("select count(*) from orders where payment_status = 0"));
                 s.put("failed", db.count("select count(*) from orders where payment_status = 2"));
                 s.put("refunded", db.count("select count(*) from orders where payment_status = 3"));
+                s.put("refundDue", db.count("select count(*) from orders where payment_status = 4"));
                 s.put("all", db.count("select count(*) from orders"));
                 s.put("revenueInr", db.scalar("select coalesce(sum(cast(nullif(price, '') as decimal(12,2))), 0) from orders where payment_status = 1 and price_type = 'inr'"));
                 s.put("revenueUsd", db.scalar("select coalesce(sum(cast(nullif(price, '') as decimal(12,2))), 0) from orders where payment_status = 1 and price_type = 'usd'"));
@@ -128,6 +131,7 @@ public class OrderAdminController {
             case 1 -> "Paid";
             case 2 -> "Failed";
             case 3 -> "Refunded";
+            case 4 -> "Refund due";
             default -> "Pending";
         };
     }
@@ -178,7 +182,8 @@ public class OrderAdminController {
         Input in = Input.of(request, json);
         String to = String.valueOf(in.get("status"));
         String note = AdminKit.trim(in.get("note"), 500);
-        if (!STATUS.containsKey(to)) {
+        if (!STATUS.containsKey(to) || "refund_due".equals(to)) {
+            // "refund due" is set by the checkout / reconciler and settled from the refunds queue
             return kit.invalid(Map.of("status", "Choose a status."));
         }
         int next = STATUS.get(to);
@@ -194,19 +199,27 @@ public class OrderAdminController {
             v.put("payment_option", AdminKit.trim("Manual (" + admin.str("name", "admin") + ")", 50));
             v.put("payment_details", json.encode(Map.of("marked_paid_by", admin.str("email", ""), "note", note, "at", LocalDateTime.now().toString())));
         }
+        Row before = audit.snapshot("orders", id);
         db.updateById("orders", id, v);
+        Row after = audit.snapshot("orders", id);
         Long userId = o.lng("user_id");
         if (userId != null) {
             if (next == 1) {
+                if (seats != null) {
+                    seats.confirm(o.lng("course_id"), userId);   // takes the seat when one is free (staff may go past the cap; that is their call)
+                }
                 lifecycle.syncEnrollments(userId);
                 db.update("update enrollments set status = 'Active', updated_at = ? where user_id = ? and course_id = ? and status = 'Refunded'",
                         LocalDateTime.now(), userId, o.get("course_id"));
             } else if (current == 1 && db.count("select count(*) from orders where user_id = ? and course_id = ? and payment_status = 1", userId, o.get("course_id")) == 0) {
                 db.update("update enrollments set status = 'Refunded', updated_at = ? where user_id = ? and course_id = ?",
                         LocalDateTime.now(), userId, o.get("course_id"));
+                if (seats != null) {
+                    seats.release(o.lng("course_id"), userId);
+                }
             }
         }
-        audit.log(admin, "order", id, "status: " + label(current) + " → " + label(next), note);
+        audit.change(admin, "order", id, "status: " + label(current) + " → " + label(next), note, before, after);
         String message = switch (next) {
             case 1 -> "Marked as paid. The student now has access to the course.";
             case 3 -> "Marked as refunded. Course access was removed.";

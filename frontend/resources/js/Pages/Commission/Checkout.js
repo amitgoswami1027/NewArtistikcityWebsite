@@ -107,7 +107,7 @@ function CheckoutForm() {
                 const rzp = new Razorpay({
                     key: d.key, amount: d.amount, currency: 'INR', order_id: d.razorpayOrderId,
                     name: 'ArtistikCity', description: `Custom commission ${d.orderId}`, image: '/favicon.png',
-                    prefill: { ...d.prefill, method: d.method }, theme: { color: '#e5156b' },
+                    prefill: { ...d.prefill, method: d.method }, theme: { color: '#9c0d48' },
                     handler: (resp) => confirm({ orderId: d.orderId, provider: 'razorpay', ...resp }),
                     modal: { ondismiss: () => { setBusy(false); setNotice({ type: 'info', text: 'Payment window closed. Your order is saved; you can try again.' }); } },
                 });

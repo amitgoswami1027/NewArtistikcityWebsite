@@ -37,9 +37,14 @@ public class ApiController {
     private final Validator validator;
     private final Storage storage;
     private final Auth auth;
+    private final com.artistikcity.auth.RateLimiter limiter;
+    private final com.artistikcity.config.Settings settings;
 
-    public ApiController(Db db, Json json, Validator validator, Storage storage, Auth auth) {
+    public ApiController(Db db, Json json, Validator validator, Storage storage, Auth auth, com.artistikcity.auth.RateLimiter limiter,
+                         com.artistikcity.config.Settings settings) {
         this.auth = auth;
+        this.limiter = limiter;
+        this.settings = settings;
         this.db = db;
         this.json = json;
         this.validator = validator;
@@ -134,16 +139,36 @@ public class ApiController {
 
     // --------------------------------------------------------- newsletter
 
+    /**
+     * Footer sign-up. Needs the CSRF token (axios sends it) and is rate-limited per address and per e-mail (429 with
+     * Retry-After). Signing up an address that is already on the list answers the same "success", so the form can't be
+     * used to find out who subscribes. A filled-in hidden "website" field (bots) is accepted silently and ignored.
+     */
     @PostMapping("/api/newsletter")
     public ResponseEntity<String> newsletter(HttpServletRequest request) {
+        if (!Csrf.matches(request)) {
+            return status(419, Row.of("message", "Your session expired. Reload the page and try again."));
+        }
+        String ip = com.artistikcity.auth.AuthEvents.ip(request);
+        var byIp = limiter.hit("newsletter:ip:" + ip, settings.newsletterSignupsPerMinute(), 60);
+        if (!byIp.allowed()) {
+            return tooMany(byIp.retryAfterSeconds());
+        }
         Input in = Input.of(request, json);
+        if (!(in.get("website") == null || in.get("website").isBlank())) {
+            return ok(Row.of("message", "success"));
+        }
         String email = in.get("email") == null ? "" : in.get("email").trim().toLowerCase();
         if (email.isEmpty() || email.length() > 255 || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
             return ok(Row.of("error", Map.of("email", List.of("Please enter a valid e-mail address."))));
         }
+        var byEmail = limiter.hit("newsletter:email:" + email, 3, 3600);
+        if (!byEmail.allowed()) {
+            return tooMany(byEmail.retryAfterSeconds());
+        }
         Row existing = db.first("select id, unsubscribed_at from newsletters where lower(email) = ?", email);
         if (existing != null && existing.get("unsubscribed_at") == null) {
-            return ok(Row.of("error", Map.of("email", List.of("You're already subscribed."))));
+            return ok(Row.of("message", "success"));
         }
         if (existing != null) {
             db.updateById("newsletters", existing.get("id"), Row.of("unsubscribed_at", null, "source", "footer"));
@@ -151,6 +176,11 @@ public class ApiController {
             db.insert("newsletters", Row.of("email", email, "source", "footer"));
         }
         return ok(Row.of("message", "success"));
+    }
+
+    private ResponseEntity<String> tooMany(long retryAfter) {
+        return ResponseEntity.status(429).header("Retry-After", String.valueOf(Math.max(1, retryAfter))).contentType(MediaType.APPLICATION_JSON)
+                .body(json.encode(Row.of("message", "Too many sign-ups from here. Please try again in a minute.", "retryAfter", Math.max(1, retryAfter))));
     }
 
     // The old admin modals used /api/modules/**, /api/project/** and /api/modules/lessons/task/**; the admin console

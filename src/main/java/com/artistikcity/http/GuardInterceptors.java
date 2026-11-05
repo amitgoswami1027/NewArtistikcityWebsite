@@ -1,6 +1,7 @@
 package com.artistikcity.http;
 
 import com.artistikcity.inertia.Inertia;
+import com.artistikcity.security.SecurityWatch;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,11 @@ public class GuardInterceptors {
     public static final String HOME = "/dashboard";
 
     private final Auth auth;
+    private final SecurityWatch watch;
 
-    public GuardInterceptors(Auth auth) {
+    public GuardInterceptors(Auth auth, SecurityWatch watch) {
         this.auth = auth;
+        this.watch = watch;
     }
 
     /** "auth" middleware - redirect to /login when not logged in. */
@@ -56,13 +59,24 @@ public class GuardInterceptors {
         };
     }
 
-    /** AdminMiddleware - admin area requires the "admin" guard. */
+    /**
+     * AdminMiddleware - admin area requires the "admin" guard. Pages redirect to the sign-in page; the JSON API answers
+     * 401 (never a redirect, so scripts and the console's fetch calls see the refusal), and a student session calling it
+     * is signed out ({@link SecurityWatch}).
+     */
     public HandlerInterceptor admin() {
         return new HandlerInterceptor() {
             @Override
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
                 if (!(handler instanceof HandlerMethod) || auth.admin(request) != null) {
                     return true;
+                }
+                if (SecurityWatch.isAdminApi(request) || wantsJson(request)) {
+                    watch.studentCalledAdminApi(request);
+                    response.setStatus(401);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"message\":\"Your admin session has ended. Please sign in again.\",\"reauth\":true}");
+                    return false;
                 }
                 Flash.put(request, "error", "Please Login to access Admin area");
                 redirect(request, response, "/admin/login");

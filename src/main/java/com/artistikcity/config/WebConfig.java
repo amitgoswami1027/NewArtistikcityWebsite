@@ -16,9 +16,12 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final SessionInterceptor sessionInterceptor;
     private final GuardInterceptors guards;
+    private final com.artistikcity.security.SecurityWatch securityWatch;
     private final Storage storage;
 
-    public WebConfig(SessionInterceptor sessionInterceptor, GuardInterceptors guards, Storage storage) {
+    public WebConfig(SessionInterceptor sessionInterceptor, GuardInterceptors guards, Storage storage,
+                     com.artistikcity.security.SecurityWatch securityWatch) {
+        this.securityWatch = securityWatch;
         this.sessionInterceptor = sessionInterceptor;
         this.guards = guards;
         this.storage = storage;
@@ -39,6 +42,10 @@ public class WebConfig implements WebMvcConfigurer {
         // "guest" middleware
         registry.addInterceptor(guards.guest())
                 .addPathPatterns("/login", "/register", "/join", "/forgot-password", "/reset-password", "/reset-password/**");
+
+        // security log: every 401/403 on the admin console is written down (and repeated refusals end the session).
+        // Registered before the guard so its afterCompletion also sees the guard's own 401s.
+        registry.addInterceptor(securityWatch).addPathPatterns("/admin/**");
 
         // AdminMiddleware
         registry.addInterceptor(guards.admin())

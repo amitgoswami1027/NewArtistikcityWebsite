@@ -75,7 +75,7 @@ export default function Courses() {
                                 const st = statusOf(c);
                                 return (
                                     <article key={c.course_id} className="rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg transition flex flex-col">
-                                        <a href={`/user/course/${c.order_id}`} className="relative block h-40 overflow-hidden" style={{ background: 'linear-gradient(135deg,#111,#3b0a24 60%,#e5156b)' }} tabIndex={-1} aria-hidden="true">
+                                        <a href={`/user/course/${c.order_id}`} className="relative block h-40 overflow-hidden" style={{ background: 'linear-gradient(135deg,#111,#3b0a24 60%,#9c0d48)' }} tabIndex={-1} aria-hidden="true">
                                             {c.photo && <img src={`/storage/uploads/courses/${c.course_id}/${c.photo}`} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(ev) => { ev.currentTarget.style.display = 'none'; }} />}
                                             <span className={`absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-bold ${st === 'done' ? 'bg-green-600 text-white' : st === 'active' ? 'bg-white text-ink' : 'bg-brand text-white'}`}>
                                                 {st === 'done' ? 'Completed' : st === 'active' ? 'In progress' : 'Not started'}

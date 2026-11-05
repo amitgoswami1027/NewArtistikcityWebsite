@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { usePage } from '@inertiajs/inertia-react';
 import SiteLayout from '@/Components/Site/SiteLayout';
 import { authPost } from '@/Components/Auth/api';
+import { SeatsNote, WaitlistPanel } from '@/Components/Site/Seats';
 
 const COUNTRIES = ['India', 'United States', 'United Kingdom', 'Canada', 'Australia', 'United Arab Emirates', 'Singapore', 'Saudi Arabia',
     'Qatar', 'Kuwait', 'Oman', 'Bahrain', 'Germany', 'France', 'Netherlands', 'Ireland', 'New Zealand', 'Malaysia', 'Nepal', 'Sri Lanka',
@@ -50,7 +51,8 @@ function Field({ id, label, error, children, wide, optional }) {
 
 /** One-page course checkout: 1 account, 2 billing details, 3 payment, with the order summary alongside. */
 export default function CheckoutCourse() {
-    const { course, prices, methods = {}, auth, addresses = [], order, enrolled, returnTo, providers = {}, notice } = usePage().props;
+    const { course, prices, methods = {}, auth, addresses = [], order, enrolled, returnTo, providers = {}, notice, seats: initialSeats } = usePage().props;
+    const [seats, setSeats] = useState(initialSeats);
     const user = auth && auth.user;
     const primary = addresses.find((a) => String(a.primary) === '1' || a.primary === true) || addresses[0];
     const initial = {
@@ -114,7 +116,7 @@ export default function CheckoutCourse() {
             const Razorpay = await loadRazorpay();
             const rzp = new Razorpay({
                 key: r.key, amount: r.amount, currency: r.currency, order_id: r.razorpayOrderId, name: r.name, description: r.description,
-                prefill: r.prefill || {}, theme: { color: '#e5156b' },
+                prefill: r.prefill || {}, theme: { color: '#9c0d48' },
                 handler: async (resp) => {
                     setBusy(true);
                     try {
@@ -133,6 +135,10 @@ export default function CheckoutCourse() {
             rzp.open();
         } catch (err) {
             if (err.data && err.data.enrolled) { window.location.reload(); return; }
+            if (err.data && err.data.code === 'SOLD_OUT') {
+                // someone took the last seat a moment ago: say so plainly and offer the waitlist instead of a dead end
+                setSeats({ ...(seats || {}), soldOut: true, left: 0, mine: false });
+            }
             setMessage({ tone: 'error', text: err.message });
             setBusy(false);
         }
@@ -192,6 +198,8 @@ export default function CheckoutCourse() {
                         ) : (
                             <>
                                 {message && <div className={`ac-alert ${message.tone === 'error' ? 'ac-alert--error' : 'co-alert--info'}`} role="alert">{message.text}</div>}
+                                <SeatsNote seats={seats} />
+                                {seats && seats.soldOut && <WaitlistPanel courseId={course.id} seats={seats} signedIn={!!user} loginUrl={signIn('/login')} />}
 
                                 <Step n={1} title="Your account" state={user ? 'done' : 'active'}
                                       aside={user ? <span className="co-step__meta">{user.name}{user.email ? ` · ${user.email}` : ''}</span> : null}>

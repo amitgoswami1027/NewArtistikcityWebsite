@@ -180,8 +180,20 @@ public class CourseService {
             c.put("reviews", rv[0]);
             c.put("positive", rv[0] == 0 ? null : Math.round(rv[1] * 100.0 / rv[0]));
         }
+        // live courses with a seat cap: "Only 3 seats left" / "Sold out" badges
+        com.artistikcity.seats.SeatService seatService = seats == null ? null : seats.getIfAvailable();
+        if (seatService != null) {
+            try {
+                seatService.annotate(courses);
+            } catch (RuntimeException e) {
+                // before the seats migration ran: no badges
+            }
+        }
         return courses;
     }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.artistikcity.seats.SeatService> seats;
 
     /** new CourseCollection($courses). */
     public Map<String, Object> collection(List<Row> courses) {
@@ -234,6 +246,9 @@ public class CourseService {
         d.put("updated_at", c.get("updated_at"));
         d.put("course_based", c.get("course_based"));
         d.put("course_type_id", c.get("course_type_id"));
+        d.put("seat_limit", c.get("seat_limit"));
+        d.put("seats_left", c.get("seats_left"));
+        d.put("sold_out", c.get("sold_out"));
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("data", d);
         m.put("status", "success");

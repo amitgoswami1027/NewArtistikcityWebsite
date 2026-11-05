@@ -63,10 +63,18 @@ public class CheckoutController {
     private final Mailer mailer;
     private final Redirects redirect;
     private final org.springframework.core.env.Environment env;
+    private final com.artistikcity.payments.RefundQueue refunds;
+    private final com.artistikcity.seats.SeatService seats;
+    private static final String ACCESS = "seat.access";
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.artistikcity.ledger.LedgerService> ledger;
 
     public CheckoutController(Views views, Inertia inertia, Db db, Json json, Auth auth, CourseService courses,
-                              CommissionPayments gateways, Mailer mailer, Redirects redirect, org.springframework.core.env.Environment env) {
+                              CommissionPayments gateways, Mailer mailer, Redirects redirect, org.springframework.core.env.Environment env,
+                              com.artistikcity.payments.RefundQueue refunds, com.artistikcity.seats.SeatService seats) {
         this.env = env;
+        this.refunds = refunds;
+        this.seats = seats;
         this.views = views;
         this.inertia = inertia;
         this.db = db;
@@ -180,10 +188,17 @@ public class CheckoutController {
         if (course == null) {
             return redirect.route(request, "courses");
         }
+        String access = request.getParameter("access");
+        if (access != null && access.matches("[A-Za-z0-9_-]{16,64}")) {
+            // a priority / waitlist link: kept in the session until the student pays
+            request.getSession(true).setAttribute(ACCESS, access);
+        }
         BigDecimal[] price = prices(courseId);
         Long uid = auth.userId(request);
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("course", course);
+        props.put("seats", seats.forStudent(courseId, uid));
+        props.put("hasAccessLink", request.getSession(true).getAttribute(ACCESS) != null);
         props.put("prices", Map.of("inr", price[0], "usd", price[1]));
         boolean free = price[0].signum() == 0 && price[1].signum() == 0;
         Map<String, Object> methods = new LinkedHashMap<>();
@@ -299,6 +314,16 @@ public class CheckoutController {
         String method = String.valueOf(in.get("method"));
         Map<String, Object> course = courseView(courseId);
         try {
+            Object access = request.getSession(true).getAttribute(ACCESS);
+            seats.hold(courseId, user.lng("id"), user.str("email"), order.lng("id"), access == null ? null : String.valueOf(access));
+        } catch (com.artistikcity.seats.SeatService.SoldOutException e) {
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("code", "SOLD_OUT");
+            body.put("message", "Sorry - the last seat was just taken. No money was taken. Join the waitlist and we'll e-mail you the moment a seat frees up.");
+            body.put("waitlist", true);
+            return json(HttpStatus.CONFLICT, body);
+        }
+        try {
             if ("free".equals(method)) {
                 if (price[0].signum() != 0 || price[1].signum() != 0) {
                     return error(HttpStatus.UNPROCESSABLE_ENTITY, "This course isn't free.");
@@ -388,6 +413,9 @@ public class CheckoutController {
         }
         Map<String, Object> event = json.decodeMap(raw);
         String type = event == null ? null : String.valueOf(event.get("event"));
+        if (type != null && type.startsWith("payment.dispute.")) {
+            return json(HttpStatus.OK, Map.of("dispute", ledger.getIfAvailable() == null ? "ledger unavailable" : ledger.getIfAvailable().onRazorpayDispute(type, event)));
+        }
         if (!"payment.captured".equals(type) && !"order.paid".equals(type)) {
             return json(HttpStatus.OK, Map.of("ignored", String.valueOf(type)));
         }
@@ -464,15 +492,86 @@ public class CheckoutController {
         return url;
     }
 
+    /**
+     * Records a verified payment. Exactly once per order; and a course is only paid once per student:
+     * <ul>
+     *   <li>the order is open and the student has no other paid order for this course: paid (1), confirmation sent;</li>
+     *   <li>the student already paid this course through another order: this order becomes "refund due" (4) and the
+     *       payment goes to the refunds queue (staff confirm the refund) - the student keeps the first enrolment;</li>
+     *   <li>the order is already paid with a different payment (two payments for one order): that payment is queued
+     *       for refund; the same payment arriving twice (webhook + browser) changes nothing.</li>
+     * </ul>
+     */
     private String markPaid(HttpServletRequest request, long userId, String email, long orderId, String option, String paymentId, Map<String, ?> details) {
+        Row current = db.find("orders", orderId);
+        if (current == null) {
+            return "/payment/failed";
+        }
+        long courseId = current.lng("course_id");
+        Row other = db.first("select id from orders where user_id = ? and course_id = ? and payment_status = 1 and id <> ? order by id limit 1", userId, courseId, orderId);
+        if (other != null && current.lng("payment_status", 0) != 1) {
+            int changed = db.update("update orders set payment_status = 4, payment_option = ?, payment_id = ?, payment_details = ?, updated_at = ?"
+                    + " where id = ? and payment_status not in (1, 3, 4)", option, paymentId, json.encode(details), LocalDateTime.now(), orderId);
+            if (changed == 1) {
+                queueRefund(db.find("orders", orderId), paymentId, "DUPLICATE_PAYMENT", "Course already paid through order #" + other.get("id"));
+            }
+            return "/payment/success?order_id=" + other.get("id") + "&duplicate=1";
+        }
+        if (current.lng("payment_status", 0) != 1 && !seats.confirm(courseId, userId)) {
+            // the student's hold ran out while paying and the last seat went to someone else: refund this payment
+            int full = db.update("update orders set payment_status = 4, payment_option = ?, payment_id = ?, payment_details = ?, updated_at = ?"
+                    + " where id = ? and payment_status not in (1, 3, 4)", option, paymentId, json.encode(details), LocalDateTime.now(), orderId);
+            if (full == 1) {
+                queueRefund(db.find("orders", orderId), paymentId, "SOLD_OUT", "The course filled up while the payment was being made");
+            }
+            return "/payment/success?order_id=" + orderId + "&soldout=1";
+        }
         int changed = db.update("update orders set payment_status = 1, payment_option = ?, payment_id = ?, payment_details = ?, updated_at = ?"
                 + " where id = ? and payment_status <> 1", option, paymentId, json.encode(details), LocalDateTime.now(), orderId);
         if (changed == 1) {
+            if (request != null && request.getSession(false) != null) {
+                request.getSession(false).removeAttribute(ACCESS);
+            }
             Row order = db.find("orders", orderId);
             logPayment(userId, orderId, order.lng("course_id"), option, paymentId, 1, json.encode(details));
             sendOrderConfirmation(request, orderId, email != null ? email : order.str("billing_email"));
+        } else if (paymentId != null && current.str("payment_id") != null && !paymentId.equals(current.str("payment_id"))
+                && !paymentId.startsWith("free_") && !paymentId.startsWith("test_")) {
+            Row copy = new Row(current);
+            copy.put("payment_option", option);
+            queueRefund(copy, paymentId, "DUPLICATE_PAYMENT", "A second payment for order " + current.str("order_number") + " (first: " + current.str("payment_id") + ")");
         }
         return "/payment/success?order_id=" + orderId;
+    }
+
+    private void queueRefund(Row order, String paymentId, String reason, String detail) {
+        String option = order.str("payment_option", "");
+        String gateway = option.startsWith("PayPal") ? (option.contains("test") ? "TEST" : "PAYPAL")
+                : option.startsWith("RazorPay") ? (option.contains("test") ? "TEST" : "RAZORPAY") : "MANUAL";
+        refunds.flag(new com.artistikcity.payments.RefundQueue.Flag("COURSE", String.valueOf(order.get("id")), paymentId, gateway,
+                com.artistikcity.payments.RefundQueue.dec(order.get("price")), "usd".equalsIgnoreCase(order.str("price_type")) ? "USD" : "INR",
+                reason, detail, order.str("billing_email"), order.lng("user_id")));
+    }
+
+    /** Payment reconciler: a verified payment found at the gateway completes the order like the webhook would. */
+    public String completeFromGateway(long orderId, String option, String paymentId, Map<String, ?> details) {
+        Row order = db.find("orders", orderId);
+        if (order == null) {
+            return null;
+        }
+        Row user = db.first("select email from users where id = ?", order.get("user_id"));
+        return markPaid(null, order.lng("user_id"), user == null ? null : user.str("email"), orderId, option, paymentId, details);
+    }
+
+    /** Payment reconciler: an order found paid next to an older paid order for the same course becomes "refund due". */
+    public boolean flagDuplicate(long orderId, long keptOrderId) {
+        int changed = db.update("update orders set payment_status = 4, updated_at = ? where id = ? and payment_status = 1", LocalDateTime.now(), orderId);
+        if (changed == 1) {
+            Row o = db.find("orders", orderId);
+            queueRefund(o, o.str("payment_id", "order-" + orderId), "DUPLICATE_PAYMENT", "Course already paid through order #" + keptOrderId);
+            return true;
+        }
+        return false;
     }
 
     /** payment_logs "upsert" keyed by (user_id, order_id). */
@@ -506,7 +605,7 @@ public class CheckoutController {
         Row data = orderMailData(orderId);
         if (data != null && email != null) {
             mailer.send(email, "Order Confirmation - " + data.str("order_number"), "emails/order-confirmation",
-                    Row.of("orderData", data, "baseUrl", Inertia.baseUrl(request)));
+                    Row.of("orderData", data, "baseUrl", request == null ? env.getProperty("app.url", "") : Inertia.baseUrl(request)));
         }
     }
 
@@ -548,6 +647,11 @@ public class CheckoutController {
                 "method", order.get("payment_option"), "date", order.get("updated_at") != null ? order.get("updated_at") : order.get("created_at"),
                 "email", order.get("billing_email")));
         props.put("course", courseView(order.lng("course_id")));
+        // a second payment for a course the student already had: they keep the first enrolment, the extra is refunded
+        props.put("duplicate", paid && "1".equals(request.getParameter("duplicate")));
+        // status 4 because the course filled up while paying: the payment is being refunded
+        props.put("soldOut", order.lng("payment_status", 0) == 4);
+        props.put("seats", seats.forStudent(order.lng("course_id"), uid));
         if (!paid) {
             putCart(request, order.lng("course_id"));
         }

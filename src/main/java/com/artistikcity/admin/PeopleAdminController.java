@@ -142,8 +142,9 @@ public class PeopleAdminController {
             id = db.insert("admins", v);
             audit.log(admin, "admin", id, "created", name + " (" + role + ")");
         } else {
+            Row before = audit.snapshot("admins", id);
             db.updateById("admins", id, v);
-            audit.log(admin, "admin", id, "updated", name + (AdminKit.blank(password) ? "" : " · password changed"));
+            audit.change(admin, "admin", id, "updated", name + (AdminKit.blank(password) ? "" : " · password changed"), before, audit.snapshot("admins", id));
         }
         if (photo != null) {
             db.updateById("admins", id, Row.of("profile_photo", storage.storeUpload(photo, "uploads/teachers/" + id)));

@@ -26,6 +26,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class Auth {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.artistikcity.moderation.Moderation> moderation;
+
+
     private static final String USER_KEY = "auth.web.id";
     private static final String ADMIN_KEY = "auth.admin.id";
     private static final String USER_CACHE = Auth.class.getName() + ".user";
@@ -144,6 +148,10 @@ public class Auth {
 
     /** Starts a login for the user: new server-side session, rotated tokens, HttpOnly cookies. */
     public void login(HttpServletRequest request, long userId, String method, boolean remember) {
+        // a suspended account can't start a session, whatever the sign-in method (moderation/Moderation)
+        if (moderation != null && moderation.getIfAvailable() != null) {
+            moderation.getIfAvailable().assertMaySignIn(userId);
+        }
         HttpServletResponse response = AuthSessionFilter.response(request);
         SessionService.AuthContext ctx = sessions.start(request, response, userId, method, remember);
         request.setAttribute(AuthSessionFilter.CONTEXT, ctx);

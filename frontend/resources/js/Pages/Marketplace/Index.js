@@ -63,7 +63,7 @@ export default function MarketplaceIndex() {
             <div className="tw">
                 {/* ---------- hero ---------- */}
                 <section className="relative overflow-hidden bg-ink text-white">
-                    <div className="absolute inset-0 opacity-30" aria-hidden="true" style={{ background: 'radial-gradient(circle at 80% 30%, #e5156b 0, transparent 40%), radial-gradient(circle at 5% 100%, #3b5bdb 0, transparent 35%)' }}></div>
+                    <div className="absolute inset-0 opacity-30" aria-hidden="true" style={{ background: 'radial-gradient(circle at 80% 30%, #9c0d48 0, transparent 40%), radial-gradient(circle at 5% 100%, #3b5bdb 0, transparent 35%)' }}></div>
                     <div className="ac-wide relative py-16 sm:py-20 grid grid-cols-1 lg:grid-cols-5 gap-10 items-center">
                         <div className="lg:col-span-3">
                             <nav aria-label="Breadcrumb" className="text-sm text-gray-400"><a href="/" className="hover:text-white">Home</a> <span className="mx-2">/</span> <span className="text-white">Marketplace</span></nav>

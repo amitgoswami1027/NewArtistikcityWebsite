@@ -40,6 +40,9 @@ public class Storage {
     private final Path privateRoot;
     private final S3Client s3;
     private final String prefix;
+    /** app.uploads.strip-metadata: public photos lose EXIF / XMP / IPTC (GPS!) before they are stored. */
+    private final boolean stripMetadata;
+    private final float jpegQuality;
 
     /**
      * Absolute address of the public files on S3 ({@code S3_PUBLIC_BASE_URL}, e.g. https://cdn.example.com or
@@ -52,6 +55,14 @@ public class Storage {
     public Storage(Environment env) {
         this.root = Path.of(env.getProperty("app.storage-dir", "storage")).toAbsolutePath().normalize();
         this.privateRoot = Path.of(env.getProperty("app.private-storage-dir", "storage-private")).toAbsolutePath().normalize();
+        this.stripMetadata = !"false".equalsIgnoreCase(env.getProperty("app.uploads.strip-metadata", "true").trim());
+        float q;
+        try {
+            q = Float.parseFloat(env.getProperty("app.uploads.jpeg-quality", "0.92").trim());
+        } catch (NumberFormatException e) {
+            q = 0.92f;
+        }
+        this.jpegQuality = Math.max(0.5f, Math.min(1f, q));
         String driver = env.getProperty("app.storage.driver", "local").trim().toLowerCase(Locale.ROOT);
         if ("s3".equals(driver)) {
             this.s3 = new S3Client(env.getProperty("app.storage.s3.bucket", ""), env.getProperty("app.storage.s3.region", ""),
@@ -79,6 +90,8 @@ public class Storage {
         this.privateRoot = root.resolveSibling(root.getFileName() + "-private");
         this.s3 = s3;
         this.prefix = prefix;
+        this.stripMetadata = true;
+        this.jpegQuality = 0.92f;
     }
 
     public boolean isS3() {
@@ -101,8 +114,28 @@ public class Storage {
         return name;
     }
 
+    /** Relative paths of every public file under a folder (e.g. "uploads"), on disk or in S3. Maintenance jobs only. */
+    public java.util.List<String> listPublic(String folder) {
+        String dir = clean(folder);
+        if (s3 != null) {
+            java.util.List<String> out = new java.util.ArrayList<>();
+            for (String k : s3.list(prefix + dir + "/")) out.add(k.substring(prefix.length()));
+            return out;
+        }
+        Path base = local(dir);
+        if (!Files.isDirectory(base)) return java.util.List.of();
+        try (var walk = Files.walk(base)) {
+            return walk.filter(Files::isRegularFile).map(p -> root.relativize(p).toString().replace('\\', '/')).sorted().toList();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public void put(String relativePath, byte[] bytes) {
         String rel = clean(relativePath);
+        if (stripMetadata && ImageMetadata.applies(rel)) {
+            bytes = ImageMetadata.strip(bytes, rel, jpegQuality);
+        }
         if (s3 != null) {
             s3.put(prefix + rel, bytes, contentType(rel), CACHE_CONTROL);
             return;

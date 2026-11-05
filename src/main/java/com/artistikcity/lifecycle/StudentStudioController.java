@@ -38,6 +38,14 @@ import java.util.UUID;
 @Controller
 public class StudentStudioController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.artistikcity.moderation.Moderation> moderation;
+
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.notices.CourseNotices courseNotices;
+
+
     private static final long MAX_BYTES = 15L * 1024 * 1024;
 
     private final Inertia inertia;
@@ -72,6 +80,12 @@ public class StudentStudioController {
         List<Map<String, Object>> creds = credentials.credentials(userId);
         props.put("stage", stage(repo.enrollments(userId), subs, creds));
         props.put("certificatesReady", creds.stream().filter(c -> Boolean.TRUE.equals(c.get("eligible")) || c.get("certificate") != null).count());
+        // messages from the course team (Admin > course > Students > Message students; cancellations; new dates)
+        try {
+            props.put("notices", courseNotices.forStudent(userId, 10));
+        } catch (RuntimeException e) {
+            props.put("notices", List.of());
+        }
         return inertia.render(request, "Studio/Home", props);
     }
 
@@ -136,6 +150,7 @@ public class StudentStudioController {
     public ResponseEntity<String> upload(HttpServletRequest request) {
         Long userId = guard(request);
         if (userId == null) return error(HttpStatus.UNAUTHORIZED, "Please log in again.");
+        if (moderation.getIfAvailable() != null) moderation.getIfAvailable().assertAllowed(userId, "POSTING");
         Input in = Input.of(request, json);
         Long courseId = LifecycleDtos.lng(in.get("courseId"));
         String title = LifecycleDtos.str(in.get("title"));
