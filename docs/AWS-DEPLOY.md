@@ -177,6 +177,17 @@ Razorpay webhook `https://www.yourdomain.com/api/v1/courses/razorpay-webhook`,
 Google `https://www.yourdomain.com/social-login/google/callback`, Facebook `https://www.yourdomain.com/social-login/facebook/callback`.
 For e-mail, Amazon SES in ap-south-1 works well (verify your domain in SES first).
 
+### Keep the site private until launch
+
+Set a preview password and every page asks for it first (testers enter it once; it is remembered for 30 days). Search
+engines are told not to index the site while it is on. Health checks and payment webhooks keep working.
+
+```powershell
+Set-AppSetting SITE_PREVIEW_PASSWORD "<a password you share with testers>"
+```
+Then re-run the last deploy. To open the site to everyone: `aws ssm delete-parameter --region ap-south-1 --name /artistikcity/prod/SITE_PREVIEW_PASSWORD`
+and re-run the deploy. Uploaded images under /storage are served by CloudFront straight from S3 and are not behind the password.
+
 ## Step 5 - Point your domain at CloudFront
 
 At your DNS provider add **`www` → CNAME → the `CloudFrontDomain` output** (`dxxxxxxxx.cloudfront.net`).

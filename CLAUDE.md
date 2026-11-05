@@ -167,6 +167,8 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   `deploy/ec2-deploy.sh` (deploy/rollback/status, runs from inside the image) and `deploy/db-migrate.sh` (schema on an empty
   DB, else pending migrations - same rules as the launcher). `http/CloudFrontFilter` (`TRUST_CLOUDFRONT`) takes the visitor IP and
   https from CloudFront headers and rejects requests without `X-Origin-Verify`. `GET /healthz` is the health check.
+  `http/PreviewLockFilter` (`SITE_PREVIEW_PASSWORD`): while set, every page asks for that password (cookie `ac_preview`, 30 days),
+  responses carry `X-Robots-Tag: noindex` and robots.txt disallows all; `/healthz`, the payment webhooks and static files stay open.
   Migrations must stay compatible with the previous release (rollback only swaps the image).
 - **Marketplace shop** (package `shop/`, docs/marketplace-shop.md): every listing can also sell a numbered canvas edition, a poster and a
   digital download (`paintings.shop_formats`), priced from the global list `shop_price_options` by `ShopPricing` (the one source of prices;
