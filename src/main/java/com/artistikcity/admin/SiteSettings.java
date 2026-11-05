@@ -5,6 +5,7 @@ import com.artistikcity.support.Row;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,6 +20,7 @@ public class SiteSettings {
 
     private final Db db;
     private volatile Map<String, Map<String, String>> cache;
+    private volatile List<String> ageGroups;
 
     public SiteSettings(Db db) {
         this.db = db;
@@ -48,6 +50,26 @@ public class SiteSettings {
 
     public void invalidate() {
         cache = null;
+        ageGroups = null;
+    }
+
+    /** Names of the visible age groups in their menu order (Admin > Catalog > Age groups); cached until one is saved. */
+    public List<String> ageGroups() {
+        List<String> a = ageGroups;
+        if (a != null) {
+            return a;
+        }
+        List<String> out = new java.util.ArrayList<>();
+        try {
+            for (Row r : db.select("select name from age_groups where status = 1 order by sort_order, id")) {
+                out.add(r.str("name"));
+            }
+        } catch (Db.DbException e) {
+            return List.of();     // table not there yet (migration not run): no age menus rather than a broken page
+        }
+        a = List.copyOf(out);
+        ageGroups = a;
+        return a;
     }
 
     /** Values for the public page head (title, description, keywords, share image). */
@@ -66,6 +88,7 @@ public class SiteSettings {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("contact", all().getOrDefault("contact", Map.of()));
         m.put("social", all().getOrDefault("social", Map.of()));
+        m.put("ageGroups", ageGroups());
         return m;
     }
 }

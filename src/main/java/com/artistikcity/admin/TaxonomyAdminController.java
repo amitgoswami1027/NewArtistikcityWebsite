@@ -39,6 +39,7 @@ public class TaxonomyAdminController {
     }
 
     private static final Map<String, Type> TYPES = new LinkedHashMap<>();
+    private static final String AGE = "age_groups";
 
     static {
         add(new Type("mediums", "catalog", "mediums", "medium_slug", "medium", "Mediums", "uploads/mediums",
@@ -47,6 +48,9 @@ public class TaxonomyAdminController {
                 "select count(*) from courses where find_in_set(?, genre_id) > 0", null, List.of(), "Landscape, portrait, abstract… A course can have several."));
         add(new Type("skills", "catalog", "skills", "skill_slug", "skill level", "Skill levels", null,
                 "select count(*) from courses where skill_id = ?", null, List.of(), "Beginner, intermediate, advanced."));
+        add(new Type("age_groups", "catalog", "age_groups", "age_group_slug", "age group", "Age groups", null,
+                "select count(*) from courses c join age_groups a on a.name = c.age_group where a.id = ?", null, List.of(),
+                "Who a course is for, e.g. Junior - 12 to 15 yrs. Shown as the Age filter on the courses page and in the By age menus, in this order."));
         add(new Type("course_types", "catalog", "course_types", "course_type_slug", "course type", "Course types", null,
                 "select count(*) from courses where course_type_id = ?", null, List.of(1L, 2L), "Course and Workshop drive the site's menus and can't be removed."));
         add(new Type("categories", "blog", "categories", "slug", "category", "Categories", null,
@@ -64,8 +68,10 @@ public class TaxonomyAdminController {
     private final Json json;
     private final Storage storage;
     private final Audit audit;
+    private final SiteSettings site;
 
-    public TaxonomyAdminController(AdminKit kit, Db db, Json json, Storage storage, Audit audit) {
+    public TaxonomyAdminController(AdminKit kit, Db db, Json json, Storage storage, Audit audit, SiteSettings site) {
+        this.site = site;
         this.kit = kit;
         this.db = db;
         this.json = json;
@@ -117,7 +123,8 @@ public class TaxonomyAdminController {
 
     private List<Row> items(Type t) {
         List<Row> out = new ArrayList<>();
-        for (Row r : db.select("select * from " + t.table() + " order by name")) {
+        String order = AGE.equals(t.key()) ? "sort_order, id" : "name";
+        for (Row r : db.select("select * from " + t.table() + " order by " + order)) {
             Row v = Row.of("id", r.get("id"), "name", r.str("name", ""), "slug", r.str(t.slugCol(), ""), "status", r.lng("status", 1) == 1,
                     "usage", db.count(t.usage(), "genres".equals(t.key()) ? String.valueOf(r.get("id")) : r.get("id")),
                     "updated_at", r.get("updated_at"));
@@ -167,11 +174,23 @@ public class TaxonomyAdminController {
         }
         Row v = Row.of("name", name, t.slugCol(), slug, "status", in.has("status") && !in.bool("status") ? 0 : 1);
         if (id == null) {
+            if (AGE.equals(t.key())) {
+                // new groups go to the end of the menus
+                v.put("sort_order", db.count("select coalesce(max(sort_order), 0) + 1 from age_groups"));
+            }
             id = db.insert(t.table(), v);
             audit.log(admin, t.key(), id, "created", name);
         } else {
+            String before = db.find(t.table(), id).str("name");
             db.updateById(t.table(), id, v);
+            if (AGE.equals(t.key()) && !before.equals(name)) {
+                // courses store the group's name: renaming the group renames it on every course
+                db.update("update courses set age_group = ? where age_group = ?", name, before);
+            }
             audit.log(admin, t.key(), id, "updated", name);
+        }
+        if (AGE.equals(t.key())) {
+            site.invalidate();
         }
         if (photo != null) {
             db.updateById(t.table(), id, Row.of("photo", storage.storeUpload(photo, t.photoDir() + "/" + id)));
@@ -202,6 +221,9 @@ public class TaxonomyAdminController {
         }
         db.deleteById(t.table(), id);
         audit.log(admin, t.key(), id, "deleted", row.str("name"));
+        if (AGE.equals(t.key())) {
+            site.invalidate();
+        }
         return kit.ok(Map.of("items", items(t), "message", "Deleted “" + row.str("name") + "”."));
     }
 }

@@ -8529,6 +8529,7 @@ const SOCIAL = [
 ];
 function SiteFooter() {
   const { site } = (0, import_inertia_react.usePage)().props;
+  const ageGroups = (0, import_SiteHeader.useAgeGroups)();
   const social = site && site.social && Object.keys(site.social).length ? SOCIAL.filter(([k]) => site.social[k]).map(([k, l, i]) => [k, l, i, site.social[k]]) : SOCIAL;
   const [mediums, setMediums] = (0, import_react.useState)([]);
   (0, import_react.useEffect)(() => {
@@ -8555,7 +8556,7 @@ function SiteFooter() {
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({ type: "course" }), children: "Live courses" }) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({ type: "workshop" }), children: "Workshops" }) }),
-          import_SiteHeader.AGE_GROUPS.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: (0, import_SiteHeader.catalogUrl)({ age: a }), children: [
+          ageGroups.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: (0, import_SiteHeader.catalogUrl)({ age: a }), children: [
             a.split(" - ")[0],
             " courses"
           ] }) }, a))
@@ -8637,7 +8638,8 @@ __export(SiteHeader_exports, {
   AGE_GROUPS: () => AGE_GROUPS,
   catalogUrl: () => catalogUrl,
   default: () => SiteHeader,
-  loginUrl: () => loginUrl
+  loginUrl: () => loginUrl,
+  useAgeGroups: () => useAgeGroups
 });
 module.exports = __toCommonJS(SiteHeader_exports);
 var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
@@ -8648,6 +8650,10 @@ var import_Constants = __webpack_require__("./resources/js/Components/Constants.
 var import_nav = __webpack_require__("./resources/js/Components/Account/nav.js");
 var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
 const AGE_GROUPS = ["Sub-junior - 8 to 12 yrs", "Junior - 12 to 15 yrs", "Adult - 16 yrs and above"];
+function useAgeGroups() {
+  const { site } = (0, import_inertia_react.usePage)().props;
+  return site && Array.isArray(site.ageGroups) ? site.ageGroups : AGE_GROUPS;
+}
 function catalogUrl(params = {}) {
   const qs = new URLSearchParams(Object.assign({ type: "all" }, params)).toString();
   return route("courses") + "?" + qs;
@@ -8700,6 +8706,7 @@ function HeaderMenu({ id, button, buttonClass, label, align = "left", children }
 }
 function SiteHeader({ showCategories = false, activeMedium = null }) {
   const { auth, nav } = (0, import_inertia_react.usePage)().props;
+  const ageGroups = useAgeGroups();
   const user = auth && auth.user;
   const [mediums, setMediums] = (0, import_react.useState)([]);
   const [open, setOpen] = (0, import_react.useState)(false);
@@ -8766,7 +8773,7 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
                 " Workshops"
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { style: { marginTop: 16 }, children: "By age" }),
-              AGE_GROUPS.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ age: a }), children: [
+              ageGroups.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ age: a }), children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-user-o" }),
                 " ",
                 a
@@ -17181,7 +17188,7 @@ const editable = (c) => {
   return v;
 };
 function CourseEditor() {
-  const { kind, course, curriculum, mediums = [], genres = [], skills = [], instructors = [], me } = (0, import_inertia_react.usePage)().props;
+  const { kind, course, curriculum, mediums = [], genres = [], skills = [], ageGroups = [], instructors = [], me } = (0, import_inertia_react.usePage)().props;
   const [saved, setSaved] = (0, import_react.useState)(course);
   const isNew = !saved;
   const noun = kind === "workshop" ? "workshop" : "course";
@@ -17319,7 +17326,22 @@ function CourseEditor() {
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SelectField, { form, name: "skill_id", label: "Skill level", options: skills.map((m) => ({ value: String(m.value), label: m.label })), optional: true })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Genres", name: "genre_ids", hint: "Pick all that apply.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.ChoiceChips, { name: "genre_ids", options: genres.map((g) => ({ value: String(g.value), label: g.label })), value: v.genre_ids, onChange: (x) => form.set("genre_ids", x) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "age_group", label: "Age group", placeholder: "e.g. 12+ years", max: 255, optional: true })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.SelectField,
+          {
+            form,
+            name: "age_group",
+            label: "Age group",
+            options: ageGroups,
+            optional: true,
+            placeholder: "Choose an age group",
+            hint: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              "Used by the Age filter and the By age menus. Add or rename groups in ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/admin/catalog?type=age_groups", children: "Catalog \u203A Age groups" }),
+              "."
+            ] })
+          }
+        )
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.FormSection, { id: "schedule", title: "Schedule & format", description: "When it runs and how much time it takes. Numbers only; units are added on the site.", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "is_free_course", checked: v.is_free_course, onChange: (x) => form.set("is_free_course", x), label: "Free course", description: "No payment and no start date needed." }),
@@ -27317,405 +27339,209 @@ function CourseDetails() {
 /***/ }),
 
 /***/ "./resources/js/Pages/Courses.js":
-/*!***************************************!*\
-  !*** ./resources/js/Pages/Courses.js ***!
-  \***************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Courses)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Site/SiteLayout */ "./resources/js/Components/Site/SiteLayout.js");
-/* harmony import */ var _Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Site/CourseCard */ "./resources/js/Components/Site/CourseCard.js");
-/* harmony import */ var _Components_Site_ProgramCard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Site/ProgramCard */ "./resources/js/Components/Site/ProgramCard.js");
-/* harmony import */ var _Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/Components/Site/SiteHeader */ "./resources/js/Components/Site/SiteHeader.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-
-
-var toSet = function toSet(v) {
-  return new Set(v === undefined || v === null || v === '' ? [] : [String(v)]);
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Courses_exports = {};
+__export(Courses_exports, {
+  default: () => Courses
+});
+module.exports = __toCommonJS(Courses_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_CourseCard = __toESM(__webpack_require__("./resources/js/Components/Site/CourseCard.js"));
+var import_ProgramCard = __webpack_require__("./resources/js/Components/Site/ProgramCard.js");
+var import_SiteHeader = __webpack_require__("./resources/js/Components/Site/SiteHeader.js");
+const toSet = (v) => new Set(v === void 0 || v === null || v === "" ? [] : [String(v)]);
 function ageMatches(courseAge, filterAge) {
   if (!courseAge) return false;
-  var a = String(courseAge).toLowerCase();
-  var f = filterAge.toLowerCase();
-  return a.includes(f) || f.includes(a) || a.includes(f.split(' - ')[0]);
+  return String(courseAge).trim().toLowerCase() === String(filterAge).trim().toLowerCase();
 }
-function Pill(_ref) {
-  var label = _ref.label,
-    options = _ref.options,
-    selected = _ref.selected,
-    onToggle = _ref.onToggle,
-    counts = _ref.counts;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState2 = _slicedToArray(_useState, 2),
-    open = _useState2[0],
-    setOpen = _useState2[1];
-  var ref = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    var close = function close(e) {
+function Pill({ label, options, selected, onToggle, counts }) {
+  const [open, setOpen] = (0, import_react.useState)(false);
+  const ref = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    const close = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
-    document.addEventListener('mousedown', close);
-    return function () {
-      return document.removeEventListener('mousedown', close);
-    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
   }, []);
   if (!options.length) return null;
-  var n = selected.size;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-    className: "dm-pill",
-    ref: ref,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("button", {
-      type: "button",
-      className: n ? 'is-set' : '',
-      onClick: function onClick() {
-        return setOpen(!open);
-      },
-      "aria-expanded": open,
-      children: [label, n ? " (".concat(n, ")") : '', " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-        className: "fa fa-angle-".concat(open ? 'up' : 'down')
-      })]
-    }), open && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-      className: "dm-pill__menu",
-      children: options.map(function (o) {
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("label", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
-            type: "checkbox",
-            checked: selected.has(String(o.value)),
-            onChange: function onChange() {
-              return onToggle(String(o.value));
-            }
-          }), o.label, counts && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("small", {
-            children: counts[String(o.value)] || 0
-          })]
-        }, o.value);
-      })
-    })]
-  });
+  const n = selected.size;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-pill", ref, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: n ? "is-set" : "", onClick: () => setOpen(!open), "aria-expanded": open, children: [
+      label,
+      n ? ` (${n})` : "",
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa fa-angle-${open ? "up" : "down"}` })
+    ] }),
+    open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-pill__menu", children: options.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: selected.has(String(o.value)), onChange: () => onToggle(String(o.value)) }),
+      o.label,
+      counts && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: counts[String(o.value)] || 0 })
+    ] }, o.value)) })
+  ] });
 }
 function Courses() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    courses = _usePage$props.courses,
-    _usePage$props$genres = _usePage$props.genres,
-    genres = _usePage$props$genres === void 0 ? [] : _usePage$props$genres,
-    _usePage$props$medium = _usePage$props.mediums,
-    mediums = _usePage$props$medium === void 0 ? [] : _usePage$props$medium,
-    _usePage$props$skills = _usePage$props.skills,
-    skills = _usePage$props$skills === void 0 ? [] : _usePage$props$skills,
-    type = _usePage$props.type,
-    _usePage$props$filter = _usePage$props.filters,
-    filters = _usePage$props$filter === void 0 ? {} : _usePage$props$filter;
-  var all = courses && courses.data || [];
-  var typeKey = String(type || 'All').toLowerCase();
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(filters.q || ''),
-    _useState4 = _slicedToArray(_useState3, 2),
-    q = _useState4[0],
-    setQ = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(toSet(filters.medium)),
-    _useState6 = _slicedToArray(_useState5, 2),
-    fMedium = _useState6[0],
-    setFMedium = _useState6[1];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(toSet(filters.genre)),
-    _useState8 = _slicedToArray(_useState7, 2),
-    fGenre = _useState8[0],
-    setFGenre = _useState8[1];
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(toSet(filters.skill)),
-    _useState0 = _slicedToArray(_useState9, 2),
-    fSkill = _useState0[0],
-    setFSkill = _useState0[1];
-  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(toSet(filters.age)),
-    _useState10 = _slicedToArray(_useState1, 2),
-    fAge = _useState10[0],
-    setFAge = _useState10[1];
-  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(new Set(typeKey === 'course' || typeKey === 'workshop' ? [typeKey] : [])),
-    _useState12 = _slicedToArray(_useState11, 2),
-    fType = _useState12[0],
-    setFType = _useState12[1];
-  var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('popular'),
-    _useState14 = _slicedToArray(_useState13, 2),
-    sort = _useState14[0],
-    setSort = _useState14[1];
-  var toggle = function toggle(setter) {
-    return function (value) {
-      return setter(function (prev) {
-        var next = new Set(prev);
-        next.has(value) ? next["delete"](value) : next.add(value);
-        return next;
-      });
-    };
-  };
-  var onlyMedium = function onlyMedium(id) {
-    return setFMedium(id ? new Set([String(id)]) : new Set());
-  };
-  var genreIds = function genreIds(c) {
-    return String(c.genre_id || '').split(',').map(function (s) {
-      return s.trim();
-    }).filter(Boolean);
-  };
-  var results = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
-    var needle = q.trim().toLowerCase();
-    var list = all.filter(function (c) {
-      if (needle && !"".concat(c.title, " ").concat(c.sub_title || '', " ").concat(c.introduction || '', " ").concat(c.medium && c.medium.name || '').toLowerCase().includes(needle)) return false;
+  const { courses, genres = [], mediums = [], skills = [], type, filters = {} } = (0, import_inertia_react.usePage)().props;
+  const all = courses && courses.data || [];
+  const typeKey = String(type || "All").toLowerCase();
+  const [q, setQ] = (0, import_react.useState)(filters.q || "");
+  const [fMedium, setFMedium] = (0, import_react.useState)(toSet(filters.medium));
+  const [fGenre, setFGenre] = (0, import_react.useState)(toSet(filters.genre));
+  const [fSkill, setFSkill] = (0, import_react.useState)(toSet(filters.skill));
+  const ageGroups = (0, import_SiteHeader.useAgeGroups)();
+  const [fAge, setFAge] = (0, import_react.useState)(toSet(filters.age));
+  const [fType, setFType] = (0, import_react.useState)(new Set(typeKey === "course" || typeKey === "workshop" ? [typeKey] : []));
+  const [sort, setSort] = (0, import_react.useState)("popular");
+  const toggle = (setter) => (value) => setter((prev) => {
+    const next = new Set(prev);
+    next.has(value) ? next.delete(value) : next.add(value);
+    return next;
+  });
+  const onlyMedium = (id) => setFMedium(id ? /* @__PURE__ */ new Set([String(id)]) : /* @__PURE__ */ new Set());
+  const genreIds = (c) => String(c.genre_id || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const results = (0, import_react.useMemo)(() => {
+    const needle = q.trim().toLowerCase();
+    let list = all.filter((c) => {
+      if (needle && !`${c.title} ${c.sub_title || ""} ${c.introduction || ""} ${c.medium && c.medium.name || ""}`.toLowerCase().includes(needle)) return false;
       if (fMedium.size && !fMedium.has(String(c.medium_id))) return false;
       if (fSkill.size && !fSkill.has(String(c.skill_id))) return false;
-      if (fGenre.size && !genreIds(c).some(function (g) {
-        return fGenre.has(g);
-      })) return false;
-      if (fAge.size && !_toConsumableArray(fAge).some(function (a) {
-        return ageMatches(c.age_group, a);
-      })) return false;
-      if (fType.size && !fType.has((0,_Components_Site_ProgramCard__WEBPACK_IMPORTED_MODULE_4__.isWorkshop)(c) ? 'workshop' : 'course')) return false;
+      if (fGenre.size && !genreIds(c).some((g) => fGenre.has(g))) return false;
+      if (fAge.size && ![...fAge].some((a) => ageMatches(c.age_group, a))) return false;
+      if (fType.size && !fType.has((0, import_ProgramCard.isWorkshop)(c) ? "workshop" : "course")) return false;
       return true;
     });
-    var price = function price(c) {
-      return Number(c.prices && c.prices[0] && c.prices[0].price_inr || 0);
-    };
-    if (sort === 'popular') list = _toConsumableArray(list).sort(function (a, b) {
-      return Number(b.students || 0) - Number(a.students || 0);
-    });
-    if (sort === 'rated') list = _toConsumableArray(list).sort(function (a, b) {
-      return Number(b.positive || 0) - Number(a.positive || 0);
-    });
-    if (sort === 'price-asc') list = _toConsumableArray(list).sort(function (a, b) {
-      return price(a) - price(b);
-    });
-    if (sort === 'price-desc') list = _toConsumableArray(list).sort(function (a, b) {
-      return price(b) - price(a);
-    });
-    if (sort === 'newest') list = _toConsumableArray(list).sort(function (a, b) {
-      return Number(b.id) - Number(a.id);
-    });
+    const price = (c) => Number(c.prices && c.prices[0] && c.prices[0].price_inr || 0);
+    if (sort === "popular") list = [...list].sort((a, b) => Number(b.students || 0) - Number(a.students || 0));
+    if (sort === "rated") list = [...list].sort((a, b) => Number(b.positive || 0) - Number(a.positive || 0));
+    if (sort === "price-asc") list = [...list].sort((a, b) => price(a) - price(b));
+    if (sort === "price-desc") list = [...list].sort((a, b) => price(b) - price(a));
+    if (sort === "newest") list = [...list].sort((a, b) => Number(b.id) - Number(a.id));
     return list;
   }, [all, q, fMedium, fGenre, fSkill, fAge, fType, sort]);
-  var countBy = function countBy(fn) {
-    return all.reduce(function (acc, c) {
-      [].concat(fn(c)).forEach(function (k) {
-        acc[k] = (acc[k] || 0) + 1;
-      });
-      return acc;
-    }, {});
+  const countBy = (fn) => all.reduce((acc, c) => {
+    [].concat(fn(c)).forEach((k) => {
+      acc[k] = (acc[k] || 0) + 1;
+    });
+    return acc;
+  }, {});
+  const anyFilter = q || fMedium.size || fGenre.size || fSkill.size || fAge.size || fType.size;
+  const clearAll = () => {
+    setQ("");
+    setFMedium(/* @__PURE__ */ new Set());
+    setFGenre(/* @__PURE__ */ new Set());
+    setFSkill(/* @__PURE__ */ new Set());
+    setFAge(/* @__PURE__ */ new Set());
+    setFType(/* @__PURE__ */ new Set());
   };
-  var anyFilter = q || fMedium.size || fGenre.size || fSkill.size || fAge.size || fType.size;
-  var clearAll = function clearAll() {
-    setQ('');
-    setFMedium(new Set());
-    setFGenre(new Set());
-    setFSkill(new Set());
-    setFAge(new Set());
-    setFType(new Set());
-  };
-  var activeMedium = fMedium.size === 1 ? mediums.find(function (m) {
-    return fMedium.has(String(m.id));
-  }) : null;
-  var heading = activeMedium ? "".concat(activeMedium.name, " courses") : fType.size === 1 ? fType.has('workshop') ? 'Art workshops' : 'Live art courses' : 'Online art courses';
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: heading,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-      className: "ac-wide",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("ul", {
-        className: "dm-crumbs",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-            href: route('welcome'),
-            children: "Home"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("a", {
-            href: route('courses') + '?type=all',
-            children: "Courses"
-          })
-        }), activeMedium && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-          children: activeMedium.name
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-        className: "dm-listhead",
-        style: {
-          paddingTop: 8
-        },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h1", {
-          children: heading
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-          children: "Learn from a working artist with live classes, guided projects and personal feedback. Choose a medium, your level and a format that fits your week."
-        })]
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("nav", {
-      className: "dm-cats",
-      style: {
-        borderTop: 0,
-        marginTop: 20
-      },
-      "aria-label": "Mediums",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-        className: "ac-wide",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("ul", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-              type: "button",
-              className: !fMedium.size ? 'is-active' : '',
-              onClick: function onClick() {
-                return onlyMedium(null);
-              },
-              children: "All"
-            })
-          }), mediums.map(function (m) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-                type: "button",
-                className: fMedium.size === 1 && fMedium.has(String(m.id)) ? 'is-active' : '',
-                onClick: function onClick() {
-                  return onlyMedium(m.id);
-                },
-                children: m.name
-              })
-            }, m.id);
-          })]
-        })
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("section", {
-      className: "ac-wide",
-      style: {
-        paddingBottom: 72
-      },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-        className: "dm-filterbar",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-          className: "dm-search",
-          style: {
-            display: 'block',
-            maxWidth: 280,
-            flex: '0 1 280px'
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("i", {
-            className: "fa fa-search"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
-            type: "search",
-            value: q,
-            onChange: function onChange(e) {
-              return setQ(e.target.value);
-            },
-            placeholder: "Search in results",
-            "aria-label": "Search in results"
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(Pill, {
-          label: "Format",
-          selected: fType,
-          onToggle: toggle(setFType),
-          options: [{
-            value: 'course',
-            label: 'Live courses'
-          }, {
-            value: 'workshop',
-            label: 'Workshops'
-          }]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(Pill, {
-          label: "Level",
-          selected: fSkill,
-          onToggle: toggle(setFSkill),
-          counts: countBy(function (c) {
-            return String(c.skill_id);
-          }),
-          options: skills.map(function (s) {
-            return {
-              value: s.id,
-              label: s.name
-            };
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(Pill, {
-          label: "Age",
-          selected: fAge,
-          onToggle: toggle(setFAge),
-          options: _Components_Site_SiteHeader__WEBPACK_IMPORTED_MODULE_5__.AGE_GROUPS.map(function (a) {
-            return {
-              value: a,
-              label: a
-            };
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(Pill, {
-          label: "Subject",
-          selected: fGenre,
-          onToggle: toggle(setFGenre),
-          counts: countBy(genreIds),
-          options: genres.map(function (g) {
-            return {
-              value: g.id,
-              label: g.name
-            };
-          })
-        }), anyFilter ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-          type: "button",
-          className: "dm-clear",
-          onClick: clearAll,
-          children: "Clear filters"
-        }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-          className: "dm-count",
-          children: [results.length, " ", results.length === 1 ? 'course' : 'courses', /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("select", {
-            value: sort,
-            onChange: function onChange(e) {
-              return setSort(e.target.value);
-            },
-            "aria-label": "Sort by",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("option", {
-              value: "popular",
-              children: "Most popular"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("option", {
-              value: "rated",
-              children: "Best rated"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("option", {
-              value: "newest",
-              children: "Newest"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("option", {
-              value: "price-asc",
-              children: "Price: low to high"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("option", {
-              value: "price-desc",
-              children: "Price: high to low"
-            })]
-          })]
-        })]
-      }), results.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-        className: "dm-grid",
-        children: results.map(function (c, i) {
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_Components_Site_CourseCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
-            course: c,
-            index: i
-          }, c.id);
-        })
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-        className: "ac-empty",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-          children: "No courses match your filters"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-          children: "Try removing a filter or searching for a different technique."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("button", {
-          type: "button",
-          className: "dm-btn dm-btn--ink",
-          onClick: clearAll,
-          children: "Clear filters"
-        })]
-      })]
-    })]
-  });
+  const activeMedium = fMedium.size === 1 ? mediums.find((m) => fMedium.has(String(m.id))) : null;
+  const heading = activeMedium ? `${activeMedium.name} courses` : fType.size === 1 ? fType.has("workshop") ? "Art workshops" : "Live art courses" : "Online art courses";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: heading, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "dm-crumbs", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("welcome"), children: "Home" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("courses") + "?type=all", children: "Courses" }) }),
+        activeMedium && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: activeMedium.name })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-listhead", style: { paddingTop: 8 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: heading }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Learn from a working artist with live classes, guided projects and personal feedback. Choose a medium, your level and a format that fits your week." })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-cats", style: { borderTop: 0, marginTop: 20 }, "aria-label": "Mediums", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: !fMedium.size ? "is-active" : "", onClick: () => onlyMedium(null), children: "All" }) }),
+      mediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: fMedium.size === 1 && fMedium.has(String(m.id)) ? "is-active" : "", onClick: () => onlyMedium(m.id), children: m.name }) }, m.id))
+    ] }) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide", style: { paddingBottom: 72 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-filterbar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-search", style: { display: "block", maxWidth: 280, flex: "0 1 280px" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", value: q, onChange: (e) => setQ(e.target.value), placeholder: "Search in results", "aria-label": "Search in results" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          Pill,
+          {
+            label: "Format",
+            selected: fType,
+            onToggle: toggle(setFType),
+            options: [{ value: "course", label: "Live courses" }, { value: "workshop", label: "Workshops" }]
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          Pill,
+          {
+            label: "Level",
+            selected: fSkill,
+            onToggle: toggle(setFSkill),
+            counts: countBy((c) => String(c.skill_id)),
+            options: skills.map((s) => ({ value: s.id, label: s.name }))
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pill, { label: "Age", selected: fAge, onToggle: toggle(setFAge), options: ageGroups.map((a) => ({ value: a, label: a })) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          Pill,
+          {
+            label: "Subject",
+            selected: fGenre,
+            onToggle: toggle(setFGenre),
+            counts: countBy(genreIds),
+            options: genres.map((g) => ({ value: g.id, label: g.name }))
+          }
+        ),
+        anyFilter ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-clear", onClick: clearAll, children: "Clear filters" }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-count", children: [
+          results.length,
+          " ",
+          results.length === 1 ? "course" : "courses",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: sort, onChange: (e) => setSort(e.target.value), "aria-label": "Sort by", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "popular", children: "Most popular" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "rated", children: "Best rated" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "newest", children: "Newest" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "price-asc", children: "Price: low to high" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "price-desc", children: "Price: high to low" })
+          ] })
+        ] })
+      ] }),
+      results.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-grid", children: results.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CourseCard.default, { course: c, index: i }, c.id)) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-empty", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "No courses match your filters" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Try removing a filter or searching for a different technique." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--ink", onClick: clearAll, children: "Clear filters" })
+      ] })
+    ] })
+  ] });
 }
+
 
 /***/ }),
 

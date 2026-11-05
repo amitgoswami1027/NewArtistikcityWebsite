@@ -155,6 +155,16 @@ public class CourseAdminController {
         p.put("mediums", db.select("select id as value, name as label from mediums order by name"));
         p.put("genres", db.select("select id as value, name as label from genres order by name"));
         p.put("skills", db.select("select id as value, name as label from skills order by id"));
+        // age groups by name (courses.age_group holds the name); a hand-typed value from before stays selectable
+        List<Map<String, Object>> ages = new ArrayList<>();
+        for (Row r : db.select("select name from age_groups where status = 1 order by sort_order, id")) {
+            ages.add(Map.of("value", r.str("name"), "label", r.str("name")));
+        }
+        String current = course == null ? "" : course.str("age_group", "");
+        if (!current.isBlank() && ages.stream().noneMatch(a -> current.equals(a.get("value")))) {
+            ages.add(Map.of("value", current, "label", current + " (old value: choose a group)"));
+        }
+        p.put("ageGroups", ages);
         p.put("instructors", kit.teacherScope(admin) == null
                 ? db.select("select id as value, name as label from admins where admin_type in ('teacher', 'admin') order by name") : List.of());
         p.put("me", admin.get("id"));
@@ -287,6 +297,12 @@ public class CourseAdminController {
         if (medium != null && db.find("mediums", medium) == null) {
             errors.put("medium_id", "Choose a medium from the list.");
         }
+        String ageGroup = AdminKit.trim(str(d, "age_group"), 255);
+        if (ageGroup != null && !ageGroup.isBlank()
+                && db.count("select count(*) from age_groups where name = ?", ageGroup) == 0
+                && (id == null || db.count("select count(*) from courses where id = ? and age_group = ?", id, ageGroup) == 0)) {
+            errors.put("age_group", "Choose an age group from the list (Catalog > Age groups).");
+        }
         Long skill = idOrNull(d, "skill_id");
         Long instructor = kit.teacherScope(admin) != null ? admin.lng("id") : idOrNull(d, "admin_id");
         if (instructor != null && db.find("admins", instructor) == null) {
@@ -330,7 +346,8 @@ public class CourseAdminController {
         }
         c.put("genre_id", String.join(",", genres));
         c.put("course_start_date", start);
-        for (String k : List.of("age_group", "duration", "sessions", "time_required", "mini_projects", "course_modules")) {
+        c.put("age_group", ageGroup == null || ageGroup.isBlank() ? null : ageGroup);
+        for (String k : List.of("duration", "sessions", "time_required", "mini_projects", "course_modules")) {
             c.put(k, AdminKit.trim(str(d, k), 255));
         }
         c.put("course_based", "video_course".equals(str(d, "course_based")) ? "video_course" : "instructor_based");

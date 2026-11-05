@@ -139,6 +139,10 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   forms show inline. Check the persona capability (`Personas`) on every API call; instructors only see their own
   courses (`kit.teacherScope`). Rich text is saved through `support/HtmlCleaner` (allow-list); uploads go through
   `AdminKit.checkImage/checkPdf`. Important changes are written to `admin_audit` (`Audit.log`).
+- **Age groups** are a managed list (`age_groups`, Admin > Catalog > Age groups, `TaxonomyAdminController`, ordered by `sort_order`).
+  A course picks one in the editor and `courses.age_group` stores the group's **name** (renaming a group renames it on its
+  courses; a group in use can't be deleted). The list reaches React as `site.ageGroups` (`SiteSettings.ageGroups`, cached) and
+  feeds the /courses Age filter (exact name match) and the header/footer "By age" menus via `useAgeGroups()` in `SiteHeader`.
 - Site settings (`settings` table, tags `home`, `seo`, `contact`, `social`) are read through `admin/SiteSettings` (cached,
   invalidated on save). SEO values go into the root templates' `<head>` (`seo.*`; a controller can override them with the
   request attribute `Inertia.SEO_ATTRIBUTE`), contact/social reach React as the shared prop `site`.

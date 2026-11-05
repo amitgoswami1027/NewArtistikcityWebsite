@@ -3,15 +3,14 @@ import { usePage } from '@inertiajs/inertia-react';
 import SiteLayout from '@/Components/Site/SiteLayout';
 import CourseCard from '@/Components/Site/CourseCard';
 import { isWorkshop } from '@/Components/Site/ProgramCard';
-import { AGE_GROUPS } from '@/Components/Site/SiteHeader';
+import { useAgeGroups } from '@/Components/Site/SiteHeader';
 
 const toSet = (v) => new Set(v === undefined || v === null || v === '' ? [] : [String(v)]);
 
+/** A course belongs to an age group when it picked that group (exact name, set in the course editor). */
 function ageMatches(courseAge, filterAge) {
     if (!courseAge) return false;
-    const a = String(courseAge).toLowerCase();
-    const f = filterAge.toLowerCase();
-    return a.includes(f) || f.includes(a) || a.includes(f.split(' - ')[0]);
+    return String(courseAge).trim().toLowerCase() === String(filterAge).trim().toLowerCase();
 }
 
 function Pill({ label, options, selected, onToggle, counts }) {
@@ -53,6 +52,7 @@ export default function Courses() {
     const [fMedium, setFMedium] = useState(toSet(filters.medium));
     const [fGenre, setFGenre] = useState(toSet(filters.genre));
     const [fSkill, setFSkill] = useState(toSet(filters.skill));
+    const ageGroups = useAgeGroups();
     const [fAge, setFAge] = useState(toSet(filters.age));
     const [fType, setFType] = useState(new Set(typeKey === 'course' || typeKey === 'workshop' ? [typeKey] : []));
     const [sort, setSort] = useState('popular');
@@ -127,7 +127,7 @@ export default function Courses() {
                           options={[{ value: 'course', label: 'Live courses' }, { value: 'workshop', label: 'Workshops' }]} />
                     <Pill label="Level" selected={fSkill} onToggle={toggle(setFSkill)} counts={countBy((c) => String(c.skill_id))}
                           options={skills.map((s) => ({ value: s.id, label: s.name }))} />
-                    <Pill label="Age" selected={fAge} onToggle={toggle(setFAge)} options={AGE_GROUPS.map((a) => ({ value: a, label: a }))} />
+                    <Pill label="Age" selected={fAge} onToggle={toggle(setFAge)} options={ageGroups.map((a) => ({ value: a, label: a }))} />
                     <Pill label="Subject" selected={fGenre} onToggle={toggle(setFGenre)} counts={countBy(genreIds)}
                           options={genres.map((g) => ({ value: g.id, label: g.name }))} />
                     {anyFilter ? <button type="button" className="dm-clear" onClick={clearAll}>Clear filters</button> : null}

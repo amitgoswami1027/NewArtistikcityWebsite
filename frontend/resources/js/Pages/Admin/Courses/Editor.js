@@ -42,7 +42,7 @@ const editable = (c) => {
 };
 
 export default function CourseEditor() {
-    const { kind, course, curriculum, mediums = [], genres = [], skills = [], instructors = [], me } = usePage().props;
+    const { kind, course, curriculum, mediums = [], genres = [], skills = [], ageGroups = [], instructors = [], me } = usePage().props;
     const [saved, setSaved] = useState(course);
     const isNew = !saved;
     const noun = kind === 'workshop' ? 'workshop' : 'course';
@@ -158,7 +158,9 @@ export default function CourseEditor() {
                         <Field label="Genres" name="genre_ids" hint="Pick all that apply." optional>
                             <ChoiceChips name="genre_ids" options={genres.map((g) => ({ value: String(g.value), label: g.label }))} value={v.genre_ids} onChange={(x) => form.set('genre_ids', x)} />
                         </Field>
-                        <TextField form={form} name="age_group" label="Age group" placeholder="e.g. 12+ years" max={255} optional />
+                        <SelectField form={form} name="age_group" label="Age group" options={ageGroups} optional
+                                     placeholder="Choose an age group"
+                                     hint={<>Used by the Age filter and the By age menus. Add or rename groups in <a href="/admin/catalog?type=age_groups">Catalog › Age groups</a>.</>} />
                     </FormSection>
 
                     <FormSection id="schedule" title="Schedule & format" description="When it runs and how much time it takes. Numbers only; units are added on the site.">

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { usePage } from '@inertiajs/inertia-react';
 import { API_URL } from '@/Components/Constants';
-import { catalogUrl, AGE_GROUPS } from '@/Components/Site/SiteHeader';
+import { catalogUrl, useAgeGroups } from '@/Components/Site/SiteHeader';
 
 const SOCIAL = [
     ['facebook', 'Facebook', 'fa-facebook', 'https://www.facebook.com/StudioVaishaliArts/'],
@@ -13,6 +13,7 @@ const SOCIAL = [
 
 export default function SiteFooter() {
     const { site } = usePage().props;
+    const ageGroups = useAgeGroups();
     // links come from Admin > Site settings; without saved settings the original links are used
     const social = site && site.social && Object.keys(site.social).length
         ? SOCIAL.filter(([k]) => site.social[k]).map(([k, l, i]) => [k, l, i, site.social[k]])
@@ -46,7 +47,7 @@ export default function SiteFooter() {
                         <ul>
                             <li><a href={catalogUrl({ type: 'course' })}>Live courses</a></li>
                             <li><a href={catalogUrl({ type: 'workshop' })}>Workshops</a></li>
-                            {AGE_GROUPS.map((a) => <li key={a}><a href={catalogUrl({ age: a })}>{a.split(' - ')[0]} courses</a></li>)}
+                            {ageGroups.map((a) => <li key={a}><a href={catalogUrl({ age: a })}>{a.split(' - ')[0]} courses</a></li>)}
                         </ul>
                     </div>
                     <div>

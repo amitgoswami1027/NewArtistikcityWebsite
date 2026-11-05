@@ -67,6 +67,7 @@ DROP TABLE IF EXISTS testimonials;
 DROP TABLE IF EXISTS mediums;
 DROP TABLE IF EXISTS genres;
 DROP TABLE IF EXISTS skills;
+DROP TABLE IF EXISTS age_groups;
 DROP TABLE IF EXISTS course_types;
 DROP TABLE IF EXISTS password_resets;
 DROP TABLE IF EXISTS auth_events;
@@ -300,6 +301,23 @@ CREATE TABLE skills (
     created_at DATETIME NULL,
     updated_at DATETIME NULL
 );
+
+-- age groups (Admin > Catalog > Age groups): a course picks one; courses.age_group holds its name.
+-- Shown as the "Age" filter on /courses and the "By age" menus, in the order of sort_order.
+CREATE TABLE age_groups (
+    id             BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    name           VARCHAR(100) NOT NULL,
+    age_group_slug VARCHAR(100) NOT NULL,
+    sort_order     INT NOT NULL DEFAULT 0,
+    status         TINYINT NOT NULL DEFAULT 1,
+    created_at     DATETIME NULL,
+    updated_at     DATETIME NULL,
+    UNIQUE INDEX age_groups_slug_unique (age_group_slug)
+);
+INSERT INTO age_groups (name, age_group_slug, sort_order, status, created_at, updated_at) VALUES
+('Sub-junior - 8 to 12 yrs', 'sub-junior', 1, 1, '2026-11-05 00:00:00', '2026-11-05 00:00:00'),
+('Junior - 12 to 15 yrs', 'junior', 2, 1, '2026-11-05 00:00:00', '2026-11-05 00:00:00'),
+('Adult - 16 yrs and above', 'adult', 3, 1, '2026-11-05 00:00:00', '2026-11-05 00:00:00');
 
 -- categories are shared by courses and blog posts (as in the original app)
 CREATE TABLE categories (

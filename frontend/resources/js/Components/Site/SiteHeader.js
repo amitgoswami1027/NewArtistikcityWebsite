@@ -5,7 +5,14 @@ import { API_URL } from '@/Components/Constants';
 import { accountNav } from '@/Components/Account/nav';
 import { CartButton } from '@/Components/Shop/CartDrawer';
 
+// fallback only: the real list is managed in Admin > Catalog > Age groups and arrives as the shared prop site.ageGroups
 export const AGE_GROUPS = ['Sub-junior - 8 to 12 yrs', 'Junior - 12 to 15 yrs', 'Adult - 16 yrs and above'];
+
+/** The age groups for menus and filters, in the order set in the admin. */
+export function useAgeGroups() {
+    const { site } = usePage().props;
+    return site && Array.isArray(site.ageGroups) ? site.ageGroups : AGE_GROUPS;
+}
 
 export function catalogUrl(params = {}) {
     const qs = new URLSearchParams(Object.assign({ type: 'all' }, params)).toString();
@@ -56,6 +63,7 @@ function HeaderMenu({ id, button, buttonClass, label, align = 'left', children }
 
 export default function SiteHeader({ showCategories = false, activeMedium = null }) {
     const { auth, nav } = usePage().props;
+    const ageGroups = useAgeGroups();
     const user = auth && auth.user;
     const [mediums, setMediums] = useState([]);
     const [open, setOpen] = useState(false);
@@ -116,7 +124,7 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                                         <a href={catalogUrl({ type: 'course' })}><i className="fa fa-graduation-cap"></i> Live courses</a>
                                         <a href={catalogUrl({ type: 'workshop' })}><i className="fa fa-paint-brush"></i> Workshops</a>
                                         <h6 style={{ marginTop: 16 }}>By age</h6>
-                                        {AGE_GROUPS.map((a) => <a key={a} href={catalogUrl({ age: a })}><i className="fa fa-user-o"></i> {a}</a>)}
+                                        {ageGroups.map((a) => <a key={a} href={catalogUrl({ age: a })}><i className="fa fa-user-o"></i> {a}</a>)}
                                     </div>
                                     <div className="dm-all"><a href={catalogUrl({})}>Browse all courses <i className="fa fa-arrow-right"></i></a></div>
                                 </div>
