@@ -1,0 +1,4 @@
+final/
+test/
+__pycache__/
+*.npy

@@ -1,6 +1,7 @@
 import React from 'react';
 import { usePage } from '@inertiajs/inertia-react';
 import SiteLayout from '@/Components/Site/SiteLayout';
+import { PurchaseStepper } from '@/Components/Shop/PurchaseLayout';
 import { inr } from '@/Components/Shop/shop';
 
 const STATUS = {
@@ -9,13 +10,17 @@ const STATUS = {
 };
 
 export default function ThankYou() {
-    const { order: o } = usePage().props;
+    const { order: o, auth } = usePage().props;
+    const signedIn = !!(auth && auth.user);
+    const when = o.paid_at || o.created_at;
+    const date = when ? new Date(Number(when)) : null;
     const paid = ['PAID', 'PACKED', 'SHIPPED', 'DELIVERED'].includes(o.status);
     const refund = Number(o.refund_due_inr) > 0;
     return (
         <SiteLayout title={`Order ${o.order_id}`}>
             <div className="pz">
                 <div className="ac-wide pz-thanks">
+                    <PurchaseStepper current={paid ? 5 : 4} />
                     <header className="pz-thanks__head">
                         <span className={`pz-thanks__icon ${paid ? '' : 'is-warn'}`} aria-hidden="true"><i className={`fa ${paid ? 'fa-check' : 'fa-info'}`}></i></span>
                         <p className="pz-eyebrow">Order {o.order_id}</p>
@@ -29,7 +34,13 @@ export default function ThankYou() {
                     </header>
 
                     <section className="pz-card">
-                        <header className="pz-card__head"><h2>What you bought</h2><span className="pz-badge">{STATUS[o.status] || o.status}</span></header>
+                        <header className="pz-card__head"><h2>Order summary</h2><span className="pz-badge">{STATUS[o.status] || o.status}</span></header>
+                        <dl className="pz-orderfacts">
+                            <div><dt>Order number</dt><dd>{o.order_id}</dd></div>
+                            {date && !isNaN(date) && <div><dt>Date</dt><dd>{date.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</dd></div>}
+                            <div><dt>Payment</dt><dd>{o.currency === 'USD' ? 'PayPal (USD)' : o.gateway === 'TEST' ? 'Test payment' : 'Razorpay (INR)'}</dd></div>
+                            <div><dt>Receipt sent to</dt><dd>{o.buyer_email}</dd></div>
+                        </dl>
                         <ul className="pz-lines">
                             {o.items.map((i) => (
                                 <li key={i.id} className={`pz-line ${i.status === 'REFUND_REQUIRED' ? 'is-bad' : ''}`}>
@@ -64,6 +75,7 @@ export default function ThankYou() {
                         </section>
                     )}
                     <div className="pz-thanks__next">
+                        {signedIn && <a href="/user/orders" className="pz-btn pz-btn--brand"><i className="fa fa-list-alt" aria-hidden="true"></i> See all your orders</a>}
                         <a href="/marketplace" className="pz-btn pz-btn--ink">Back to the marketplace</a>
                         <a href="/commission/step-1" className="pz-btn pz-btn--line">Commission an artwork</a>
                     </div>

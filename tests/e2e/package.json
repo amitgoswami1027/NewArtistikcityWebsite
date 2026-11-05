@@ -1,0 +1,12 @@
+{
+  "name": "artistikcity-e2e",
+  "private": true,
+  "description": "Browser tests for the marketplace purchase flow, the room preview and Your orders. Needs the app running with demo data and test payments (dev profile).",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

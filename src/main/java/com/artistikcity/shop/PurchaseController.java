@@ -40,13 +40,15 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * The purchase tunnel for marketplace artworks, modelled on the commission wizard:
+ * The purchase flow for marketplace artworks, four screens and nothing in between:
  * <ol>
- *   <li>{@code /purchase/step-1?artwork=<slug>}: how to buy it (original, canvas edition, poster, digital), size and finish</li>
- *   <li>{@code /purchase/step-2}: see it on a wall, drag it around, change size and frame</li>
- *   <li>{@code /purchase/preview}: summary, cost estimate with coupon, and "Meet the artist"</li>
- *   <li>{@code /purchase/checkout}: the whole cart, contact and delivery, payment</li>
+ *   <li>the artwork page {@code /marketplace/<slug>}: everything about the piece, how to buy it (original, numbered canvas,
+ *       poster, digital), size and finish, and "Talk to the artist"; {@code /purchase/step-1} redirects there</li>
+ *   <li>{@code /purchase/step-2}: the room preview (photographed rooms, one-click switch), size and framing</li>
+ *   <li>{@code /purchase/checkout}: contact, delivery and payment in one accordion, with the order summary beside it</li>
+ *   <li>{@code /purchase/orders/<id>}: the order summary / confirmation</li>
  * </ol>
+ * {@code /purchase/preview} (the old review step) redirects to the room preview.
  * The step being configured (the "draft") lives in the HTTP session, so steps 2 and 3 work after a refresh. Choosing the
  * original reserves it for 15 minutes straight away, so nobody else can buy it while the collector decides.
  */
@@ -92,6 +94,10 @@ public class PurchaseController {
 
     // ================================================================ pages
 
+    /**
+     * Screen 1 is the artwork page itself (format, size and "talk to the artist" in the buy box), so the old step-1 URL
+     * and print links land there with the format preselected.
+     */
     @GetMapping({"/purchase", "/purchase/", "/purchase/step-1"})
     public ResponseEntity<String> step1(HttpServletRequest request, @RequestParam(value = "artwork", required = false) String slug,
                                         @RequestParam(value = "format", required = false) String format) {
@@ -100,49 +106,40 @@ public class PurchaseController {
             if (draft == null) return redirect.to(request, "/marketplace");
             slug = String.valueOf(draft.get("slug"));
         }
-        Map<String, Object> p = marketRepo.bySlug(slug);
-        if (p == null || !MarketplaceRepository.PUBLIC_STATUSES.contains(String.valueOf(p.get("stock_status")))) {
-            return redirect.to(request, "/marketplace");
-        }
-        p = repo.painting(((Number) p.get("id")).longValue());
-        Map<String, Object> props = pageProps(request, p);
-        // keep the draft only if it is for this artwork; otherwise start from the format in the link
-        if (draft == null || !slug.equals(draft.get("slug"))) {
-            Map<String, Object> d = new LinkedHashMap<>();
-            d.put("slug", slug);
-            d.put("paintingId", p.get("id"));
-            d.put("format", format == null ? null : format.toUpperCase(Locale.ROOT));
-            props.put("draft", d);
-        }
-        return inertia.render(request, "Purchase/Step1Variant", props);
+        if (!slug.matches("[A-Za-z0-9-]{1,200}")) return redirect.to(request, "/marketplace");
+        String f = format == null ? null : format.toUpperCase(Locale.ROOT);
+        boolean known = f != null && List.of("ORIGINAL", "CANVAS", "POSTER", "DIGITAL").contains(f);
+        return redirect.to(request, "/marketplace/" + slug + (known ? "?format=" + f : "") + "#buy");
     }
 
+    /** Screen 2: the room preview with size and framing. Digital downloads have nothing to hang, so they go to payment. */
     @GetMapping("/purchase/step-2")
     public ResponseEntity<String> step2(HttpServletRequest request) {
+        Map<String, Object> draft = draft(request);
+        if (draft != null && "DIGITAL".equals(draft.get("format"))) return redirect.to(request, "/purchase/checkout");
         return draftPage(request, "Purchase/Step2Room");
     }
 
+    /** The old review step is now part of the room preview (price) and the checkout (coupon, totals). */
     @GetMapping("/purchase/preview")
     public ResponseEntity<String> preview(HttpServletRequest request) {
-        return draftPage(request, "Purchase/Preview");
+        Map<String, Object> draft = draft(request);
+        return redirect.to(request, draft != null && "DIGITAL".equals(draft.get("format")) ? "/purchase/checkout" : "/purchase/step-2");
     }
 
     private ResponseEntity<String> draftPage(HttpServletRequest request, String component) {
         Map<String, Object> draft = draft(request);
-        if (draft == null || draft.get("format") == null) return redirect.to(request, draft == null ? "/marketplace" : "/purchase/step-1");
+        if (draft == null || draft.get("format") == null) return redirect.to(request, draft == null ? "/marketplace" : "/marketplace/" + draft.get("slug"));
         Map<String, Object> p = repo.painting(((Number) draft.get("paintingId")).longValue());
         if (p == null || !MarketplaceRepository.PUBLIC_STATUSES.contains(String.valueOf(p.get("stock_status")))) {
             clearDraft(request);
             return redirect.to(request, "/marketplace");
         }
         Map<String, Object> props = pageProps(request, p);
-        if ("Purchase/Preview".equals(component)) {
-            props.put("estimate", estimate(request, p, draft, null));
-            props.put("contact", hub.contact(p));
-            props.put("conversation", hub.conversation(Holders.all(request, auth), ((Number) p.get("id")).longValue()));
-            Row user = auth.user(request);
-            props.put("customer", user == null ? null : Map.of("name", user.str("name", ""), "email", user.str("email", "")));
-        }
+        props.put("contact", hub.contact(p));
+        props.put("conversation", hub.conversation(Holders.all(request, auth), ((Number) p.get("id")).longValue()));
+        Row user = auth.user(request);
+        props.put("customer", user == null ? null : Map.of("name", user.str("name", ""), "email", user.str("email", "")));
         return inertia.render(request, component, props);
     }
 
@@ -191,7 +188,9 @@ public class PurchaseController {
     public ResponseEntity<String> confirmation(HttpServletRequest request, @PathVariable("orderId") String orderId) {
         Map<String, Object> o = orders.order(orderId);
         if (o == null || !owns(request, o)) return redirect.to(request, "/marketplace");
-        return inertia.render(request, "Purchase/ThankYou", Map.of("order", ShopOrderService.view(o, orders.items(orderId), siteUrl(request))));
+        Map<String, Object> view = new LinkedHashMap<>(ShopOrderService.view(o, orders.items(orderId), siteUrl(request)));
+        view.remove("staff_notes");                                    // internal notes never reach the collector
+        return inertia.render(request, "Purchase/ThankYou", Map.of("order", view));
     }
 
     // ================================================================ draft + estimate API

@@ -92,20 +92,19 @@ export default function Classroom() {
                     {/* ---------- next step (adapts to where the student is) ---------- */}
                     {approved && finished ? (
                         <section className="mt-10 rounded-2xl p-8 text-white relative overflow-hidden" style={{ background: 'linear-gradient(120deg,#111,#3b0a24 60%,#e5156b)' }}>
-                            <p className="font-mono text-xs tracking-widest uppercase text-pink-200">Course complete · Step 07</p>
+                            <p className="font-mono text-xs tracking-widest uppercase text-pink-200">Course complete · Step 06</p>
                             <h3 className="mt-2 text-3xl font-black tracking-tight text-white">You've earned your certificate</h3>
                             <p className="mt-2 text-lg text-gray-200 max-w-xl">Every lesson is done and your milestone is approved. Download your ArtistikCity certificate and a printable portfolio of this course.</p>
                             <div className="mt-6 flex flex-wrap gap-3">
                                 <a href="/dashboard/certificates" className="inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-black hover:bg-brand-dark"><i className="fa fa-certificate mr-2" aria-hidden="true"></i>Get my certificate</a>
-                                <a href="/dashboard/portfolio" className="inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink">Sell from my portfolio</a>
                             </div>
                         </section>
                     ) : approved ? (
                         <section className="mt-10 rounded-2xl border border-green-200 bg-green-50 p-8">
                             <p className="font-mono text-xs tracking-widest uppercase text-green-800">Milestone approved</p>
                             <h3 className="mt-2 text-2xl font-black tracking-tight text-ink">Great work. Finish the remaining lessons to earn your certificate.</h3>
-                            <p className="mt-2 text-gray-700">{lessons.length - done.size} lesson{lessons.length - done.size === 1 ? '' : 's'} to go. Your approved piece is already in your portfolio.</p>
-                            <a href="/dashboard/portfolio" className="mt-5 inline-flex items-center h-11 px-6 rounded-full bg-ink text-white font-bold">Open portfolio</a>
+                            <p className="mt-2 text-gray-700">{lessons.length - done.size} lesson{lessons.length - done.size === 1 ? '' : 's'} to go. Your approved piece counts toward your certificate.</p>
+                            <a href="/dashboard/submissions" className="mt-5 inline-flex items-center h-11 px-6 rounded-full bg-ink text-white font-bold">My submissions</a>
                         </section>
                     ) : pending ? (
                         <section className="mt-10 rounded-2xl border border-yellow-200 bg-yellow-50 p-8">
@@ -118,7 +117,7 @@ export default function Classroom() {
                         <section className="mt-10 rounded-2xl p-8 text-white relative overflow-hidden" style={{ background: 'linear-gradient(120deg,#e5156b,#b80f55 55%,#111)' }}>
                             <p className="font-mono text-xs tracking-widest uppercase text-pink-100">Milestone · Step 05</p>
                             <h3 className="mt-2 text-3xl font-black tracking-tight text-white">{finished ? 'All lessons done. Submit your milestone' : 'Ready to pass this module milestone?'}</h3>
-                            <p className="mt-2 text-lg text-pink-50 max-w-xl">Upload your assignment for a personal review. Approved work goes straight into your portfolio, and you can sell it.</p>
+                            <p className="mt-2 text-lg text-pink-50 max-w-xl">Upload your assignment for a personal review. Approved work counts toward your certificate.</p>
                             <a href={`/dashboard/submissions?course=${course.id}`} className="mt-6 inline-flex items-center h-12 px-7 rounded-full bg-white text-ink font-black hover:bg-gray-100">Submit assignment <i className="fa fa-arrow-right ml-2" aria-hidden="true"></i></a>
                             {submissions.length > 0 && (
                                 <p className="mt-4 text-sm text-pink-50">Your latest: <strong>{submissions[0].title}</strong> · {statusStyle(submissions[0].admin_status).label}</p>

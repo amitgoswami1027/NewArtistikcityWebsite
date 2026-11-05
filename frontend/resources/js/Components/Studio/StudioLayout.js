@@ -6,7 +6,6 @@ export const TABS = [
     { href: '/dashboard', label: 'My studio', icon: 'fa-th-large' },
     { href: '/user/my-courses', label: 'My courses', icon: 'fa-graduation-cap' },
     { href: '/dashboard/submissions', label: 'Submissions', icon: 'fa-upload' },
-    { href: '/dashboard/portfolio', label: 'Portfolio & shop', icon: 'fa-picture-o' },
     { href: '/dashboard/certificates', label: 'Certificates & reports', icon: 'fa-certificate' },
 ];
 

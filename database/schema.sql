@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS shop_price_options;
 DROP TABLE IF EXISTS admin_audit;
 DROP TABLE IF EXISTS faqs;
 DROP TABLE IF EXISTS newsletter_campaigns;
+DROP TABLE IF EXISTS student_documents;
 DROP TABLE IF EXISTS wishlist_items;
 DROP TABLE IF EXISTS marketplace_orders;
 DROP TABLE IF EXISTS cart_reservations;
@@ -565,6 +566,25 @@ CREATE TABLE cart_items (
 );
 
 -- Things a student saved for later: a course/workshop or a marketplace original.
+-- generated student PDFs (portfolio reports, course certificates) in private storage (S3 key private/documents/...)
+CREATE TABLE student_documents (
+    id             BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    user_id        BIGINT        NOT NULL,
+    kind           VARCHAR(20)   NOT NULL,              -- PORTFOLIO | CERTIFICATE
+    course_id      BIGINT        NULL,
+    certificate_no VARCHAR(40)   NULL,
+    storage_key    VARCHAR(1024) NOT NULL,
+    file_name      VARCHAR(255)  NOT NULL,
+    content_type   VARCHAR(100)  NOT NULL DEFAULT 'application/pdf',
+    size_bytes     BIGINT        NOT NULL DEFAULT 0,
+    options        VARCHAR(255)  NULL,
+    created_at     DATETIME      NOT NULL,
+    updated_at     DATETIME      NOT NULL,
+    INDEX student_documents_user_kind_index (user_id, kind, created_at),
+    UNIQUE INDEX student_documents_certificate_no_unique (certificate_no),
+    CONSTRAINT student_documents_user_id_foreign FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
 CREATE TABLE wishlist_items (
     id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     user_id    BIGINT      NOT NULL,
@@ -601,7 +621,7 @@ CREATE TABLE certificates (
     teacher_name       VARCHAR(255) NULL,
     certificate_number VARCHAR(255) NULL,
     certificate_name   VARCHAR(500) NULL,
-    certificate_path   VARCHAR(1000) NULL,
+    certificate_path   VARCHAR(1024) NULL,   -- storage key of the PDF (private/documents/certificates/orders/...)
     status             TINYINT NOT NULL DEFAULT 1,
     created_at         DATETIME NULL,
     updated_at         DATETIME NULL,
@@ -869,7 +889,7 @@ CREATE TABLE student_submissions (
     course_id         BIGINT        NOT NULL,
     title             VARCHAR(200) NOT NULL,
     description       LONGTEXT NULL,
-    file_url          VARCHAR(500) NOT NULL,
+    file_url          VARCHAR(2083) NOT NULL,
     admin_status      VARCHAR(20)  NOT NULL DEFAULT 'Pending Review' CHECK (admin_status IN ('Pending Review', 'Approved', 'Rejected')),
     reviewer_feedback LONGTEXT NULL,
     reviewed_by       BIGINT        NULL,
@@ -1170,7 +1190,7 @@ CREATE TABLE shop_order_items (
     quantity            INT            NOT NULL DEFAULT 1,
     title               VARCHAR(255)   NOT NULL,
     artist_name         VARCHAR(255)   NOT NULL,
-    image_url           VARCHAR(500)   NULL,
+    image_url           VARCHAR(2083)  NULL,
     variant_label       VARCHAR(255)   NOT NULL,
     unit_price_inr      DECIMAL(12, 2) NOT NULL,
     line_total_inr      DECIMAL(12, 2) NOT NULL,

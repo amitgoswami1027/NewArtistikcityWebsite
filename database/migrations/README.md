@@ -22,6 +22,7 @@ To change the schema of a database that already holds real data:
 | `2026-10-26_enrollment_refunded.sql` | Lets `enrollments.status` be `Refunded` (used when an admin records a refund). |
 | `2026-10-27_course_lesson_videos.sql` | Separate videos: `courses.intro_video_url` (trailer on the course page) and `course_module_lessons.video_url` (each lesson's own video). Copies the old shared `course_videos` list over once: first video to the intro, video N to lesson N. |
 | `2026-10-28_marketplace_shop.sql` | Marketplace shop: `paintings.shop_formats` (prints sold besides the original), `edition_size` / `editions_sold`, `hires_path` / `hires_name` (private download file) and artist contact links; tables `shop_price_options` (price list, with starter prices), `shop_carts`, `shop_cart_items`, `shop_coupons` (with `WELCOME10`), `shop_orders`, `shop_order_items`, `artist_threads`, `artist_thread_messages`. Existing listings start out selling canvas and poster prints. |
+| `2026-11-05_documents_s3.sql` | `student_documents` (every generated portfolio report and course certificate PDF, with its private S3 key); widens `shop_order_items.image_url`, `student_submissions.file_url` and `certificates.certificate_path` for full S3 / CDN URLs and keys. |
 
 The earlier SQL Server (T-SQL) migrations were removed when the project moved to MySQL. Everything they did is
 already in `schema.sql`, and they remain available in git history.

@@ -22,9 +22,12 @@ tools/redesign_patch_mustache.py
 test-output/
 TEST-CERTIFICATES.bat
 tools/*.tgz
-
-# Claude Code personal settings (shared settings live in .claude/settings.json)
-.claude/settings.local.json
-CLAUDE.local.md
-
-_backup_before_*/
+# browser tests (tests/e2e): installed packages and run output
+tests/e2e/node_modules/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+# room renderer output (tools/room-renderer)
+tools/room-renderer/final/
+tools/room-renderer/__pycache__/
+# database backups and moved uploads written by WIPE-SITE-DATA.bat
+backups/

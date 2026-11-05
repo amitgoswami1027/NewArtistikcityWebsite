@@ -19,7 +19,7 @@ function Chip({ on, onClick, children }) {
 
 export default function MarketplaceIndex() {
     const { paintings = [], mediums = [], holds = [], serverNow, initialSource, stats = {} } = usePage().props;
-    const [source, setSource] = useState(initialSource === 'student' ? 'STUDENT' : initialSource === 'studio' ? 'STUDIO' : 'ALL');
+    const [source, setSource] = useState('ALL');   // studio originals only now; old ?source= links show everything
     const [medium, setMedium] = useState('ALL');
     const [size, setSize] = useState(null);
     const [orient, setOrient] = useState(null);
@@ -69,7 +69,7 @@ export default function MarketplaceIndex() {
                             <nav aria-label="Breadcrumb" className="text-sm text-gray-400"><a href="/" className="hover:text-white">Home</a> <span className="mx-2">/</span> <span className="text-white">Marketplace</span></nav>
                             <p className="mt-6 font-mono text-xs tracking-widest uppercase text-pink-300">The ArtistikCity Marketplace</p>
                             <h1 className="mt-3 text-5xl sm:text-6xl font-black tracking-tight leading-none text-white">Original art.<br /><span className="text-brand">Only one of each.</span></h1>
-                            <p className="mt-6 max-w-xl text-lg text-gray-300">Paintings and drawings by our studio artists and reviewed student originals. Every piece is unique, signed, and ships with a certificate of authenticity.</p>
+                            <p className="mt-6 max-w-xl text-lg text-gray-300">Paintings and drawings by our studio artists. Every piece is unique, signed, and ships with a certificate of authenticity.</p>
                             <dl className="mt-8 flex flex-wrap gap-8">
                                 <div><dt className="text-xs uppercase tracking-widest text-gray-400">Available now</dt><dd className="text-3xl font-black">{stats.available || 0}</dd></div>
                                 <div><dt className="text-xs uppercase tracking-widest text-gray-400">Artists</dt><dd className="text-3xl font-black">{stats.artists || 0}</dd></div>
@@ -102,12 +102,6 @@ export default function MarketplaceIndex() {
                 {/* ---------- filters ---------- */}
                 <section className="ac-wide pt-10">
                     <div className="flex flex-wrap items-center gap-3">
-                        <div className="inline-flex rounded-full border border-gray-300 p-1 bg-white" role="tablist" aria-label="Artist">
-                            {[['ALL', 'All originals'], ['STUDIO', 'Studio artists'], ['STUDENT', 'Student originals']].map(([k, l]) => (
-                                <button key={k} type="button" role="tab" aria-selected={source === k} onClick={() => setSource(k)}
-                                        className={`h-9 px-4 rounded-full text-sm font-bold ${source === k ? 'bg-ink text-white' : 'text-gray-600 hover:text-ink'}`}>{l}</button>
-                            ))}
-                        </div>
                         <div className="relative flex-1 min-w-[220px] max-w-sm">
                             <i className="fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
                             <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title, artist, subject"
@@ -175,10 +169,10 @@ export default function MarketplaceIndex() {
                     <p className="mt-6 text-sm text-gray-500" aria-live="polite">{shown.length} {shown.length === 1 ? 'artwork' : 'artworks'}{active ? ' match your filters' : ''}</p>
                 </section>
 
-                {/* ---------- masonry gallery ---------- */}
+                {/* ---------- gallery grid: 4 columns on desktop, 2 on tablets, 1 on phones ---------- */}
                 <section className="ac-wide pt-6 pb-24">
                     {shown.length ? (
-                        <div className="mk-masonry">
+                        <div className="mk-grid" data-testid="mk-grid">
                             {shown.map((p) => <ArtCard key={p.id} p={p} serverNow={serverNow} />)}
                         </div>
                     ) : (
@@ -204,9 +198,9 @@ export default function MarketplaceIndex() {
                         </div>
                         <div className="rounded-2xl bg-white border border-gray-200 p-8">
                             <i className="fa fa-graduation-cap text-2xl text-brand" aria-hidden="true"></i>
-                            <h2 className="mt-3 text-2xl font-black tracking-tight text-ink">Are you an ArtistikCity student?</h2>
-                            <p className="mt-2 text-gray-600">Once a reviewer approves your coursework, you can list it here as a 1-of-1 original.</p>
-                            <a href="/dashboard/portfolio" className="mt-5 inline-flex items-center h-11 px-5 rounded-full border border-gray-300 font-bold hover:border-ink">Sell from my portfolio</a>
+                            <h2 className="mt-3 text-2xl font-black tracking-tight text-ink">Learn to paint like this</h2>
+                            <p className="mt-2 text-gray-600">Live courses and weekend workshops with the artists behind these originals.</p>
+                            <a href="/courses?type=all" className="mt-5 inline-flex items-center h-11 px-5 rounded-full border border-gray-300 font-bold hover:border-ink">Browse courses</a>
                         </div>
                     </div>
                 </section>

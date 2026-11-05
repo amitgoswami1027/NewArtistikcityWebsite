@@ -198,7 +198,6 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                     <h6>ArtistikCity</h6>
                     <a href={route('commission.step1')}>Commission art</a>
                     <a href="/marketplace">Marketplace</a>
-                    <a href="/marketplace?source=student">Student originals</a>
                     <a href={route('studio.stories')}>Studio Stories</a>
                     {user ? (
                         <>

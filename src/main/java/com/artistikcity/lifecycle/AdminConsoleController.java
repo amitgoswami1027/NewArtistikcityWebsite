@@ -362,8 +362,11 @@ public class AdminConsoleController {
         Map<String, Object> b = new LinkedHashMap<>();
         b.put("submissions", repo.count("select count(*) from student_submissions where admin_status = 'Pending Review'"));
         b.put("commissions", repo.count("select count(*) from commission_orders where order_status = 'QUEUED'"));
+        // marketplace (one menu item): listings to review, orders to ship or refund (both checkouts), unread collector messages
         b.put("marketplace", repo.count("select (select count(*) from paintings where stock_status = 'PENDING_REVIEW')"
-                + " + (select count(*) from marketplace_orders where status in ('PAID', 'REFUND_REQUIRED'))"));
+                + " + (select count(*) from marketplace_orders where status in ('PAID', 'REFUND_REQUIRED'))"
+                + " + (select count(*) from artist_threads where staff_unread > 0 and status = 'OPEN')"
+                + " + (select count(*) from shop_orders where status in ('PAID', 'REFUND_REQUIRED') or refund_due_inr > 0)"));
         // art shop: collectors' messages waiting for the artist, cart orders to ship and refunds still owed
         b.put("shop", repo.count("select (select count(*) from artist_threads where staff_unread > 0 and status = 'OPEN')"
                 + " + (select count(*) from shop_orders where status in ('PAID', 'REFUND_REQUIRED') or refund_due_inr > 0)"));

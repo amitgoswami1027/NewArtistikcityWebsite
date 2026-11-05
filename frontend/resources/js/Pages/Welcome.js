@@ -13,7 +13,7 @@ const BENEFITS = [
     { icon: 'fa-certificate', title: 'Certificate', text: 'Finish your course and download a shareable certificate.' },
     { icon: 'fa-users', title: 'Every age welcome', text: 'Batches for sub-juniors, juniors and adults.' },
     { icon: 'fa-paint-brush', title: 'Every major medium', text: 'Graphite, charcoal, pastel, watercolour, acrylic and more.' },
-    { icon: 'fa-id-card-o', title: 'Free artist profile', text: 'Publish your finished work to a public portfolio.' },
+    { icon: 'fa-id-card-o', title: 'Verifiable certificates', text: 'Finish a course to earn a certificate anyone can verify.' },
     { icon: 'fa-gift', title: 'Free starter lessons', text: 'Join for free and start with guided mini-lessons.' },
 ];
 
@@ -133,7 +133,7 @@ export default function Welcome() {
             {testimonials.length > 0 && (
                 <section className="dm-section">
                     <div className="ac-wide">
-                        <div className="dm-head"><div><h2>What our students say</h2></div><a href="/marketplace?source=student">See student originals</a></div>
+                        <div className="dm-head"><div><h2>What our students say</h2></div><a href="/marketplace">Visit the marketplace</a></div>
                         <div className="dm-reviews" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
                             {testimonials.map((t) => (
                                 <div className="dm-review" key={t.id}>

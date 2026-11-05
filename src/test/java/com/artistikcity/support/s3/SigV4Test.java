@@ -74,4 +74,14 @@ class SigV4Test {
         assertEquals("a%2Fb", SigV4.uriEncode("a/b", true));
         assertEquals("caf%C3%A9~-_.", SigV4.uriEncode("café~-_.", false));
     }
+
+    /** AWS's published example: "Authenticating Requests: Using Query Parameters", GET /test.txt for 24 hours. */
+    @Test
+    void presignedGetMatchesAwsExample() {
+        AwsCredentials c = new AwsCredentials("AKIAIOSFODNN7EXAMPLE", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", null, null);
+        String q = SigV4.presignGet("examplebucket.s3.amazonaws.com", "/test.txt", null, c, "us-east-1", "s3",
+                java.time.Instant.parse("2013-05-24T00:00:00Z"), 86400);
+        org.junit.jupiter.api.Assertions.assertTrue(q.endsWith("&X-Amz-Signature=aeeed9bbccd4d02ee5c0109b86d86835f995330da4c265957d157751f604d404"), q);
+        org.junit.jupiter.api.Assertions.assertTrue(q.contains("X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request"), q);
+    }
 }

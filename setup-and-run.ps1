@@ -23,6 +23,10 @@
 .EXAMPLE
     .\setup-and-run.ps1 -DemoData                         # also load database\demo\demo-data.sql (extra courses, orders, logins)
 .EXAMPLE
+    .\setup-and-run.ps1 -RestoreData                      # put back the data from the newest backups\wipe-* folder (-RestoreFrom <folder> for another)
+.EXAMPLE
+    .\setup-and-run.ps1 -WipeData                         # back up, then clear all site data (database\maintenance\wipe-site-data.sql)
+.EXAMPLE
     .\setup-and-run.ps1 -Db mysql -DbUser root -DbPassword "YourPassword"
 .EXAMPLE
     .\setup-and-run.ps1 -Db docker
@@ -40,6 +44,9 @@ param(
     [string]$RootPassword = 'ArtistikRoot@2026',
     [switch]$ResetDatabase,
     [switch]$DemoData,
+    [switch]$WipeData,
+    [switch]$RestoreData,
+    [string]$RestoreFrom = '',
     [switch]$DatabaseOnly,
     [switch]$StopDatabase,
     [int]$Port = 8080,
@@ -505,6 +512,110 @@ if ($AdminCnf) {
         }
         $r = Invoke-MysqlClient $MysqlExe $AdminCnf ("$Database -e `"INSERT IGNORE INTO schema_migrations (filename) VALUES ('$($m.Name)')`"") $null
     }
+    if ($RestoreData) {
+        # undo WIPE-SITE-DATA: load the full backup it took and move the uploaded files back. The current database is
+        # backed up first (backups\before-restore-<date>), so the restore itself can be undone too.
+        Step 'Restoring site data from a backup'
+        if ($RestoreFrom) {
+            $src = if ([IO.Path]::IsPathRooted($RestoreFrom)) { $RestoreFrom } else { Join-Path $Root $RestoreFrom }
+        } else {
+            $latest = Get-ChildItem -Path (Join-Path $Root 'backups') -Directory -Filter 'wipe-*' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1
+            if (-not $latest) { Fail 'No backups\wipe-* folder found. Nothing was changed.' }
+            $src = $latest.FullName
+        }
+        $sqlFile = Join-Path $src "$Database.sql"
+        if (-not (Test-Path $sqlFile)) { Fail "No $Database.sql in $src. Nothing was changed." }
+        Write-Host "    Backup to restore: $src" -ForegroundColor Yellow
+        Write-Host '    This REPLACES everything now in the database with that backup. Anything added since then is lost' -ForegroundColor Yellow
+        Write-Host '    (a copy of the current database is saved first, so you can go back).' -ForegroundColor Yellow
+        $answer = Read-Host '    Type RESTORE to continue (anything else cancels)'
+        if ($answer -cne 'RESTORE') { Fail 'Cancelled. Nothing was changed.' }
+        $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+        $safeDir = Join-Path $Root "backups\before-restore-$stamp"
+        New-Item -ItemType Directory -Force -Path $safeDir | Out-Null
+        $safeFile = Join-Path $safeDir "$Database.sql"
+        if ($AdminCnf -eq 'docker') {
+            $dumpCmd = "docker exec -i $DockerName mysqldump --protocol=TCP -h127.0.0.1 -uroot `"-p$RootPassword`" --single-transaction --routines --default-character-set=utf8mb4 $Database > `"$safeFile`""
+        } else {
+            $dumpExe = Join-Path (Split-Path -Parent $MysqlExe) 'mysqldump.exe'
+            if (-not (Test-Path $dumpExe)) { Fail "mysqldump.exe not found next to $MysqlExe - cannot save the current data first, so nothing was changed." }
+            $dumpCmd = "`"$dumpExe`" --defaults-extra-file=`"$AdminCnf`" --single-transaction --routines $Database > `"$safeFile`""
+        }
+        cmd /c "$dumpCmd 2>`"$safeDir\dump-errors.txt`""
+        if ($LASTEXITCODE -ne 0 -or -not (Test-Path $safeFile) -or (Get-Item $safeFile).Length -lt 1000) {
+            Fail "Could not save the current data (see $safeDir\dump-errors.txt), so nothing was changed."
+        }
+        Ok "Current data saved to $safeFile"
+        $r = Invoke-MysqlClient $MysqlExe $AdminCnf $Database $sqlFile
+        if ($r.Code -eq 0 -and $r.Output -match 'ERROR \d+') { $r.Code = 1 }
+        if ($r.Code -ne 0) { Write-Host $r.Output; Fail "The restore failed - see the message above. Your previous data is in $safeFile" }
+        Ok 'Database restored'
+        # move the uploaded files back; a file that already exists in the site again is left as it is
+        $moved = 0
+        $pairs = @(@{ From = (Join-Path $src 'uploads'); To = (Join-Path $Root 'storage\uploads') },
+                   @{ From = (Join-Path $src 'storage-certificates'); To = (Join-Path $Root 'storage\certificates') },
+                   @{ From = (Join-Path $src 'storage-private'); To = (Join-Path $Root 'storage-private') })
+        foreach ($p in $pairs) {
+            if (-not (Test-Path $p.From)) { continue }
+            Get-ChildItem -Path $p.From -Recurse -File -Force | ForEach-Object {
+                $rel = $_.FullName.Substring($p.From.Length).TrimStart('\')
+                $dest = Join-Path $p.To $rel
+                if (-not (Test-Path $dest)) {
+                    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
+                    Move-Item -Path $_.FullName -Destination $dest; $moved++
+                }
+            }
+        }
+        Ok "$moved uploaded file(s) moved back into storage. The backup folder $src can be deleted once the site looks right."
+    }
+    if ($WipeData) {
+        # clear all site data: students, courses, orders, paintings, content (staff logins, settings and lists stay).
+        # A full backup is written first; uploaded files are moved (not deleted) into the same backup folder.
+        Step 'Clearing all site data'
+        Write-Host '    This deletes every student, course, workshop, order, painting, commission, blog post and message.' -ForegroundColor Yellow
+        Write-Host '    Staff logins, site settings, FAQs, mediums/genres/skills and the print price list are kept.' -ForegroundColor Yellow
+        $answer = Read-Host '    Type WIPE to continue (anything else cancels)'
+        if ($answer -cne 'WIPE') { Fail 'Cancelled. Nothing was changed.' }
+        $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+        $backupDir = Join-Path $Root "backups\wipe-$stamp"
+        New-Item -ItemType Directory -Force -Path $backupDir | Out-Null
+        $dumpFile = Join-Path $backupDir "$Database.sql"
+        if ($AdminCnf -eq 'docker') {
+            $dumpCmd = "docker exec -i $DockerName mysqldump --protocol=TCP -h127.0.0.1 -uroot `"-p$RootPassword`" --single-transaction --routines --default-character-set=utf8mb4 $Database > `"$dumpFile`""
+        } else {
+            $dumpExe = Join-Path (Split-Path -Parent $MysqlExe) 'mysqldump.exe'
+            if (-not (Test-Path $dumpExe)) { Fail "mysqldump.exe not found next to $MysqlExe - cannot take the backup, so nothing was deleted." }
+            $dumpCmd = "`"$dumpExe`" --defaults-extra-file=`"$AdminCnf`" --single-transaction --routines $Database > `"$dumpFile`""
+        }
+        cmd /c "$dumpCmd 2>`"$backupDir\dump-errors.txt`""
+        if ($LASTEXITCODE -ne 0 -or -not (Test-Path $dumpFile) -or (Get-Item $dumpFile).Length -lt 1000) {
+            Fail "The backup failed (see $backupDir\dump-errors.txt), so nothing was deleted."
+        }
+        Ok "Backup: $dumpFile"
+        $r = Invoke-MysqlClient $MysqlExe $AdminCnf $Database (Join-Path $Root 'database\maintenance\wipe-site-data.sql')
+        if ($r.Code -eq 0 -and $r.Output -match 'ERROR \d+') { $r.Code = 1 }
+        if ($r.Code -ne 0) { Write-Host $r.Output; Fail "Clearing the data failed - see the message above. Restore with: mysql $Database < $dumpFile" }
+        # uploaded files that belonged to the cleared data move into the backup folder (site logo, staff photos and medium images stay)
+        $moved = 0
+        $uploads = Join-Path $Root 'storage\uploads'
+        foreach ($d in @('artworks', 'blog', 'commissions', 'courses', 'free-courses', 'home-artworks', 'students', 'submissions', 'testimonials', 'editor')) {
+            $src = Join-Path $uploads $d
+            if (Test-Path $src) {
+                $dest = Join-Path $backupDir "uploads\$d"
+                New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
+                Move-Item -Path $src -Destination $dest -Force; $moved++
+            }
+        }
+        foreach ($d in @('storage\certificates', 'storage-private')) {
+            $src = Join-Path $Root $d
+            if ((Test-Path $src) -and (Get-ChildItem $src -Force | Measure-Object).Count -gt 0) {
+                $dest = Join-Path $backupDir ($d -replace '\\', '-')
+                New-Item -ItemType Directory -Force -Path $dest | Out-Null
+                Get-ChildItem $src -Force | Move-Item -Destination $dest -Force; $moved++
+            }
+        }
+        Ok "Site data cleared. $moved upload folder(s) moved to $backupDir - delete that folder when you no longer need the backup."
+    }
     if ($DemoData) {
         # optional demo pack: extra teachers, students, courses, workshops, orders and content.
         # Uses fixed ids and INSERT IGNORE, so running it again changes nothing.
@@ -525,6 +636,8 @@ if ($AdminCnf) {
     $env:DB_INIT = if ($ResetDatabase) { 'always' } else { 'never' }
     if (-not $ResetDatabase) { Info 'First run on an empty database? Run once with -ResetDatabase to create the tables and demo data.' }
     if ($DemoData) { Info 'No mysql.exe here, so -DemoData was skipped. Run database\demo\demo-data.sql with your MySQL client.' }
+    if ($RestoreData) { Fail 'No mysql.exe here, so -RestoreData cannot run. Load backups\wipe-<date>\artistikcity.sql with your MySQL client.' }
+    if ($WipeData) { Fail 'No mysql.exe here, so -WipeData cannot take a backup. Run database\maintenance\wipe-site-data.sql with your MySQL client after backing up.' }
 }
 $env:DB_URL = $AppUrl
 

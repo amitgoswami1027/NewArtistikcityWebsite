@@ -15,9 +15,9 @@ export default function HowItWorks() {
                     <div className="ac-wide relative py-20 sm:py-28">
                         <p className="font-mono text-xs tracking-widest uppercase text-pink-300">The ArtistikCity creative lifecycle</p>
                         <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-none text-white">
-                            Learn.<br />Demonstrate.<br /><span className="text-brand">Exhibit &amp; Sell.</span>
+                            Learn.<br />Demonstrate.<br /><span className="text-brand">Get certified.</span>
                         </h1>
-                        <p className="mt-6 max-w-2xl text-xl text-gray-300">From your first guided lesson to a finished piece in your public portfolio, with the option to sell it and a certificate at the end. Seven clear steps, one studio.</p>
+                        <p className="mt-6 max-w-2xl text-xl text-gray-300">From your first guided lesson to an approved assignment and a verifiable certificate at the end. Six clear steps, one studio.</p>
                         <div className="mt-8 flex flex-wrap gap-3">
                             <a href={signedIn ? '/dashboard' : '/join'} className="inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-bold hover:bg-brand-dark">{signedIn ? 'Open my studio' : 'Start for free'}</a>
                             <a href="/courses?type=all" className="inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink">Browse courses</a>
@@ -29,7 +29,7 @@ export default function HowItWorks() {
                 <section className="ac-wide py-20">
                     <div className="max-w-2xl">
                         <p className="font-mono text-xs tracking-widest uppercase text-brand">Roadmap</p>
-                        <h2 className="mt-2 text-4xl font-black tracking-tight text-ink">Seven steps from curious to certified</h2>
+                        <h2 className="mt-2 text-4xl font-black tracking-tight text-ink">Six steps from curious to certified</h2>
                         <p className="mt-3 text-lg text-gray-600">Each step unlocks the next. Your studio shows exactly where you are.</p>
                     </div>
                     <ol className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -58,8 +58,8 @@ export default function HowItWorks() {
                             {[
                                 ['fa-video-camera', 'Guided classroom', 'Structured units and lessons with progress tracking and study material.'],
                                 ['fa-comments-o', 'Milestone reviews', 'Every submission gets personal notes from a reviewer before it is approved.'],
-                                ['fa-picture-o', 'Curated portfolio', 'Approved pieces form a portfolio you can share with anyone.'],
-                                ['fa-inr', 'Sell your originals', 'List approved pieces as 1-of-1 originals in the ArtistikCity Marketplace after a quick moderator review.'],
+                                ['fa-certificate', 'Verifiable certificates', 'Finish a course with approved work to earn a certificate anyone can check online.'],
+                                ['fa-file-pdf-o', 'Portfolio report', 'Download a print-ready PDF of your courses, progress and approved work.'],
                             ].map(([icon, t, d]) => (
                                 <div key={t} className="rounded-2xl bg-white border border-gray-200 p-6">
                                     <i className={`fa ${icon} text-2xl text-brand`} aria-hidden="true"></i>
@@ -75,7 +75,7 @@ export default function HowItWorks() {
                 <section className="ac-wide py-20">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div>
-                            <p className="font-mono text-xs tracking-widest uppercase text-brand">Step 07 · Certify &amp; showcase</p>
+                            <p className="font-mono text-xs tracking-widest uppercase text-brand">Step 06 · Certify</p>
                             <h2 className="mt-2 text-4xl font-black tracking-tight text-ink">Your work, on paper</h2>
                             <p className="mt-3 text-lg text-gray-600">Finish every lesson and get one assignment approved to earn a verifiable ArtistikCity certificate for that course. Then generate a detailed, print-ready PDF portfolio of everything you've made.</p>
                             <ul className="mt-6 space-y-3 text-base text-gray-700">
@@ -111,9 +111,9 @@ export default function HowItWorks() {
                 </section>
 
                 <section className="ac-wide py-16 text-center">
-                    <h2 className="text-3xl font-black tracking-tight text-ink">See what students are selling</h2>
-                    <p className="mt-2 text-lg text-gray-600">Reviewed, 1-of-1 originals from ArtistikCity learners, sold beside studio work in the marketplace.</p>
-                    <a href="/marketplace?source=student" className="mt-6 inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800">Browse student originals</a>
+                    <h2 className="text-3xl font-black tracking-tight text-ink">Ready to start?</h2>
+                    <p className="mt-2 text-lg text-gray-600">Pick a live course or a weekend workshop in the medium you love.</p>
+                    <a href="/courses?type=all" className="mt-6 inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800">Browse courses</a>
                 </section>
             </div>
         </SiteLayout>

@@ -1,0 +1,15 @@
+src/main/resources/static/assets/rooms/bedroom-front.webp
+src/main/resources/static/assets/rooms/bedroom-glow.jpg
+src/main/resources/static/assets/rooms/bedroom-shade.jpg
+src/main/resources/static/assets/rooms/bedroom-sm.jpg
+src/main/resources/static/assets/rooms/bedroom.jpg
+src/main/resources/static/assets/rooms/living-front.webp
+src/main/resources/static/assets/rooms/living-glow.jpg
+src/main/resources/static/assets/rooms/living-shade.jpg
+src/main/resources/static/assets/rooms/living-sm.jpg
+src/main/resources/static/assets/rooms/living.jpg
+src/main/resources/static/assets/rooms/studio-front.webp
+src/main/resources/static/assets/rooms/studio-glow.jpg
+src/main/resources/static/assets/rooms/studio-shade.jpg
+src/main/resources/static/assets/rooms/studio-sm.jpg
+src/main/resources/static/assets/rooms/studio.jpg

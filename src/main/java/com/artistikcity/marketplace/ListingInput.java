@@ -1,5 +1,7 @@
 package com.artistikcity.marketplace;
 
+import com.artistikcity.support.Storage;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Year;
@@ -69,7 +71,7 @@ public record ListingInput(
             for (Object o : list) {
                 if (o instanceof Map<?, ?> im) {
                     String url = str(((Map<String, Object>) im).get("url"));
-                    if (url.startsWith("/storage/uploads/") || url.startsWith("/assets/images/")) {
+                    if (Storage.pathOf(url).filter(p -> p.startsWith("uploads/")).isPresent() || url.startsWith("/assets/images/")) {
                         images.add(new ImageInput(url, Boolean.TRUE.equals(im.get("primary")), cap(str(((Map<String, Object>) im).get("alt")), 255)));
                     }
                 }

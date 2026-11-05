@@ -9,7 +9,6 @@ export default function Home() {
     const next = JOURNEY[Math.min(stage, JOURNEY.length) - 1];
     const approved = submissions.filter((s) => s.admin_status === 'Approved').length;
     const pending = submissions.filter((s) => s.admin_status === 'Pending Review').length;
-    const listed = submissions.filter((s) => s.is_listed_for_sale).length;
 
     return (
         <StudioLayout title="My studio" subtitle={`Welcome back, ${name}. Here's where you are on your creative journey.`} active="/dashboard" stage={stage}>
@@ -28,7 +27,7 @@ export default function Home() {
                         ['Courses', enrollments.length, 'fa-graduation-cap'],
                         ['In review', pending, 'fa-clock-o'],
                         ['Approved', approved, 'fa-check-circle'],
-                        ['For sale', listed, 'fa-tag'],
+                        ['Certificates', certificatesReady || 0, 'fa-certificate'],
                     ].map(([label, value, icon]) => (
                         <div key={label} className="rounded-2xl border border-gray-200 bg-white p-5">
                             <i className={`fa ${icon} text-brand`} aria-hidden="true"></i>
@@ -95,7 +94,7 @@ export default function Home() {
                 <section className="mt-12">
                     <div className="flex items-end justify-between gap-4">
                         <h2 className="text-2xl font-black tracking-tight text-ink">Latest submissions</h2>
-                        <a href="/dashboard/portfolio" className="font-bold underline">Open portfolio</a>
+                        <a href="/dashboard/submissions" className="font-bold underline">All submissions</a>
                     </div>
                     <ul className="mt-6 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white">
                         {submissions.slice(0, 5).map((s) => {

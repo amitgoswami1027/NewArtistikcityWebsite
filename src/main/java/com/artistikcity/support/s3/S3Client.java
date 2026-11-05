@@ -158,6 +158,31 @@ public class S3Client {
         });
     }
 
+    /**
+     * A time-limited GET link to a (private) object that the browser can open directly from S3.
+     *
+     * @param downloadName file name the browser should use, or null
+     * @param inline       true: show it in the browser (e.g. a PDF viewer), false: download it
+     */
+    public String presignedGet(String key, Duration ttl, String contentType, String downloadName, boolean inline) {
+        if (key == null || key.isBlank() || key.startsWith("/")) {
+            throw new IllegalArgumentException("Bad S3 key: " + key);
+        }
+        URI uri = uri(key);
+        String host = uri.getPort() == -1 ? uri.getHost() : uri.getHost() + ":" + uri.getPort();
+        StringBuilder extra = new StringBuilder();
+        if (downloadName != null) {
+            String safe = downloadName.replaceAll("[^A-Za-z0-9._-]", "_");
+            extra.append("response-content-disposition=").append(SigV4.uriEncode((inline ? "inline" : "attachment") + "; filename=\"" + safe + "\"", true));
+        }
+        if (contentType != null) {
+            if (extra.length() > 0) extra.append('&');
+            extra.append("response-content-type=").append(SigV4.uriEncode(contentType, true));
+        }
+        String query = SigV4.presignGet(host, uri.getRawPath(), extra.toString(), credentials.get(), region, "s3", clock.instant(), ttl.toSeconds());
+        return uri + "?" + query;
+    }
+
     // ------------------------------------------------------------------ plumbing
 
     private static Map<String, String> headers(String contentType, String cacheControl) {

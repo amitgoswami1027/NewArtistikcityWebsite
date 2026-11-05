@@ -77,6 +77,47 @@ public final class SigV4 {
         return out;
     }
 
+    /**
+     * Query-string ("presigned URL") signature for a GET, as in the S3 guide "Authenticating Requests: Using Query
+     * Parameters". The URL works without credentials until it expires, so it can be handed to a browser.
+     *
+     * @param host          the host the URL points at (virtual-hosted bucket host, or endpoint host:port)
+     * @param rawPath       the already URI-encoded path, e.g. {@code /private/documents/a.pdf}
+     * @param expiresSeconds 1 to 604800 (7 days)
+     * @param extraQuery    additional parameters to sign, already URI-encoded (e.g. response-content-disposition), or null
+     * @return the full query string to append after {@code ?}
+     */
+    public static String presignGet(String host, String rawPath, String extraQuery, AwsCredentials creds, String region, String service,
+                                    Instant now, long expiresSeconds) {
+        if (expiresSeconds < 1 || expiresSeconds > 604800) {
+            throw new IllegalArgumentException("Presigned URLs last 1 second to 7 days");
+        }
+        String amzDate = AMZ_DATE.format(now);
+        String day = amzDate.substring(0, 8);
+        String scope = day + "/" + region + "/" + service + "/aws4_request";
+        StringBuilder q = new StringBuilder();
+        q.append("X-Amz-Algorithm=AWS4-HMAC-SHA256")
+                .append("&X-Amz-Credential=").append(uriEncode(creds.accessKey() + "/" + scope, true))
+                .append("&X-Amz-Date=").append(amzDate)
+                .append("&X-Amz-Expires=").append(expiresSeconds)
+                .append("&X-Amz-SignedHeaders=host");
+        if (creds.sessionToken() != null && !creds.sessionToken().isBlank()) {
+            q.append("&X-Amz-Security-Token=").append(uriEncode(creds.sessionToken(), true));
+        }
+        if (extraQuery != null && !extraQuery.isBlank()) {
+            q.append('&').append(extraQuery);
+        }
+        String canonicalQuery = canonicalQuery(q.toString());
+        String canonicalRequest = "GET\n" + (rawPath == null || rawPath.isEmpty() ? "/" : rawPath) + "\n" + canonicalQuery + "\n"
+                + "host:" + host + "\n\nhost\n" + UNSIGNED_PAYLOAD;
+        String stringToSign = "AWS4-HMAC-SHA256\n" + amzDate + "\n" + scope + "\n" + hex(sha256(canonicalRequest.getBytes(StandardCharsets.UTF_8)));
+        byte[] key = hmac(("AWS4" + creds.secretKey()).getBytes(StandardCharsets.UTF_8), day);
+        key = hmac(key, region);
+        key = hmac(key, service);
+        key = hmac(key, "aws4_request");
+        return canonicalQuery + "&X-Amz-Signature=" + hex(hmac(key, stringToSign));
+    }
+
     /** RFC 3986 encoding as AWS wants it: unreserved characters kept, everything else %XX (upper case); '/' kept in paths. */
     public static String uriEncode(String s, boolean encodeSlash) {
         StringBuilder sb = new StringBuilder();

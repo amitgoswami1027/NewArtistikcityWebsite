@@ -30,9 +30,9 @@ import java.util.UUID;
 
 /**
  * Student Creative Lifecycle - the student side.
- * Pages (auth guard): /dashboard, /dashboard/classroom/{id}, /dashboard/submissions, /dashboard/portfolio.
+ * Pages (auth guard): /dashboard, /dashboard/classroom/{id}, /dashboard/submissions (/dashboard/portfolio redirects to /dashboard).
  * Public page: /student-shop (approved work listed for sale).
- * APIs: POST /api/submissions/upload, PUT /api/portfolio/marketplace/toggle,
+ * APIs: POST /api/submissions/upload,
  *       POST /api/classroom/{courseId}/lessons/{lessonId}/complete.
  */
 @Controller
@@ -123,34 +123,10 @@ public class StudentStudioController {
         return inertia.render(request, "Studio/Submissions", props);
     }
 
-    @GetMapping("/dashboard/portfolio")
+    /** The artwork section (portfolio & selling originals) was removed from the studio; old links land on the studio home. */
+    @GetMapping({"/dashboard/portfolio", "/dashboard/portfolio/", "/dashboard/portfolio/sell/{submissionId}"})
     public ResponseEntity<String> portfolio(HttpServletRequest request) {
-        long userId = auth.userId(request);
-        Row user = auth.user(request);
-        Map<String, Object> props = new LinkedHashMap<>();
-        props.put("submissions", repo.submissionsForUser(userId));
-        props.put("profileSlug", user == null ? null : user.get("slug"));
-        // 1-of-1 marketplace listings made from this student's approved work, keyed by submission
-        List<Map<String, Object>> listings = new ArrayList<>();
-        for (Map<String, Object> l : market.studentListings(userId)) {
-            Map<String, Object> m = new LinkedHashMap<>();
-            for (String k : List.of("id", "slug", "title", "stock_status", "final_price", "base_price", "discount_percentage", "submission_id", "review_notes", "version")) {
-                m.put(k, l.get(k));
-            }
-            m.put("held", "RESERVED".equals(l.get("stock_status")) && l.get("reserved_until") != null);
-            listings.add(m);
-        }
-        props.put("listings", listings);
-        return inertia.render(request, "Studio/Portfolio", props);
-    }
-
-    /**
-     * @deprecated The student shop became the "Student originals" filter of /marketplace; /student-shop now
-     * 301-redirects there (MarketplaceController#legacyStudentShop). Kept, unmapped, during the transition.
-     */
-    @Deprecated
-    public ResponseEntity<String> shop(HttpServletRequest request) {
-        return inertia.render(request, "Studio/Shop", Map.of("listings", repo.publicListings()));
+        return ResponseEntity.status(HttpStatus.FOUND).header("Location", "/dashboard").build();
     }
 
     // ================================================================ APIs
@@ -181,40 +157,6 @@ public class StudentStudioController {
         return ok(new LifecycleDtos.SubmissionCreated(id, url, "Pending Review"));
     }
 
-    /**
-     * JSON: { submissionId, isListedForSale, salePrice, inventoryCount } - only for Approved work.
-     * @deprecated Multi-stock student shop listings were replaced by 1-of-1 originals that go through
-     * moderator review (StudentListingController). The endpoint now answers 410 Gone.
-     */
-    @Deprecated
-    @PutMapping("/api/portfolio/marketplace/toggle")
-    public ResponseEntity<String> toggle(HttpServletRequest request) throws IOException {
-        Long userId = guard(request);
-        if (userId == null) return error(HttpStatus.UNAUTHORIZED, "Please log in again.");
-        if (true) {
-            return error(HttpStatus.GONE, "The student shop moved to the ArtistikCity Marketplace. Use \"Sell as an original\" on the artwork instead.");
-        }
-        Map<String, Object> body = json.decodeMap(new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8));
-        if (body == null) return error(HttpStatus.BAD_REQUEST, "Invalid request.");
-        LifecycleDtos.MarketplaceToggleRequest req = LifecycleDtos.MarketplaceToggleRequest.from(body);
-        if (req.submissionId() == null) return error(HttpStatus.BAD_REQUEST, "Missing artwork.");
-        BigDecimal price = req.salePrice();
-        int inventory = req.inventoryCount() == null ? 1 : req.inventoryCount();
-        if (req.isListedForSale()) {
-            if (price == null || price.compareTo(new BigDecimal("100")) < 0 || price.compareTo(new BigDecimal("10000000")) > 0) {
-                return error(HttpStatus.UNPROCESSABLE_ENTITY, "Set a price between ₹100 and ₹1,00,00,000.");
-            }
-            if (inventory < 1 || inventory > 1000) return error(HttpStatus.UNPROCESSABLE_ENTITY, "Stock must be between 1 and 1000.");
-        }
-        try {
-            repo.updateListing(userId, req.submissionId(), req.isListedForSale(), price == null ? null : price.setScale(2, java.math.RoundingMode.HALF_UP),
-                    Math.max(0, inventory));
-        } catch (LifecycleDtos.LifecycleException e) {
-            return error(HttpStatus.valueOf(e.status()), e.getMessage());
-        }
-        return ok(repo.submission(req.submissionId()));
-    }
-
     @PostMapping("/api/classroom/{courseId}/lessons/{lessonId}/complete")
     public ResponseEntity<String> complete(HttpServletRequest request, @PathVariable("courseId") long courseId, @PathVariable("lessonId") long lessonId) {
         Long userId = guard(request);
@@ -237,15 +179,14 @@ public class StudentStudioController {
         return auth.userId(request);
     }
 
-    /** The next step in the lifecycle: 3 choose a course, 4 learn, 5 submit, 6 certify, 7 showcase (exhibit & sell). */
+    /** The next step in the lifecycle: 3 choose a course, 4 learn, 5 submit, 6 certify (the last step). */
     static int stage(List<Map<String, Object>> enrollments, List<Map<String, Object>> subs) {
         return stage(enrollments, subs, List.of());
     }
 
     static int stage(List<Map<String, Object>> enrollments, List<Map<String, Object>> subs, List<Map<String, Object>> credentials) {
         boolean certified = credentials.stream().anyMatch(c -> Boolean.TRUE.equals(c.get("eligible")) || c.get("certificate") != null);
-        if (certified || subs.stream().anyMatch(s -> Boolean.TRUE.equals(s.get("is_listed_for_sale")))) return 7;
-        if (subs.stream().anyMatch(s -> "Approved".equals(s.get("admin_status")))) return 6;
+        if (certified || subs.stream().anyMatch(s -> "Approved".equals(s.get("admin_status")))) return 6;
         if (!subs.isEmpty()) return 5;
         if (!enrollments.isEmpty()) return 4;
         return 3;

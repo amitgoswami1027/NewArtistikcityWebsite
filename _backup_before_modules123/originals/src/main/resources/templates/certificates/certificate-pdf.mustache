@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ArtistikCity Certificate</title>
+    <style type="text/css">
+        @page { size: A4 landscape; margin: 12mm; }
+        body { font-family: sans-serif; color: #333; margin: 0; }
+        .outer { border: 12px solid #618597; padding: 6px; height: 170mm; }
+        .inner { border: 2px solid #fff; outline: 1px solid #618597; height: 100%; text-align: center; background: #fdfdfd; }
+        h1 { font-family: serif; font-style: italic; font-size: 34px; color: #618597; margin: 28mm 0 10mm 0; }
+        .name { font-size: 30px; font-weight: bold; border-bottom: 1px solid #777; margin: 0 60mm; padding-bottom: 6px; }
+        .earned { font-family: serif; font-style: italic; font-size: 18px; margin-top: 8mm; }
+        .credits { font-size: 16px; font-weight: bold; margin-top: 2mm; }
+        .course { font-size: 22px; font-weight: bold; border-bottom: 1px solid #777; margin: 4mm 50mm 0 50mm; padding-bottom: 6px; }
+        table.footer { width: 100%; margin-top: 18mm; }
+        table.footer td { width: 33%; text-align: center; vertical-align: top; font-size: 13px; }
+        .line { border-bottom: 1px solid #777; margin: 4px 25mm 6px 25mm; padding: 6px; font-size: 15px; }
+    </style>
+</head>
+<body>
+<div class="outer"><div class="inner">
+    <h1>ArtistikCity Certificate of Completion</h1>
+    <div class="name">{{name}}</div>
+    <div class="earned">has earned</div>
+    <div class="credits">Certificate of completion of the course</div>
+    <div class="earned">while completing the training course entitled</div>
+    <div class="course">{{course_title}}</div>
+    <table class="footer"><tr>
+        <td><strong>ArtistikCity</strong><div class="line">{{signature}}</div><strong>Art Learning for Anyone, Anywhere</strong></td>
+        <td></td>
+        <td><strong>Completed Date</strong><div class="line">{{certificate_date}}</div><strong>Certificate # {{certificate_number}}</strong></td>
+    </tr></table>
+</div></div>
+</body>
+</html>

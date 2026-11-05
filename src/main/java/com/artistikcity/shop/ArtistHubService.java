@@ -198,7 +198,7 @@ public class ArtistHubService {
             model.put("price", p.get("final_price"));
             model.put("status", p.get("stock_status"));
             model.put("artworkUrl", baseUrl + "/marketplace/" + p.get("slug"));
-            model.put("replyUrl", baseUrl + "/admin/dashboard/shop?tab=messages&thread=" + t.get("id"));
+            model.put("replyUrl", baseUrl + "/admin/dashboard/marketplace?tab=messages&thread=" + t.get("id"));
             String subject = (first ? "New question about “" : "New message about “") + p.get("title") + "” from " + t.get("buyer_name");
             for (String to : artistRecipients(p)) mailer.send(to, subject, "emails/artist-inquiry", model);
         } catch (RuntimeException e) {

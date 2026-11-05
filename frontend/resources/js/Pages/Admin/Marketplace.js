@@ -3,9 +3,14 @@ import { usePage } from '@inertiajs/inertia-react';
 import axios from 'axios';
 import AdminLayout, { PageHeader, useToast, errorText } from '@/Components/Admin/AdminLayout';
 import { StatusChip, inr, usd, dims, useCountdown, mmss, num } from '@/Components/Marketplace/shared';
+import { Badge } from '@/Components/Admin/kit';
+import { Orders as CartOrders, Messages, Prices, Coupons, ListingDrawer } from '@/Components/Admin/ShopSections';
 
 /*
- * Marketplace console. What each persona sees:
+ * Marketplace console: everything sold in the marketplace in one place. Paintings (listings, review, holds, and each
+ * painting's print formats), orders from the cart checkout (originals, canvas editions, posters, downloads) and the
+ * older single-original checkout, collectors' messages to the artists, the print price list and coupons.
+ * What each persona sees:
  *   Super admin  - everything: list/publish, review queue, live holds, fulfilment, refunds.
  *   Moderator    - review queue, unpublish/feature, live holds, fulfilment.
  *   Instructor   - their own listings (edits go to review) and a read-only view of their sales.
@@ -113,26 +118,45 @@ function OrderRow({ o, flow, canFulfil, onAdvance }) {
 }
 
 export default function Marketplace() {
-    const { admin = {}, listings: initial = [], kpis = {}, orders: initialOrders = [], holds: initialHolds, orderFlow = {}, serverNow, tab: initialTab } = usePage().props;
+    const { admin = {}, listings: initial = [], kpis = {}, orders: initialOrders = [], holds: initialHolds, orderFlow = {}, serverNow, tab: initialTab,
+        shop = {}, openThread } = usePage().props;
     const caps = admin.capabilities || [];
     const publisher = caps.includes('marketplace.publish');
     const editor = caps.includes('marketplace.edit');
     const canCreate = editor || caps.includes('marketplace.own');
     const canFulfil = caps.includes('marketplace.orders');
+    const shopCan = shop.can || {};
     const [items, setItems] = useState(initial);
     const [orders, setOrders] = useState(initialOrders);
     const [holds, setHolds] = useState(initialHolds || []);
+    const [cartOrders, setCartOrders] = useState(shop.orders || []);
+    const [threads, setThreads] = useState(shop.threads || []);
+    const [prices, setPrices] = useState(shop.prices || []);
+    const [coupons, setCoupons] = useState(shop.coupons || []);
+    const [shopListings, setShopListings] = useState(shop.listings || []);
+    const [printsFor, setPrintsFor] = useState(null);
     const review = items.filter((l) => l.raw_status === 'PENDING_REVIEW');
+    const cartToDo = cartOrders.filter((o) => ['PAID', 'PACKED', 'REFUND_REQUIRED'].includes(o.status) || Number(o.refund_due_inr) > 0).length;
+    const legacyToDo = orders.filter((o) => ['PAID', 'PACKED', 'REFUND_REQUIRED'].includes(o.status)).length;
+    const unread = threads.filter((t) => t.staff_unread > 0).length;
+    const cartRevenue = cartOrders.filter((o) => ['PAID', 'PACKED', 'SHIPPED', 'DELIVERED'].includes(o.status))
+        .reduce((sum, o) => sum + Number(o.total_inr) - Number(o.refund_due_inr || 0), 0);
     const tabs = [
         publisher && ['review', 'Review queue', review.length],
-        ['listings', editor || publisher ? 'All listings' : 'My listings', items.length],
+        ['paintings', editor || publisher ? 'Paintings' : 'My paintings', items.length],
         publisher && ['holds', 'Live holds', holds.length],
-        ['orders', canFulfil ? 'Orders & fulfilment' : 'My sales', orders.length],
+        ['orders', canFulfil ? 'Orders' : 'My sales', cartToDo + legacyToDo],
+        ['messages', 'Messages', unread],
+        shopCan.prices && ['prices', 'Prices', null],
+        shopCan.prices && ['coupons', 'Coupons', null],
     ].filter(Boolean);
-    const [tab, setTab] = useState(initialTab && tabs.some((t) => t[0] === initialTab) ? initialTab : (publisher && review.length ? 'review' : 'listings'));
+    const startTab = initialTab === 'listings' ? 'paintings' : initialTab;
+    const [tab, setTabState] = useState(startTab && tabs.some((t) => t[0] === startTab) ? startTab : (publisher && review.length ? 'review' : 'paintings'));
+    const setTab = (t) => { setTabState(t); try { window.history.replaceState(null, '', `?tab=${t}`); } catch (e) { /* ignore */ } };
     const [status, setStatus] = useState('ALL');
     const [q, setQ] = useState('');
     const [toastNode, toast] = useToast();
+    const printsOf = (id) => shopListings.find((x) => x.id === id);
 
     const shown = useMemo(() => items.filter((l) => (status === 'ALL' || l.raw_status === status)
         && (!q || `${l.title} ${l.artist_name} ${l.medium}`.toLowerCase().includes(q.toLowerCase()))), [items, status, q]);
@@ -159,20 +183,20 @@ export default function Marketplace() {
 
     return (
         <AdminLayout title="Marketplace">
-            <PageHeader title="Art marketplace"
-                        subtitle={editor ? 'Every 1-of-1 original: list, review, watch live holds and ship sold work.' : publisher ? 'Review new originals, keep the gallery tidy and get sold work to collectors.' : 'List your originals and follow their review and sales.'}
+            <PageHeader title="Marketplace"
+                        subtitle={editor ? 'Paintings, prints and downloads: list and review, ship orders, answer collectors, set print prices and coupons.' : publisher ? 'Review new originals, keep the gallery tidy, ship orders and answer collectors.' : 'List your originals, choose their prints, and follow their sales.'}
                         actions={<>
                             <a href="/marketplace" target="_blank" rel="noopener" className="inline-flex items-center h-11 px-5 rounded-full border border-gray-300 bg-white font-bold hover:border-ink"><i className="fa fa-external-link mr-2" aria-hidden="true"></i>Open marketplace</a>
                             {canCreate && <a href="/admin/dashboard/marketplace/new" className="inline-flex items-center h-11 px-5 rounded-full bg-brand text-white font-bold hover:bg-brand-dark"><i className="fa fa-plus mr-2" aria-hidden="true"></i>List an original</a>}
                         </>} />
 
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-                <Kpi label="Live" value={kpis.live || 0} icon="fa-eye" onClick={() => { setTab('listings'); setStatus('AVAILABLE'); }} />
+                <Kpi label="Live" value={kpis.live || 0} icon="fa-eye" onClick={() => { setTab('paintings'); setStatus('AVAILABLE'); }} />
                 <Kpi label="On hold" value={kpis.held || 0} icon="fa-lock" tone="text-yellow-600" onClick={publisher ? () => setTab('holds') : undefined} />
-                <Kpi label="In review" value={kpis.review || 0} icon="fa-hourglass-half" tone="text-blue-700" onClick={() => { if (publisher) setTab('review'); else { setTab('listings'); setStatus('PENDING_REVIEW'); } }} />
-                <Kpi label="To ship" value={kpis.toShip || 0} icon="fa-truck" tone={kpis.toShip ? 'text-brand' : 'text-ink'} onClick={() => setTab('orders')} />
-                <Kpi label="Sales (INR)" value={inr(kpis.revenueInr)} icon="fa-line-chart" />
-                <Kpi label="Live inventory" value={inr(kpis.inventoryValueInr)} icon="fa-diamond" />
+                <Kpi label="In review" value={kpis.review || 0} icon="fa-hourglass-half" tone="text-blue-700" onClick={() => { if (publisher) setTab('review'); else { setTab('paintings'); setStatus('PENDING_REVIEW'); } }} />
+                <Kpi label="Orders to handle" value={cartToDo + legacyToDo} icon="fa-truck" tone={cartToDo + legacyToDo ? 'text-brand' : 'text-ink'} onClick={() => setTab('orders')} />
+                <Kpi label="Unread messages" value={unread} icon="fa-comments-o" tone={unread ? 'text-brand' : 'text-ink'} onClick={() => setTab('messages')} />
+                <Kpi label="Sales (INR)" value={inr(Number(kpis.revenueInr || 0) + cartRevenue)} icon="fa-line-chart" />
             </div>
             {Number(kpis.refunds) > 0 && canFulfil && (
                 <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between gap-3" role="alert">
@@ -185,7 +209,7 @@ export default function Marketplace() {
                 {tabs.map(([k, l, n]) => (
                     <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
                             className={`whitespace-nowrap px-4 py-3 text-base font-bold border-b-2 -mb-px ${tab === k ? 'border-ink text-ink' : 'border-transparent text-gray-500 hover:text-ink'}`}>
-                        {l} <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${k === 'review' && n ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600'}`}>{n}</span>
+                        {l} {n !== null && <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${['review', 'orders', 'messages'].includes(k) && n ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600'}`}>{n}</span>}
                     </button>
                 ))}
             </div>
@@ -195,7 +219,7 @@ export default function Marketplace() {
                     : <div className="rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center"><p className="text-xl font-extrabold text-ink">All caught up</p><p className="mt-1 text-gray-600">New originals from instructors and students appear here for review.</p></div>
             )}
 
-            {tab === 'listings' && (
+            {tab === 'paintings' && (
                 <div>
                     <div className="flex flex-wrap items-center gap-2 mb-4">
                         {[['ALL', 'All', items.length], ['AVAILABLE', 'Live', count('AVAILABLE')], ['RESERVED', 'On hold', count('RESERVED')], ['PENDING_REVIEW', 'In review', count('PENDING_REVIEW')], ['DRAFT', 'Drafts', count('DRAFT')], ['SOLD', 'Sold', count('SOLD')], ['ARCHIVED', 'Archived', count('ARCHIVED')]].map(([k, l, n]) => (
@@ -205,7 +229,7 @@ export default function Marketplace() {
                     </div>
                     <div className="rounded-2xl border border-gray-200 bg-white overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead><tr className="text-xs font-mono uppercase tracking-widest text-gray-500"><th className="p-4">Artwork</th><th className="p-4">Status</th><th className="p-4">Price</th><th className="p-4 hidden lg:table-cell">Updated</th><th className="p-4 text-right">Actions</th></tr></thead>
+                            <thead><tr className="text-xs font-mono uppercase tracking-widest text-gray-500"><th className="p-4">Artwork</th><th className="p-4">Status</th><th className="p-4">Price</th><th className="p-4 hidden md:table-cell">Prints</th><th className="p-4 hidden lg:table-cell">Updated</th><th className="p-4 text-right">Actions</th></tr></thead>
                             <tbody>
                                 {shown.map((l) => (
                                     <tr key={l.id} className="border-t border-gray-100 align-middle">
@@ -216,10 +240,21 @@ export default function Marketplace() {
                                         </div></td>
                                         <td className="p-4"><StatusChip status={l.raw_status} />{l.order_id && <p className="mt-1 text-xs font-mono text-gray-500">{l.order_id}</p>}</td>
                                         <td className="p-4 font-mono text-sm font-bold text-ink">{inr(l.final_price)}{Number(l.discount_percentage) > 0 && <p className="font-sans font-normal text-xs text-gray-400"><span className="line-through">{inr(l.base_price)}</span> −{num(l.discount_percentage, 0)}%</p>}</td>
+                                        <td className="p-4 hidden md:table-cell">{(() => {
+                                            const sl = printsOf(l.id);
+                                            if (!sl) return <span className="text-xs text-gray-400">—</span>;
+                                            return (
+                                                <div className="flex flex-wrap items-center gap-1">
+                                                    {sl.formats.length ? sl.formats.map((x) => <Badge key={x} tone="blue">{x.toLowerCase()}</Badge>) : <span className="text-xs text-gray-500">Original only</span>}
+                                                    {sl.formats.includes('CANVAS') && <span className="text-xs text-gray-500">{sl.editions_sold}/{sl.edition_size}</span>}
+                                                </div>
+                                            );
+                                        })()}</td>
                                         <td className="p-4 text-sm text-gray-500 hidden lg:table-cell">{when(l.updated_at)}</td>
                                         <td className="p-4">
                                             <div className="flex flex-wrap justify-end gap-1.5">
                                                 {canEditRow(l) && <a href={`/admin/dashboard/marketplace/${l.id}/edit`} className="h-9 px-3 inline-flex items-center rounded-full border border-gray-300 text-sm font-bold hover:border-ink">Edit</a>}
+                                                {shopCan.listings && printsOf(l.id) && <button type="button" onClick={() => setPrintsFor(printsOf(l.id))} className="h-9 px-3 rounded-full border border-gray-300 text-sm font-bold hover:border-ink" title="Print formats, edition and download file">Prints</button>}
                                                 <a href={`/marketplace/${l.slug}`} target="_blank" rel="noopener" className="h-9 w-9 inline-flex items-center justify-center rounded-full border border-gray-300 hover:border-ink" title="View page" aria-label="View page"><i className="fa fa-eye" aria-hidden="true"></i></a>
                                                 {publisher && ['DRAFT', 'ARCHIVED'].includes(l.raw_status) && <button type="button" onClick={() => setListing(l, 'AVAILABLE')} className="h-9 px-3 rounded-full bg-ink text-white text-sm font-bold">Publish</button>}
                                                 {publisher && l.raw_status === 'PENDING_REVIEW' && <button type="button" onClick={() => setTab('review')} className="h-9 px-3 rounded-full bg-blue-600 text-white text-sm font-bold">Review</button>}
@@ -231,7 +266,7 @@ export default function Marketplace() {
                                         </td>
                                     </tr>
                                 ))}
-                                {shown.length === 0 && <tr><td colSpan={5} className="p-12 text-center text-gray-500">No listings here. {canCreate && <a href="/admin/dashboard/marketplace/new" className="font-bold text-brand">List an original</a>}</td></tr>}
+                                {shown.length === 0 && <tr><td colSpan={6} className="p-12 text-center text-gray-500">No listings here. {canCreate && <a href="/admin/dashboard/marketplace/new" className="font-bold text-brand">List an original</a>}</td></tr>}
                             </tbody>
                         </table>
                     </div>
@@ -251,7 +286,11 @@ export default function Marketplace() {
             )}
 
             {tab === 'orders' && (
-                <div>
+                <div className="space-y-8">
+                    <CartOrders orders={cartOrders} setOrders={setCartOrders} flow={shop.orderFlow || {}} can={shopCan} toast={toast} />
+                    {orders.length > 0 && <div>
+                    <h3 className="text-lg font-extrabold text-ink mb-1">Earlier orders</h3>
+                    <p className="text-sm text-gray-500 mb-4">Originals bought one at a time through the checkout used before the cart.</p>
                     {canFulfil && (
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
                             {['PAID', 'PACKED', 'SHIPPED', 'DELIVERED', 'REFUND_REQUIRED'].map((s) => (
@@ -267,8 +306,16 @@ export default function Marketplace() {
                             </table>
                         ) : <p className="p-10 text-center text-gray-500">No sales yet.</p>}
                     </div>
+                    </div>}
                 </div>
             )}
+
+            {tab === 'messages' && <Messages threads={threads} setThreads={setThreads} initial={openThread} toast={toast} />}
+            {tab === 'prices' && <Prices prices={prices} setPrices={setPrices} can={shopCan} toast={toast} />}
+            {tab === 'coupons' && <Coupons coupons={coupons} setCoupons={setCoupons} listings={shopListings} can={shopCan} toast={toast} />}
+            {printsFor && <ListingDrawer l={printsFor} toast={toast} onClose={() => setPrintsFor(null)}
+                                         onSaved={(ls) => { setShopListings(ls); const again = ls.find((x) => x.id === printsFor.id); if (again) setPrintsFor(again); }} />}
+
             {toastNode}
         </AdminLayout>
     );

@@ -340,7 +340,6 @@ export default function CourseDetails() {
                                             const src = `/storage/uploads/artworks/${g.id}/${g.photo_name}`;
                                             return <a key={g.id} href={src} data-fancybox="course-gallery" style={{ backgroundImage: `url(${src})` }}><span>{g.name}</span></a>;
                                         })}
-                                        <a href="/marketplace?source=student" className="dm-more">Student originals</a>
                                     </div>
                                 </section>
                             )}

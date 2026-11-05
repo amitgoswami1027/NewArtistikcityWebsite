@@ -1,0 +1,24 @@
+target/
+.tools/
+frontend/node_modules/
+*.tgz
+*.tar.gz
+*.log
+.git/
+.idea/
+.vscode/
+*.bat
+*.ps1
+# secrets, local-only and AWS/CI files never go into the image
+.env
+.env.*
+logs/
+storage/certificates/
+storage-private/
+_backup_before_*/
+redesign-backup*/
+.github/
+infra/
+docs/
+tools/
+test-output/

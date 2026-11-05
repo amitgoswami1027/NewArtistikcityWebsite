@@ -28,13 +28,19 @@ java -jar target/artistikcity-1.0.0.jar --spring.profiles.active=dev   # run fro
 docker compose up -d --build
 docker compose down -v && docker compose up -d            # wipe and reload demo data
 
+# Clear ALL site data (students, courses, orders, paintings, content); keeps staff logins, settings, FAQs and lists.
+# Asks you to type WIPE, takes a full backup into backups\wipe-<date>\ first and moves uploads there (not deleted).
+WIPE-SITE-DATA.bat                                        # = setup-and-run.ps1 -WipeData; SQL: database/maintenance/wipe-site-data.sql
+RESTORE-SITE-DATA.bat                                     # = -RestoreData [-RestoreFrom backups\wipe-<date>]: undo a wipe (current data saved first)
+
 # Rebuild the React bundle -> src/main/resources/static/js/app.js
 cd frontend && npm install && npm run dev                 # or: npm run prod / npm run watch
 ```
 
 Unit tests cover the auth crypto (`src/test/java/com/artistikcity/auth`: tokens, password policy, JWT/JWKS, WebAuthn), the
 rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/VideoUploadCheckTest`), S3 request signing against
-AWS's published examples (`support/s3/SigV4Test`) and the CloudFront filter (`http/CloudFrontFilterTest`): `mvn test`.
+AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing (`shop/ShopPricingTest`) and
+the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc): `mvn test`. Browser tests for the purchase flow live in `tests/e2e`.
 For everything else, run the app against MySQL and check the pages by hand. Use the demo logins below.
 
 **Local database access:** `127.0.0.1:3306`, database `artistikcity`, app user `artistik` / `Artistik@2026`,
@@ -63,6 +69,8 @@ src/main/java/com/artistikcity/
                 Course/Order/Newsletter/Blog/Taxonomy/Content/People/FreeCourse controllers, SiteSettings, NewsletterService
   lifecycle/    student studio, credentials and admin console overview (learn -> submit -> sell)
   marketplace/  1-of-1 original-art marketplace (listings, cart reservations, admin review)
+  shop/         prints, room preview, artist hub, cart, shop orders (purchase flow)
+  orders/       Your orders: one UnifiedOrder list from every order system (OrderSource beans), certificate of authenticity
   commission/   commission-art requests, pricing and payments
 src/main/resources/
   templates/    Mustache: inertia/ (root HTML for React), pages/, admin/login, emails/, certificates/
@@ -73,6 +81,7 @@ database/       schema.sql (drops + recreates everything), seed.sql (demo data),
 deploy/         ec2-deploy.sh, db-migrate.sh (AWS server scripts, shipped inside the image)
 infra/          CloudFormation: certificate.yml (us-east-1), artistikcity.yml (ap-south-1)
 docs/           AWS-DEPLOY.md, awsarchitecture.md, marketplace-shop.md
+tests/e2e/      Playwright browser tests (purchase flow, room preview, Your orders); run against the dev profile
 storage/        uploaded files, served at /storage/**  (storage/certificates is git-ignored)
 storage-private/ paid download files (git-ignored, never served directly; S3 key prefix private/)
 ```
@@ -104,9 +113,10 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   identities live in `linked_accounts`. Merge accounts only through `AccountService`, which applies the verified-e-mail rules.
 - Auth JSON endpoints (`web/AuthApiController`, `/auth/**`) return `{message, errors, retryAfter, reauth}` on failure. Changing
   sign-in methods needs a login younger than 30 minutes (403 `reauth`).
-- **Student areas.** *My studio* is for learning only. It uses `Components/Studio/StudioLayout` with five tabs (My studio, My courses,
-  Submissions, Portfolio & shop, Certificates & reports) and the journey Discover → Join → Choose a course → Learn → Submit → Certify →
-  Showcase (`Components/Studio/Journey.js`; the backend stage is `StudentStudioController.stage`).
+- **Student areas.** *My studio* is for learning only. It uses `Components/Studio/StudioLayout` with four tabs (My studio, My courses,
+  Submissions, Certificates & reports) and the journey Discover → Join → Choose a course → Learn → Submit → Certify
+  (`Components/Studio/Journey.js`; the backend stage is `StudentStudioController.stage`). The old artwork section (Portfolio & shop,
+  students selling originals) was removed: `/dashboard/portfolio` redirects to `/dashboard`, and the marketplace sells studio work only.
   *My course* is a focused view with no studio tabs (`web/user/CourseLearningController`, frame `Components/Course/CourseShell`):
   overview `/user/course/{order_id}` (`Pages/Course/Overview`), `/user/course/{order_id}/resume` (next unfinished lesson) and the learning
   view `/user/course/modules/{module_id}?lesson={id}` (`Pages/Course/Learn`: collapsible syllabus sidebar, prev/next across modules, mark
@@ -114,7 +124,7 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   Old URLs (`/dashboard/classroom/{id}`, `/user/course/module/lesson/...`, `/user/course/syllabus/...`, `/user/workshop/...`) redirect there.
   Lesson tasks (`/user/course/module/lesson/task/{id}`) use the same frame via the `courseLinks` prop.
   *My account* (`Components/Account/AccountLayout`, list in `Components/Account/nav.js`) holds Profile, Your orders (`/user/orders`, page
-  `Account/Orders`), Wish list, Addresses, Login & security, Notifications and Help. `Layouts/Authenticated` picks the shell from the URL.
+  `Account/Orders`: every order system in one list through `orders/UnifiedOrderService`, see docs/marketplace-shop.md), Wish list, Addresses, Login & security, Notifications and Help. `Layouts/Authenticated` picks the shell from the URL.
   The header "My studio" is a plain link, and the avatar menu lists the account pages, with counts from the shared prop `nav`.
 - The Tailwind CSS (`static/css/commission.css`) is pre-built and only contains the classes already in use, scoped to `.tw`. A new
   utility class does nothing until the CSS is rebuilt, so new pages use classes that already exist or small custom classes in `ac-theme.css`.
@@ -141,6 +151,18 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
 - **Storage:** always go through `support/Storage` (`put`, `put(stream)`, `copy`, `exists`, `read`, `storeUpload`); never write
   files under the storage folder directly. `STORAGE_DRIVER=s3` keeps them in S3 (`support/s3/S3Client`: plain java.net.http +
   SigV4, credentials from env or the EC2 role via IMDSv2), same `/storage/...` URLs; `web/StorageController` serves them when no CDN does.
+  `Storage.publicUrl(rel)` gives the address to save for new public files (absolute when `S3_PUBLIC_BASE_URL` is set) and
+  `Storage.pathOf(url)` turns either form back into a storage path: use it instead of stripping `/storage/` by hand.
+  Marketplace photos: `marketplace/MarketplaceImages` → `uploads/marketplace/yyyy/MM/<uuid>.jpg|png`.
+- **Generated PDFs** (portfolio reports, course certificates): rendered in memory (OpenHTMLtoPDF into a byte array) and
+  stored privately by `documents/StudentDocuments` (`private/documents/portfolios/<user>/…`, `private/documents/certificates/<no>.pdf`),
+  one row each in `student_documents` (storage key, owner, kind). Students get them through short-lived links:
+  a 10-minute presigned S3 GET (`S3Client.presignedGet`, `SigV4.presignGet`) or, with local storage, the owner-checked
+  `/dashboard/documents/{id}/file`. Never link to `private/` keys any other way. PDF palette: `CredentialsService` constants
+  (ink #2C3E50, soft #34495E, panels #F8F9FA / #ECF0F1); the cover is page 1 via `@page :first` (no named page: that forced a blank page).
+- **Room preview** (`Components/Shop/RoomStage.js`, /purchase/step-2): no shadows or light overlays; the stage zooms into
+  the photo around the artwork (`data-zoom`) so it fills ~half the width (more on phones) while staying to scale; the room is
+  muted (CSS filter) and softened as zoom grows. Room photos are rendered without sun (`tools/room-renderer`, `NO_SUN=1`).
 - **AWS** (docs/AWS-DEPLOY.md): CloudFront → EC2 (Docker) + RDS + S3, `infra/*.yml` (CloudFormation), `.github/workflows/deploy.yml`,
   `deploy/ec2-deploy.sh` (deploy/rollback/status, runs from inside the image) and `deploy/db-migrate.sh` (schema on an empty
   DB, else pending migrations - same rules as the launcher). `http/CloudFrontFilter` (`TRUST_CLOUDFRONT`) takes the visitor IP and
@@ -148,15 +170,18 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   Migrations must stay compatible with the previous release (rollback only swaps the image).
 - **Marketplace shop** (package `shop/`, docs/marketplace-shop.md): every listing can also sell a numbered canvas edition, a poster and a
   digital download (`paintings.shop_formats`), priced from the global list `shop_price_options` by `ShopPricing` (the one source of prices;
-  `Components/Shop/shop.js` only mirrors it for live UI). Purchase tunnel `/purchase/step-1?artwork=<slug>` → `step-2` (room visualiser,
-  `Components/Shop/RoomStage`) → `preview` (estimate, coupon, "Meet the artist" `ArtistHub`) → `checkout` (whole cart); the step's choice is
-  the session draft `purchase.draft`. Cart: `shop_carts` per owner key (`U:<id>` / guest `S:<token>`, same keys as holds, guest cart merged
+  `Components/Shop/shop.js` only mirrors it for live UI). Four screens: the artwork page (buy box `Components/Shop/BuyPanel`: format, size,
+  price, "Talk to the artist") → `/purchase/step-2` room preview (`Components/Shop/RoomStage` on photographed rooms from `Components/Shop/rooms.js`
+  + `static/assets/rooms/`, generated by the room renderer; do not hand-edit the calibration) → `/purchase/checkout` (accordion contact/delivery/
+  payment, sticky summary) → `/purchase/orders/{id}`. `/purchase/step-1` and `/purchase/preview` only redirect. The choice is the session draft
+  `purchase.draft`. Cart: `shop_carts` per owner key (`U:<id>` / guest `S:<token>`, same keys as holds, guest cart merged
   on sign-in), JSON API `/api/v1/cart/**`, client store `Components/Shop/CartStore` (module-level, no provider) + header bag/drawer
   `CartDrawer`. An original in the cart is a 15-minute hold (one at a time). Orders: `shop_orders` / `shop_order_items`, finalised by
   `ShopOrderService.finalizeSale` (idempotent; lines that can't be supplied become REFUND_REQUIRED with `refund_due_inr`); the marketplace
   webhook also resolves shop orders. Downloads stream from private storage (`Storage.putPrivate/openPrivate`, never /storage/**) at
-  `/shop/download/{token}`. Admin: Sales > Art shop (`/admin/dashboard/shop`, `ShopAdminController`). The old single-original checkout
-  page now forwards into the cart checkout.
+  `/shop/download/{token}`. Admin: one console, Sales > Marketplace (`/admin/dashboard/marketplace`: paintings, review, holds, orders, messages, prices, coupons;
+  `MarketplaceAdminController` + `ShopAdminController`, sections in `Components/Admin/ShopSections`; `/admin/dashboard/shop` only redirects). The old single-original checkout
+  page now forwards into the cart checkout. Browser tests: `tests/e2e` (Playwright, against the dev profile).
 - Blog posts are public only when `status = 1`; drafts 404 for visitors (admins can preview). `/faq` reads the `faqs` table.
   Order `payment_status`: 0 pending, 1 paid, 2 failed, 3 refunded; course access needs 1.
 - Wish list: table `wishlist_items` (type `course` or `painting`), `POST /wishlist {type, id, saved}`, page `/user/wishlist`

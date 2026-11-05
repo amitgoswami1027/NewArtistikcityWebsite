@@ -38,6 +38,16 @@ import java.util.stream.Collectors;
 public class CredentialsService {
 
     private static final DateTimeFormatter LONG = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.ENGLISH);
+
+    // light document palette: charcoal text on white, pale grey panels and hairlines, one brand accent used sparingly
+    static final String INK = "#2C3E50";       // headings, names, key figures
+    static final String SOFT = "#34495E";      // body text, secondary headings
+    static final String MUTED = "#6C7A89";     // captions, labels
+    static final String RULE = "#DDE3E8";      // hairlines and borders
+    static final String PANEL = "#F8F9FA";     // panels, cover background
+    static final String PAPER = "#FFFFFF";     // certificate sheet
+    static final String TINT = "#ECF0F1";      // table stripes, progress track
+    static final String ACCENT = "#C2185B";    // ArtistikCity rose, for small markers only
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final LifecycleRepository repo;
@@ -129,31 +139,32 @@ public class CredentialsService {
                 .stream().filter(x -> !x.isBlank()).toList());
         String html = "<html><head><style>"
                 + "@page { size: A4 landscape; margin: 0; }"
-                + "body { margin: 0; font-family: Helvetica, Arial, sans-serif; color: #111; }"
-                + ".sheet { position: relative; width: 297mm; height: 210mm; background: #fbf8f3; }"
-                + ".frame { position: absolute; top: 10mm; left: 10mm; right: 10mm; bottom: 10mm; border: 1.2mm solid #111; }"
-                + ".inner { position: absolute; top: 14mm; left: 14mm; right: 14mm; bottom: 14mm; border: 0.3mm solid #e5156b; }"
-                + ".band { position: absolute; top: 14mm; bottom: 14mm; left: 14mm; width: 16mm; background: #e5156b; }"
-                + ".content { position: absolute; top: 26mm; left: 44mm; right: 30mm; }"
+                + "body { margin: 0; font-family: Helvetica, Arial, sans-serif; color: " + INK + "; }"
+                + ".sheet { position: relative; width: 297mm; height: 209mm; background: " + PAPER + "; }"
+                + ".frame { position: absolute; top: 10mm; left: 10mm; right: 10mm; bottom: 10mm; border: 0.6mm solid " + INK + "; }"
+                + ".inner { position: absolute; top: 13mm; left: 13mm; right: 13mm; bottom: 13mm; border: 0.3mm solid " + RULE + "; }"
+                + ".band { position: absolute; top: 13mm; bottom: 13mm; left: 13mm; width: 12mm; background: " + PANEL + "; border-right: 0.3mm solid " + RULE + "; }"
+                + ".band div { position: absolute; left: 5.4mm; top: 0; bottom: 0; width: 1.2mm; background: " + ACCENT + "; }"
+                + ".content { position: absolute; top: 26mm; left: 40mm; right: 30mm; }"
                 + ".logo { height: 16mm; }"
-                + ".kicker { margin-top: 12mm; font-size: 11pt; letter-spacing: 3pt; text-transform: uppercase; color: #e5156b; font-weight: bold; }"
-                + "h1 { font-size: 34pt; margin: 3mm 0 0; letter-spacing: -0.5pt; }"
-                + ".presented { margin-top: 8mm; font-size: 12pt; color: #555; }"
-                + ".name { font-size: 30pt; font-weight: bold; margin-top: 2mm; border-bottom: 0.4mm solid #111; padding-bottom: 2mm; }"
-                + ".for { margin-top: 6mm; font-size: 12pt; color: #555; }"
-                + ".course { font-size: 18pt; font-weight: bold; margin-top: 1mm; }"
-                + ".details { margin-top: 2mm; font-size: 10.5pt; color: #555; }"
-                + ".footer { position: absolute; left: 44mm; right: 30mm; bottom: 24mm; }"
+                + ".kicker { margin-top: 12mm; font-size: 10.5pt; letter-spacing: 3pt; text-transform: uppercase; color: " + SOFT + "; font-weight: bold; }"
+                + "h1 { font-size: 34pt; margin: 3mm 0 0; letter-spacing: -0.5pt; color: " + INK + "; }"
+                + ".presented { margin-top: 8mm; font-size: 12pt; color: " + MUTED + "; }"
+                + ".name { font-size: 30pt; font-weight: bold; margin-top: 2mm; border-bottom: 0.4mm solid " + RULE + "; padding-bottom: 2mm; color: " + INK + "; }"
+                + ".for { margin-top: 6mm; font-size: 12pt; color: " + MUTED + "; }"
+                + ".course { font-size: 18pt; font-weight: bold; margin-top: 1mm; color: " + SOFT + "; }"
+                + ".details { margin-top: 2mm; font-size: 10.5pt; color: " + MUTED + "; }"
+                + ".footer { position: absolute; left: 40mm; right: 30mm; bottom: 24mm; }"
                 + ".col { display: inline-block; width: 31%; vertical-align: bottom; margin-right: 2%; }"
-                + ".line { border-top: 0.3mm solid #111; padding-top: 1.5mm; font-size: 10pt; }"
-                + ".muted { color: #666; font-size: 8.5pt; }"
-                + ".sig { font-size: 16pt; font-style: italic; margin-bottom: 1mm; }"
-                + ".seal { position: absolute; right: 30mm; top: 26mm; width: 34mm; height: 34mm; border-radius: 17mm; background: #111; color: #fff; text-align: center; }"
-                + ".seal div { padding-top: 10mm; font-size: 8pt; letter-spacing: 1.5pt; font-weight: bold; }"
-                + ".seal b { display: block; font-size: 15pt; color: #ffb020; letter-spacing: 0; margin-top: 1mm; }"
-                + "</style></head><body><div class=\"sheet\"><div class=\"frame\"></div><div class=\"inner\"></div><div class=\"band\"></div>"
+                + ".line { border-top: 0.3mm solid " + SOFT + "; padding-top: 1.5mm; font-size: 10pt; color: " + INK + "; }"
+                + ".muted { color: " + MUTED + "; font-size: 8.5pt; }"
+                + ".sig { font-size: 16pt; font-style: italic; margin-bottom: 1mm; color: " + SOFT + "; }"
+                + ".seal { position: absolute; right: 30mm; top: 26mm; width: 34mm; height: 34mm; border-radius: 17mm; background: " + PANEL + "; border: 0.6mm solid " + RULE + "; color: " + INK + "; text-align: center; }"
+                + ".seal div { padding-top: 10mm; font-size: 8pt; letter-spacing: 1.5pt; font-weight: bold; color: " + SOFT + "; }"
+                + ".seal b { display: block; font-size: 15pt; color: " + INK + "; letter-spacing: 0; margin-top: 1mm; }"
+                + "</style></head><body><div class=\"sheet\"><div class=\"frame\"></div><div class=\"inner\"></div><div class=\"band\"><div></div></div>"
                 + "<div class=\"seal\"><div>ARTISTIKCITY<b>" + LocalDateTime.parse(ts(cert.get("issued_at"))).getYear() + "</b>CERTIFIED</div></div>"
-                + "<div class=\"content\">" + logoImg("logo") 
+                + "<div class=\"content\">" + logoImg("logo")
                 + "<div class=\"kicker\">Certificate of completion</div>"
                 + "<h1>" + esc(workshop ? "Workshop Certificate" : "Course Certificate") + "</h1>"
                 + "<div class=\"presented\">This certifies that</div>"
@@ -188,48 +199,54 @@ public class CredentialsService {
         long certCount = creds.stream().filter(c -> c.get("certificate") != null).count();
 
         StringBuilder h = new StringBuilder();
+        // The cover is ordinary content on page 1 (@page :first has no margins and no footer), so the PDF never opens on an
+        // empty page. (A named page for the cover forced a page break before it, which left page 1 blank.)
         h.append("<html><head><style>")
                 .append("@page { size: A4; margin: 18mm 16mm 20mm 16mm; @bottom-left { content: 'ArtistikCity portfolio  |  ").append(css(user.get("name")))
-                .append("'; font-family: Helvetica; font-size: 8pt; color: #888; } @bottom-right { content: 'Page ' counter(page) ' of ' counter(pages); font-family: Helvetica; font-size: 8pt; color: #888; } }")
-                .append("@page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }")
-                .append("body { font-family: Helvetica, Arial, sans-serif; color: #1a1a1a; font-size: 10pt; line-height: 1.45; }")
-                .append(".cover { page: cover; width: 210mm; height: 297mm; background: #111; color: #fff; position: relative; page-break-after: always; }")
-                .append(".cover .band { position: absolute; left: 0; top: 0; bottom: 0; width: 14mm; background: #e5156b; }")
+                .append("'; font-family: Helvetica; font-size: 8pt; color: ").append(MUTED).append("; } @bottom-right { content: 'Page ' counter(page) ' of ' counter(pages); font-family: Helvetica; font-size: 8pt; color: ").append(MUTED).append("; } }")
+                .append("@page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }")
+                .append("body { margin: 0; font-family: Helvetica, Arial, sans-serif; color: ").append(SOFT).append("; font-size: 10pt; line-height: 1.45; }")
+                .append(".cover { width: 210mm; height: 296mm; background: ").append(PANEL).append("; color: ").append(INK).append("; position: relative; page-break-after: always; }")
+                .append(".cover .band { position: absolute; left: 0; top: 0; bottom: 0; width: 10mm; background: ").append(TINT).append("; border-right: 0.3mm solid ").append(RULE).append("; }")
+                .append(".cover .mark { position: absolute; left: 4.4mm; top: 40mm; width: 1.2mm; height: 60mm; background: ").append(ACCENT).append("; }")
                 .append(".cover .inner { position: absolute; left: 30mm; right: 22mm; top: 40mm; }")
-                .append(".cover .kicker { font-size: 10pt; letter-spacing: 3pt; text-transform: uppercase; color: #ff7ab2; font-weight: bold; margin-top: 30mm; }")
-                .append(".cover h1 { font-size: 40pt; line-height: 1.05; margin: 4mm 0 0; }")
-                .append(".cover .who { font-size: 13pt; color: #ddd; margin-top: 6mm; }")
+                .append(".cover .kicker { font-size: 10pt; letter-spacing: 3pt; text-transform: uppercase; color: ").append(MUTED).append("; font-weight: bold; margin-top: 30mm; }")
+                .append(".cover h1 { font-size: 40pt; line-height: 1.05; margin: 4mm 0 0; color: ").append(INK).append("; }")
+                .append(".cover .who { font-size: 13pt; color: ").append(SOFT).append("; margin-top: 6mm; }")
+                .append(".cover .rule { margin-top: 10mm; width: 40mm; border-top: 0.6mm solid ").append(INK).append("; }")
                 .append(".cover .stats { position: absolute; left: 30mm; right: 22mm; bottom: 36mm; }")
-                .append(".cover .stat { display: inline-block; width: 23%; margin-right: 2%; border-top: 0.4mm solid #555; padding-top: 3mm; }")
-                .append(".cover .stat b { display: block; font-size: 22pt; color: #fff; } .cover .stat span { font-size: 8pt; letter-spacing: 1pt; text-transform: uppercase; color: #aaa; }")
-                .append(".cover .date { position: absolute; left: 30mm; bottom: 20mm; font-size: 8.5pt; color: #999; }")
-                .append("h2 { font-size: 20pt; margin: 0 0 2mm; letter-spacing: -0.3pt; }")
-                .append("h3 { font-size: 12pt; margin: 6mm 0 2mm; }")
-                .append(".eyebrow { font-size: 8pt; letter-spacing: 2pt; text-transform: uppercase; color: #e5156b; font-weight: bold; }")
-                .append(".muted { color: #666; } .small { font-size: 8.5pt; }")
+                .append(".cover .stat { display: inline-block; width: 22%; margin-right: 3%; border-top: 0.4mm solid ").append(RULE).append("; padding-top: 3mm; vertical-align: top; }")
+                .append(".cover .stat b { display: block; font-size: 22pt; color: ").append(INK).append("; } .cover .stat span { font-size: 7.5pt; letter-spacing: 1pt; text-transform: uppercase; color: ").append(MUTED).append("; }")
+                .append(".cover .date { position: absolute; left: 30mm; bottom: 20mm; font-size: 8.5pt; color: ").append(MUTED).append("; }")
+                .append(".page { padding: 0; }")
+                .append("h2 { font-size: 20pt; margin: 0 0 2mm; letter-spacing: -0.3pt; color: ").append(INK).append("; }")
+                .append("h3 { font-size: 12pt; margin: 6mm 0 2mm; color: ").append(INK).append("; }")
+                .append(".eyebrow { font-size: 8pt; letter-spacing: 2pt; text-transform: uppercase; color: ").append(MUTED).append("; font-weight: bold; }")
+                .append(".eyebrow:before { content: ''; display: inline-block; width: 3mm; height: 0.8mm; background: ").append(ACCENT).append("; margin-right: 2mm; vertical-align: middle; }")
+                .append(".muted { color: ").append(MUTED).append("; } .small { font-size: 8.5pt; }")
                 .append(".course { page-break-before: always; }")
-                .append(".meta { width: 100%; border-collapse: collapse; margin: 3mm 0; } .meta td { padding: 1.6mm 2mm; border-bottom: 0.2mm solid #e5e5e5; font-size: 9pt; vertical-align: top; } .meta td.k { width: 32%; color: #666; }")
-                .append(".chip { display: inline-block; padding: 0.6mm 2.2mm; border-radius: 2mm; font-size: 8pt; font-weight: bold; }")
-                .append(".ok { background: #dcfce7; color: #166534; } .wait { background: #fef9c3; color: #854d0e; } .no { background: #fee2e2; color: #991b1b; } .ink { background: #111; color: #fff; }")
-                .append(".unit { margin: 3mm 0 1mm; font-weight: bold; font-size: 9.5pt; }")
-                .append(".lesson { padding: 1.2mm 0 1.2mm 7mm; border-bottom: 0.2mm dotted #ddd; font-size: 9pt; position: relative; }")
-                .append(".lesson .box { position: absolute; left: 0; top: 1.8mm; width: 3.2mm; height: 3.2mm; border: 0.3mm solid #999; }")
-                .append(".lesson .box.done { background: #16a34a; border-color: #16a34a; }")
-                .append(".work { page-break-inside: avoid; margin: 5mm 0; border: 0.3mm solid #e5e5e5; }")
+                .append(".meta { width: 100%; border-collapse: collapse; margin: 3mm 0; } .meta td { padding: 1.6mm 2mm; border-bottom: 0.2mm solid ").append(RULE).append("; font-size: 9pt; vertical-align: top; } .meta td.k { width: 32%; color: ").append(MUTED).append("; background: ").append(PANEL).append("; }")
+                .append(".chip { display: inline-block; padding: 0.6mm 2.2mm; border-radius: 2mm; font-size: 8pt; font-weight: bold; border: 0.2mm solid ").append(RULE).append("; }")
+                .append(".ok { background: #E8F6EE; color: #1E7B4F; } .wait { background: #FDF6E3; color: #8A6D1F; } .no { background: #FBECEC; color: #A23B3B; } .ink { background: ").append(TINT).append("; color: ").append(INK).append("; }")
+                .append(".unit { margin: 3mm 0 1mm; font-weight: bold; font-size: 9.5pt; color: ").append(INK).append("; }")
+                .append(".lesson { padding: 1.2mm 0 1.2mm 7mm; border-bottom: 0.2mm dotted ").append(RULE).append("; font-size: 9pt; position: relative; }")
+                .append(".lesson .box { position: absolute; left: 0; top: 1.8mm; width: 3.2mm; height: 3.2mm; border: 0.3mm solid ").append(MUTED).append("; }")
+                .append(".lesson .box.done { background: ").append(SOFT).append("; border-color: ").append(SOFT).append("; }")
+                .append(".work { page-break-inside: avoid; margin: 5mm 0; border: 0.3mm solid ").append(RULE).append("; background: #FFFFFF; }")
                 .append(".work img { width: 100%; max-height: 120mm; }")
-                .append(".work .body { padding: 3mm 4mm; }")
-                .append(".comment { margin-top: 2mm; padding: 2.5mm 3mm; background: #f6f6f6; border-left: 1mm solid #e5156b; font-size: 9pt; }")
-                .append(".toc td { padding: 1.8mm 0; border-bottom: 0.2mm solid #eee; }")
-                .append(".bar { height: 2mm; background: #eee; margin-top: 1mm; } .bar div { height: 2mm; background: #e5156b; }")
+                .append(".work .body { padding: 3mm 4mm; background: ").append(PANEL).append("; border-top: 0.3mm solid ").append(RULE).append("; }")
+                .append(".comment { margin-top: 2mm; padding: 2.5mm 3mm; background: #FFFFFF; border-left: 0.8mm solid ").append(RULE).append("; font-size: 9pt; }")
+                .append(".toc td { padding: 1.8mm 0; border-bottom: 0.2mm solid ").append(RULE).append("; }")
+                .append(".bar { height: 2mm; background: ").append(TINT).append("; margin-top: 1mm; } .bar div { height: 2mm; background: ").append(SOFT).append("; }")
                 .append("</style></head><body>");
 
-        // ---- cover
-        h.append("<div class=\"cover\"><div class=\"band\"></div><div class=\"inner\">").append(logoImg("logo-white"))
+        // ---- cover (page 1)
+        h.append("<div class=\"cover\"><div class=\"band\"></div><div class=\"mark\"></div><div class=\"inner\">").append(logoImg("logo"))
                 .append("<div class=\"kicker\">Artist portfolio</div><h1>").append(esc(user.get("name"))).append("</h1>")
                 .append("<div class=\"who\">").append(esc(user.get("profile_title") == null ? "ArtistikCity student artist" : user.get("profile_title")))
-                .append(user.get("location") == null ? "" : " &#183; " + esc(user.get("location"))).append("</div></div>")
+                .append(user.get("location") == null ? "" : " &#183; " + esc(user.get("location"))).append("</div><div class=\"rule\"></div></div>")
                 .append("<div class=\"stats\">")
-                .append(stat(creds.size(), "Courses")).append(stat(totalLessons, "Lessons completed"))
+                .append(stat(creds.size(), "Courses")).append(stat(totalLessons, "Lessons done"))
                 .append(stat(approvedCount, "Approved works")).append(stat(certCount, "Certificates")).append("</div>")
                 .append("<div class=\"date\">Generated ").append(esc(LocalDate.now().format(LONG))).append(" &#183; artistikcity.com</div></div>");
 
@@ -318,7 +335,6 @@ public class CredentialsService {
                         .append("Rejected".equals(st) ? "Changes requested" : esc(st)).append("</span>")
                         .append("<div class=\"small muted\">Submitted ").append(esc(longDate(w.get("created_at"))))
                         .append(w.get("reviewed_at") == null ? "" : " &#183; reviewed " + esc(longDate(w.get("reviewed_at"))))
-                        .append(Boolean.TRUE.equals(w.get("is_listed_for_sale")) && w.get("sale_price") != null ? " &#183; available in the student shop, INR " + esc(w.get("sale_price")) : "")
                         .append("</div>");
                 if (w.get("description") != null) h.append("<p style=\"margin:2mm 0 0\">").append(esc(w.get("description"))).append("</p>");
                 if (opt.comments() && w.get("reviewer_feedback") != null) {
@@ -331,7 +347,7 @@ public class CredentialsService {
         }
 
         h.append("<div style=\"page-break-before: always\"><div class=\"eyebrow\">About</div><h2>ArtistikCity</h2>")
-                .append("<p>ArtistikCity runs live, instructor-led art courses and workshops for learners of every age. Students learn in guided classrooms, submit assignment milestones for personal review, and curate a portfolio of approved work.</p>")
+                .append("<p>ArtistikCity runs live, instructor-led art courses and workshops for learners of every age. Students learn in guided classrooms, submit assignment milestones for personal review, and build a portfolio of approved work.</p>")
                 .append("<p class=\"muted\">Certificates listed in this portfolio can be verified online using their certificate number at ")
                 .append(esc(baseUrl + "/certificates/verify/")).append("&lt;number&gt;.</p></div>");
         h.append("</body></html>");
@@ -356,8 +372,8 @@ public class CredentialsService {
     /** Embeds a stored image as a (down-scaled) JPEG data URI so the PDF is self-contained. */
     private String imageTag(String url, String alt) {
         try {
-            String rel = url.replaceFirst("^/storage/", "");
-            if (!storage.exists(rel)) return "";
+            String rel = Storage.pathOf(url).orElse(null);
+            if (rel == null || !storage.exists(rel)) return "";
             return "<img src=\"data:image/jpeg;base64," + Base64.getEncoder().encodeToString(scaled(storage.read(rel), 1400)) + "\" alt=\"" + alt + "\"/>";
         } catch (Exception e) {
             return "";

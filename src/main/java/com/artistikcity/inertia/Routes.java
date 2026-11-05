@@ -49,6 +49,8 @@ public class Routes {
         get("purchase.preview", "purchase/preview");
         get("purchase.checkout", "purchase/checkout");
         get("purchase.order", "purchase/orders/{orderId}");
+        get("marketplace.certificate", "marketplace/certificates/{orderId}/{item}");
+        get("api.user.orders", "api/v1/user/orders");
         get("teacher.profile", "teacher/{slug}");
         get("instructor", "instructor");
         get("home", "home");
@@ -65,7 +67,6 @@ public class Routes {
         get("studio.classroom", "dashboard/classroom/{id}");
         get("studio.submissions", "dashboard/submissions");
         get("studio.portfolio", "dashboard/portfolio");
-        get("studio.portfolio.sell", "dashboard/portfolio/sell/{submissionId}");
         get("student.shop", "student-shop");
         get("studio.certificates", "dashboard/certificates");
         get("studio.portfolio.report", "dashboard/portfolio/report");

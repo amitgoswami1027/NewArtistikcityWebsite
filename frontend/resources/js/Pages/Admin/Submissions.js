@@ -48,7 +48,7 @@ export default function Submissions() {
         setBusy(true);
         axios.patch(`/api/admin/submissions/${selected.id}/review`, { status: decision, notes: notes.trim() })
             .then((r) => {
-                toast(decision === 'Approved' ? 'Approved and added to the student’s portfolio' : 'Sent back with your notes');
+                toast(decision === 'Approved' ? 'Approved' : 'Sent back with your notes');
                 const updated = { ...selected, ...r.data };
                 const rest = items.map((s) => (s.id === selected.id ? updated : s));
                 const stillVisible = status === 'all' || status === decision ? rest : rest.filter((s) => s.id !== selected.id);
@@ -62,7 +62,7 @@ export default function Submissions() {
 
     return (
         <AdminLayout title="Verification desk">
-            <PageHeader title="Verification desk" subtitle="Review student milestone submissions. Approved work unlocks the student's portfolio and selling options." />
+            <PageHeader title="Verification desk" subtitle="Review student milestone submissions. Approved work counts toward the student's certificate." />
             <div className="flex flex-wrap gap-2 mb-6" role="tablist">
                 {FILTERS.map((f) => (
                     <a key={f} href={`/admin/dashboard/submissions?status=${encodeURIComponent(f)}`} role="tab" aria-selected={status === f}
@@ -119,7 +119,7 @@ export default function Submissions() {
                                 <textarea id="notes" rows="6" maxLength="4000" value={notes} onChange={(e) => setNotes(e.target.value)}
                                           placeholder="What works, what to improve, and the next step…" className="mt-1.5 w-full rounded-lg border-gray-300 focus:border-brand focus:ring-brand text-sm" />
                                 <div className="mt-2 flex flex-wrap gap-2">
-                                    {['Beautiful value control and composition.', 'Please refine the edges and resubmit.', 'Great progress, ready for your portfolio!'].map((q) => (
+                                    {['Beautiful value control and composition.', 'Please refine the edges and resubmit.', 'Great progress, well done!'].map((q) => (
                                         <button key={q} type="button" onClick={() => setNotes((n) => (n ? `${n} ${q}` : q))} className="rounded-full border border-gray-200 px-3 py-1 text-xs hover:border-ink">{q}</button>
                                     ))}
                                 </div>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { usePage } from '@inertiajs/inertia-react';
 import StudioLayout from '@/Components/Studio/StudioLayout';
 import { shortDate } from '@/Components/Studio/Journey';
@@ -74,79 +75,141 @@ function CertificateCard({ c, verifyBase }) {
     );
 }
 
-function PortfolioBuilder({ credentials, stats }) {
+const isPhone = () => {
+    try {
+        return window.matchMedia('(max-width: 767px)').matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '');
+    } catch (e) { return false; }
+};
+const kb = (n) => (Number(n) >= 1048576 ? `${(Number(n) / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(Number(n || 0) / 1024))} KB`);
+
+/** Opens a stored document through a fresh short-lived link (presigned S3 URL in production). */
+function openDocument(id, inline) {
+    // open the tab first, in the click, so phones don't block it as a pop-up; then point it at the link
+    const w = inline ? window.open('', '_blank') : null;
+    return axios.get(`/api/v1/studio/documents/${id}/link${inline ? '?inline=1' : ''}`)
+        .then((r) => { if (w) w.location.href = r.data.url; else window.location.href = r.data.url; })
+        .catch(() => { if (w) w.close(); window.alert('This report is no longer available. Make a new one.'); });
+}
+
+/**
+ * Portfolio report: choose what to include, make the PDF (rendered on the server, stored privately in S3), then read
+ * it right here (desktop) or open it in the phone's own PDF viewer. Earlier reports stay listed for 10 versions.
+ */
+function PortfolioBuilder({ credentials, stats, reports: initialReports }) {
     const [approvedOnly, setApprovedOnly] = useState(true);
     const [curriculum, setCurriculum] = useState(true);
     const [comments, setComments] = useState(true);
     const [courses, setCourses] = useState(credentials.map((c) => String(c.course_id)));
+    const [busy, setBusy] = useState(false);
+    const [err, setErr] = useState(null);
+    const [made, setMade] = useState(null);        // {document, viewUrl, downloadUrl}
+    const [reports, setReports] = useState(initialReports || []);
+    const [phone, setPhone] = useState(false);
+    useEffect(() => { setPhone(isPhone()); }, []);
     const toggleCourse = (id) => setCourses((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]));
-    const qs = new URLSearchParams({ approvedOnly: approvedOnly ? '1' : '0', curriculum: curriculum ? '1' : '0', comments: comments ? '1' : '0', courses: courses.join(',') }).toString();
-    const href = `/dashboard/portfolio/report?${qs}`;
     const none = credentials.length > 0 && courses.length === 0;
 
+    const create = () => {
+        setBusy(true); setErr(null);
+        axios.post('/api/v1/studio/portfolio', { approvedOnly, curriculum, comments, courses: courses.map(Number) })
+            .then((r) => { setMade(r.data); setReports((xs) => [r.data.document, ...xs.filter((x) => x.id !== r.data.document.id)].slice(0, 10)); })
+            .catch((e) => setErr((e.response && e.response.data && e.response.data.message) || 'We could not make your report. Please try again.'))
+            .finally(() => setBusy(false));
+    };
+
     const Toggle = ({ checked, onChange, label, hint }) => (
-        <label className="flex items-start gap-3 py-2 cursor-pointer">
-            <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-1 h-5 w-5 rounded text-brand border-gray-300 focus:ring-brand" />
-            <span><span className="block font-bold text-ink">{label}</span>{hint && <span className="block text-sm text-gray-500">{hint}</span>}</span>
+        <label className="pf-toggle">
+            <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+            <span><b>{label}</b>{hint && <small>{hint}</small>}</span>
         </label>
     );
 
     return (
-        <section className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-5">
-                <div className="lg:col-span-2 bg-ink text-white p-8 relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 90% 10%, #e5156b 0, transparent 55%)' }} aria-hidden="true"></div>
-                    <div className="relative">
-                        <p className="font-mono text-xs tracking-widest uppercase text-pink-300">PDF report</p>
-                        <h2 className="mt-2 text-3xl font-black tracking-tight text-white">Portfolio report</h2>
-                        <p className="mt-2 text-gray-300">A detailed, print-ready portfolio: cover page, every course with its curriculum and your progress, each artwork with instructor comments, and your certificate numbers.</p>
-                        <div className="mt-6 grid grid-cols-3 gap-3">
-                            {[[credentials.length, 'Courses'], [stats.lessons, 'Lessons'], [approvedOnly ? stats.approved : stats.total, 'Artworks']].map(([v, l]) => (
-                                <div key={l} className="border-t border-gray-600 pt-2"><p className="text-2xl font-black">{v}</p><p className="font-mono text-xs uppercase tracking-widest text-gray-400">{l}</p></div>
-                            ))}
-                        </div>
+        <section className="pf" aria-labelledby="pf-title">
+            <div className="pf__grid">
+                <div className="pf__intro">
+                    <p className="pf__eyebrow">PDF report</p>
+                    <h2 id="pf-title">Portfolio report</h2>
+                    <p>A print-ready portfolio: a cover with your details, every course with its curriculum and your progress, each artwork with instructor comments, and your certificate numbers.</p>
+                    <div className="pf__stats">
+                        {[[credentials.length, 'Courses'], [stats.lessons, 'Lessons'], [approvedOnly ? stats.approved : stats.total, 'Artworks']].map(([v, l]) => (
+                            <div key={l}><b>{v}</b><span>{l}</span></div>
+                        ))}
                     </div>
                 </div>
-                <div className="lg:col-span-3 p-8">
-                    <h3 className="text-lg font-black tracking-tight text-ink">What to include</h3>
-                    <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                <div className="pf__form">
+                    <h3>What to include</h3>
+                    <div className="pf__toggles">
                         <Toggle checked={curriculum} onChange={setCurriculum} label="Course curriculum" hint="Units and lessons, with the ones you completed ticked" />
                         <Toggle checked={comments} onChange={setComments} label="Instructor comments" hint="Reviewer notes printed under each artwork" />
                         <Toggle checked={approvedOnly} onChange={setApprovedOnly} label="Approved artworks only" hint="Untick to include work in review or needing changes" />
                     </div>
                     {credentials.length > 1 && (
-                        <fieldset className="mt-4">
-                            <legend className="font-bold text-ink">Courses</legend>
-                            <div className="mt-2 flex flex-wrap gap-2">
+                        <fieldset className="pf__courses">
+                            <legend>Courses</legend>
+                            <div>
                                 {credentials.map((c) => {
                                     const on = courses.includes(String(c.course_id));
                                     return <button key={c.course_id} type="button" aria-pressed={on} onClick={() => toggleCourse(String(c.course_id))}
-                                                   className={`h-9 px-4 rounded-full text-sm font-bold border ${on ? 'bg-ink text-white border-ink' : 'bg-white text-gray-600 border-gray-300'}`}>{on && <i className="fa fa-check mr-1" aria-hidden="true"></i>}{c.title}</button>;
+                                                   className={on ? 'is-on' : ''}>{on && <i className="fa fa-check" aria-hidden="true"></i>} {c.title}</button>;
                                 })}
                             </div>
                         </fieldset>
                     )}
-                    <div className="mt-6 flex flex-wrap gap-3">
-                        <a href={none ? undefined : href} aria-disabled={none} className={`inline-flex items-center h-12 px-6 rounded-full font-bold ${none ? 'bg-gray-300 text-white pointer-events-none' : 'bg-brand text-white hover:bg-brand-dark'}`}>
-                            <i className="fa fa-file-pdf-o mr-2" aria-hidden="true"></i>Download portfolio PDF
-                        </a>
-                        <a href={none ? undefined : `${href}&inline=1`} target="_blank" rel="noopener" className={`inline-flex items-center h-12 px-6 rounded-full border font-bold ${none ? 'border-gray-200 text-gray-300 pointer-events-none' : 'border-gray-300 hover:border-ink'}`}>
-                            <i className="fa fa-print mr-2" aria-hidden="true"></i>Open to print
-                        </a>
+                    <div className="pf__actions">
+                        <button type="button" className="pf__btn pf__btn--primary" onClick={create} disabled={busy || none} data-testid="portfolio-create">
+                            {busy ? <i className="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> : <i className="fa fa-file-pdf-o" aria-hidden="true"></i>}
+                            {busy ? ' Making your PDF…' : ' Create portfolio PDF'}
+                        </button>
                     </div>
-                    <p className="mt-3 text-xs text-gray-500">Generated fresh each time, so it always reflects your latest reviews and certificates.</p>
+                    {err && <p className="pf__error" role="alert">{err}</p>}
+                    <p className="pf__fine">Made fresh each time, so it always shows your latest reviews and certificates. Stored privately; links last 10 minutes.</p>
                 </div>
             </div>
+
+            {made && (
+                <div className="pf__viewer" data-testid="portfolio-viewer">
+                    <div className="pf__viewerbar">
+                        <span><i className="fa fa-check-circle" aria-hidden="true"></i> <b>{made.document.fileName}</b> · {kb(made.document.sizeBytes)}</span>
+                        <span className="pf__viewerlinks">
+                            <a href={made.viewUrl} target="_blank" rel="noopener noreferrer" className="pf__btn"><i className="fa fa-external-link" aria-hidden="true"></i> Open</a>
+                            <a href={made.downloadUrl} className="pf__btn pf__btn--primary" data-testid="portfolio-download"><i className="fa fa-download" aria-hidden="true"></i> Download</a>
+                        </span>
+                    </div>
+                    {phone ? (
+                        <p className="pf__phone">Your PDF is ready. Tap <b>Open</b> to read it in your phone's PDF viewer, or <b>Download</b> to save it.</p>
+                    ) : (
+                        <iframe title="Your portfolio report" src={made.viewUrl} className="pf__frame" />
+                    )}
+                </div>
+            )}
+
+            {reports.length > 0 && (
+                <div className="pf__history">
+                    <h3>Your reports</h3>
+                    <ul>
+                        {reports.map((d) => (
+                            <li key={d.id}>
+                                <span><i className="fa fa-file-pdf-o" aria-hidden="true"></i> {shortDate(d.createdAt)} · {kb(d.sizeBytes)}</span>
+                                <span>
+                                    <button type="button" className="pf__link" onClick={() => openDocument(d.id, true)}>Open</button>
+                                    <button type="button" className="pf__link" onClick={() => openDocument(d.id, false)}>Download</button>
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </section>
     );
 }
 
 export default function Certificates() {
-    const { credentials = [], stats = {}, stage = 4, verifyBase = '' } = usePage().props;
+    const { credentials = [], stats = {}, stage = 4, verifyBase = '', reports = [] } = usePage().props;
     const earned = credentials.filter((c) => c.eligible || c.certificate).length;
     return (
         <StudioLayout title="Certificates & reports" subtitle="Earn a verifiable certificate for each course and download a printable portfolio of your work." active="/dashboard/certificates">
-            <PortfolioBuilder credentials={credentials} stats={stats} />
+            <PortfolioBuilder credentials={credentials} stats={stats} reports={reports} />
 
             <section className="mt-12">
                 <div className="flex flex-wrap items-end justify-between gap-4">

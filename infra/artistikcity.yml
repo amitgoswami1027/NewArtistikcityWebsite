@@ -89,6 +89,16 @@ Parameters:
   GitHubBranch:
     Type: String
     Default: main
+  GitHubOwnerId:
+    Type: String
+    Default: '*'
+    AllowedPattern: '^(\*|[0-9]+)$'
+    Description: Numeric id of the GitHub owner. Newer GitHub tokens name the repository as owner@id/repo@id; the ids pin the role to this exact account and repository even if a name is reused. '*' accepts any id.
+  GitHubRepoId:
+    Type: String
+    Default: '*'
+    AllowedPattern: '^(\*|[0-9]+)$'
+    Description: Numeric id of the GitHub repository (see GitHubOwnerId)
   CreateGitHubOidcProvider:
     Type: String
     Default: 'true'
@@ -593,6 +603,9 @@ Resources:
                 token.actions.githubusercontent.com:sub:
                   - !Sub 'repo:${GitHubOwner}/${GitHubRepo}:ref:refs/heads/${GitHubBranch}'
                   - !Sub 'repo:${GitHubOwner}/${GitHubRepo}:environment:production'
+                  # newer GitHub token format: repo:<owner>@<owner id>/<repo>@<repo id>:...
+                  - !Sub 'repo:${GitHubOwner}@${GitHubOwnerId}/${GitHubRepo}@${GitHubRepoId}:ref:refs/heads/${GitHubBranch}'
+                  - !Sub 'repo:${GitHubOwner}@${GitHubOwnerId}/${GitHubRepo}@${GitHubRepoId}:environment:production'
       Policies:
         - PolicyName: artistikcity-deploy
           PolicyDocument:

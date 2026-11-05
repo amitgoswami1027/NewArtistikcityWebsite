@@ -1,12 +1,11 @@
 /** The six stages of the Student Creative Lifecycle, shared by the roadmap page and the studio. */
 export const JOURNEY = [
-    { n: '01', key: 'DISCOVER', title: 'Discover', text: 'See how ArtistikCity takes you from first sketch to a sold artwork.', href: '/how-it-works', cta: 'How it works' },
+    { n: '01', key: 'DISCOVER', title: 'Discover', text: 'See how ArtistikCity takes you from your first sketch to a certified course.', href: '/how-it-works', cta: 'How it works' },
     { n: '02', key: 'JOIN', title: 'Join', text: 'Create your free account in under a minute, with email, phone, Google or Facebook.', href: '/join', cta: 'Join for free' },
     { n: '03', key: 'CHOOSE_COURSE', title: 'Choose a course', text: 'Pick a live course or a weekend workshop in the medium you love.', href: '/courses?type=all', cta: 'Browse courses' },
     { n: '04', key: 'LEARN', title: 'Learn', text: 'Follow the lessons in your course, practise and track your progress.', href: '/user/my-courses', cta: 'Go to my courses' },
     { n: '05', key: 'SUBMIT', title: 'Submit', text: 'Upload your assignment milestone for a personal review from your instructor.', href: '/dashboard/submissions', cta: 'Submit work' },
     { n: '06', key: 'CERTIFY', title: 'Certify', text: 'Finish the course with approved work to earn your verifiable ArtistikCity certificate and PDF portfolio report.', href: '/dashboard/certificates', cta: 'Certificates & reports' },
-    { n: '07', key: 'SHOWCASE', title: 'Showcase', subtitle: 'Exhibit & sell', text: 'Approved pieces join your portfolio. Exhibit them and list any as a 1-of-1 original in the ArtistikCity Marketplace.', href: '/dashboard/portfolio', cta: 'Portfolio & shop' },
 ];
 
 export const statusStyle = (status) => ({

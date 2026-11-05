@@ -1,0 +1,82 @@
+# =====================================================================
+#  ArtistikCity - full stack in Docker
+#    docker compose up -d --build        start everything
+#    http://localhost:8080               website   (admin: /admin/login)
+#    localhost:3306                      MySQL     user artistik / see .env (root: MYSQL_ROOT_PASSWORD)
+#    docker compose down                 stop (data is kept in volumes)
+#    docker compose down -v              stop and delete the database + uploads
+#                                        (the next "up" reloads schema.sql + seed.sql)
+# =====================================================================
+name: artistikcity
+
+services:
+  # ---- Module 1: database (MySQL 8.4 LTS) -----------------------------
+  #  On the first start (empty volume) MySQL runs the scripts in /docker-entrypoint-initdb.d
+  #  in name order: the schema first, then the demo data.
+  db:
+    image: mysql:8.4
+    container_name: artistikcity-db
+    environment:
+      MYSQL_DATABASE: artistikcity
+      MYSQL_USER: ${DB_USERNAME:-artistik}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-Artistik@2026}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ArtistikRoot@2026}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci", "--mysqlx=OFF"]
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s
+    restart: unless-stopped
+
+  # ---- Module 2: web application (Spring Boot backend + React UI) ----
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: artistikcity/app:latest
+    container_name: artistikcity-app
+    environment:
+      DB_URL: jdbc:mysql://db:3306/artistikcity?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      DB_USERNAME: ${DB_USERNAME:-artistik}
+      DB_PASSWORD: ${DB_PASSWORD:-Artistik@2026}
+      DB_INIT: never
+      PAYMENT_TEST_MODE: ${PAYMENT_TEST_MODE:-true}
+      RAZORPAY_KEY: ${RAZORPAY_KEY:-}
+      RAZORPAY_SECRET: ${RAZORPAY_SECRET:-}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_SECRET: ${PAYPAL_SECRET:-}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      - app-storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ---- Optional module 3: rebuild the React bundle -------------------
+  #   docker compose --profile frontend run --rm frontend
+  #   then: docker compose up -d --build app
+  frontend:
+    image: node:18-bullseye
+    profiles: ["frontend"]
+    working_dir: /work/frontend
+    command: sh -c "npm install --no-audit --no-fund && npm run prod"
+    volumes:
+      - ./:/work
+
+volumes:
+  mysql-data:
+  app-storage:

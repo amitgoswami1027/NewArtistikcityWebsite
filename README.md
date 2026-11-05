@@ -40,6 +40,8 @@ Closing the window or pressing **Ctrl+C** stops the site, and MySQL too if the l
 | `START-MySQL.bat` | Starts only MySQL, which keeps running in the background. Use it before running the app from VS Code (F5 also starts it for you). |
 | `STOP-MySQL.bat` | Stops the portable MySQL. Your data is kept. |
 | `LOAD-DEMO-DATA.bat` | Adds the demo data pack (more courses, workshops, orders, teacher and student logins), then starts the site. See *Demo data* below. |
+| `WIPE-SITE-DATA.bat` | **Clears all site data**: students, courses, workshops, orders, coursework, certificates, paintings, commissions, blog posts, testimonials, messages. Keeps staff logins, site settings, FAQs, mediums/genres/skills and the print price list. You type `WIPE` to confirm; a full backup goes to `backups\wipe-<date>\` first and uploaded files are moved there, not deleted. Undo it with `RESTORE-SITE-DATA.bat`. |
+| `RESTORE-SITE-DATA.bat` | Puts back the data from the newest `backups\wipe-<date>\` (or `-RestoreFrom backups\wipe-<date>`): loads its database copy and moves the uploaded pictures back. You type `RESTORE` to confirm; the data in the site at that moment is saved first to `backups\before-restore-<date>\`. |
 | `DOCKER-START.bat` | The whole stack in Docker Desktop (see below). |
 
 Options, from a command prompt (also accepted by `setup-and-run.ps1`):
@@ -155,7 +157,7 @@ Apply it on a database that is already set up (it runs after the migrations).
   workshop have already finished, so the *Finished* filters have content.
 - **30 course orders** over the last six months: paid (RazorPay in INR, PayPal in USD), pending, failed and refunded, with
   enrolments and lesson progress (some courses completed, so certificates can be issued).
-- Studio: submissions waiting for review, approved and rejected; portfolio items listed for sale; marketplace paintings
+- Studio: submissions waiting for review, approved and rejected; marketplace paintings
   (one sold and delivered); commission orders in every stage; student task conversations; wish lists.
 - Content: 6 testimonials, home and student gallery artworks, 6 blog posts (one draft) with categories and tags,
   3 free lessons, 5 more FAQs, 6 contact messages, 26 newsletter subscribers, one sent and one draft campaign.

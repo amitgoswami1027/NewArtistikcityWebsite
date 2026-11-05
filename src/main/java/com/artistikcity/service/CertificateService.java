@@ -16,7 +16,9 @@ import java.util.Map;
 
 /**
  * Course completion certificates (Admin\OrderController@order_issue_certificate and the student download),
- * rendered to PDF with OpenHTMLtoPDF instead of dompdf. PDFs are stored under storage/certificates.
+ * rendered to PDF with OpenHTMLtoPDF instead of dompdf. The PDF is rendered in memory and stored privately
+ * (S3 key {@code private/documents/certificates/orders/<name>} in production, storage-private/ locally); the key is
+ * kept in {@code certificates.certificate_path}. Only the share image for social networks stays public.
  */
 @Service
 public class CertificateService {
@@ -50,10 +52,49 @@ public class CertificateService {
         db.updateById("certificates", certId, Row.of("certificate_number", number));
         Row cert = db.find("certificates", certId);
         byte[] pdf = render(model(cert));
-        storage.put("certificates/" + name, pdf);
-        db.updateById("certificates", certId, Row.of("certificate_path", "/storage/certificates/" + name));
+        String rel = privatePath(name);
+        storage.putPrivate(rel, pdf);
+        db.updateById("certificates", certId, Row.of("certificate_path", Storage.privateKey(rel)));
         db.updateById("orders", orderId, Row.of("issue_certificate", 1, "certificate_name", name));
         return db.find("certificates", certId);
+    }
+
+    /** Private storage path of an order certificate's PDF. */
+    public static String privatePath(String fileName) {
+        return "documents/certificates/orders/" + fileName.replaceAll("[^A-Za-z0-9._-]", "_");
+    }
+
+    /**
+     * The certificate PDF: the stored copy (private storage, or the old public copy for certificates issued before),
+     * rendered again if neither exists - and then stored privately.
+     */
+    public byte[] pdf(Row cert) {
+        String name = cert.str("certificate_name");
+        if (name != null) {
+            String rel = privatePath(name);
+            java.util.Optional<Storage.PrivateFile> f = storage.openPrivate(rel);
+            if (f.isPresent()) {
+                try (java.io.InputStream in = f.get().body()) {
+                    return in.readAllBytes();
+                } catch (java.io.IOException e) {
+                    throw new java.io.UncheckedIOException(e);
+                }
+            }
+            if (storage.exists("certificates/" + name)) return storage.read("certificates/" + name);
+        }
+        byte[] pdf = render(model(cert));
+        if (name != null) {
+            storage.putPrivate(privatePath(name), pdf);
+            db.updateById("certificates", cert.get("id"), Row.of("certificate_path", Storage.privateKey(privatePath(name))));
+        }
+        return pdf;
+    }
+
+    /** A presigned S3 link to the certificate PDF (S3 storage only; empty locally). */
+    public java.util.Optional<String> link(Row cert) {
+        String name = cert.str("certificate_name");
+        if (name == null || !storage.existsPrivate(privatePath(name))) return java.util.Optional.empty();
+        return storage.privateLink(privatePath(name), java.time.Duration.ofMinutes(10), name, false);
     }
 
     /** Certificate of a student's order joined with the order (null if none). */

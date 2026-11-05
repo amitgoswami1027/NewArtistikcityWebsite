@@ -2,11 +2,12 @@ import React from 'react';
 import SiteLayout from '@/Components/Site/SiteLayout';
 import { useCountdown, mmss } from '@/Components/Marketplace/shared';
 
+/** The four screens: the artwork page (choose), the room preview, payment, and the order summary. */
 export const STEPS = [
-    { n: 1, label: 'Choose format', href: '/purchase/step-1' },
-    { n: 2, label: 'See it on your wall', href: '/purchase/step-2' },
-    { n: 3, label: 'Review & meet the artist', href: '/purchase/preview' },
-    { n: 4, label: 'Checkout', href: '/purchase/checkout' },
+    { n: 1, label: 'Choose', href: '/purchase/step-1' },
+    { n: 2, label: 'Room preview', href: '/purchase/step-2' },
+    { n: 3, label: 'Payment', href: '/purchase/checkout' },
+    { n: 4, label: 'Confirmation', href: null },
 ];
 
 export function PurchaseStepper({ current, skipRoom = false }) {
@@ -16,7 +17,7 @@ export function PurchaseStepper({ current, skipRoom = false }) {
                 {STEPS.map((s) => {
                     const done = s.n < current;
                     const skipped = skipRoom && s.n === 2;
-                    const linkable = done && !skipped && s.n < 4;
+                    const linkable = done && !skipped && !!s.href;
                     const inner = (
                         <>
                             <span className="pz-stepper__dot" aria-hidden="true">{done && !skipped ? <i className="fa fa-check"></i> : s.n}</span>

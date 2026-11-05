@@ -7,15 +7,24 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
 
-/** Stores listing photos under uploads/marketplace/, after checking type, size and resolution. */
+/**
+ * Stores listing photos after checking type, size and resolution. The bytes go straight from the upload to storage
+ * (with STORAGE_DRIVER=s3: the S3 object storage/uploads/marketplace/yyyy/MM/uuid.jpg, nothing on the server's disk), and
+ * the returned URL is what the listing saves (absolute S3 / CDN URL when S3_PUBLIC_BASE_URL is set).
+ */
 @Component
 public class MarketplaceImages {
 
     public static final long MAX_BYTES = 20L * 1024 * 1024;
     public static final int MIN_LONG_EDGE = 800;
+    /** Target folder for listing photos (in the bucket: S3_PREFIX + this). */
+    public static final String FOLDER = "uploads/marketplace/";
+    private static final DateTimeFormatter YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy/MM");
 
     private final Storage storage;
 
@@ -43,9 +52,9 @@ public class MarketplaceImages {
             throw new MarketplaceException(422, "LOW_RES", "This photo is " + w + "×" + h + " px. Collectors zoom in on brushwork, so use at least "
                     + MIN_LONG_EDGE + " px on the longest side (2000 px or more is ideal).");
         }
-        String name = UUID.randomUUID() + "." + ext;
-        storage.put("uploads/marketplace/" + name, bytes);
-        return Map.of("url", "/storage/uploads/marketplace/" + name, "width", w, "height", h);
+        String rel = FOLDER + YEAR_MONTH.format(LocalDate.now()) + "/" + UUID.randomUUID() + "." + ext;
+        storage.put(rel, bytes);
+        return Map.of("url", Storage.publicUrl(rel), "width", w, "height", h);
     }
 
     static String sniff(byte[] b) {

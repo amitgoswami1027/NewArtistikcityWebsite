@@ -1,15 +1,67 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Head, usePage } from '@inertiajs/inertia-react';
 import Authenticated from '@/Layouts/Authenticated';
 
-const KINDS = { course: 'Course', workshop: 'Workshop', original: 'Original artwork', commission: 'Commission' };
-const TYPE_FILTERS = [
+/**
+ * My account > Your orders. Every order the student has placed, from every order system (courses and workshops,
+ * marketplace cart orders, older single-original orders, commissions), as UnifiedOrder records from
+ * UnifiedOrderService, newest first. Filtering happens here for instant feedback; the same rules exist on the server
+ * for GET /api/v1/user/orders?type=&q= (UnifiedOrderService.matchesType / matchesQuery).
+ */
+
+export const TYPE_FILTERS = [
     { id: 'all', label: 'All orders' },
     { id: 'course', label: 'Courses' },
     { id: 'workshop', label: 'Workshops' },
-    { id: 'original', label: 'Original artworks' },
+    { id: 'marketplace', label: 'Art shop' },
+    { id: 'original', label: 'Original paintings' },
+    { id: 'print', label: 'Prints' },
+    { id: 'download', label: 'Digital downloads' },
     { id: 'commission', label: 'Commissions' },
 ];
+
+const STATUS_FILTERS = [
+    { id: 'all', label: 'Any status' },
+    { id: 'pending', label: 'Payment pending' },
+    { id: 'processing', label: 'Being prepared' },
+    { id: 'shipped', label: 'Shipped' },
+    { id: 'completed', label: 'Completed' },
+    { id: 'failed', label: 'Failed' },
+    { id: 'refunded', label: 'Refunded' },
+];
+
+export const matchesType = (o, type) => {
+    switch (type) {
+        case 'all': return true;
+        case 'course': return o.category === 'Digital Course';
+        case 'workshop': return o.category === 'Workshop';
+        case 'marketplace': return o.orderType === 'marketplace';
+        case 'original': return o.category === 'Original Painting';
+        case 'print': return o.category === 'Canvas Print' || o.category === 'Poster Print';
+        case 'download': return o.category === 'Digital Download';
+        case 'commission': return o.orderType === 'commission';
+        default: return false;
+    }
+};
+
+export const matchesQuery = (o, q) => {
+    const words = String(q || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) return true;
+    const hay = [o.orderId, o.title, o.subtitle, o.variant, o.category, o.statusLabel].filter(Boolean).join(' ').toLowerCase();
+    return words.every((w) => hay.includes(w));
+};
+
+const BADGE = {
+    'Digital Course': { icon: 'fa-play-circle', tone: 'course' },
+    Workshop: { icon: 'fa-users', tone: 'course' },
+    'Original Painting': { icon: 'fa-paint-brush', tone: 'original' },
+    'Canvas Print': { icon: 'fa-picture-o', tone: 'print' },
+    'Poster Print': { icon: 'fa-file-image-o', tone: 'print' },
+    'Digital Download': { icon: 'fa-download', tone: 'digital' },
+    Commission: { icon: 'fa-magic', tone: 'commission' },
+};
+
+const STATUS_TONE = { pending: 'wait', processing: 'wait', shipped: 'info', completed: 'ok', failed: 'bad', refunded: 'bad' };
 
 const money = (a, c) => {
     const n = Number(a);
@@ -17,49 +69,68 @@ const money = (a, c) => {
     const cur = String(c || 'INR').toUpperCase();
     return (cur === 'USD' ? '$' : '₹') + n.toLocaleString(cur === 'USD' ? 'en-US' : 'en-IN', { maximumFractionDigits: 2 });
 };
-const toDate = (v) => (v ? new Date(String(v).replace(' ', 'T')) : null);
 const niceDate = (v) => {
-    const d = toDate(v);
+    const d = v ? new Date(v) : null;
     return d && !isNaN(d) ? d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 };
-const tone = (status) => {
-    const s = String(status || '').toLowerCase();
-    if (/(fail|cancel|refund)/.test(s)) return 'bad';
-    if (/(pending|queued|production|proof|packed)/.test(s)) return 'wait';
-    return 'ok';
-};
 
-/** My account > Your orders: every order in one place, with search and filters. */
+/** The one thing to do next for this order, then the secondary actions. */
+function actionsFor(o) {
+    const a = [];
+    if (o.accessUrl) a.push({ href: o.accessUrl, label: 'Start learning', icon: 'fa-play', primary: true, id: 'learn' });
+    if (o.downloadUrl) a.push({ href: o.downloadUrl, label: 'Download', icon: 'fa-download', primary: true, id: 'download' });
+    if (o.trackingUrl) a.push({ href: o.trackingUrl, label: 'Track delivery', icon: 'fa-truck', primary: true, external: true, id: 'track' });
+    if (o.certificateUrl) a.push({ href: o.certificateUrl, label: 'View certificate of authenticity', icon: 'fa-certificate', id: 'coa', external: true });
+    if (o.status === 'pending' && o.orderType === 'course' && o.detailUrl) a.push({ href: o.detailUrl, label: 'Complete payment', icon: 'fa-credit-card', primary: true, id: 'pay' });
+    else if (o.detailUrl) a.push({ href: o.detailUrl, label: 'View order', icon: 'fa-file-text-o', id: 'detail' });
+    return a;
+}
+
+function readUrl(fallback) {
+    try {
+        const p = new URLSearchParams(window.location.search);
+        return { type: p.get('type') || fallback.type || 'all', q: p.get('q') || fallback.q || '' };
+    } catch (e) {
+        return { type: fallback.type || 'all', q: fallback.q || '' };
+    }
+}
+
 export default function Orders(props) {
-    const { orders = [] } = usePage().props;
-    const [type, setType] = useState('all');
+    const { orders = [], filter = {} } = usePage().props;
+    const initial = useMemo(() => readUrl(filter), []); // eslint-disable-line react-hooks/exhaustive-deps
+    const [type, setType] = useState(TYPE_FILTERS.some((t) => t.id === initial.type) ? initial.type : 'all');
     const [status, setStatus] = useState('all');
     const [period, setPeriod] = useState('all');
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState(initial.q);
     const [open, setOpen] = useState(null);
 
-    const statuses = useMemo(() => Array.from(new Set(orders.map((o) => o.status).filter(Boolean))).sort(), [orders]);
-    const years = useMemo(() => Array.from(new Set(orders.map((o) => { const d = toDate(o.date); return d && !isNaN(d) ? d.getFullYear() : null; })
-        .filter(Boolean))).sort((a, b) => b - a), [orders]);
+    // keep the filter in the address bar so a refresh or a shared link shows the same list
+    useEffect(() => {
+        try {
+            const p = new URLSearchParams();
+            if (type !== 'all') p.set('type', type);
+            if (query.trim()) p.set('q', query.trim());
+            const s = p.toString();
+            window.history.replaceState(window.history.state, '', window.location.pathname + (s ? `?${s}` : ''));
+        } catch (e) { /* not important */ }
+    }, [type, query]);
+
     const counts = useMemo(() => {
-        const c = { all: orders.length };
-        orders.forEach((o) => { c[o.kind] = (c[o.kind] || 0) + 1; });
+        const c = {};
+        TYPE_FILTERS.forEach((t) => { c[t.id] = orders.filter((o) => matchesType(o, t.id)).length; });
         return c;
     }, [orders]);
 
-    const shown = orders.filter((o) => {
-        if (type !== 'all' && o.kind !== type) return false;
-        if (status !== 'all' && o.status !== status) return false;
-        if (period !== 'all') {
-            const d = toDate(o.date);
-            if (!d || isNaN(d)) return false;
-            if (period === '30' || period === '180') {
-                if ((Date.now() - d.getTime()) / 86400000 > Number(period)) return false;
-            } else if (String(d.getFullYear()) !== period) return false;
-        }
-        const q = query.trim().toLowerCase();
-        return !q || [o.number, o.title, o.subtitle].filter(Boolean).join(' ').toLowerCase().includes(q);
-    });
+    const years = useMemo(() => Array.from(new Set(orders.map((o) => { const d = new Date(o.purchaseDate); return isNaN(d) ? null : d.getFullYear(); })
+        .filter(Boolean))).sort((a, b) => b - a), [orders]);
+    const inPeriod = (o) => {
+        if (period === 'all') return true;
+        const d = new Date(o.purchaseDate);
+        if (isNaN(d)) return false;
+        if (period === '30' || period === '180') return (Date.now() - d.getTime()) / 86400000 <= Number(period);
+        return String(d.getFullYear()) === period;
+    };
+    const shown = orders.filter((o) => matchesType(o, type) && (status === 'all' || o.status === status) && inPeriod(o) && matchesQuery(o, query));
     const filtered = type !== 'all' || status !== 'all' || period !== 'all' || query.trim() !== '';
     const reset = () => { setType('all'); setStatus('all'); setPeriod('all'); setQuery(''); };
 
@@ -67,10 +138,10 @@ export default function Orders(props) {
         <Authenticated auth={props.auth} errors={props.errors}>
             <Head title="Your orders" />
             {orders.length === 0 ? (
-                <div className="wl-empty">
+                <div className="wl-empty" data-testid="orders-empty">
                     <i className="fa fa-shopping-bag" aria-hidden="true"></i>
                     <h3 style={{ marginTop: 12 }}>No orders yet</h3>
-                    <p className="dm-muted">When you enroll in a course, buy an original or commission artwork, it will appear here.</p>
+                    <p className="dm-muted">Courses, workshops, artworks, prints and commissions you buy will all appear here.</p>
                     <p style={{ marginTop: 16, display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
                         <a href="/courses?type=all" className="dm-btn dm-btn--brand">Browse courses</a>
                         <a href="/marketplace" className="dm-btn dm-btn--line">Visit the marketplace</a>
@@ -80,9 +151,9 @@ export default function Orders(props) {
                 <>
                     <div className="ord-filters" role="search" aria-label="Filter orders">
                         <div className="ord-chips" role="group" aria-label="Order type">
-                            {TYPE_FILTERS.filter((f) => f.id === 'all' || counts[f.id]).map((f) => (
-                                <button key={f.id} type="button" aria-pressed={type === f.id} className={`ord-chip ${type === f.id ? 'is-on' : ''}`}
-                                        onClick={() => setType(f.id)}>
+                            {TYPE_FILTERS.filter((f) => f.id === 'all' || counts[f.id] || type === f.id).map((f) => (
+                                <button key={f.id} type="button" aria-pressed={type === f.id} data-type={f.id}
+                                        className={`ord-chip ${type === f.id ? 'is-on' : ''}`} onClick={() => setType(f.id)}>
                                     {f.label} <span>{counts[f.id] || 0}</span>
                                 </button>
                             ))}
@@ -91,13 +162,13 @@ export default function Orders(props) {
                             <label className="ord-search">
                                 <span className="sr-only">Search orders</span>
                                 <i className="fa fa-search" aria-hidden="true"></i>
-                                <input type="search" className="ac-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Order number or title" />
+                                <input type="search" className="ac-input" value={query} onChange={(e) => setQuery(e.target.value)}
+                                       placeholder="Search by order number, title, artist or size" />
                             </label>
                             <label>
                                 <span className="sr-only">Status</span>
                                 <select className="ac-input" value={status} onChange={(e) => setStatus(e.target.value)}>
-                                    <option value="all">Any status</option>
-                                    {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
+                                    {STATUS_FILTERS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
                                 </select>
                             </label>
                             <label>
@@ -113,7 +184,7 @@ export default function Orders(props) {
                     </div>
 
                     <p className="dm-muted ord-summary" aria-live="polite">
-                        {shown.length === orders.length ? `${orders.length} order${orders.length === 1 ? '' : 's'}` : `${shown.length} of ${orders.length} orders`}
+                        {shown.length === orders.length ? `${orders.length} order${orders.length === 1 ? '' : 's'}, newest first` : `${shown.length} of ${orders.length} orders`}
                         {filtered && <> · <button type="button" className="dm-linkbtn" onClick={reset}>Clear filters</button></>}
                     </p>
 
@@ -121,42 +192,61 @@ export default function Orders(props) {
                         <p className="wl-empty" style={{ padding: 32 }}>No orders match these filters.</p>
                     ) : (
                         <ul className="ord-list">
-                            {shown.map((o) => (
-                                <li key={o.key} className="ord-item">
-                                    <div className="ord-item__main">
-                                        <span className="ord-item__img" aria-hidden="true" style={o.image ? { backgroundImage: `url("${o.image}")` } : undefined}>
-                                            {!o.image && <i className={`fa ${o.kind === 'commission' ? 'fa-paint-brush' : 'fa-picture-o'}`}></i>}
-                                        </span>
-                                        <div className="ord-item__body">
-                                            <span className="wl-item__kind">{KINDS[o.kind]}</span>
-                                            <h4>{o.title}</h4>
-                                            {o.subtitle && <div className="wl-item__meta">{o.subtitle}</div>}
-                                            <div className="wl-item__meta">Order {o.number} · {niceDate(o.date)}</div>
+                            {shown.map((o) => {
+                                const badge = BADGE[o.category] || { icon: 'fa-shopping-bag', tone: 'print' };
+                                const actions = actionsFor(o);
+                                return (
+                                    <li key={o.key} className="ord-item" data-order={o.orderId} data-category={o.category}>
+                                        <div className="ord-item__main">
+                                            <span className="ord-item__img" aria-hidden="true" style={o.imageUrl ? { backgroundImage: `url("${o.imageUrl}")` } : undefined}>
+                                                {!o.imageUrl && <i className={`fa ${badge.icon}`}></i>}
+                                            </span>
+                                            <div className="ord-item__body">
+                                                <span className={`ord-badge ord-badge--${badge.tone}`}>
+                                                    <i className={`fa ${badge.icon}`} aria-hidden="true"></i> {o.category}
+                                                </span>
+                                                <h4>{o.title}</h4>
+                                                {(o.subtitle || o.variant) && (
+                                                    <div className="wl-item__meta">{[o.subtitle, o.variant].filter(Boolean).join(' · ')}
+                                                        {o.quantity > 1 && ` · Qty ${o.quantity}`}</div>
+                                                )}
+                                                <div className="wl-item__meta">Order {o.orderId} · {niceDate(o.purchaseDate)}</div>
+                                            </div>
+                                            <div className="ord-item__side">
+                                                <span className="wl-item__price">{money(o.amount, o.currency)}</span>
+                                                <span className={`ord-status ord-status--${STATUS_TONE[o.status] || 'wait'}`} data-status={o.status}>
+                                                    {o.statusLabel || o.status}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="ord-item__side">
-                                            <span className="wl-item__price">{money(o.amount, o.currency)}</span>
-                                            <span className={`ord-status ord-status--${tone(o.status)}`}>{o.status}</span>
+                                        <div className="ord-item__actions">
+                                            {actions.map((a) => (
+                                                <a key={a.id} href={a.href} data-action={a.id}
+                                                   className={`dm-btn ${a.primary ? 'dm-btn--brand' : 'dm-btn--line'}`}
+                                                   {...(a.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+                                                    <i className={`fa ${a.icon}`} aria-hidden="true"></i> {a.label}
+                                                </a>
+                                            ))}
+                                            <button type="button" className="dm-btn dm-btn--line" aria-expanded={open === o.key} onClick={() => setOpen(open === o.key ? null : o.key)}>
+                                                {open === o.key ? 'Hide details' : 'Order details'}
+                                            </button>
                                         </div>
-                                    </div>
-                                    <div className="ord-item__actions">
-                                        {o.link && <a href={o.link} className="dm-btn dm-btn--brand">{o.linkLabel}</a>}
-                                        <button type="button" className="dm-btn dm-btn--line" aria-expanded={open === o.key} onClick={() => setOpen(open === o.key ? null : o.key)}>
-                                            {open === o.key ? 'Hide details' : 'Order details'}
-                                        </button>
-                                    </div>
-                                    {open === o.key && (
-                                        <dl className="ord-details">
-                                            <div><dt>Order number</dt><dd>{o.number}</dd></div>
-                                            <div><dt>Ordered on</dt><dd>{niceDate(o.date)}</dd></div>
-                                            <div><dt>Amount</dt><dd>{money(o.amount, o.currency)}</dd></div>
-                                            {o.payment && <div><dt>Payment</dt><dd>{o.payment}</dd></div>}
-                                            <div><dt>Status</dt><dd>{o.status}</dd></div>
-                                            {o.tracking && <div><dt>Tracking</dt><dd>{o.tracking}</dd></div>}
-                                            {o.billing && <div className="ord-details__wide"><dt>{o.kind === 'original' ? 'Ship to' : 'Billed to'}</dt><dd>{o.billing}</dd></div>}
-                                        </dl>
-                                    )}
-                                </li>
-                            ))}
+                                        {open === o.key && (
+                                            <dl className="ord-details">
+                                                <div><dt>Order number</dt><dd>{o.orderId}</dd></div>
+                                                <div><dt>Ordered on</dt><dd>{niceDate(o.purchaseDate)}</dd></div>
+                                                <div><dt>Amount</dt><dd>{money(o.amount, o.currency)}</dd></div>
+                                                <div><dt>Type</dt><dd>{o.category}</dd></div>
+                                                <div><dt>Status</dt><dd>{o.statusLabel || o.status}</dd></div>
+                                                {o.editionNo && <div><dt>Edition</dt><dd>No. {o.editionNo}{o.quantity > 1 ? `–${o.editionNo + o.quantity - 1}` : ''}</dd></div>}
+                                                {o.paymentMethod && <div><dt>Payment</dt><dd>{o.paymentMethod}</dd></div>}
+                                                {o.trackingNumber && <div><dt>Tracking number</dt><dd>{o.trackingNumber}</dd></div>}
+                                                {o.address && <div className="ord-details__wide"><dt>{o.addressLabel}</dt><dd>{o.address}</dd></div>}
+                                            </dl>
+                                        )}
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
                 </>

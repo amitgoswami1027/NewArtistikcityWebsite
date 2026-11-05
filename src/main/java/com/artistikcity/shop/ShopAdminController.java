@@ -37,7 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Admin console, Sales > Art shop (/admin/dashboard/shop). Tabs: orders (multi-item marketplace orders), artist
+ * Admin console, the shop sections of Sales > Marketplace (/admin/dashboard/marketplace; /admin/dashboard/shop redirects there). Sections: orders (multi-item marketplace orders), artist
  * messages, the print price list, coupons, and per-listing shop settings (formats sold, edition size, high-resolution
  * file, artist contact links).
  * <ul>
@@ -78,12 +78,23 @@ public class ShopAdminController {
 
     // ================================================================ page
 
+    /** The art shop is part of Admin > Marketplace now; old links (and e-mailed reply links) land on the same tab there. */
     @GetMapping("/admin/dashboard/shop")
     public ResponseEntity<String> page(HttpServletRequest request) {
-        Row admin = auth.admin(request);
-        if (!Personas.can(admin, "marketplace")) return inertia.render(request, "Admin/Denied", base(admin));
+        String tab = request.getParameter("tab");
+        String to = tab == null || tab.isBlank() ? "orders" : "listings".equals(tab) ? "paintings" : tab.replaceAll("[^a-z]", "");
+        String thread = request.getParameter("thread");
+        String url = "/admin/dashboard/marketplace?tab=" + to + (thread != null && thread.matches("\\d{1,12}") ? "&thread=" + thread : "");
+        return ResponseEntity.status(HttpStatus.FOUND).header("Location", url).build();
+    }
+
+    /**
+     * The shop sections of the Marketplace console (cart orders, artist messages, price list, coupons and each
+     * painting's print formats), scoped like the rest of the console: instructors only see their own artworks.
+     */
+    public Map<String, Object> consoleProps(Row admin) {
         Long scope = scope(admin);
-        Map<String, Object> p = base(admin);
+        Map<String, Object> p = new LinkedHashMap<>();
         p.put("orders", orderList(scope));
         p.put("threads", hub.threads(scope));
         p.put("prices", repo.optionRows());
@@ -94,9 +105,7 @@ public class ShopAdminController {
                 "prices", Personas.can(admin, "marketplace.edit"),
                 "listings", Personas.can(admin, "marketplace.edit") || Personas.can(admin, "marketplace.publish")));
         p.put("orderFlow", ShopOrderService.ORDER_FLOW);
-        p.put("tab", request.getParameter("tab"));
-        p.put("openThread", request.getParameter("thread"));
-        return inertia.render(request, "Admin/Shop", p);
+        return p;
     }
 
     private List<Map<String, Object>> orderList(Long scope) {

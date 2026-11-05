@@ -47,9 +47,11 @@ public class MarketplaceAdminController {
     private final MarketplaceService market;
     private final MarketplaceImages images;
     private final LifecycleRepository lifecycle;
+    private final com.artistikcity.shop.ShopAdminController shop;
 
     public MarketplaceAdminController(Inertia inertia, Auth auth, Json json, Slugs slugs, MarketplaceRepository repo, MarketplaceService market,
-                                      MarketplaceImages images, LifecycleRepository lifecycle) {
+                                      MarketplaceImages images, LifecycleRepository lifecycle, com.artistikcity.shop.ShopAdminController shop) {
+        this.shop = shop;
         this.inertia = inertia;
         this.auth = auth;
         this.json = json;
@@ -101,6 +103,9 @@ public class MarketplaceAdminController {
         p.put("orderFlow", MarketplaceService.ORDER_FLOW);
         p.put("serverNow", System.currentTimeMillis());
         p.put("tab", request.getParameter("tab"));
+        // one console for everything sold in the marketplace: the cart orders, prints, prices, coupons and messages too
+        p.put("shop", shop.consoleProps(admin));
+        p.put("openThread", request.getParameter("thread"));
         return inertia.render(request, "Admin/Marketplace", p);
     }
 

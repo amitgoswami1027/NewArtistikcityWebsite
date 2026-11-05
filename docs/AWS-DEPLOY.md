@@ -44,6 +44,21 @@ no new libraries are needed. It is checked against AWS's published signature exa
 against an S3 emulator that verifies every signature. On EC2 it gets credentials from the server's IAM role (IMDSv2).
 If you prefer the official SDK later, only `support/s3/S3Client.java` would change.
 
+**What lives where in the bucket**
+
+| Key | What | Who reads it |
+|---|---|---|
+| `storage/uploads/marketplace/yyyy/MM/<uuid>.jpg` | marketplace listing photos | everyone, through CloudFront `/storage/*` (or `S3_PUBLIC_BASE_URL`) |
+| `storage/uploads/...` | other uploads (course photos, student work, videos) | everyone, through CloudFront |
+| `private/documents/portfolios/<user>/<time>-<id>.pdf` | portfolio reports (newest 10 per student kept) | only the student, via a 10-minute presigned link |
+| `private/documents/certificates/<no>.pdf` | course certificates | the student, via a presigned link; anyone can verify the number at /certificates/verify |
+| `private/documents/certificates/orders/...` | purchase certificates | the buyer, via a presigned link |
+| `private/shop/...` | paid high-resolution downloads | the buyer, streamed by the app with a token |
+
+`S3_PUBLIC_BASE_URL` is optional. Leave it empty on AWS: pages then use `/storage/...` and CloudFront serves those from
+the bucket. Set it (for example to a CDN domain) if you want new marketplace photos saved as absolute URLs; older
+`/storage/...` rows keep working either way. To move files that are still on a server's disk: `aws s3 sync storage s3://<bucket>/storage/`.
+
 ---
 
 ## Step 0 - Before you start

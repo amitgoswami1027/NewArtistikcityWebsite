@@ -148,7 +148,14 @@ public class MarketplaceController {
         props.put("saved", wishlist.isSaved(auth.userId(request), com.artistikcity.web.user.WishlistService.PAINTING, id));
         // prints and downloads of this artwork, and "Meet the artist"
         Map<String, Object> full = shopRepo.painting(id);
-        Map<String, Object> offer = com.artistikcity.shop.ShopPricing.offer(com.artistikcity.shop.ShopRepository.art(full), shopRepo.options(), true, null);
+        boolean sold = "SOLD".equals(String.valueOf(p.get("stock_status")));
+        Map<String, Object> offer = com.artistikcity.shop.ShopPricing.offer(com.artistikcity.shop.ShopRepository.art(full), shopRepo.options(), !sold,
+                sold ? "This original has found its collector. Prints are still available." : null);
+        props.put("offer", offer);
+        // screen 1 of the purchase flow: the format picker starts from the visitor's last choice for this piece, or ?format=
+        Object d = request.getSession(false) == null ? null : request.getSession(false).getAttribute("purchase.draft");
+        props.put("draft", d instanceof Map<?, ?> m && slug.equals(m.get("slug")) ? m
+                : request.getParameter("format") == null ? null : Map.of("slug", slug, "format", request.getParameter("format").toUpperCase(java.util.Locale.ROOT)));
         props.put("prints", ((List<?>) offer.get("formats")).stream().map(o -> (Map<?, ?>) o)
                 .filter(f -> !"ORIGINAL".equals(f.get("format")) && Boolean.TRUE.equals(f.get("available")))
                 .map(f -> Map.of("format", f.get("format"), "from", f.get("from"))).toList());

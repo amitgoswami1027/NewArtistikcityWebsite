@@ -68,7 +68,9 @@ public class WishlistService {
     public int orderCount(long userId) {
         return (int) (db.count("select count(*) from orders where user_id = ? and payment_status = 1", userId)
                 + db.count("select count(*) from marketplace_orders where user_id = ? and status not in ('PAYMENT_PENDING', 'EXPIRED')", userId)
-                + db.count("select count(*) from commission_orders where user_id = ? and order_status <> 'PAYMENT_PENDING'", userId));
+                + db.count("select count(*) from commission_orders where user_id = ? and order_status <> 'PAYMENT_PENDING'", userId)
+                + db.count("select count(*) from shop_order_items i join shop_orders o on o.order_id = i.order_id"
+                        + " where o.user_id = ? and o.status not in ('PAYMENT_PENDING', 'EXPIRED', 'CANCELLED')", userId));
     }
 
     /** Header menu data for the signed-in student (shared Inertia prop {@code nav}). */

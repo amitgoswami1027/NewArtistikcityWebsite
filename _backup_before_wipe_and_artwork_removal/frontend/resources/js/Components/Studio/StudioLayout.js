@@ -1,0 +1,82 @@
+import React from 'react';
+import SiteLayout from '@/Components/Site/SiteLayout';
+import { JOURNEY } from '@/Components/Studio/Journey';
+
+export const TABS = [
+    { href: '/dashboard', label: 'My studio', icon: 'fa-th-large' },
+    { href: '/user/my-courses', label: 'My courses', icon: 'fa-graduation-cap' },
+    { href: '/dashboard/submissions', label: 'Submissions', icon: 'fa-upload' },
+    { href: '/dashboard/portfolio', label: 'Portfolio & shop', icon: 'fa-picture-o' },
+    { href: '/dashboard/certificates', label: 'Certificates & reports', icon: 'fa-certificate' },
+];
+
+/** The studio tab bar (learning only; account pages live in the separate My account area). */
+export function StudioTabs({ active }) {
+    return (
+        <nav className="mt-6 flex gap-2 overflow-x-auto border-b border-gray-200" aria-label="Studio">
+            {TABS.map((t) => (
+                <a key={t.href} href={t.href} aria-current={active === t.href ? 'page' : undefined}
+                   className={`whitespace-nowrap px-4 py-3 text-base font-bold border-b-2 -mb-px ${active === t.href ? 'border-ink text-ink' : 'border-transparent text-gray-500 hover:text-ink'}`}>
+                    <i className={`fa ${t.icon} mr-2`} aria-hidden="true"></i>{t.label}
+                </a>
+            ))}
+        </nav>
+    );
+}
+
+/** The student's lifecycle progress, styled like the commission wizard stepper. */
+export function JourneyStepper({ stage = 4 }) {
+    return (
+        <ol className="flex flex-wrap items-center gap-x-2 gap-y-3" aria-label="Your creative journey">
+            {JOURNEY.map((s, i) => {
+                const n = i + 1;
+                const done = n < stage;
+                const active = n === stage;
+                return (
+                    <li key={s.key} className="flex items-center gap-2">
+                        <a href={s.href} aria-current={active ? 'step' : undefined}
+                           className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${active ? 'bg-brand text-white' : done ? 'bg-ink text-white' : 'bg-white border border-gray-300 text-gray-500'}`}>
+                            {done ? <i className="fa fa-check" aria-hidden="true"></i> : n}
+                        </a>
+                        <span className={`text-base ${active ? 'font-bold text-ink' : 'text-gray-500'}`}>{s.title}{s.subtitle && <span className="font-normal"> – {s.subtitle}</span>}</span>
+                        {n < JOURNEY.length && <span className="hidden sm:block w-6 h-px bg-gray-300 mx-1" aria-hidden="true"></span>}
+                    </li>
+                );
+            })}
+        </ol>
+    );
+}
+
+/**
+ * Shell of every My studio page: breadcrumbs, title, the five studio tabs, optional journey stepper.
+ * {@code crumbs} adds levels between "My studio" and the page, e.g. [{ href: '/user/my-courses', label: 'My courses' }].
+ */
+export default function StudioLayout({ title, subtitle, active, stage, actions, crumbs = [], children }) {
+    return (
+        <SiteLayout title={title}>
+            <div className="ac-wide">
+                <ul className="dm-crumbs">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/dashboard">My studio</a></li>
+                    {crumbs.map((c) => <li key={c.href}><a href={c.href}>{c.label}</a></li>)}
+                    {title !== 'My studio' && <li>{title}</li>}
+                </ul>
+                <div className="dm-listhead" style={{ paddingTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+                    <div>
+                        <span className="ac-eyebrow">Student studio</span>
+                        <h1>{title}</h1>
+                        {subtitle && <p>{subtitle}</p>}
+                    </div>
+                    {actions}
+                </div>
+            </div>
+            <div className="tw">
+                <div className="ac-wide">
+                    <StudioTabs active={active} />
+                    {stage && <div className="py-5 border-b border-gray-100"><JourneyStepper stage={stage} /></div>}
+                    <div className="py-10">{children}</div>
+                </div>
+            </div>
+        </SiteLayout>
+    );
+}

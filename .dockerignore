@@ -22,3 +22,5 @@ infra/
 docs/
 tools/
 test-output/
+tests/
+backups/

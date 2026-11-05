@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ArtistikCity - Admin Panel</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSRF Token -->
+  <meta name="_token" content="{{csrf}}">
+
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- plugin css -->
+  <link rel="stylesheet" href="/assets/plugins/@mdi/font/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="/assets/plugins/perfect-scrollbar/perfect-scrollbar.css">
+  <!-- end plugin css -->
+
+  
+
+  <!-- common css -->
+  <link rel="stylesheet" href="/css/admin/app.css">
+  <!-- end common css -->
+
+  
+</head>
+<body data-base-url="/">
+
+  <div class="container-scroller" id="app">
+    <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+  <div class="text-center navbar-brand-wrapper d-flex align-items-top justify-content-center">
+    <a class="navbar-brand brand-logo" href="/">
+      <img src="/assets/images/logo.png" alt="logo" />
+    </a>
+    <a class="navbar-brand brand-logo-mini" href="/">
+      <img src="/assets/images/logo.png" alt="logo" />
+    </a>
+  </div>
+  <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+    <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+      <span class="mdi mdi-menu"></span>
+    </button>
+    <!-- <ul class="navbar-nav navbar-nav-left header-links">
+      <li class="nav-item d-none d-xl-flex">
+        <a href="#" class="nav-link">Schedule <span class="badge badge-primary ml-1">New</span>
+        </a>
+      </li>
+      <li class="nav-item active d-none d-lg-flex">
+        <a href="#" class="nav-link">
+          <i class="mdi mdi-elevation-rise"></i>Reports</a>
+      </li>
+      <li class="nav-item d-none d-md-flex">
+        <a href="#" class="nav-link">
+          <i class="mdi mdi-bookmark-plus-outline"></i>Score</a>
+      </li>
+      <li class="nav-item dropdown d-none d-lg-flex">
+        <a class="nav-link dropdown-toggle px-0" id="quickDropdown" href="#" data-toggle="dropdown" aria-expanded="false"> Quick Links </a>
+        <div class="dropdown-menu dropdown-menu-right navbar-dropdown pt-3" aria-labelledby="quickDropdown">
+          <a href="#" class="dropdown-item">Schedule <span class="badge badge-primary ml-1">New</span></a>
+          <a href="#" class="dropdown-item"><i class="mdi mdi-elevation-rise"></i>Reports</a>
+          <a href="#" class="dropdown-item"><i class="mdi mdi-bookmark-plus-outline"></i>Score</a>
+        </div>
+      </li>
+    </ul> -->
+    <ul class="navbar-nav navbar-nav-right">
+      
+      <li class="nav-item dropdown d-none d-xl-inline-block">
+        <a class="nav-link dropdown-toggle" id="UserDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
+          <span class="profile-text d-none d-md-inline-flex">{{admin.name}}!</span>
+          <img class="img-xs rounded-circle" src="{{admin.photo_url}}">
+        </a>
+        <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
+          <a class="dropdown-item p-0">
+            <div class="d-flex border-bottom w-100 justify-content-center">
+              <div class="py-3 px-4 d-flex align-items-center justify-content-center">
+                <i class="mdi mdi-bookmark-plus-outline mr-0 text-gray"></i>
+              </div>
+              <div class="py-3 px-4 d-flex align-items-center justify-content-center border-left border-right">
+                <i class="mdi mdi-account-outline mr-0 text-gray"></i>
+              </div>
+              <div class="py-3 px-4 d-flex align-items-center justify-content-center">
+                <i class="mdi mdi-alarm-check mr-0 text-gray"></i>
+              </div>
+            </div>
+          </a>
+          <a class="dropdown-item mt-2" href="/admin/profile"> Manage Accounts </a>
+          <a class="dropdown-item" href="/admin/change-password"> Change Password </a>
+          <!-- <a class="dropdown-item"> Check Inbox </a> -->
+          <a href="javascript:void" class="dropdown-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+          <form id="logout-form" action="/admin/logout" method="POST" style="display: none;">
+            <input type="hidden" name="_token" value="{{csrf}}">
+          </form>
+        </div>
+      </li>
+    </ul>
+    <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+      <span class="mdi mdi-menu icon-menu"></span>
+    </button>
+  </div>
+</nav>
+
+    <div class="container-fluid page-body-wrapper">
+      
+<nav class="sidebar sidebar-offcanvas dynamic-active-class-disabled" id="sidebar">
+	<ul class="nav">
+		<li class="nav-item nav-profile not-navigation-link">
+			<div class="nav-link">
+				<div class="user-wrapper">
+					<div class="profile-image">
+						<img src="{{admin.photo_url}}" width="50">
+					</div>
+					<div class="text-wrapper">
+						<p class="profile-name">{{admin.name}}</p>
+						<div class="dropdown" data-display="static">
+							<a href="#" class="nav-link d-flex user-switch-dropdown-toggler" id="UsersettingsDropdown"
+								href="#" data-toggle="dropdown" aria-expanded="false">
+								<small class="designation text-muted">{{admin.type_label}}</small>
+								<span class="status-indicator online"></span>
+							</a>
+							<div class="dropdown-menu" aria-labelledby="UsersettingsDropdown">
+								<a class="dropdown-item p-0">
+									<div class="d-flex border-bottom">
+										<div class="py-3 px-4 d-flex align-items-center justify-content-center">
+											<i class="mdi mdi-bookmark-plus-outline mr-0 text-gray"></i>
+										</div>
+										<div
+											class="py-3 px-4 d-flex align-items-center justify-content-center border-left border-right">
+											<i class="mdi mdi-account-outline mr-0 text-gray"></i>
+										</div>
+										<div class="py-3 px-4 d-flex align-items-center justify-content-center">
+											<i class="mdi mdi-alarm-check mr-0 text-gray"></i>
+										</div>
+									</div>
+								</a>
+								<a class="dropdown-item mt-2"> Manage Accounts </a>
+								<a class="dropdown-item"> Change Password </a>
+								<!-- <a class="dropdown-item"> Check Inbox </a> -->
+								<a href="javascript:void" class="dropdown-item"
+									onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- <button class="btn btn-success btn-block">New Project <i class="mdi mdi-plus"></i>
+		</button> -->
+			</div>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="/admin/dashboard">
+				<i class="menu-icon mdi mdi-television"></i>
+				<span class="menu-title">Dashboard</span>
+			</a>
+		</li>
+		<li class="nav-item {{#activeClass}}admin/teachers|admin/teacher/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#teacher"
+				aria-expanded="{{#isActiveRoute}}admin/teachers|admin/teacher/*{{/isActiveRoute}}" aria-controls="teacher">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Teacher Management</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/teachers|admin/teacher/*{{/showClass}}" id="teacher">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/teacher/create{{/activeClass}}">
+						<a class="nav-link" href="/admin/teacher/create">Add Teacher</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/teachers{{/activeClass}}">
+						<a class="nav-link" href="/admin/teachers">Manage Teacher</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+
+		<li class="nav-item {{#activeClass}}admin/students|admin/students/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#student"
+				aria-expanded="{{#isActiveRoute}}admin/students|admin/students/*{{/isActiveRoute}}" aria-controls="student">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Students Management</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/students|admin/students/*{{/showClass}}" id="student">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/students/create{{/activeClass}}">
+						<a class="nav-link" href="/admin/students/create">Add Student</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/students{{/activeClass}}">
+						<a class="nav-link" href="/admin/students">Manage Student</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/students/artworks{{/activeClass}}">
+						<a class="nav-link" href="/admin/students/artworks">Manage Student ArtWork</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+
+		<li class="nav-item {{#activeClass}}admin/courses|admin/courses/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#courses"
+				aria-expanded="{{#isActiveRoute}}admin/courses|admin/courses/*{{/isActiveRoute}}" aria-controls="courses">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Course Management</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/courses|admin/courses/*{{/showClass}}" id="courses">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/courses/create{{/activeClass}}">
+						<a class="nav-link" href="/admin/courses/create">Add New Course</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/courses{{/activeClass}}">
+						<a class="nav-link" href="/admin/courses">Manage Active Courses</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/courses/archived/list{{/activeClass}}">
+						<a class="nav-link" href="/admin/courses/archived/list">Manage Archived Courses</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+
+		
+
+		<li class="nav-item {{#activeClass}}admin/workshop|admin/workshop/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#workshop"
+				aria-expanded="{{#isActiveRoute}}admin/workshop|admin/workshop/*{{/isActiveRoute}}" aria-controls="workshop">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Workshop Management</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/workshop|admin/workshop/*{{/showClass}}" id="workshop">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/workshop/create{{/activeClass}}">
+						<a class="nav-link" href="/admin/workshop/create">Add Workshop</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/workshop{{/activeClass}}">
+						<a class="nav-link" href="/admin/workshop">Manage Workshop</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+
+		<li class="nav-item {{#activeClass}}admin/orders|admin/orders/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#orders"
+				aria-expanded="{{#isActiveRoute}}admin/orders|admin/orders/*{{/isActiveRoute}}" aria-controls="orders">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Course Subscription</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/orders|admin/orders/*{{/showClass}}" id="orders">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/orders{{/activeClass}}">
+						<a class="nav-link" href="/admin/orders">Manage Subscription</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+		<li class="nav-item {{#activeClass}}admin/tasks|admin/tasks/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#tasks"
+				aria-expanded="{{#isActiveRoute}}admin/tasks|admin/tasks/*{{/isActiveRoute}}" aria-controls="tasks">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Task Management</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/tasks|admin/tasks/*{{/showClass}}" id="tasks">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/tasks{{/activeClass}}">
+						<a class="nav-link" href="/admin/tasks">Manage Tasks</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+
+		<li class="nav-item {{#activeClass}}admin/testimonials|admin/testimonials/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#testimonials"
+				aria-expanded="{{#isActiveRoute}}admin/testimonials|admin/testimonials/*{{/isActiveRoute}}" aria-controls="testimonials">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Testimonial Management</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/testimonials|admin/testimonials/*{{/showClass}}" id="testimonials">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/testimonials/create{{/activeClass}}">
+						<a class="nav-link" href="/admin/testimonials/create">Add Testimonial</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/testimonials{{/activeClass}}">
+						<a class="nav-link" href="/admin/testimonials">Manage Testimonials</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+
+		<li class="nav-item {{#activeClass}}admin/newsletter|admin/newsletter/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#newsletter"
+				aria-expanded="{{#isActiveRoute}}admin/newsletter|admin/newsletter/*{{/isActiveRoute}}" aria-controls="newsletter">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Newsletter Management</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/newsletter|admin/newsletter/*{{/showClass}}" id="newsletter">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/newsletter{{/activeClass}}">
+						<a class="nav-link" href="/admin/newsletter">Manage Newsletter</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+
+		<li class="nav-item {{#activeClass}}admin/settings|admin/genres|admin/genres/*|admin/mediums|admin/mediums/*|admin/skills|admin/skills/*|admin/course_types|admin/course_types/*|admin/home/artworks|admin/home/artworks/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#master"
+				aria-expanded="{{#isActiveRoute}}admin/settings|admin/genres|admin/genres/*|admin/mediums|admin/mediums/*|admin/skills|admin/skills/*|admin/course_types|admin/course_types/*|admin/home/artworks|admin/home/artworks/*{{/isActiveRoute}}" aria-controls="master">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Master Management</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/settings|admin/genres|admin/genres/*|admin/mediums|admin/mediums/*|admin/skills|admin/skills/*|admin/course_types|admin/course_types/*|admin/home/artworks|admin/home/artworks/*{{/showClass}}" id="master">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/genres{{/activeClass}}">
+						<a class="nav-link" href="/admin/genres">Manage Genres</a>
+					</li>
+					
+					<li class="nav-item {{#activeClass}}admin/mediums{{/activeClass}}">
+						<a class="nav-link" href="/admin/mediums">Manage Medium</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/skills{{/activeClass}}">
+						<a class="nav-link" href="/admin/skills">Manage Skills</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/course_types{{/activeClass}}">
+						<a class="nav-link" href="/admin/course_types">Manage Course Types</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/settings{{/activeClass}}">
+						<a class="nav-link" href="/admin/settings">Manage Settings</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/home/artworks{{/activeClass}}">
+						<a class="nav-link" href="/admin/home/artworks">Manage Home Artwork</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+
+		<li class="nav-item {{#activeClass}}admin/blog/*{{/activeClass}}">
+			<a class="nav-link" data-toggle="collapse" href="#blog"
+				aria-expanded="{{#isActiveRoute}}admin/blog/*{{/isActiveRoute}}" aria-controls="blog">
+				<i class="menu-icon mdi mdi-dna"></i>
+				<span class="menu-title">Blog Management</span>
+				<i class="menu-arrow"></i>
+			</a>
+			<div class="collapse {{#showClass}}admin/blog/*{{/showClass}}" id="blog">
+				<ul class="nav flex-column sub-menu">
+					<li class="nav-item {{#activeClass}}admin/blog/category{{/activeClass}}">
+						<a class="nav-link" href="/admin/blog/category">Manage Categories</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/blog/tag{{/activeClass}}">
+						<a class="nav-link" href="/admin/blog/tag">Manage Tags</a>
+					</li>
+					<li class="nav-item {{#activeClass}}admin/blog/post{{/activeClass}}">
+						<a class="nav-link" href="/admin/blog/post">Manage Posts</a>
+					</li>
+				</ul>
+			</div>
+		</li>
+
+		
+			
+				
+				
+				
+				
+			
+				
+					
+						
+						
+					
+						
+						
+					
+						
+						
+					
+				
+			
+
+		
+			
+				
+				
+				
+			
+		
+			
+				
+				
+				
+			
+		
+			
+				
+				
+				
+			
+		
+			
+				
+				
+				
+				
+			
+				
+					
+						
+						
+					
+						
+						
+					
+						
+						
+					
+				
+			
+		
+			
+				
+				
+				
+			
+	</ul>
+</nav>
+      <div class="main-panel">
+        <div class="content-wrapper">
+          {{#flash.success}}
+<div class="alert alert-success alert-block">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    <strong>{{flash.success}}</strong>
+</div>
+{{/flash.success}}
+
+{{#flash.error}}
+<div class="alert alert-danger alert-block">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    <strong>{{flash.error}}</strong>
+</div>
+{{/flash.error}}
+
+{{#flash.warning}}
+<div class="alert alert-warning alert-block">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    <strong>{{flash.warning}}</strong>
+</div>
+{{/flash.warning}}
+
+{{#flash.info}}
+<div class="alert alert-info alert-block">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    <strong>{{flash.info}}</strong>
+</div>
+{{/flash.info}}
+
+{{#hasErrors}}
+<div class="alert alert-danger">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    Please check the form below for errors
+</div>
+{{/hasErrors}}
+          
+<div class="col-12 grid-margin">
+  <div class="card">
+    <div class="card-body">
+      <h4 class="card-title">Add Post</h4>
+      <p class="card-description"> <a href="/admin/blog/post" class='btn btn-success'>Manage Posts</a> </p>
+      <form role="form" action="/admin/blog/post" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="_token" value="{{csrf}}">
+        <div class="box-body">
+          <div class="col-lg-6">
+            <div class="form-group">
+              <label for="title">Post Title</label>
+              <input type="text" class="form-control" id="title" name="title" placeholder="Title">
+            </div>
+
+            <div class="form-group">
+              <label for="subtitle">Post Sub Title</label>
+              <input type="text" class="form-control" id="subtitle" name="subtitle" placeholder="Sub Title">
+            </div>
+
+          </div>
+          <div class="col-lg-6">
+            <br>
+            <div class="form-group">
+              <div class="pull-right">
+                <label for="image">File input</label>
+                <input type="file" name="image" id="image">
+              </div>
+              <div class="checkbox pull-left">
+                <label>
+                  <input type="checkbox" name="status" value="1"> Publish
+                </label>
+              </div>
+              <div class="checkbox pull-left">
+                <label>
+                  <input type="checkbox" name="featured" value="1"> Featured
+                </label>
+              </div>
+            </div>
+            <br>
+            <div class="form-group" style="margin-top:18px;">
+              <label>Select Tags</label>
+              <select class="form-control select2" multiple="" data-placeholder="Select a State" style="width: 100%;"
+                tabindex="-1" aria-hidden="true" name="tags[]">
+                {{#tags}}
+                <option value="{{id}}">{{name}}</option>
+                {{/tags}}
+              </select>
+            </div>
+            <div class="form-group" style="margin-top:18px;">
+              <label>Select Category</label>
+              <select class="form-control select2" multiple="" data-placeholder="Select a State" style="width: 100%;"
+                tabindex="-1" aria-hidden="true" name="categories[]">
+                {{#categories}}
+                <option value="{{id}}">{{name}}</option>
+                {{/categories}}
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- /.box-body -->
+
+        <div class="box">
+          <div class="box-header">
+            <h3 class="box-title">Write Post Body Here
+              <small>Simple and fast</small>
+            </h3>
+            <!-- tools box -->
+            <div class="pull-right box-tools">
+              <button type="button" class="btn btn-default btn-sm" data-widget="collapse" data-toggle="tooltip"
+                title="Collapse">
+                <i class="fa fa-minus"></i></button>
+            </div>
+            <!-- /. tools -->
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body pad">
+            <textarea name="body"
+              style="width: 100%; height: 300px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"
+              id="body"></textarea>
+          </div>
+        </div>
+
+        <div class="box-footer">
+          <input type="submit" class="btn btn-primary">
+          <a href='/admin/blog/post' class="btn btn-warning">Back</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+        </div>
+        <footer class="footer">
+  <div class="container-fluid clearfix">
+    <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright ©  <a href="#" target="_blank">artistik.com</a> 2021</span>
+    <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"><a href="#" target="_blank">Admin</a> <i class="mdi mdi-heart text-danger"></i>
+    </span>
+  </div>
+</footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- base js -->
+  <script src="/js/admin/app.js"></script>
+  <script src="/assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+  <!-- end base js -->
+
+  <!-- plugin js -->
+  
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6.1.0/tinymce.min.js" referrerpolicy="origin"></script>
+
+  <!-- end plugin js -->
+
+  <!-- common js -->
+  <script src="/assets/js/off-canvas.js"></script>
+  <script src="/assets/js/hoverable-collapse.js"></script>
+  <script src="/assets/js/misc.js"></script>
+  <script src="/assets/js/settings.js"></script>
+  <script src="/assets/js/todolist.js"></script>
+  <script src="/assets/js/file-upload.js"></script>
+<!-- end common js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script>
+
+<script>
+  tinymce.init({
+      selector:'#body',
+      width: 900,
+      height: 300
+  });
+  // $(document).ready(function() {
+        //     $("#categoryFrm").validate({
+        //         rules: {
+        //             name: 'required'
+        //         },
+        //         messages: {
+        //             name: 'Name is required'
+        //         },
+        //     });
+        // });
+</script>
+
+</body>
+</html>
