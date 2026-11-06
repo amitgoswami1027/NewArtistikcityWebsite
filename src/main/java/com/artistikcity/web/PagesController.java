@@ -32,10 +32,13 @@ public class PagesController {
     private final Redirects redirect;
     private final String adminEmail;
     private final com.artistikcity.admin.SiteSettings site;
+    private final com.artistikcity.config.Settings settings;
 
     public PagesController(Views views, Inertia inertia, Db db, Json json, Validator validator, Mailer mailer,
-                           Redirects redirect, Environment env, com.artistikcity.admin.SiteSettings site) {
+                           Redirects redirect, Environment env, com.artistikcity.admin.SiteSettings site,
+                           com.artistikcity.config.Settings settings) {
         this.site = site;
+        this.settings = settings;
         this.views = views;
         this.inertia = inertia;
         this.db = db;
@@ -54,7 +57,13 @@ public class PagesController {
     /** New "How it works" page (React / Inertia). */
     @GetMapping("/how-it-works")
     public ResponseEntity<String> howItWorks(HttpServletRequest request) {
-        return inertia.render(request, "HowItWorks", Map.of());
+        // step 7 (Sell) quotes the real marketplace terms, so the page stays true when the commission or payout delay changes
+        java.math.BigDecimal commission = settings.commissionPercent();
+        Map<String, Object> sell = Map.of(
+                "artistPercent", java.math.BigDecimal.valueOf(100).subtract(commission).stripTrailingZeros().toPlainString(),
+                "payoutDays", settings.payoutAfterDays(),
+                "listed", db.count("select count(*) from paintings where stock_status in ('AVAILABLE', 'RESERVED')"));
+        return inertia.render(request, "HowItWorks", Map.of("sell", sell));
     }
 
     @GetMapping("/customer-support")

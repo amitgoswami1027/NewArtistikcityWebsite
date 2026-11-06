@@ -8477,6 +8477,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var Journey_exports = {};
 __export(Journey_exports, {
   JOURNEY: () => JOURNEY,
+  JOURNEY_ICONS: () => JOURNEY_ICONS,
+  SELL_STEP: () => SELL_STEP,
   inr: () => inr,
   shortDate: () => shortDate,
   statusStyle: () => statusStyle
@@ -8490,6 +8492,8 @@ const JOURNEY = [
   { n: "05", key: "SUBMIT", title: "Submit", text: "Upload your assignment milestone for a personal review from your instructor.", href: "/dashboard/submissions", cta: "Submit work" },
   { n: "06", key: "CERTIFY", title: "Certify", text: "Finish the course with approved work to earn your verifiable ArtistikCity certificate and PDF portfolio report.", href: "/dashboard/certificates", cta: "Certificates & reports" }
 ];
+const SELL_STEP = { n: "07", key: "SELL", title: "Sell your art", href: "/marketplace", cta: "Explore the Marketplace" };
+const JOURNEY_ICONS = { DISCOVER: "fa-compass", JOIN: "fa-user-plus", CHOOSE_COURSE: "fa-th-large", LEARN: "fa-paint-brush", SUBMIT: "fa-upload", CERTIFY: "fa-certificate", SELL: "fa-shopping-bag" };
 const statusStyle = (status) => ({
   "Pending Review": { chip: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: "fa-clock-o", label: "Pending review" },
   Approved: { chip: "bg-green-100 text-green-800 border-green-200", icon: "fa-check-circle", label: "Approved" },
@@ -31669,10 +31673,27 @@ function Home() {
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -31704,135 +31725,267 @@ var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react
 var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
 var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
 var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
-function HowItWorks() {
-  const { auth } = (0, import_inertia_react.usePage)().props;
-  const signedIn = auth && auth.user;
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: "How it works", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "tw", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "relative overflow-hidden bg-ink text-white", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 opacity-40", style: { background: "radial-gradient(circle at 85% 20%, #9c0d48 0, transparent 45%), radial-gradient(circle at 10% 90%, #3b5bdb 0, transparent 40%)" }, "aria-hidden": "true" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide relative py-20 sm:py-28", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-300", children: "The ArtistikCity creative lifecycle" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { className: "mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-none text-white", children: [
-          "Learn.",
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-          "Demonstrate.",
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-brand", children: "Get certified." })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 max-w-2xl text-xl text-gray-300", children: "From your first guided lesson to an approved assignment and a verifiable certificate at the end. Six clear steps, one studio." }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-8 flex flex-wrap gap-3", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: signedIn ? "/dashboard" : "/join", className: "inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-bold hover:bg-brand-dark", children: signedIn ? "Open my studio" : "Start for free" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink", children: "Browse courses" })
-        ] })
-      ] })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide py-20", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "max-w-2xl", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-brand", children: "Roadmap" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-2 text-4xl font-black tracking-tight text-ink", children: "Six steps from curious to certified" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 text-lg text-gray-600", children: "Each step unlocks the next. Your studio shows exactly where you are." })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: import_Journey.JOURNEY.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "group relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 hover:border-ink hover:shadow-xl transition", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-6xl font-black tracking-tight text-gray-200 group-hover:text-brand transition-colors", children: s.n }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mt-4 font-mono text-xs tracking-widest uppercase text-gray-500", children: [
-          "Step ",
-          s.n,
-          " \xB7 ",
-          s.key.replace("_", " ")
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-2 text-2xl font-black tracking-tight text-ink", children: s.title }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-base text-gray-600 flex-1", children: s.text }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: s.href, className: "mt-6 inline-flex items-center gap-2 font-bold text-ink hover:text-brand", children: [
-          s.cta,
-          " ",
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right text-sm", "aria-hidden": "true" })
-        ] })
-      ] }, s.key)) })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "bg-gray-50 border-t border-gray-200", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide py-20 grid grid-cols-1 lg:grid-cols-3 gap-10", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-brand", children: "Why it works" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-2 text-3xl font-black tracking-tight text-ink", children: "Real feedback, real outcomes" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6", children: [
-        ["fa-video-camera", "Guided classroom", "Structured units and lessons with progress tracking and study material."],
-        ["fa-comments-o", "Milestone reviews", "Every submission gets personal notes from a reviewer before it is approved."],
-        ["fa-certificate", "Verifiable certificates", "Finish a course with approved work to earn a certificate anyone can check online."],
-        ["fa-file-pdf-o", "Portfolio report", "Download a print-ready PDF of your courses, progress and approved work."]
-      ].map(([icon, t, d]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl bg-white border border-gray-200 p-6", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon} text-2xl text-brand`, "aria-hidden": "true" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-3 text-lg font-extrabold text-ink", children: t }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-1 text-gray-600", children: d })
-      ] }, t)) })
-    ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "ac-wide py-20", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-brand", children: "Step 06 \xB7 Certify" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-2 text-4xl font-black tracking-tight text-ink", children: "Your work, on paper" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 text-lg text-gray-600", children: "Finish every lesson and get one assignment approved to earn a verifiable ArtistikCity certificate for that course. Then generate a detailed, print-ready PDF portfolio of everything you've made." }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "mt-6 space-y-3 text-base text-gray-700", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate text-brand mt-1", "aria-hidden": "true" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { className: "text-ink", children: "Course certificates" }),
-              " with a unique number anyone can verify online"
-            ] })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o text-brand mt-1", "aria-hidden": "true" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { className: "text-ink", children: "Portfolio PDF" }),
-              " with every course, its full curriculum and your progress"
-            ] })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-comments-o text-brand mt-1", "aria-hidden": "true" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { className: "text-ink", children: "Instructor comments" }),
-              " printed beside each approved artwork"
-            ] })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-print text-brand mt-1", "aria-hidden": "true" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { className: "text-ink", children: "Print or share any time" }),
-              " for applications, exhibitions or school"
-            ] })
-          ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: signedIn ? "/dashboard/certificates" : "/join", className: "mt-8 inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800", children: signedIn ? "Open certificates & reports" : "Join and start earning" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "relative h-96", "aria-hidden": "true", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-0 top-6 w-3/4 rounded-lg bg-white shadow-2xl border border-gray-200 p-6 transform -rotate-3", style: { aspectRatio: "297 / 210" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "h-full border-4 border-ink p-4 relative", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-y-0 left-0 w-3 bg-brand" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 font-mono text-xs tracking-widest uppercase text-brand", children: "Certificate of completion" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 mt-2 text-2xl font-black text-ink", children: "Course Certificate" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 mt-3 text-xs text-gray-500", children: "This certifies that" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 text-lg font-bold text-ink border-b border-ink inline-block", children: "Your name" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 mt-3 font-mono text-xs text-gray-500", children: "AC-2026-XXXXXXXX" })
-        ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute right-0 bottom-0 w-1/2 rounded-lg bg-ink shadow-2xl p-5 text-white transform rotate-2", style: { aspectRatio: "210 / 297" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "h-full border-l-4 border-brand pl-4 flex flex-col", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-300 mt-8", children: "Artist portfolio" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-2xl font-black leading-tight", children: "Your name" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-auto grid grid-cols-2 gap-2 text-xs text-gray-300", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { className: "block text-xl text-white", children: "3" }),
-              "Courses"
+const reduceMotion = () => {
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (e) {
+    return false;
+  }
+};
+function scrollToStep(id) {
+  const el = typeof document !== "undefined" && document.getElementById(id);
+  if (!el) return;
+  const tracker = document.querySelector(".hiw-tracker");
+  const offset = 68 + (tracker ? tracker.offsetHeight : 0) + 16;
+  window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - offset, behavior: reduceMotion() ? "auto" : "smooth" });
+  try {
+    window.history.replaceState(window.history.state, "", `/how-it-works#${id}`);
+  } catch (e) {
+  }
+}
+function ProcessTracker({ steps, active }) {
+  const listRef = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    const list = listRef.current;
+    const node = list && list.children[active];
+    if (!list || !node || list.scrollWidth <= list.clientWidth) return;
+    list.scrollTo({ left: node.offsetLeft - (list.clientWidth - node.offsetWidth) / 2, behavior: reduceMotion() ? "auto" : "smooth" });
+  }, [active]);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "hiw-tracker", "aria-label": "The student journey, step by step", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide hiw-tracker__inner", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { ref: listRef, className: "hiw-tracker__list", children: steps.map((s, i) => {
+    const state = i < active ? "is-done" : i === active ? "is-current" : "";
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: `hiw-node ${state} ${s.key === "SELL" ? "is-goal" : ""}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+        "a",
+        {
+          href: `/how-it-works#${s.id}`,
+          onClick: (e) => {
+            e.preventDefault();
+            scrollToStep(s.id);
+          },
+          "aria-current": i === active ? "step" : void 0,
+          "aria-label": `Step ${i + 1} of ${steps.length}: ${s.title}`,
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "hiw-node__dot", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${import_Journey.JOURNEY_ICONS[s.key]}`, "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: i + 1 })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { className: "block text-xl text-white", children: "12" }),
-              "Artworks"
-            ] })
-          ] })
-        ] }) })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "hiw-node__label", children: s.title })
+          ]
+        }
+      ),
+      i < steps.length - 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-right hiw-node__arrow", "aria-hidden": "true" })
+    ] }, s.key);
+  }) }) }) });
+}
+function StepCard({ step, index, total }) {
+  const side = index % 2 === 0 ? "is-left" : "is-right";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { id: step.id, className: `hiw-step ${side}`, "data-step": index, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "hiw-step__node", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${import_Journey.JOURNEY_ICONS[step.key]}` }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "hiw-card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "hiw-card__num", "aria-hidden": "true", children: step.n }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "hiw-card__eyebrow", children: [
+        "Step ",
+        index + 1,
+        " of ",
+        total
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "hiw-card__title", children: step.title }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "hiw-card__text", children: step.text }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: step.href, className: "hiw-card__cta", children: [
+        step.cta,
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
       ] })
-    ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide py-16 text-center", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-3xl font-black tracking-tight text-ink", children: "Ready to start?" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-lg text-gray-600", children: "Pick a live course or a weekend workshop in the medium you love." }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "mt-6 inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800", children: "Browse courses" })
     ] })
-  ] }) });
+  ] });
+}
+function SellStep({ step, index, total, sell, signedIn }) {
+  const perks = [
+    ["fa-percent", `You keep ${sell.artistPercent}%`, "of every sale. Our share covers the listing, secure checkout and payment handling."],
+    ["fa-clock-o", `Payable ${sell.payoutDays} days after the sale`, "Then paid out in our weekly payout run."],
+    ["fa-clone", "One painting, four ways to buy", "The one-of-a-kind original, plus numbered canvas editions, fine-art posters and digital downloads."],
+    ["fa-globe", "Collectors in India and worldwide", "Rupee payments through Razorpay, international payments through PayPal."]
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { id: step.id, className: "hiw-step is-goal", "data-step": index, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "hiw-step__node", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${import_Journey.JOURNEY_ICONS.SELL}` }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "hiw-goal", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "hiw-goal__copy", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "hiw-goal__eyebrow", children: [
+          "Step ",
+          index + 1,
+          " of ",
+          total,
+          " \xB7 The finish line"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "hiw-goal__title", children: "Launch your gallery & sell" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "hiw-goal__text", children: "Your certificate proves the skill; your paintings can now earn from it. Once you're certified, your best approved studio pieces can be listed in the ArtistikCity Marketplace, each with its own gallery page: the original for one collector, and prints and downloads for many more. Our team reviews every piece before it goes live, and we run the checkout, payments and collector messages for you, so you can keep painting while your practice grows into a sustainable art career." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "hiw-goal__actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: step.href, className: "hiw-btn hiw-btn--light", children: [
+            step.cta,
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: signedIn ? "/dashboard" : "/join", className: "hiw-btn hiw-btn--ghost", children: signedIn ? "Back to my studio" : "Start creating" })
+        ] }),
+        Number(sell.listed) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "hiw-goal__note", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o", "aria-hidden": "true" }),
+          " ",
+          Number(sell.listed).toLocaleString("en-IN"),
+          " artworks on sale right now"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "hiw-goal__perks", children: perks.map(([icon, title, text]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: title }),
+          text
+        ] })
+      ] }, title)) })
+    ] })
+  ] });
+}
+function HowItWorks() {
+  const { auth, sell = { artistPercent: "70", payoutDays: 14, listed: 0 } } = (0, import_inertia_react.usePage)().props;
+  const signedIn = auth && auth.user;
+  const steps = [
+    ...import_Journey.JOURNEY.map((s) => __spreadProps(__spreadValues({}, s), { id: `step-${s.key.toLowerCase().replace("_", "-")}` })),
+    __spreadProps(__spreadValues({}, import_Journey.SELL_STEP), { id: "step-sell" })
+  ];
+  const [active, setActive] = (0, import_react.useState)(0);
+  const timeline = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    const root = timeline.current;
+    if (!root || typeof IntersectionObserver === "undefined") return void 0;
+    const seen = /* @__PURE__ */ new Map();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => seen.set(Number(e.target.dataset.step), e.isIntersecting));
+      const on = [...seen.entries()].filter(([, v]) => v).map(([k]) => k);
+      if (on.length) setActive(Math.max(...on));
+    }, { rootMargin: "-30% 0px -60% 0px" });
+    root.querySelectorAll("[data-step]").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+  (0, import_react.useEffect)(() => {
+    const id = typeof window !== "undefined" ? window.location.hash.replace("#", "") : "";
+    if (id && steps.some((s) => s.id === id)) setTimeout(() => scrollToStep(id), 150);
+  }, []);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: "How it works", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProcessTracker, { steps, active }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "tw", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "relative overflow-hidden bg-ink text-white", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 opacity-40", style: { background: "radial-gradient(circle at 85% 20%, #9c0d48 0, transparent 45%), radial-gradient(circle at 10% 90%, #3b5bdb 0, transparent 40%)" }, "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide relative py-20 sm:py-28", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-300", children: "The ArtistikCity creative lifecycle" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { className: "mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-none text-white", children: [
+            "Learn.",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+            "Get certified.",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-brand", children: "Sell your art." })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 max-w-2xl text-xl text-gray-300", children: "From your first guided lesson to a verifiable certificate, and from there to your paintings in front of collectors. Seven clear steps, one studio." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-8 flex flex-wrap gap-3", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: signedIn ? "/dashboard" : "/join", className: "inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-bold hover:bg-brand-dark", children: signedIn ? "Open my studio" : "Start for free" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink", children: "Browse courses" })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide py-20", "aria-labelledby": "hiw-roadmap", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "max-w-2xl", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-brand", children: "Roadmap" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "hiw-roadmap", className: "mt-2 text-4xl font-black tracking-tight text-ink", children: "Seven steps from curious to collected" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 text-lg text-gray-600", children: "Each step unlocks the next, and the last one turns your practice into income. Your studio always shows where you are." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { ref: timeline, className: "hiw-timeline", children: steps.map((s, i) => s.key === "SELL" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SellStep, { step: s, index: i, total: steps.length, sell, signedIn }, s.key) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StepCard, { step: s, index: i, total: steps.length }, s.key)) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "bg-gray-50 border-t border-gray-200", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide py-20 grid grid-cols-1 lg:grid-cols-3 gap-10", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-brand", children: "Why it works" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-2 text-3xl font-black tracking-tight text-ink", children: "Real feedback, real outcomes" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6", children: [
+          ["fa-video-camera", "Guided classroom", "Structured units and lessons with progress tracking and study material."],
+          ["fa-comments-o", "Milestone reviews", "Every submission gets personal notes from a reviewer before it is approved."],
+          ["fa-certificate", "Verifiable certificates", "Finish a course with approved work to earn a certificate anyone can check online."],
+          ["fa-shopping-bag", "A marketplace for your work", `Approved pieces can be sold as originals, prints and downloads, and you keep ${sell.artistPercent}% of each sale.`]
+        ].map(([icon, t, d]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl bg-white border border-gray-200 p-6", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon} text-2xl text-brand`, "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-3 text-lg font-extrabold text-ink", children: t }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-1 text-gray-600", children: d })
+        ] }, t)) })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "ac-wide py-20", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-brand", children: "Step 06 \xB7 Certify" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-2 text-4xl font-black tracking-tight text-ink", children: "Your work, on paper" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-3 text-lg text-gray-600", children: "Finish every lesson and get one assignment approved to earn a verifiable ArtistikCity certificate for that course. Then generate a detailed, print-ready PDF portfolio of everything you've made." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "mt-6 space-y-3 text-base text-gray-700", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate text-brand mt-1", "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { className: "text-ink", children: "Course certificates" }),
+                " with a unique number anyone can verify online"
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-pdf-o text-brand mt-1", "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { className: "text-ink", children: "Portfolio PDF" }),
+                " with every course, its full curriculum and your progress"
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-comments-o text-brand mt-1", "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { className: "text-ink", children: "Instructor comments" }),
+                " printed beside each approved artwork"
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "flex gap-3", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-print text-brand mt-1", "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { className: "text-ink", children: "Print or share any time" }),
+                " for applications, exhibitions or school"
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: signedIn ? "/dashboard/certificates" : "/join", className: "mt-8 inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800", children: signedIn ? "Open certificates & reports" : "Join and start earning" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "relative h-96", "aria-hidden": "true", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-0 top-6 w-3/4 rounded-lg bg-white shadow-2xl border border-gray-200 p-6 transform -rotate-3", style: { aspectRatio: "297 / 210" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "h-full border-4 border-ink p-4 relative", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-y-0 left-0 w-3 bg-brand" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 font-mono text-xs tracking-widest uppercase text-brand", children: "Certificate of completion" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 mt-2 text-2xl font-black text-ink", children: "Course Certificate" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 mt-3 text-xs text-gray-500", children: "This certifies that" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 text-lg font-bold text-ink border-b border-ink inline-block", children: "Your name" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pl-5 mt-3 font-mono text-xs text-gray-500", children: "AC-2026-XXXXXXXX" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute right-0 bottom-0 w-1/2 rounded-lg bg-ink shadow-2xl p-5 text-white transform rotate-2", style: { aspectRatio: "210 / 297" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "h-full border-l-4 border-brand pl-4 flex flex-col", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-300 mt-8", children: "Artist portfolio" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-2xl font-black leading-tight", children: "Your name" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-auto grid grid-cols-2 gap-2 text-xs text-gray-300", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { className: "block text-xl text-white", children: "3" }),
+                "Courses"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { className: "block text-xl text-white", children: "12" }),
+                "Artworks"
+              ] })
+            ] })
+          ] }) })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide py-16 text-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-3xl font-black tracking-tight text-ink", children: "Ready to start?" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-lg text-gray-600", children: "Pick a live course or a weekend workshop in the medium you love, or see what our artists are selling." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-6 flex flex-wrap justify-center gap-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800", children: "Browse courses" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "inline-flex items-center h-12 px-7 rounded-full border border-gray-200 text-ink font-bold hover:border-ink", children: "Explore the Marketplace" })
+        ] })
+      ] })
+    ] })
+  ] });
 }
 
 

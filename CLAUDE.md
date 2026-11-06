@@ -139,6 +139,10 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   Lesson tasks (`/user/course/module/lesson/task/{id}`) use the same frame via the `courseLinks` prop.
   *My account* (`Components/Account/AccountLayout`, list in `Components/Account/nav.js`) holds Profile, Your orders (`/user/orders`, page
   `Account/Orders`: every order system in one list through `orders/UnifiedOrderService`, see docs/marketplace-shop.md), Wish list, Addresses, Login & security, Notifications and Help. `Layouts/Authenticated` picks the shell from the URL.
+  The public roadmap `/how-it-works` (`Pages/HowItWorks`) shows seven steps: the six of `JOURNEY` plus `SELL_STEP` (Sell your art, kept out of
+  `JOURNEY` because the studio stage ends at Certify), with a sticky process tracker (`.hiw-tracker`, scrolls in code because of `<base href>`) and a
+  zigzag timeline (`.hiw-*` in `ac-theme.css`). Step 7 quotes the real terms from `PagesController.howItWorks` (prop `sell`: artist share =
+  100 - `app.ledger.commission-percent`, `payout-after-days`), so don't hard-code percentages in that copy.
   The header "My studio" is a plain link, and the avatar menu lists the account pages, with counts from the shared prop `nav`.
 - The Tailwind CSS (`static/css/commission.css`) is pre-built and only contains the classes already in use, scoped to `.tw`. A new
   utility class does nothing until the CSS is rebuilt, so new pages use classes that already exist or small custom classes in `ac-theme.css`.

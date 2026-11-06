@@ -1,13 +1,166 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { usePage } from '@inertiajs/inertia-react';
 import SiteLayout from '@/Components/Site/SiteLayout';
-import { JOURNEY } from '@/Components/Studio/Journey';
+import { JOURNEY, SELL_STEP, JOURNEY_ICONS } from '@/Components/Studio/Journey';
+
+/*
+ * How it works (/how-it-works): the seven-step student journey, Discover > Join > Choose a course > Learn > Submit >
+ * Certify > Sell. A sticky process tracker at the top follows the reader down a zigzag timeline (one column on phones)
+ * and jumps to any step. Step 7 quotes the real marketplace terms from the server (prop `sell`).
+ *
+ * Note: the root template has <base href="/">, so in-page "#step" links would leave the page; the tracker scrolls in code.
+ */
+
+const reduceMotion = () => {
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+};
+
+function scrollToStep(id) {
+    const el = typeof document !== 'undefined' && document.getElementById(id);
+    if (!el) return;
+    const tracker = document.querySelector('.hiw-tracker');
+    const offset = 68 + (tracker ? tracker.offsetHeight : 0) + 16;          // site header + tracker + breathing room
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - offset, behavior: reduceMotion() ? 'auto' : 'smooth' });
+    try { window.history.replaceState(window.history.state, '', `/how-it-works#${id}`); } catch (e) { /* old browser */ }
+}
+
+/* ------------------------------------------------------------- the tracker */
+
+function ProcessTracker({ steps, active }) {
+    const listRef = useRef(null);
+
+    // keep the current step in view on narrow screens (scroll the strip only, never the page)
+    useEffect(() => {
+        const list = listRef.current;
+        const node = list && list.children[active];
+        if (!list || !node || list.scrollWidth <= list.clientWidth) return;
+        list.scrollTo({ left: node.offsetLeft - (list.clientWidth - node.offsetWidth) / 2, behavior: reduceMotion() ? 'auto' : 'smooth' });
+    }, [active]);
+
+    return (
+        <nav className="hiw-tracker" aria-label="The student journey, step by step">
+            <div className="ac-wide hiw-tracker__inner">
+                <ol ref={listRef} className="hiw-tracker__list">
+                    {steps.map((s, i) => {
+                        const state = i < active ? 'is-done' : i === active ? 'is-current' : '';
+                        return (
+                            <li key={s.key} className={`hiw-node ${state} ${s.key === 'SELL' ? 'is-goal' : ''}`}>
+                                <a href={`/how-it-works#${s.id}`} onClick={(e) => { e.preventDefault(); scrollToStep(s.id); }}
+                                   aria-current={i === active ? 'step' : undefined} aria-label={`Step ${i + 1} of ${steps.length}: ${s.title}`}>
+                                    <span className="hiw-node__dot">
+                                        <i className={`fa ${JOURNEY_ICONS[s.key]}`} aria-hidden="true"></i>
+                                        <b>{i + 1}</b>
+                                    </span>
+                                    <span className="hiw-node__label">{s.title}</span>
+                                </a>
+                                {i < steps.length - 1 && <i className="fa fa-angle-right hiw-node__arrow" aria-hidden="true"></i>}
+                            </li>
+                        );
+                    })}
+                </ol>
+            </div>
+        </nav>
+    );
+}
+
+/* ----------------------------------------------------------- one step card */
+
+function StepCard({ step, index, total }) {
+    const side = index % 2 === 0 ? 'is-left' : 'is-right';
+    return (
+        <li id={step.id} className={`hiw-step ${side}`} data-step={index}>
+            <span className="hiw-step__node" aria-hidden="true"><i className={`fa ${JOURNEY_ICONS[step.key]}`}></i></span>
+            <article className="hiw-card">
+                <span className="hiw-card__num" aria-hidden="true">{step.n}</span>
+                <p className="hiw-card__eyebrow">Step {index + 1} of {total}</p>
+                <h3 className="hiw-card__title">{step.title}</h3>
+                <p className="hiw-card__text">{step.text}</p>
+                <a href={step.href} className="hiw-card__cta">
+                    {step.cta} <i className="fa fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </article>
+        </li>
+    );
+}
+
+/** Step 7: the finale, full width. Terms come from the server so the promise always matches the payouts. */
+function SellStep({ step, index, total, sell, signedIn }) {
+    const perks = [
+        ['fa-percent', `You keep ${sell.artistPercent}%`, 'of every sale. Our share covers the listing, secure checkout and payment handling.'],
+        ['fa-clock-o', `Payable ${sell.payoutDays} days after the sale`, 'Then paid out in our weekly payout run.'],
+        ['fa-clone', 'One painting, four ways to buy', 'The one-of-a-kind original, plus numbered canvas editions, fine-art posters and digital downloads.'],
+        ['fa-globe', 'Collectors in India and worldwide', 'Rupee payments through Razorpay, international payments through PayPal.'],
+    ];
+    return (
+        <li id={step.id} className="hiw-step is-goal" data-step={index}>
+            <span className="hiw-step__node" aria-hidden="true"><i className={`fa ${JOURNEY_ICONS.SELL}`}></i></span>
+            <article className="hiw-goal">
+                <div className="hiw-goal__copy">
+                    <p className="hiw-goal__eyebrow">Step {index + 1} of {total} · The finish line</p>
+                    <h3 className="hiw-goal__title">Launch your gallery &amp; sell</h3>
+                    <p className="hiw-goal__text">
+                        Your certificate proves the skill; your paintings can now earn from it. Once you're certified, your best approved
+                        studio pieces can be listed in the ArtistikCity Marketplace, each with its own gallery page: the original for one
+                        collector, and prints and downloads for many more. Our team reviews every piece before it goes live, and we run
+                        the checkout, payments and collector messages for you, so you can keep painting while your practice grows into a
+                        sustainable art career.
+                    </p>
+                    <div className="hiw-goal__actions">
+                        <a href={step.href} className="hiw-btn hiw-btn--light">{step.cta} <i className="fa fa-arrow-right" aria-hidden="true"></i></a>
+                        <a href={signedIn ? '/dashboard' : '/join'} className="hiw-btn hiw-btn--ghost">{signedIn ? 'Back to my studio' : 'Start creating'}</a>
+                    </div>
+                    {Number(sell.listed) > 0 && (
+                        <p className="hiw-goal__note"><i className="fa fa-picture-o" aria-hidden="true"></i> {Number(sell.listed).toLocaleString('en-IN')} artworks on sale right now</p>
+                    )}
+                </div>
+                <ul className="hiw-goal__perks">
+                    {perks.map(([icon, title, text]) => (
+                        <li key={title}>
+                            <i className={`fa ${icon}`} aria-hidden="true"></i>
+                            <span><b>{title}</b>{text}</span>
+                        </li>
+                    ))}
+                </ul>
+            </article>
+        </li>
+    );
+}
+
+/* -------------------------------------------------------------------- page */
 
 export default function HowItWorks() {
-    const { auth } = usePage().props;
+    const { auth, sell = { artistPercent: '70', payoutDays: 14, listed: 0 } } = usePage().props;
     const signedIn = auth && auth.user;
+    const steps = [
+        ...JOURNEY.map((s) => ({ ...s, id: `step-${s.key.toLowerCase().replace('_', '-')}` })),
+        { ...SELL_STEP, id: 'step-sell' },
+    ];
+    const [active, setActive] = useState(0);
+    const timeline = useRef(null);
+
+    // the step whose card crosses the upper third of the screen is the current one
+    useEffect(() => {
+        const root = timeline.current;
+        if (!root || typeof IntersectionObserver === 'undefined') return undefined;
+        const seen = new Map();
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((e) => seen.set(Number(e.target.dataset.step), e.isIntersecting));
+            const on = [...seen.entries()].filter(([, v]) => v).map(([k]) => k);
+            if (on.length) setActive(Math.max(...on));
+        }, { rootMargin: '-30% 0px -60% 0px' });
+        root.querySelectorAll('[data-step]').forEach((el) => io.observe(el));
+        return () => io.disconnect();
+    }, []);
+
+    // arriving with /how-it-works#step-sell (e.g. from the studio) opens that step
+    useEffect(() => {
+        const id = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+        if (id && steps.some((s) => s.id === id)) setTimeout(() => scrollToStep(id), 150);
+    }, []);
+
     return (
         <SiteLayout title="How it works">
+            <ProcessTracker steps={steps} active={active} />
             <div className="tw">
                 {/* ---------- hero ---------- */}
                 <section className="relative overflow-hidden bg-ink text-white">
@@ -15,9 +168,9 @@ export default function HowItWorks() {
                     <div className="ac-wide relative py-20 sm:py-28">
                         <p className="font-mono text-xs tracking-widest uppercase text-pink-300">The ArtistikCity creative lifecycle</p>
                         <h1 className="mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-none text-white">
-                            Learn.<br />Demonstrate.<br /><span className="text-brand">Get certified.</span>
+                            Learn.<br />Get certified.<br /><span className="text-brand">Sell your art.</span>
                         </h1>
-                        <p className="mt-6 max-w-2xl text-xl text-gray-300">From your first guided lesson to an approved assignment and a verifiable certificate at the end. Six clear steps, one studio.</p>
+                        <p className="mt-6 max-w-2xl text-xl text-gray-300">From your first guided lesson to a verifiable certificate, and from there to your paintings in front of collectors. Seven clear steps, one studio.</p>
                         <div className="mt-8 flex flex-wrap gap-3">
                             <a href={signedIn ? '/dashboard' : '/join'} className="inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-bold hover:bg-brand-dark">{signedIn ? 'Open my studio' : 'Start for free'}</a>
                             <a href="/courses?type=all" className="inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink">Browse courses</a>
@@ -25,25 +178,17 @@ export default function HowItWorks() {
                     </div>
                 </section>
 
-                {/* ---------- 6-step roadmap ---------- */}
-                <section className="ac-wide py-20">
+                {/* ---------- 7-step timeline ---------- */}
+                <section className="ac-wide py-20" aria-labelledby="hiw-roadmap">
                     <div className="max-w-2xl">
                         <p className="font-mono text-xs tracking-widest uppercase text-brand">Roadmap</p>
-                        <h2 className="mt-2 text-4xl font-black tracking-tight text-ink">Six steps from curious to certified</h2>
-                        <p className="mt-3 text-lg text-gray-600">Each step unlocks the next. Your studio shows exactly where you are.</p>
+                        <h2 id="hiw-roadmap" className="mt-2 text-4xl font-black tracking-tight text-ink">Seven steps from curious to collected</h2>
+                        <p className="mt-3 text-lg text-gray-600">Each step unlocks the next, and the last one turns your practice into income. Your studio always shows where you are.</p>
                     </div>
-                    <ol className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {JOURNEY.map((s) => (
-                            <li key={s.key} className="group relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 hover:border-ink hover:shadow-xl transition">
-                                <span className="text-6xl font-black tracking-tight text-gray-200 group-hover:text-brand transition-colors">{s.n}</span>
-                                <span className="mt-4 font-mono text-xs tracking-widest uppercase text-gray-500">Step {s.n} · {s.key.replace('_', ' ')}</span>
-                                <h3 className="mt-2 text-2xl font-black tracking-tight text-ink">{s.title}</h3>
-                                <p className="mt-2 text-base text-gray-600 flex-1">{s.text}</p>
-                                <a href={s.href} className="mt-6 inline-flex items-center gap-2 font-bold text-ink hover:text-brand">
-                                    {s.cta} <i className="fa fa-arrow-right text-sm" aria-hidden="true"></i>
-                                </a>
-                            </li>
-                        ))}
+                    <ol ref={timeline} className="hiw-timeline">
+                        {steps.map((s, i) => (s.key === 'SELL'
+                            ? <SellStep key={s.key} step={s} index={i} total={steps.length} sell={sell} signedIn={signedIn} />
+                            : <StepCard key={s.key} step={s} index={i} total={steps.length} />))}
                     </ol>
                 </section>
 
@@ -59,7 +204,7 @@ export default function HowItWorks() {
                                 ['fa-video-camera', 'Guided classroom', 'Structured units and lessons with progress tracking and study material.'],
                                 ['fa-comments-o', 'Milestone reviews', 'Every submission gets personal notes from a reviewer before it is approved.'],
                                 ['fa-certificate', 'Verifiable certificates', 'Finish a course with approved work to earn a certificate anyone can check online.'],
-                                ['fa-file-pdf-o', 'Portfolio report', 'Download a print-ready PDF of your courses, progress and approved work.'],
+                                ['fa-shopping-bag', 'A marketplace for your work', `Approved pieces can be sold as originals, prints and downloads, and you keep ${sell.artistPercent}% of each sale.`],
                             ].map(([icon, t, d]) => (
                                 <div key={t} className="rounded-2xl bg-white border border-gray-200 p-6">
                                     <i className={`fa ${icon} text-2xl text-brand`} aria-hidden="true"></i>
@@ -112,8 +257,11 @@ export default function HowItWorks() {
 
                 <section className="ac-wide py-16 text-center">
                     <h2 className="text-3xl font-black tracking-tight text-ink">Ready to start?</h2>
-                    <p className="mt-2 text-lg text-gray-600">Pick a live course or a weekend workshop in the medium you love.</p>
-                    <a href="/courses?type=all" className="mt-6 inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800">Browse courses</a>
+                    <p className="mt-2 text-lg text-gray-600">Pick a live course or a weekend workshop in the medium you love, or see what our artists are selling.</p>
+                    <div className="mt-6 flex flex-wrap justify-center gap-3">
+                        <a href="/courses?type=all" className="inline-flex items-center h-12 px-7 rounded-full bg-ink text-white font-bold hover:bg-gray-800">Browse courses</a>
+                        <a href="/marketplace" className="inline-flex items-center h-12 px-7 rounded-full border border-gray-200 text-ink font-bold hover:border-ink">Explore the Marketplace</a>
+                    </div>
                 </section>
             </div>
         </SiteLayout>

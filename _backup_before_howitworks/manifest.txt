@@ -1,0 +1,7 @@
+9f03c1e09d613109f842056408caa7e0  CLAUDE.md
+170d1e7d3224d803db971545d075f0f8  frontend/resources/js/Pages/HowItWorks.js
+ec8e515898030952bf7c2da79d1c802f  frontend/resources/js/Components/Studio/Journey.js
+dd2ef4b0aba072aca3ee3aabc9aa82d1  src/main/java/com/artistikcity/web/PagesController.java
+82fa29b556408bfa61d7010bd8576a67  src/main/resources/static/css/ac-theme.css
+3cf9ad5f80eabf972fa57d83cd850646  src/main/resources/static/js/app.js
+5d0f5e879a77bf99ee613a9060587fd9  tests/e2e/specs/how-it-works.spec.js
