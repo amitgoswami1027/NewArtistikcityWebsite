@@ -5674,7 +5674,10 @@ function ArtCard({ p, serverNow }) {
           "-",
           (0, import_shared.pct)(p)
         ] }),
-        p.source === "STUDENT" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mk-tag", children: "Student original" })
+        p.source === "STUDENT" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mk-tag mk-tag--student", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-graduation-cap", "aria-hidden": "true" }),
+          " Student painting"
+        ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-overlay", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-overlay__eyebrow", children: [
@@ -33510,6 +33513,38 @@ var import_shared = __webpack_require__("./resources/js/Components/Marketplace/s
 const SIZES = [["small", "Small", "up to 16 in"], ["medium", "Medium", "16\u201336 in"], ["large", "Large", "over 36 in"]];
 const ORIENT = [["portrait", "Portrait"], ["landscape", "Landscape"], ["square", "Square"]];
 const PRICES = [["0-10000", "Under \u20B910,000"], ["10000-25000", "\u20B910,000\u201325,000"], ["25000-50000", "\u20B925,000\u201350,000"], ["50000-", "Over \u20B950,000"]];
+const COLLECTIONS = {
+  ARTIST: {
+    label: "Artist originals",
+    icon: "fa-paint-brush",
+    title: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      "Original art.",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-brand", children: "Only one of each." })
+    ] }),
+    text: "Paintings and drawings by our studio artists. Every piece is unique, signed, and ships with a certificate of authenticity.",
+    note: "Works by our studio artists and guest painters."
+  },
+  STUDENT: {
+    label: "Student paintings",
+    icon: "fa-graduation-cap",
+    title: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      "Student paintings.",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-brand", children: "New artists, real originals." })
+    ] }),
+    text: "Original work by ArtistikCity students who earned a course certificate. Our team reviews every piece before it goes on sale.",
+    note: "By certified ArtistikCity students. Every piece is reviewed by our team, and the student artist keeps most of the price."
+  }
+};
+const collectionOf = (p) => p.source === "STUDENT" ? "STUDENT" : "ARTIST";
+function CollectionSwitch({ value, counts, onChange }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mk-switch", role: "radiogroup", "aria-label": "Which paintings to show", children: Object.entries(COLLECTIONS).map(([k, c]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "radio", "aria-checked": value === k, className: value === k ? "is-on" : "", onClick: () => onChange(k), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${c.icon}`, "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: c.label }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: counts[k] || 0 })
+  ] }, k)) });
+}
 function Chip({ on, onClick, children }) {
   return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
     "button",
@@ -33524,7 +33559,7 @@ function Chip({ on, onClick, children }) {
 }
 function MarketplaceIndex() {
   const { paintings = [], mediums = [], holds = [], serverNow, initialSource, stats = {} } = (0, import_inertia_react.usePage)().props;
-  const [source, setSource] = (0, import_react.useState)("ALL");
+  const [collection, setCollection] = (0, import_react.useState)(String(initialSource || "").toLowerCase() === "student" ? "STUDENT" : "ARTIST");
   const [medium, setMedium] = (0, import_react.useState)("ALL");
   const [size, setSize] = (0, import_react.useState)(null);
   const [orient, setOrient] = (0, import_react.useState)(null);
@@ -33533,10 +33568,34 @@ function MarketplaceIndex() {
   const [sort, setSort] = (0, import_react.useState)("curated");
   const [q, setQ] = (0, import_react.useState)("");
   const [filtersOpen, setFiltersOpen] = (0, import_react.useState)(false);
+  const inCollection = (0, import_react.useMemo)(() => paintings.filter((p) => collectionOf(p) === collection), [paintings, collection]);
+  const counts = (0, import_react.useMemo)(() => ({
+    ARTIST: paintings.filter((p) => collectionOf(p) === "ARTIST").length,
+    STUDENT: paintings.filter((p) => collectionOf(p) === "STUDENT").length
+  }), [paintings]);
+  const shownMediums = (0, import_react.useMemo)(() => mediums.filter((m) => inCollection.some((p) => p.medium === m)), [mediums, inCollection]);
+  const cstats = (0, import_react.useMemo)(() => ({
+    available: inCollection.filter((p) => p.stock_status === "AVAILABLE").length,
+    artists: new Set(inCollection.map((p) => p.artist_name)).size,
+    sold: inCollection.filter((p) => p.stock_status === "SOLD").length
+  }), [inCollection]);
+  const c = COLLECTIONS[collection];
+  const pick = (k) => {
+    setCollection(k);
+    if (medium !== "ALL" && !paintings.some((p) => collectionOf(p) === k && p.medium === medium)) setMedium("ALL");
+  };
+  (0, import_react.useEffect)(() => {
+    try {
+      const u = new URL(window.location.href);
+      if (collection === "STUDENT") u.searchParams.set("source", "student");
+      else u.searchParams.delete("source");
+      window.history.replaceState(window.history.state, "", u.pathname + u.search);
+    } catch (e) {
+    }
+  }, [collection]);
   const shown = (0, import_react.useMemo)(() => {
     const needle = q.trim().toLowerCase();
-    let list = paintings.filter((p) => {
-      if (source !== "ALL" && p.source !== source) return false;
+    let list = inCollection.filter((p) => {
       if (medium !== "ALL" && p.medium !== medium) return false;
       if (size && p.size_class !== size) return false;
       if (orient && p.orientation !== orient) return false;
@@ -33556,10 +33615,9 @@ function MarketplaceIndex() {
     if (sort === "newest") list = [...list].sort((a, b) => (b.published_at || 0) - (a.published_at || 0));
     if (sort === "size") list = [...list].sort((a, b) => b.height_inches * b.width_inches - a.height_inches * a.width_inches);
     return list;
-  }, [paintings, source, medium, size, orient, price, availableOnly, sort, q]);
-  const active = [source !== "ALL", medium !== "ALL", size, orient, price, availableOnly, q].filter(Boolean).length;
+  }, [inCollection, medium, size, orient, price, availableOnly, sort, q]);
+  const active = [medium !== "ALL", size, orient, price, availableOnly, q].filter(Boolean).length;
   const clear = () => {
-    setSource("ALL");
     setMedium("ALL");
     setSize(null);
     setOrient(null);
@@ -33567,7 +33625,7 @@ function MarketplaceIndex() {
     setAvailableOnly(false);
     setQ("");
   };
-  const featured = paintings.find((p) => p.is_featured && p.stock_status === "AVAILABLE") || paintings.find((p) => p.stock_status === "AVAILABLE");
+  const featured = inCollection.find((p) => p.is_featured && p.stock_status === "AVAILABLE") || inCollection.find((p) => p.stock_status === "AVAILABLE");
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: "Original art marketplace", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "tw", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "relative overflow-hidden bg-ink text-white", children: [
@@ -33582,24 +33640,20 @@ function MarketplaceIndex() {
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-white", children: "Marketplace" })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 font-mono text-xs tracking-widest uppercase text-pink-300", children: "The ArtistikCity Marketplace" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { className: "mt-3 text-5xl sm:text-6xl font-black tracking-tight leading-none text-white", children: [
-              "Original art.",
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-brand", children: "Only one of each." })
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 max-w-xl text-lg text-gray-300", children: "Paintings and drawings by our studio artists. Every piece is unique, signed, and ships with a certificate of authenticity." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { className: "mt-3 text-5xl sm:text-6xl font-black tracking-tight leading-none text-white", children: c.title }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 max-w-xl text-lg text-gray-300", children: c.text }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "mt-8 flex flex-wrap gap-8", children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { className: "text-xs uppercase tracking-widest text-gray-400", children: "Available now" }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { className: "text-3xl font-black", children: stats.available || 0 })
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { className: "text-3xl font-black", children: cstats.available })
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { className: "text-xs uppercase tracking-widest text-gray-400", children: "Artists" }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { className: "text-3xl font-black", children: stats.artists || 0 })
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { className: "text-xs uppercase tracking-widest text-gray-400", children: collection === "STUDENT" ? "Student artists" : "Artists" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { className: "text-3xl font-black", children: cstats.artists })
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { className: "text-xs uppercase tracking-widest text-gray-400", children: "Found a home" }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { className: "text-3xl font-black", children: stats.sold || 0 })
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { className: "text-3xl font-black", children: cstats.sold })
               ] })
             ] })
           ] }),
@@ -33621,7 +33675,17 @@ function MarketplaceIndex() {
         t
       ] }, t)) }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide pt-10", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex flex-wrap items-center gap-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-collection", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CollectionSwitch, { value: collection, counts, onChange: pick }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-collection__note", children: [
+            c.note,
+            collection === "STUDENT" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/how-it-works#step-sell", children: "How student selling works" })
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-6 flex flex-wrap items-center gap-3", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "relative flex-1 min-w-[220px] max-w-sm", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400", "aria-hidden": "true" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
@@ -33663,7 +33727,7 @@ function MarketplaceIndex() {
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4 flex gap-2 overflow-x-auto pb-2", "aria-label": "Medium", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Chip, { on: medium === "ALL", onClick: () => setMedium("ALL"), children: "All mediums" }),
-          mediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Chip, { on: medium === m, onClick: () => setMedium(medium === m ? "ALL" : m), children: m }, m))
+          shownMediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Chip, { on: medium === m, onClick: () => setMedium(medium === m ? "ALL" : m), children: m }, m))
         ] }),
         filtersOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4 rounded-2xl border border-gray-200 bg-white p-6 grid grid-cols-1 md:grid-cols-4 gap-6", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { children: [
@@ -33708,15 +33772,19 @@ function MarketplaceIndex() {
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-6 text-sm text-gray-500", "aria-live": "polite", children: [
           shown.length,
           " ",
-          shown.length === 1 ? "artwork" : "artworks",
+          collection === "STUDENT" ? shown.length === 1 ? "student painting" : "student paintings" : shown.length === 1 ? "artist original" : "artist originals",
           active ? " match your filters" : ""
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "ac-wide pt-6 pb-24", children: shown.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mk-grid", "data-testid": "mk-grid", children: shown.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ArtCard.default, { p, serverNow }, p.id)) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border-2 border-dashed border-gray-300 p-16 text-center", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-2xl font-black text-ink", children: "Nothing matches just yet" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: "Try another medium or price range, or commission a painting made just for you." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-2xl font-black text-ink", children: collection === "STUDENT" && !active ? "No student paintings for sale yet" : "Nothing matches just yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-gray-600", children: collection === "STUDENT" && !active ? "Certified students list their work here after our review. Have a look at the artist originals meanwhile." : "Try another medium or price range, or commission a painting made just for you." }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-6 flex flex-wrap justify-center gap-3", children: [
           active > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: clear, className: "h-12 px-6 rounded-full bg-ink text-white font-bold", children: "Clear filters" }),
+          !active && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: () => pick(collection === "STUDENT" ? "ARTIST" : "STUDENT"), className: "h-12 px-6 rounded-full bg-ink text-white font-bold", children: [
+            "See ",
+            COLLECTIONS[collection === "STUDENT" ? "ARTIST" : "STUDENT"].label.toLowerCase()
+          ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/commission/step-1", className: "inline-flex items-center h-12 px-6 rounded-full border border-gray-300 font-bold hover:border-ink", children: "Commission a painting" })
         ] })
       ] }) }),
@@ -33860,7 +33928,7 @@ function BuyBox({ p, hold, serverNow, preview, offer, sel, setSel, contact, conv
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border border-gray-200 bg-white p-6 sm:p-7 shadow-sm", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-center justify-between gap-3", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-mono text-xs uppercase tracking-widest text-gray-500", children: [
-        p.source === "STUDENT" ? "Student original" : "Studio original",
+        p.source === "STUDENT" ? "Student painting" : "Artist original",
         " \xB7 ",
         p.year_created
       ] }),

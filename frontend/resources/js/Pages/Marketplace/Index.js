@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { usePage } from '@inertiajs/inertia-react';
 import SiteLayout from '@/Components/Site/SiteLayout';
 import ArtCard from '@/Components/Marketplace/ArtCard';
@@ -7,6 +7,41 @@ import { HoldBanner, inr } from '@/Components/Marketplace/shared';
 const SIZES = [['small', 'Small', 'up to 16 in'], ['medium', 'Medium', '16–36 in'], ['large', 'Large', 'over 36 in']];
 const ORIENT = [['portrait', 'Portrait'], ['landscape', 'Landscape'], ['square', 'Square']];
 const PRICES = [['0-10000', 'Under ₹10,000'], ['10000-25000', '₹10,000–25,000'], ['25000-50000', '₹25,000–50,000'], ['50000-', 'Over ₹50,000']];
+
+/*
+ * Two collections share the marketplace: artist originals (studio artists; the default) and student paintings (work by
+ * certified ArtistikCity students, source STUDENT). The switch is mirrored in the address bar as ?source=student, so
+ * links and Back keep the view.
+ */
+const COLLECTIONS = {
+    ARTIST: {
+        label: 'Artist originals', icon: 'fa-paint-brush',
+        title: <>Original art.<br /><span className="text-brand">Only one of each.</span></>,
+        text: 'Paintings and drawings by our studio artists. Every piece is unique, signed, and ships with a certificate of authenticity.',
+        note: 'Works by our studio artists and guest painters.',
+    },
+    STUDENT: {
+        label: 'Student paintings', icon: 'fa-graduation-cap',
+        title: <>Student paintings.<br /><span className="text-brand">New artists, real originals.</span></>,
+        text: 'Original work by ArtistikCity students who earned a course certificate. Our team reviews every piece before it goes on sale.',
+        note: 'By certified ArtistikCity students. Every piece is reviewed by our team, and the student artist keeps most of the price.',
+    },
+};
+const collectionOf = (p) => (p.source === 'STUDENT' ? 'STUDENT' : 'ARTIST');
+
+function CollectionSwitch({ value, counts, onChange }) {
+    return (
+        <div className="mk-switch" role="radiogroup" aria-label="Which paintings to show">
+            {Object.entries(COLLECTIONS).map(([k, c]) => (
+                <button key={k} type="button" role="radio" aria-checked={value === k} className={value === k ? 'is-on' : ''} onClick={() => onChange(k)}>
+                    <i className={`fa ${c.icon}`} aria-hidden="true"></i>
+                    <span>{c.label}</span>
+                    <b>{counts[k] || 0}</b>
+                </button>
+            ))}
+        </div>
+    );
+}
 
 function Chip({ on, onClick, children }) {
     return (
@@ -19,7 +54,7 @@ function Chip({ on, onClick, children }) {
 
 export default function MarketplaceIndex() {
     const { paintings = [], mediums = [], holds = [], serverNow, initialSource, stats = {} } = usePage().props;
-    const [source, setSource] = useState('ALL');   // studio originals only now; old ?source= links show everything
+    const [collection, setCollection] = useState(String(initialSource || '').toLowerCase() === 'student' ? 'STUDENT' : 'ARTIST');
     const [medium, setMedium] = useState('ALL');
     const [size, setSize] = useState(null);
     const [orient, setOrient] = useState(null);
@@ -29,10 +64,35 @@ export default function MarketplaceIndex() {
     const [q, setQ] = useState('');
     const [filtersOpen, setFiltersOpen] = useState(false);
 
+    const inCollection = useMemo(() => paintings.filter((p) => collectionOf(p) === collection), [paintings, collection]);
+    const counts = useMemo(() => ({
+        ARTIST: paintings.filter((p) => collectionOf(p) === 'ARTIST').length,
+        STUDENT: paintings.filter((p) => collectionOf(p) === 'STUDENT').length,
+    }), [paintings]);
+    const shownMediums = useMemo(() => mediums.filter((m) => inCollection.some((p) => p.medium === m)), [mediums, inCollection]);
+    const cstats = useMemo(() => ({
+        available: inCollection.filter((p) => p.stock_status === 'AVAILABLE').length,
+        artists: new Set(inCollection.map((p) => p.artist_name)).size,
+        sold: inCollection.filter((p) => p.stock_status === 'SOLD').length,
+    }), [inCollection]);
+    const c = COLLECTIONS[collection];
+
+    const pick = (k) => {
+        setCollection(k);
+        if (medium !== 'ALL' && !paintings.some((p) => collectionOf(p) === k && p.medium === medium)) setMedium('ALL');
+    };
+    // keep ?source=student in the address bar (without a reload), so the view can be shared and survives Back
+    useEffect(() => {
+        try {
+            const u = new URL(window.location.href);
+            if (collection === 'STUDENT') u.searchParams.set('source', 'student'); else u.searchParams.delete('source');
+            window.history.replaceState(window.history.state, '', u.pathname + u.search);
+        } catch (e) { /* old browser */ }
+    }, [collection]);
+
     const shown = useMemo(() => {
         const needle = q.trim().toLowerCase();
-        let list = paintings.filter((p) => {
-            if (source !== 'ALL' && p.source !== source) return false;
+        let list = inCollection.filter((p) => {
             if (medium !== 'ALL' && p.medium !== medium) return false;
             if (size && p.size_class !== size) return false;
             if (orient && p.orientation !== orient) return false;
@@ -52,11 +112,11 @@ export default function MarketplaceIndex() {
         if (sort === 'newest') list = [...list].sort((a, b) => (b.published_at || 0) - (a.published_at || 0));
         if (sort === 'size') list = [...list].sort((a, b) => b.height_inches * b.width_inches - a.height_inches * a.width_inches);
         return list;
-    }, [paintings, source, medium, size, orient, price, availableOnly, sort, q]);
+    }, [inCollection, medium, size, orient, price, availableOnly, sort, q]);
 
-    const active = [source !== 'ALL', medium !== 'ALL', size, orient, price, availableOnly, q].filter(Boolean).length;
-    const clear = () => { setSource('ALL'); setMedium('ALL'); setSize(null); setOrient(null); setPrice(null); setAvailableOnly(false); setQ(''); };
-    const featured = paintings.find((p) => p.is_featured && p.stock_status === 'AVAILABLE') || paintings.find((p) => p.stock_status === 'AVAILABLE');
+    const active = [medium !== 'ALL', size, orient, price, availableOnly, q].filter(Boolean).length;
+    const clear = () => { setMedium('ALL'); setSize(null); setOrient(null); setPrice(null); setAvailableOnly(false); setQ(''); };
+    const featured = inCollection.find((p) => p.is_featured && p.stock_status === 'AVAILABLE') || inCollection.find((p) => p.stock_status === 'AVAILABLE');
 
     return (
         <SiteLayout title="Original art marketplace">
@@ -68,12 +128,12 @@ export default function MarketplaceIndex() {
                         <div className="lg:col-span-3">
                             <nav aria-label="Breadcrumb" className="text-sm text-gray-400"><a href="/" className="hover:text-white">Home</a> <span className="mx-2">/</span> <span className="text-white">Marketplace</span></nav>
                             <p className="mt-6 font-mono text-xs tracking-widest uppercase text-pink-300">The ArtistikCity Marketplace</p>
-                            <h1 className="mt-3 text-5xl sm:text-6xl font-black tracking-tight leading-none text-white">Original art.<br /><span className="text-brand">Only one of each.</span></h1>
-                            <p className="mt-6 max-w-xl text-lg text-gray-300">Paintings and drawings by our studio artists. Every piece is unique, signed, and ships with a certificate of authenticity.</p>
+                            <h1 className="mt-3 text-5xl sm:text-6xl font-black tracking-tight leading-none text-white">{c.title}</h1>
+                            <p className="mt-6 max-w-xl text-lg text-gray-300">{c.text}</p>
                             <dl className="mt-8 flex flex-wrap gap-8">
-                                <div><dt className="text-xs uppercase tracking-widest text-gray-400">Available now</dt><dd className="text-3xl font-black">{stats.available || 0}</dd></div>
-                                <div><dt className="text-xs uppercase tracking-widest text-gray-400">Artists</dt><dd className="text-3xl font-black">{stats.artists || 0}</dd></div>
-                                <div><dt className="text-xs uppercase tracking-widest text-gray-400">Found a home</dt><dd className="text-3xl font-black">{stats.sold || 0}</dd></div>
+                                <div><dt className="text-xs uppercase tracking-widest text-gray-400">Available now</dt><dd className="text-3xl font-black">{cstats.available}</dd></div>
+                                <div><dt className="text-xs uppercase tracking-widest text-gray-400">{collection === 'STUDENT' ? 'Student artists' : 'Artists'}</dt><dd className="text-3xl font-black">{cstats.artists}</dd></div>
+                                <div><dt className="text-xs uppercase tracking-widest text-gray-400">Found a home</dt><dd className="text-3xl font-black">{cstats.sold}</dd></div>
                             </dl>
                         </div>
                         {featured && (
@@ -101,7 +161,11 @@ export default function MarketplaceIndex() {
 
                 {/* ---------- filters ---------- */}
                 <section className="ac-wide pt-10">
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="mk-collection">
+                        <CollectionSwitch value={collection} counts={counts} onChange={pick} />
+                        <p className="mk-collection__note">{c.note}{collection === 'STUDENT' && <> <a href="/how-it-works#step-sell">How student selling works</a></>}</p>
+                    </div>
+                    <div className="mt-6 flex flex-wrap items-center gap-3">
                         <div className="relative flex-1 min-w-[220px] max-w-sm">
                             <i className="fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
                             <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title, artist, subject"
@@ -125,7 +189,7 @@ export default function MarketplaceIndex() {
 
                     <div className="mt-4 flex gap-2 overflow-x-auto pb-2" aria-label="Medium">
                         <Chip on={medium === 'ALL'} onClick={() => setMedium('ALL')}>All mediums</Chip>
-                        {mediums.map((m) => <Chip key={m} on={medium === m} onClick={() => setMedium(medium === m ? 'ALL' : m)}>{m}</Chip>)}
+                        {shownMediums.map((m) => <Chip key={m} on={medium === m} onClick={() => setMedium(medium === m ? 'ALL' : m)}>{m}</Chip>)}
                     </div>
 
                     {filtersOpen && (
@@ -166,7 +230,7 @@ export default function MarketplaceIndex() {
                         </div>
                     )}
 
-                    <p className="mt-6 text-sm text-gray-500" aria-live="polite">{shown.length} {shown.length === 1 ? 'artwork' : 'artworks'}{active ? ' match your filters' : ''}</p>
+                    <p className="mt-6 text-sm text-gray-500" aria-live="polite">{shown.length} {collection === 'STUDENT' ? (shown.length === 1 ? 'student painting' : 'student paintings') : (shown.length === 1 ? 'artist original' : 'artist originals')}{active ? ' match your filters' : ''}</p>
                 </section>
 
                 {/* ---------- gallery grid: 4 columns on desktop, 2 on tablets, 1 on phones ---------- */}
@@ -177,10 +241,13 @@ export default function MarketplaceIndex() {
                         </div>
                     ) : (
                         <div className="rounded-2xl border-2 border-dashed border-gray-300 p-16 text-center">
-                            <p className="text-2xl font-black text-ink">Nothing matches just yet</p>
-                            <p className="mt-2 text-gray-600">Try another medium or price range, or commission a painting made just for you.</p>
+                            <p className="text-2xl font-black text-ink">{collection === 'STUDENT' && !active ? 'No student paintings for sale yet' : 'Nothing matches just yet'}</p>
+                            <p className="mt-2 text-gray-600">{collection === 'STUDENT' && !active
+                                ? 'Certified students list their work here after our review. Have a look at the artist originals meanwhile.'
+                                : 'Try another medium or price range, or commission a painting made just for you.'}</p>
                             <div className="mt-6 flex flex-wrap justify-center gap-3">
                                 {active > 0 && <button type="button" onClick={clear} className="h-12 px-6 rounded-full bg-ink text-white font-bold">Clear filters</button>}
+                                {!active && <button type="button" onClick={() => pick(collection === 'STUDENT' ? 'ARTIST' : 'STUDENT')} className="h-12 px-6 rounded-full bg-ink text-white font-bold">See {COLLECTIONS[collection === 'STUDENT' ? 'ARTIST' : 'STUDENT'].label.toLowerCase()}</button>}
                                 <a href="/commission/step-1" className="inline-flex items-center h-12 px-6 rounded-full border border-gray-300 font-bold hover:border-ink">Commission a painting</a>
                             </div>
                         </div>

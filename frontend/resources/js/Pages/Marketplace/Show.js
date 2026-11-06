@@ -28,7 +28,7 @@ function BuyBox({ p, hold, serverNow, preview, offer, sel, setSel, contact, conv
     return (
         <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-7 shadow-sm">
             <div className="flex items-center justify-between gap-3">
-                <p className="font-mono text-xs uppercase tracking-widest text-gray-500">{p.source === 'STUDENT' ? 'Student original' : 'Studio original'} · {p.year_created}</p>
+                <p className="font-mono text-xs uppercase tracking-widest text-gray-500">{p.source === 'STUDENT' ? 'Student painting' : 'Artist original'} · {p.year_created}</p>
                 <StatusChip status={hold && hold.mine ? 'RESERVED' : p.stock_status} />
             </div>
             <h1 className="mt-3 text-3xl sm:text-4xl font-black tracking-tight text-ink leading-tight">{p.title}</h1>

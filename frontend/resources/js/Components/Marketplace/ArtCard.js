@@ -30,7 +30,7 @@ export default function ArtCard({ p, serverNow }) {
                         {sold && <span className="mk-tag mk-tag--ink">Sold</span>}
                         {held && left > 0 && <span className="mk-tag mk-tag--hold"><i className="fa fa-lock" aria-hidden="true"></i> On hold · {mmss(left)}</span>}
                         {!sold && !held && hasDiscount(p) && <span className="mk-tag mk-tag--brand">-{pct(p)}</span>}
-                        {p.source === 'STUDENT' && <span className="mk-tag">Student original</span>}
+                        {p.source === 'STUDENT' && <span className="mk-tag mk-tag--student"><i className="fa fa-graduation-cap" aria-hidden="true"></i> Student painting</span>}
                     </div>
 
                     {/* hover details (pointer devices only) */}

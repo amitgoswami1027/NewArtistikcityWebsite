@@ -211,6 +211,10 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   `http/PreviewLockFilter` (`SITE_PREVIEW_PASSWORD`): while set, every page asks for that password (cookie `ac_preview`, 30 days),
   responses carry `X-Robots-Tag: noindex` and robots.txt disallows all; `/healthz`, the payment webhooks and static files stay open.
   Migrations must stay compatible with the previous release (rollback only swaps the image).
+- **Marketplace collections** (`Pages/Marketplace/Index.js`): `/marketplace` shows **artist originals** (every source except STUDENT) by
+  default; a toggle switches to **student paintings** (`source = 'STUDENT'`, listed by certified students from My studio > Sell your art),
+  mirrored as `?source=student` (`/student-shop` redirects there). Cards and the artwork page label student work "Student painting" and the
+  rest "Artist original". Filtering is client-side over `publicListings()`.
 - **Marketplace shop** (package `shop/`, docs/marketplace-shop.md): every listing can also sell a numbered canvas edition, a poster and a
   digital download (`paintings.shop_formats`), priced from the global list `shop_price_options` by `ShopPricing` (the one source of prices;
   `Components/Shop/shop.js` only mirrors it for live UI). Four screens: the artwork page (buy box `Components/Shop/BuyPanel`: format, size,
