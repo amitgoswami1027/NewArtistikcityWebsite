@@ -18,6 +18,7 @@ export default function Finance() {
     const [toastNode, toast] = useToast();
     const [tab, setTab] = useState(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab')) || 'report');
     const [batch, setBatch] = useState(null);
+    const [payee, setPayee] = useState(null);
     const [busy, setBusy] = useState(null);
     const [dispute, setDispute] = useState({ source: 'MARKETPLACE', ref: '', reason: '' });
     const reload = () => Inertia.reload({ preserveScroll: true });
@@ -70,6 +71,8 @@ export default function Finance() {
                         { key: 'holding', label: 'In holding period', align: 'right', render: (r) => (Number(r.holding) ? inr(r.holding) : '—') },
                         { key: 'disputed', label: 'On hold (dispute)', align: 'right', render: (r) => (Number(r.disputed) ? <Badge tone="red">{inr(r.disputed)}</Badge> : '—') },
                         { key: 'balance', label: 'Balance', align: 'right', render: (r) => <b>{inr(r.balance)}</b> },
+                        { key: 'pay', label: <span className="sr-only">Payout details</span>, align: 'right', render: (r) => (r.payee_type === 'USER'
+                            ? <Button size="sm" icon="fa-university" onClick={() => setPayee(r.payee_id)}>Payout details</Button> : null) },
                     ]} />
                 )
             )}
@@ -137,13 +140,46 @@ export default function Finance() {
                     <Pagination meta={g.meta} onPage={g.setPage} onPer={g.setPer} />
                 </>
             )}
-            {batch && <BatchDrawer id={batch} onClose={() => setBatch(null)} call={call} busy={busy} />}
+            {batch && <BatchDrawer id={batch} onClose={() => setBatch(null)} call={call} busy={busy} onPayee={setPayee} />}
+            {payee && <PayoutDetailsDrawer userId={payee} onClose={() => setPayee(null)} />}
             {toastNode}
         </AdminLayout>
     );
 }
 
-function BatchDrawer({ id, onClose, call, busy }) {
+/** Where to send a student artist's money (saved by them in My studio > Sell your art). Opening it is logged. */
+function PayoutDetailsDrawer({ userId, onClose }) {
+    const [d, setD] = useState(null);
+    const [err, setErr] = useState(null);
+    React.useEffect(() => {
+        axios.get(`/admin/api/finance/payees/${userId}/payout-details`).then((r) => setD(r.data)).catch((e) => setErr(errorText(e)));
+    }, [userId]);
+    const x = d && d.details;
+    const rows = !x || x.unreadable ? [] : [
+        ['Method', { UPI: 'UPI', BANK: 'Bank transfer (India)', PAYPAL: 'PayPal' }[x.method] || x.method],
+        ['Account holder', x.holderName],
+        ...(x.method === 'UPI' ? [['UPI ID', x.upiId]] : []),
+        ...(x.method === 'BANK' ? [['Account number', x.accountNumber], ['IFSC', x.ifsc]] : []),
+        ...(x.method === 'PAYPAL' ? [['PayPal e-mail', x.paypalEmail]] : []),
+        ['Last changed', fmtDate(x.updated_at, true)],
+    ];
+    return (
+        <Drawer open title="Payout details" subtitle={d ? `${d.student.name} · ${d.student.email}` : ''} onClose={onClose} footer={<Button onClick={onClose}>Close</Button>}>
+            {err ? <p className="adm-field__error" role="alert">{err}</p> : !d ? <span className="adm-skel" style={{ height: 16, width: '60%' }}></span> : !x ? (
+                <EmptyState icon="fa-university" title="No payout details yet">The student hasn't added where to be paid. Ask them to add it in My studio › Sell your art ({d.student.email}{d.student.phone ? `, ${d.student.phone}` : ''}).</EmptyState>
+            ) : x.unreadable ? (
+                <p className="adm-field__error" role="alert">These details can't be decrypted with the server's current key. Ask the student to enter them again.</p>
+            ) : (
+                <div className="adm-stack">
+                    <dl className="adm-dl">{rows.map(([k, v]) => <React.Fragment key={k}><dt>{k}</dt><dd><b>{v}</b></dd></React.Fragment>)}</dl>
+                    <p className="adm-muted adm-small"><i className="fa fa-shield" aria-hidden="true"></i> Viewing these details is recorded in the security log. Check the name matches the student before you transfer.</p>
+                </div>
+            )}
+        </Drawer>
+    );
+}
+
+function BatchDrawer({ id, onClose, call, busy, onPayee }) {
     const [d, setD] = useState(null);
     const [ref, setRef] = useState('');
     React.useEffect(() => { axios.get(`/admin/api/finance/batches/${id}`).then((r) => setD(r.data)); }, [id]);
@@ -157,6 +193,8 @@ function BatchDrawer({ id, onClose, call, busy }) {
                     { key: 'who', label: 'Artist', render: (l) => <span className="adm-cell__text"><b>{l.payee_name || `#${l.payee_id}`}</b><small>{l.payee_email || '—'}</small></span> },
                     { key: 'entries', label: 'Entries', align: 'right', render: (l) => l.entries },
                     { key: 'amount', label: 'Amount', align: 'right', render: (l) => <b>{inr(l.amount)}</b> },
+                    { key: 'pay', label: <span className="sr-only">Payout details</span>, align: 'right', render: (l) => (l.payee_type === 'USER'
+                        ? <Button size="sm" variant="ghost" icon="fa-university" onClick={() => onPayee(l.payee_id)} aria-label={`Payout details of ${l.payee_name || l.payee_id}`}>Pay to</Button> : null) },
                 ]} />
                 {draft ? (
                     <div className="adm-task is-edit">

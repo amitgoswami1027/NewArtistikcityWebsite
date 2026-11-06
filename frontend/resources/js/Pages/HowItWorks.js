@@ -5,7 +5,7 @@ import { JOURNEY, SELL_STEP, JOURNEY_ICONS } from '@/Components/Studio/Journey';
 
 /*
  * How it works (/how-it-works): the seven-step student journey, Discover > Join > Choose a course > Learn > Submit >
- * Certify > Sell. A sticky process tracker at the top follows the reader down a zigzag timeline (one column on phones)
+ * Certify > Sell. A process tracker right under the hero banner (sticky below the header once reached) follows the reader down a zigzag timeline (one column on phones)
  * and jumps to any step. Step 7 quotes the real marketplace terms from the server (prop `sell`).
  *
  * Note: the root template has <base href="/">, so in-page "#step" links would leave the page; the tracker scrolls in code.
@@ -88,7 +88,7 @@ function SellStep({ step, index, total, sell, signedIn }) {
     const perks = [
         ['fa-percent', `You keep ${sell.artistPercent}%`, 'of every sale. Our share covers the listing, secure checkout and payment handling.'],
         ['fa-clock-o', `Payable ${sell.payoutDays} days after the sale`, 'Then paid out in our weekly payout run.'],
-        ['fa-clone', 'One painting, four ways to buy', 'The one-of-a-kind original, plus numbered canvas editions, fine-art posters and digital downloads.'],
+        ['fa-tag', 'Your price, your story', 'You set the price of each original and write what went into it; we check every listing before it goes live.'],
         ['fa-globe', 'Collectors in India and worldwide', 'Rupee payments through Razorpay, international payments through PayPal.'],
     ];
     return (
@@ -99,15 +99,14 @@ function SellStep({ step, index, total, sell, signedIn }) {
                     <p className="hiw-goal__eyebrow">Step {index + 1} of {total} · The finish line</p>
                     <h3 className="hiw-goal__title">Launch your gallery &amp; sell</h3>
                     <p className="hiw-goal__text">
-                        Your certificate proves the skill; your paintings can now earn from it. Once you're certified, your best approved
-                        studio pieces can be listed in the ArtistikCity Marketplace, each with its own gallery page: the original for one
-                        collector, and prints and downloads for many more. Our team reviews every piece before it goes live, and we run
-                        the checkout, payments and collector messages for you, so you can keep painting while your practice grows into a
-                        sustainable art career.
+                        Your certificate proves the skill; your paintings can now earn from it. Once you're certified, list the approved
+                        work from that course straight from My studio: write its story and set your own price. Every piece gets its own
+                        gallery page in the ArtistikCity Marketplace after our team reviews it, and we run the checkout, payments and
+                        collector messages for you, so you can keep painting while your practice grows into a sustainable art career.
                     </p>
                     <div className="hiw-goal__actions">
                         <a href={step.href} className="hiw-btn hiw-btn--light">{step.cta} <i className="fa fa-arrow-right" aria-hidden="true"></i></a>
-                        <a href={signedIn ? '/dashboard' : '/join'} className="hiw-btn hiw-btn--ghost">{signedIn ? 'Back to my studio' : 'Start creating'}</a>
+                        <a href={signedIn ? '/dashboard/sell' : '/join'} className="hiw-btn hiw-btn--ghost">{signedIn ? 'Sell from my studio' : 'Start creating'}</a>
                     </div>
                     {Number(sell.listed) > 0 && (
                         <p className="hiw-goal__note"><i className="fa fa-picture-o" aria-hidden="true"></i> {Number(sell.listed).toLocaleString('en-IN')} artworks on sale right now</p>
@@ -132,8 +131,7 @@ export default function HowItWorks() {
     const { auth, sell = { artistPercent: '70', payoutDays: 14, listed: 0 } } = usePage().props;
     const signedIn = auth && auth.user;
     const steps = [
-        ...JOURNEY.map((s) => ({ ...s, id: `step-${s.key.toLowerCase().replace('_', '-')}` })),
-        { ...SELL_STEP, id: 'step-sell' },
+        ...JOURNEY.map((s) => (s.key === 'SELL' ? { ...s, ...SELL_STEP, id: 'step-sell' } : { ...s, id: `step-${s.key.toLowerCase().replace('_', '-')}` })),
     ];
     const [active, setActive] = useState(0);
     const timeline = useRef(null);
@@ -160,7 +158,6 @@ export default function HowItWorks() {
 
     return (
         <SiteLayout title="How it works">
-            <ProcessTracker steps={steps} active={active} />
             <div className="tw">
                 {/* ---------- hero ---------- */}
                 <section className="relative overflow-hidden bg-ink text-white">
@@ -177,7 +174,12 @@ export default function HowItWorks() {
                         </div>
                     </div>
                 </section>
+            </div>
 
+            {/* ---------- the workflow, right under the banner; it stays pinned below the header while scrolling ---------- */}
+            <ProcessTracker steps={steps} active={active} />
+
+            <div className="tw">
                 {/* ---------- 7-step timeline ---------- */}
                 <section className="ac-wide py-20" aria-labelledby="hiw-roadmap">
                     <div className="max-w-2xl">
@@ -204,7 +206,7 @@ export default function HowItWorks() {
                                 ['fa-video-camera', 'Guided classroom', 'Structured units and lessons with progress tracking and study material.'],
                                 ['fa-comments-o', 'Milestone reviews', 'Every submission gets personal notes from a reviewer before it is approved.'],
                                 ['fa-certificate', 'Verifiable certificates', 'Finish a course with approved work to earn a certificate anyone can check online.'],
-                                ['fa-shopping-bag', 'A marketplace for your work', `Approved pieces can be sold as originals, prints and downloads, and you keep ${sell.artistPercent}% of each sale.`],
+                                ['fa-shopping-bag', 'A marketplace for your work', `Once certified, sell your approved originals from My studio at your own price, and keep ${sell.artistPercent}% of each sale.`],
                             ].map(([icon, t, d]) => (
                                 <div key={t} className="rounded-2xl bg-white border border-gray-200 p-6">
                                     <i className={`fa ${icon} text-2xl text-brand`} aria-hidden="true"></i>

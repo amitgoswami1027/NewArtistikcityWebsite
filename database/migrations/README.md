@@ -34,6 +34,7 @@ To change the schema of a database that already holds real data:
 | `2026-11-06_test_buyers.sql` | Test-buyer accounts: `users.test_buyer`, and `is_test` on `orders`, `marketplace_orders`, `shop_orders` and `commission_orders` (simulated payments, kept out of revenue, ledger and payouts). |
 | `2026-11-06_room_scenes.sql` | Room photos for the room preview (`room_scenes`, managed in Admin › Room preview) with the four original rooms, and the `room_preview.enabled` setting. |
 | `2026-11-06_admin_setup.sql` | Configuration panel values (`config_overrides`, secrets encrypted by the app); Studio Stories workflow and analytics (`posts.author_id`, `publish_at`, `published_at`, `archived_at`, `views`, `read_minutes`, daily `post_views`). |
+| `2026-11-06_student_selling.sql` | `student_payout_details` (where a student artist's marketplace earnings are paid: method, holder, encrypted details, masked summary) for My studio › Sell your art. |
 
 The earlier SQL Server (T-SQL) migrations were removed when the project moved to MySQL. Everything they did is
 already in `schema.sql`, and they remain available in git history.

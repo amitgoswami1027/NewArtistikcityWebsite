@@ -5,7 +5,7 @@ import { JOURNEY, statusStyle, shortDate } from '@/Components/Studio/Journey';
 import Notices from '@/Components/Studio/Notices';
 
 export default function Home() {
-    const { enrollments = [], submissions = [], stage = 3, auth, certificatesReady = 0, notices = [] } = usePage().props;
+    const { enrollments = [], submissions = [], stage = 3, auth, certificatesReady = 0, notices = [], selling = {} } = usePage().props;
     const name = auth && auth.user ? auth.user.name.split(' ')[0] : 'artist';
     const next = JOURNEY[Math.min(stage, JOURNEY.length) - 1];
     const approved = submissions.filter((s) => s.admin_status === 'Approved').length;
@@ -47,6 +47,19 @@ export default function Home() {
                     <p className="text-sm text-gray-600">{certificatesReady > 0 ? 'Download your ArtistikCity certificates and a printable PDF portfolio of your work.' : 'Track what\u2019s left to earn each course certificate, and download your PDF portfolio any time.'}</p>
                 </div>
                 <a href="/dashboard/certificates" className="inline-flex items-center justify-center h-11 px-5 rounded-full bg-ink text-white font-bold hover:bg-gray-800">Open certificates &amp; reports</a>
+            </section>
+
+            <section className={`mt-4 sl-cta ${stage >= 7 ? 'is-open' : ''}`} aria-labelledby="sl-cta-h">
+                <span className="sl-cta__icon" aria-hidden="true"><i className="fa fa-shopping-bag"></i></span>
+                <div className="sl-cta__text">
+                    <p id="sl-cta-h" className="sl-cta__title">{stage >= 7 ? 'Sell your art' : 'Sell your art · unlocks with your first certificate'}</p>
+                    <p className="sl-cta__sub">{stage >= 7
+                        ? (Number(selling.live) || Number(selling.inReview) || Number(selling.sold)
+                            ? `${Number(selling.live) || 0} for sale · ${Number(selling.inReview) || 0} in review · ${Number(selling.sold) || 0} sold`
+                            : 'You are certified: put your approved work up for sale in the marketplace, at your own price.')
+                        : 'Finish a course with approved work to earn its certificate; then you can sell the work you made for it.'}</p>
+                </div>
+                <a href={stage >= 7 ? '/dashboard/sell' : '/how-it-works#step-sell'} className="sl-cta__btn">{stage >= 7 ? 'Open Sell your art' : 'How selling works'}</a>
             </section>
 
             <section className="mt-12">

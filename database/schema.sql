@@ -20,6 +20,10 @@ DROP TABLE IF EXISTS shop_carts;
 DROP TABLE IF EXISTS shop_price_options;
 DROP TABLE IF EXISTS admin_audit;
 DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS student_payout_details;
+DROP TABLE IF EXISTS config_overrides;
+DROP TABLE IF EXISTS post_views;
+DROP TABLE IF EXISTS room_scenes;
 DROP TABLE IF EXISTS account_restrictions;
 DROP TABLE IF EXISTS content_reports;
 DROP TABLE IF EXISTS ledger_entries;
@@ -1601,3 +1605,14 @@ CREATE TABLE post_views (
     PRIMARY KEY (post_id, day)
 );
 CREATE INDEX post_views_day_index ON post_views (day);
+
+-- 2026-11-06_student_selling.sql
+CREATE TABLE student_payout_details (
+    user_id      BIGINT       NOT NULL PRIMARY KEY,
+    method       VARCHAR(10)  NOT NULL,
+    holder_name  VARCHAR(100) NOT NULL,
+    details_enc  TEXT         NOT NULL,
+    masked       VARCHAR(160) NOT NULL,
+    created_at   DATETIME     NULL,
+    updated_at   DATETIME     NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

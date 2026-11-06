@@ -1,4 +1,7 @@
-/** The six learning stages of the Student Creative Lifecycle, shared by the roadmap page and the studio (studio stage 1-6). */
+/**
+ * The seven stages of the Student Creative Lifecycle, shared by the roadmap page (/how-it-works) and My studio
+ * (StudentStudioController.stage: 1-7; 7 = certified, selling from My studio > Sell your art).
+ */
 export const JOURNEY = [
     { n: '01', key: 'DISCOVER', title: 'Discover', text: 'See how ArtistikCity takes you from your first sketch to a certified course.', href: '/how-it-works', cta: 'How it works' },
     { n: '02', key: 'JOIN', title: 'Join', text: 'Create your free account in under a minute, with email, phone, Google or Facebook.', href: '/join', cta: 'Join for free' },
@@ -6,12 +9,10 @@ export const JOURNEY = [
     { n: '04', key: 'LEARN', title: 'Learn', text: 'Follow the lessons in your course, practise and track your progress.', href: '/user/my-courses', cta: 'Go to my courses' },
     { n: '05', key: 'SUBMIT', title: 'Submit', text: 'Upload your assignment milestone for a personal review from your instructor.', href: '/dashboard/submissions', cta: 'Submit work' },
     { n: '06', key: 'CERTIFY', title: 'Certify', text: 'Finish the course with approved work to earn your verifiable ArtistikCity certificate and PDF portfolio report.', href: '/dashboard/certificates', cta: 'Certificates & reports' },
+    { n: '07', key: 'SELL', title: 'Sell your art', text: 'Put your certified, approved paintings up for sale in the ArtistikCity Marketplace. You set the price; we review, sell and pay you.', href: '/dashboard/sell', cta: 'Sell your art' },
 ];
 
-/**
- * Step 7 of the public roadmap (/how-it-works): selling approved work in the marketplace. Kept out of JOURNEY because the
- * studio's progress (StudentStudioController.stage) ends at Certify; the text is filled in with the real terms by the page.
- */
+/** How the public roadmap (/how-it-works) presents step 7 to visitors (the studio's version is the SELL entry above). */
 export const SELL_STEP = { n: '07', key: 'SELL', title: 'Sell your art', href: '/marketplace', cta: 'Explore the Marketplace' };
 
 /** Font Awesome icon per stage, for roadmaps. */

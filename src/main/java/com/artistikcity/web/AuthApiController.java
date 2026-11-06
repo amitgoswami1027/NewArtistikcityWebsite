@@ -451,7 +451,10 @@ public class AuthApiController {
     public ResponseEntity<String> reauthenticate(HttpServletRequest request) {
         auth.logout(request);
         Map<String, Object> body = ok();
-        body.put("redirect", "/login?return_to=%2Fuser%2Flinked-accounts");
+        // ?return_to=/dashboard/sell (a page on this site) brings the student back where they were; default: Login & security
+        String back = request.getParameter("return_to");
+        boolean local = back != null && back.matches("^/(?!/)[A-Za-z0-9/_\\-.?=&#%]*$") && back.length() < 200;
+        body.put("redirect", "/login?return_to=" + java.net.URLEncoder.encode(local ? back : "/user/linked-accounts", java.nio.charset.StandardCharsets.UTF_8));
         return json(HttpStatus.OK, body);
     }
 

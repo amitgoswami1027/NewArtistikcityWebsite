@@ -42,7 +42,8 @@ rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/Vi
 AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing (`shop/ShopPricingTest`) and
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc), the configuration panel's encryption and allow-list
 (`config/panel/ConfigPanelTest`), SNS SMS requests (`auth/sms/SnsSmsSenderTest`) and the Studio Stories / site layout checks
-(`admin/StudioAndLayoutTest`): `mvn test`. `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
+(`admin/StudioAndLayoutTest`), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
+`tests/system/test_selling.py` covers Sell your art end to end. `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
 new admin API, secret masking, validation and commit of panel values, site settings and the Studio Stories workflow. Browser tests for the purchase flow live in `tests/e2e`.
 The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
 the rest get 409 or REFUND_REQUIRED) and `seats/SeatRaceIT` (20 students, 5 seats: exactly 5 get one) run only with
@@ -127,10 +128,21 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   identities live in `linked_accounts`. Merge accounts only through `AccountService`, which applies the verified-e-mail rules.
 - Auth JSON endpoints (`web/AuthApiController`, `/auth/**`) return `{message, errors, retryAfter, reauth}` on failure. Changing
   sign-in methods needs a login younger than 30 minutes (403 `reauth`).
-- **Student areas.** *My studio* is for learning only. It uses `Components/Studio/StudioLayout` with four tabs (My studio, My courses,
-  Submissions, Certificates & reports) and the journey Discover → Join → Choose a course → Learn → Submit → Certify
-  (`Components/Studio/Journey.js`; the backend stage is `StudentStudioController.stage`). The old artwork section (Portfolio & shop,
-  students selling originals) was removed: `/dashboard/portfolio` redirects to `/dashboard`, and the marketplace sells studio work only.
+- **Student areas.** *My studio* uses `Components/Studio/StudioLayout` with five tabs (My studio, My courses, Submissions,
+  Certificates & reports, Sell your art) and the seven-step journey Discover → Join → Choose a course → Learn → Submit → Certify → Sell
+  (`Components/Studio/Journey.js` `JOURNEY`; the backend stage is `StudentStudioController.stage`: 7 once certified in any course).
+  `/dashboard/portfolio` (the old portfolio page) redirects to `/dashboard`.
+- **Sell your art** (`selling/StudentSellController`, `/dashboard/sell`, pages `Studio/Sell` + `Studio/SellListing`): a student certified in a
+  course (certificate issued, or every requirement met: `certifiedCourses`) can list the *approved* submissions of that course as originals
+  (`paintings.source = 'STUDENT'`, `artist_user_id`, `submission_id`, `shop_formats` NULL = no prints; one live listing per submission). The
+  approved photo is the cover, extra photos go through `MarketplaceImages`; the student sets the price (`ListingInput` rules). Submitting puts it
+  in the staff review queue (PENDING_REVIEW → Admin > Sales > Marketplace approve/reject with notes; "changes requested" = DRAFT with review notes).
+  Editing a live listing sends it back to review; withdraw = DRAFT (clears the notes). The ledger pays the artist share to payee USER.
+  API (CSRF-checked): `POST /api/studio/sell/listings`, `PUT .../listings/{id}`, `POST .../listings/{id}/withdraw`, `POST /api/studio/sell/images`,
+  `POST /api/studio/sell/payout`. Moderation `SELLING` blocks it. **Payout details** (UPI / Indian bank / PayPal) live in `student_payout_details`,
+  encrypted with the Configuration Panel key (`selling/PayoutDetails`, `PanelConfig.secretBox()`), shown masked; changing them needs a sign-in
+  younger than 30 minutes (403 `reauth`; `/auth/reauthenticate?return_to=/dashboard/sell`). Finance staff (capability `revenue`) read them in
+  Admin > Sales > Payouts & ledger (Artists tab / batch lines → "Payout details", `GET /admin/api/finance/payees/{userId}/payout-details`); each look is audited.
   *My course* is a focused view with no studio tabs (`web/user/CourseLearningController`, frame `Components/Course/CourseShell`):
   overview `/user/course/{order_id}` (`Pages/Course/Overview`), `/user/course/{order_id}/resume` (next unfinished lesson) and the learning
   view `/user/course/modules/{module_id}?lesson={id}` (`Pages/Course/Learn`: collapsible syllabus sidebar, prev/next across modules, mark
@@ -140,7 +152,7 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   *My account* (`Components/Account/AccountLayout`, list in `Components/Account/nav.js`) holds Profile, Your orders (`/user/orders`, page
   `Account/Orders`: every order system in one list through `orders/UnifiedOrderService`, see docs/marketplace-shop.md), Wish list, Addresses, Login & security, Notifications and Help. `Layouts/Authenticated` picks the shell from the URL.
   The public roadmap `/how-it-works` (`Pages/HowItWorks`) shows seven steps: the six of `JOURNEY` plus `SELL_STEP` (Sell your art, kept out of
-  `JOURNEY` because the studio stage ends at Certify), with a sticky process tracker (`.hiw-tracker`, scrolls in code because of `<base href>`) and a
+  `JOURNEY` because the studio stage ends at Certify), with a process tracker right under the hero banner (`.hiw-tracker`, sticky below the header once reached; scrolls in code because of `<base href>`) and a
   zigzag timeline (`.hiw-*` in `ac-theme.css`). Step 7 quotes the real terms from `PagesController.howItWorks` (prop `sell`: artist share =
   100 - `app.ledger.commission-percent`, `payout-after-days`), so don't hard-code percentages in that copy.
   The header "My studio" is a plain link, and the avatar menu lists the account pages, with counts from the shared prop `nav`.

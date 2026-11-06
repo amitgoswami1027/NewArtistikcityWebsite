@@ -8490,7 +8490,8 @@ const JOURNEY = [
   { n: "03", key: "CHOOSE_COURSE", title: "Choose a course", text: "Pick a live course or a weekend workshop in the medium you love.", href: "/courses?type=all", cta: "Browse courses" },
   { n: "04", key: "LEARN", title: "Learn", text: "Follow the lessons in your course, practise and track your progress.", href: "/user/my-courses", cta: "Go to my courses" },
   { n: "05", key: "SUBMIT", title: "Submit", text: "Upload your assignment milestone for a personal review from your instructor.", href: "/dashboard/submissions", cta: "Submit work" },
-  { n: "06", key: "CERTIFY", title: "Certify", text: "Finish the course with approved work to earn your verifiable ArtistikCity certificate and PDF portfolio report.", href: "/dashboard/certificates", cta: "Certificates & reports" }
+  { n: "06", key: "CERTIFY", title: "Certify", text: "Finish the course with approved work to earn your verifiable ArtistikCity certificate and PDF portfolio report.", href: "/dashboard/certificates", cta: "Certificates & reports" },
+  { n: "07", key: "SELL", title: "Sell your art", text: "Put your certified, approved paintings up for sale in the ArtistikCity Marketplace. You set the price; we review, sell and pay you.", href: "/dashboard/sell", cta: "Sell your art" }
 ];
 const SELL_STEP = { n: "07", key: "SELL", title: "Sell your art", href: "/marketplace", cta: "Explore the Marketplace" };
 const JOURNEY_ICONS = { DISCOVER: "fa-compass", JOIN: "fa-user-plus", CHOOSE_COURSE: "fa-th-large", LEARN: "fa-paint-brush", SUBMIT: "fa-upload", CERTIFY: "fa-certificate", SELL: "fa-shopping-bag" };
@@ -8556,7 +8557,8 @@ const TABS = [
   { href: "/dashboard", label: "My studio", icon: "fa-th-large" },
   { href: "/user/my-courses", label: "My courses", icon: "fa-graduation-cap" },
   { href: "/dashboard/submissions", label: "Submissions", icon: "fa-upload" },
-  { href: "/dashboard/certificates", label: "Certificates & reports", icon: "fa-certificate" }
+  { href: "/dashboard/certificates", label: "Certificates & reports", icon: "fa-certificate" },
+  { href: "/dashboard/sell", label: "Sell your art", icon: "fa-shopping-bag" }
 ];
 function StudioTabs({ active }) {
   return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "mt-6 flex gap-2 overflow-x-auto border-b border-gray-200", "aria-label": "Studio", children: TABS.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
@@ -24944,6 +24946,7 @@ function Finance() {
   const [toastNode, toast] = (0, import_AdminLayout.useToast)();
   const [tab, setTab] = (0, import_react.useState)(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") || "report");
   const [batch, setBatch] = (0, import_react.useState)(null);
+  const [payee, setPayee] = (0, import_react.useState)(null);
   const [busy, setBusy] = (0, import_react.useState)(null);
   const [dispute, setDispute] = (0, import_react.useState)({ source: "MARKETPLACE", ref: "", reason: "" });
   const reload = () => import_inertia.Inertia.reload({ preserveScroll: true });
@@ -25007,7 +25010,8 @@ function Finance() {
       { key: "paid", label: "Paid", align: "right", render: (r) => inr(r.paid) },
       { key: "holding", label: "In holding period", align: "right", render: (r) => Number(r.holding) ? inr(r.holding) : "\u2014" },
       { key: "disputed", label: "On hold (dispute)", align: "right", render: (r) => Number(r.disputed) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "red", children: inr(r.disputed) }) : "\u2014" },
-      { key: "balance", label: "Balance", align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: inr(r.balance) }) }
+      { key: "balance", label: "Balance", align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: inr(r.balance) }) },
+      { key: "pay", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Payout details" }), align: "right", render: (r) => r.payee_type === "USER" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-university", onClick: () => setPayee(r.payee_id), children: "Payout details" }) : null }
     ] })),
     tab === "payouts" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", style: { marginBottom: 12 }, children: [
@@ -25091,11 +25095,43 @@ function Finance() {
       ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-book", title: "No ledger entries yet" }) }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer })
     ] }),
-    batch && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BatchDrawer, { id: batch, onClose: () => setBatch(null), call, busy }),
+    batch && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BatchDrawer, { id: batch, onClose: () => setBatch(null), call, busy, onPayee: setPayee }),
+    payee && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PayoutDetailsDrawer, { userId: payee, onClose: () => setPayee(null) }),
     toastNode
   ] });
 }
-function BatchDrawer({ id, onClose, call, busy }) {
+function PayoutDetailsDrawer({ userId, onClose }) {
+  const [d, setD] = (0, import_react.useState)(null);
+  const [err, setErr] = (0, import_react.useState)(null);
+  import_react.default.useEffect(() => {
+    import_axios.default.get(`/admin/api/finance/payees/${userId}/payout-details`).then((r) => setD(r.data)).catch((e) => setErr((0, import_AdminLayout.errorText)(e)));
+  }, [userId]);
+  const x = d && d.details;
+  const rows = !x || x.unreadable ? [] : [
+    ["Method", { UPI: "UPI", BANK: "Bank transfer (India)", PAYPAL: "PayPal" }[x.method] || x.method],
+    ["Account holder", x.holderName],
+    ...x.method === "UPI" ? [["UPI ID", x.upiId]] : [],
+    ...x.method === "BANK" ? [["Account number", x.accountNumber], ["IFSC", x.ifsc]] : [],
+    ...x.method === "PAYPAL" ? [["PayPal e-mail", x.paypalEmail]] : [],
+    ["Last changed", (0, import_kit.fmtDate)(x.updated_at, true)]
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Drawer, { open: true, title: "Payout details", subtitle: d ? `${d.student.name} \xB7 ${d.student.email}` : "", onClose, footer: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Close" }), children: err ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: err }) : !d ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-skel", style: { height: 16, width: "60%" } }) : !x ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.EmptyState, { icon: "fa-university", title: "No payout details yet", children: [
+    "The student hasn't added where to be paid. Ask them to add it in My studio \u203A Sell your art (",
+    d.student.email,
+    d.student.phone ? `, ${d.student.phone}` : "",
+    ")."
+  ] }) : x.unreadable ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: "These details can't be decrypted with the server's current key. Ask the student to enter them again." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dl", { className: "adm-dl", children: rows.map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_react.default.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: k }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: v }) })
+    ] }, k)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shield", "aria-hidden": "true" }),
+      " Viewing these details is recorded in the security log. Check the name matches the student before you transfer."
+    ] })
+  ] }) });
+}
+function BatchDrawer({ id, onClose, call, busy, onPayee }) {
   const [d, setD] = (0, import_react.useState)(null);
   const [ref, setRef] = (0, import_react.useState)("");
   import_react.default.useEffect(() => {
@@ -25111,7 +25147,8 @@ function BatchDrawer({ id, onClose, call, busy }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: l.payee_email || "\u2014" })
       ] }) },
       { key: "entries", label: "Entries", align: "right", render: (l) => l.entries },
-      { key: "amount", label: "Amount", align: "right", render: (l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: inr(l.amount) }) }
+      { key: "amount", label: "Amount", align: "right", render: (l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: inr(l.amount) }) },
+      { key: "pay", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Payout details" }), align: "right", render: (l) => l.payee_type === "USER" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-university", onClick: () => onPayee(l.payee_id), "aria-label": `Payout details of ${l.payee_name || l.payee_id}`, children: "Pay to" }) : null }
     ] }),
     draft ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-task is-edit", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Transfer each amount to the artist, then record the reference. Lines are re-checked when you confirm: a dispute opened since the batch was made lowers or removes that artist's line." }),
@@ -28230,6 +28267,701 @@ function Editor() {
 function StudioStories() {
   const { mode } = (0, import_inertia_react.usePage)().props;
   return mode === "edit" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Editor, {}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dashboard, {});
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Studio/Sell.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Sell_exports = {};
+__export(Sell_exports, {
+  LISTING_STATUS: () => LISTING_STATUS,
+  default: () => Sell,
+  statusOf: () => statusOf
+});
+module.exports = __toCommonJS(Sell_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
+var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
+const LISTING_STATUS = {
+  DRAFT: { label: "Draft", tone: "grey", icon: "fa-pencil", text: "Private. Submit it when you are ready." },
+  CHANGES: { label: "Changes requested", tone: "amber", icon: "fa-exclamation-circle", text: "Our team asked for a change before it can go live." },
+  PENDING_REVIEW: { label: "In review", tone: "blue", icon: "fa-clock-o", text: "Our team is checking it before it goes live." },
+  AVAILABLE: { label: "For sale", tone: "green", icon: "fa-globe", text: "Live in the marketplace." },
+  RESERVED: { label: "Reserved", tone: "purple", icon: "fa-lock", text: "A collector is paying for it right now." },
+  SOLD: { label: "Sold", tone: "brand", icon: "fa-trophy", text: "Sold. Your share is in Earnings." },
+  ARCHIVED: { label: "Archived", tone: "grey", icon: "fa-archive", text: "Off the marketplace." }
+};
+const statusOf = (l) => l.changes_requested ? LISTING_STATUS.CHANGES : LISTING_STATUS[l.stock_status] || LISTING_STATUS.DRAFT;
+function Pill({ s }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `sl-pill is-${s.tone}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${s.icon}`, "aria-hidden": "true" }),
+    s.label
+  ] });
+}
+function Terms({ terms }) {
+  const items = [
+    ["fa-percent", `You keep ${terms.artistPercent}%`, `of every sale (${terms.commissionPercent}% covers the listing, checkout and payments)`],
+    ["fa-tag", "You set the price", `from ${(0, import_Journey.inr)(terms.minPrice)}; we check every listing before it goes live`],
+    ["fa-clock-o", `Payable ${terms.payoutDays} days after a sale`, "then paid in our weekly payout run"],
+    ["fa-shield", "Secure checkout", "collectors pay us; we hold the money until it is yours"]
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "sl-terms", "aria-label": "How selling works", children: items.map(([icon, t, d]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t }),
+      d
+    ] })
+  ] }, t)) });
+}
+function Listings({ listings, onToast }) {
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const withdraw = (l) => {
+    if (!window.confirm(`Take \u201C${l.title}\u201D off the marketplace? It becomes a private draft; you can submit it again later.`)) return;
+    setBusy(l.id);
+    import_axios.default.post(`/api/studio/sell/listings/${l.id}/withdraw`).then((r) => {
+      onToast(r.data.message);
+      import_inertia.Inertia.reload({ preserveScroll: true });
+    }).catch((e) => onToast(e.response && e.response.data && e.response.data.message || "Something went wrong.", true)).finally(() => setBusy(null));
+  };
+  if (listings.length === 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-empty", children: "No listings yet. Pick an approved piece above to start." });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "sl-listings", children: listings.map((l) => {
+    const s = statusOf(l);
+    const editable = ["DRAFT", "PENDING_REVIEW", "AVAILABLE"].includes(l.stock_status);
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "sl-listing", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sl-listing__img", children: l.image_url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: l.image_url, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o", "aria-hidden": "true" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-listing__main", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-listing__top", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: l.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pill, { s })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "sl-listing__meta", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_Journey.inr)(l.final_price) }),
+          " \xB7 you earn ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_Journey.inr)(l.you_earn) }),
+          l.stock_status === "SOLD" && l.sold_at ? ` \xB7 sold ${(0, import_Journey.shortDate)(l.sold_at)}` : l.published_at && l.stock_status === "AVAILABLE" ? ` \xB7 live since ${(0, import_Journey.shortDate)(l.published_at)}` : ` \xB7 updated ${(0, import_Journey.shortDate)(l.updated_at)}`
+        ] }),
+        l.changes_requested ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "sl-note", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-comment-o", "aria-hidden": "true" }),
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "From our team:" }),
+          " ",
+          l.review_notes
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-listing__hint", children: s.text })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-listing__actions", children: [
+        editable && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/sell/listings/${l.id}`, className: "sl-btn sl-btn--line", children: l.changes_requested ? "Make changes" : "Edit" }),
+        l.stock_status !== "ARCHIVED" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/marketplace/${l.slug}`, className: "sl-btn sl-btn--ghost", target: "_blank", rel: "noopener noreferrer", children: [
+          ["AVAILABLE", "RESERVED", "SOLD"].includes(l.stock_status) ? "View" : "Preview",
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link", "aria-hidden": "true" })
+        ] }),
+        ["PENDING_REVIEW", "AVAILABLE"].includes(l.stock_status) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "sl-btn sl-btn--ghost", disabled: busy === l.id, onClick: () => withdraw(l), children: "Withdraw" })
+      ] })
+    ] }, l.id);
+  }) });
+}
+function Earnings({ e, terms }) {
+  const n = (v) => Number(v || 0);
+  const payableNow = Math.max(0, n(e.balance) - n(e.holding));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-stats", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Earned" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_Journey.inr)(e.earned) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "your share of every sale" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "To be paid" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_Journey.inr)(payableNow) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "in the next weekly payout" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "In holding" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_Journey.inr)(e.holding) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: `payable ${terms.payoutDays} days after the sale` })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Paid out" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_Journey.inr)(e.paid) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "sent to your payout account" })
+      ] })
+    ] }),
+    (e.sales || []).length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "sl-sales", "aria-label": "Latest sales", children: e.sales.map((s, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: String(s.memo || "Sale").replace(/^Original: /, "") }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+        (0, import_Journey.shortDate)(s.created_at),
+        s.available_at ? ` \xB7 payable ${(0, import_Journey.shortDate)(s.available_at)}` : ""
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_Journey.inr)(s.amount) })
+    ] }, i)) })
+  ] });
+}
+const METHODS = [["UPI", "UPI", "fa-mobile"], ["BANK", "Bank account (India)", "fa-university"], ["PAYPAL", "PayPal (outside India)", "fa-paypal"]];
+function PayoutForm({ payout, canStore, onToast }) {
+  const [editing, setEditing] = (0, import_react.useState)(!payout);
+  const [v, setV] = (0, import_react.useState)({ method: payout && payout.method || "UPI", holderName: payout && payout.holder_name || "", upiId: "", accountNumber: "", accountNumberConfirm: "", ifsc: "", paypalEmail: "" });
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [reauth, setReauth] = (0, import_react.useState)(false);
+  const set = (k, x) => {
+    setV((p) => __spreadProps(__spreadValues({}, p), { [k]: x }));
+    setErrors((e) => __spreadProps(__spreadValues({}, e), { [k]: null }));
+  };
+  const field = (k, label, props = {}) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "sl-field", htmlFor: `pay-${k}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: label }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", __spreadValues({ id: `pay-${k}`, value: v[k], onChange: (e) => set(k, e.target.value), "aria-invalid": errors[k] ? "true" : void 0, autoComplete: "off" }, props)),
+    errors[k] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { role: "alert", children: errors[k] })
+  ] });
+  const save = (ev) => {
+    ev.preventDefault();
+    setBusy(true);
+    setReauth(false);
+    import_axios.default.post("/api/studio/sell/payout", v).then((r) => {
+      onToast(r.data.message);
+      setEditing(false);
+      import_inertia.Inertia.reload({ only: ["payout"], preserveScroll: true });
+    }).catch((e) => {
+      const d = e.response && e.response.data || {};
+      if (d.reauth) setReauth(true);
+      else if (d.errors) {
+        setErrors(d.errors);
+        onToast(d.message, true);
+      } else onToast(d.message || "Something went wrong.", true);
+    }).finally(() => setBusy(false));
+  };
+  const signInAgain = () => import_axios.default.post("/auth/reauthenticate?return_to=%2Fdashboard%2Fsell").then((r) => window.location.assign(r.data.redirect));
+  if (!canStore) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-note", children: "Payout details can't be saved right now. Please try again later." });
+  if (!editing && payout) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-payout", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check-circle", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: payout.masked }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          payout.holder_name,
+          " \xB7 changed ",
+          (0, import_Journey.shortDate)(payout.updated_at)
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "sl-btn sl-btn--line", onClick: () => setEditing(true), children: "Change" })
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "sl-form", onSubmit: save, noValidate: true, children: [
+    reauth && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-alert", role: "alert", children: [
+      "For your security, sign in again before changing where your earnings are paid.",
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "sl-linkbtn", onClick: signInAgain, children: "Sign in again" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sl-seg", role: "radiogroup", "aria-label": "How do you want to be paid?", children: METHODS.map(([id, label, icon]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "radio", "aria-checked": v.method === id, className: v.method === id ? "is-on" : "", onClick: () => set("method", id), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+      " ",
+      label
+    ] }, id)) }),
+    field("holderName", "Account holder name", { autoComplete: "name" }),
+    v.method === "UPI" && field("upiId", "UPI ID", { placeholder: "yourname@okhdfcbank", inputMode: "email" }),
+    v.method === "BANK" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-grid2", children: [
+      field("accountNumber", "Account number", { inputMode: "numeric" }),
+      field("accountNumberConfirm", "Account number again", { inputMode: "numeric", onPaste: (e) => e.preventDefault() }),
+      field("ifsc", "IFSC code", { placeholder: "HDFC0001234", style: { textTransform: "uppercase" } })
+    ] }),
+    v.method === "PAYPAL" && field("paypalEmail", "PayPal e-mail", { type: "email", inputMode: "email" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "sl-small", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+      " Stored encrypted. Only our finance team can see the full details, and only when paying you."
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-actions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "sl-btn sl-btn--brand", disabled: busy, children: busy ? "Saving\u2026" : "Save payout details" }),
+      payout && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "sl-btn sl-btn--ghost", onClick: () => setEditing(false), children: "Cancel" })
+    ] })
+  ] });
+}
+function Sell() {
+  const { certified, certifiedCourses = [], ready = [], locked = [], listings = [], earnings = {}, payout, canStorePayout, terms = {}, restriction, flash } = (0, import_inertia_react.usePage)().props;
+  const [toast, setToast] = (0, import_react.useState)(flash && flash.message ? { text: flash.message } : null);
+  const say = (text, error = false) => setToast({ text, error });
+  (0, import_react.useEffect)(() => {
+    try {
+      const m = window.sessionStorage.getItem("ac.sell.flash");
+      if (m) {
+        window.sessionStorage.removeItem("ac.sell.flash");
+        setToast({ text: m });
+      }
+    } catch (e) {
+    }
+  }, []);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_StudioLayout.default,
+    {
+      title: "Sell your art",
+      active: "/dashboard/sell",
+      stage: 7,
+      subtitle: `Turn your certified work into income. You set the price and keep ${terms.artistPercent}% of every sale.`,
+      children: [
+        toast && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `sl-toast ${toast.error ? "is-error" : ""}`, role: toast.error ? "alert" : "status", children: [
+          toast.text,
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => setToast(null), "aria-label": "Dismiss", children: "\xD7" })
+        ] }),
+        restriction && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-alert", role: "alert", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-ban", "aria-hidden": "true" }),
+          " ",
+          restriction
+        ] }),
+        !certified ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-locked", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sl-locked__icon", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-eyebrow", children: "Step 7 \xB7 unlocks with your first certificate" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Earn a certificate to start selling" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Finish every lesson of a course and get an assignment approved to earn its certificate. Then the approved work you made for that course can go on sale here." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-actions", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/certificates", className: "sl-btn sl-btn--brand", children: "See what's left to certify" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/how-it-works#step-sell", className: "sl-btn sl-btn--line", children: "How selling works" })
+            ] })
+          ] })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "sl-certified", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-certificate", "aria-hidden": "true" }),
+          " Certified in ",
+          certifiedCourses.map((c) => c.title).join(", ")
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Terms, { terms }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-section", "aria-labelledby": "sl-ready", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-head", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sl-ready", children: "Ready to sell" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Approved work from the courses you are certified in." })
+          ] }),
+          ready.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-empty", children: certified ? "Everything approved is already listed. Submit new work in a certified course to sell more." : "Nothing yet: your approved work appears here once its course is certified." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "sl-cards", children: ready.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "sl-card", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: s.file_url, alt: "" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-card__body", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: s.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: s.course_title }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                "a",
+                {
+                  href: `/dashboard/sell/new?submission=${s.id}`,
+                  className: `sl-btn sl-btn--brand ${restriction ? "is-disabled" : ""}`,
+                  "aria-disabled": restriction ? "true" : void 0,
+                  onClick: (e) => {
+                    if (restriction) e.preventDefault();
+                  },
+                  children: "List for sale"
+                }
+              )
+            ] })
+          ] }, s.id)) }),
+          locked.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { className: "sl-lockedlist", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
+              locked.length,
+              " approved piece",
+              locked.length === 1 ? "" : "s",
+              " waiting for a course certificate"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { children: locked.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: s.file_url, alt: "" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: s.title }),
+                s.course_title
+              ] })
+            ] }, s.id)) })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-section", "aria-labelledby": "sl-listings", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-head", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sl-listings", children: "Your listings" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Drafts, listings in review, and what is live or sold." })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Listings, { listings, onToast: say })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-two", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-section", "aria-labelledby": "sl-earnings", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-head", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sl-earnings", children: "Earnings" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Your share of each sale, from our payout ledger." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Earnings, { e: earnings, terms })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-section", id: "payout", "aria-labelledby": "sl-payout", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-head", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sl-payout", children: "Payout details" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Where we send your earnings." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PayoutForm, { payout, canStore: canStorePayout, onToast: say })
+          ] })
+        ] })
+      ]
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Studio/SellListing.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SellListing_exports = {};
+__export(SellListing_exports, {
+  default: () => SellListing
+});
+module.exports = __toCommonJS(SellListing_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
+var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
+var import_Sell = __webpack_require__("./resources/js/Pages/Studio/Sell.js");
+const MEDIUMS = ["Oil", "Acrylic", "Watercolour", "Gouache", "Pencil", "Charcoal", "Ink", "Soft pastel", "Oil pastel", "Mixed media"];
+const SURFACES = ["Stretched cotton canvas", "Canvas board", "Watercolour paper (300 gsm)", "Drawing paper", "Wood panel", "Handmade paper"];
+const toForm = (l, s) => l ? {
+  title: l.title || "",
+  description: l.description || "",
+  artistNotes: l.artist_notes || "",
+  medium: l.medium || "",
+  surface: l.surface || "",
+  subject: l.subject || "",
+  styleTags: l.style_tags || "",
+  heightInches: l.height_inches || "",
+  widthInches: l.width_inches || "",
+  depthInches: Number(l.depth_inches) ? l.depth_inches : "",
+  weightKg: Number(l.weight_kg) ? l.weight_kg : "",
+  yearCreated: l.year_created || (/* @__PURE__ */ new Date()).getFullYear(),
+  framed: !!Number(l.is_framed),
+  frameDetails: l.frame_details || "",
+  signed: !!Number(l.is_signed),
+  basePrice: l.base_price ? String(Math.round(Number(l.base_price))) : ""
+} : {
+  title: s && s.title || "",
+  description: s && s.description || "",
+  artistNotes: "",
+  medium: "",
+  surface: "",
+  subject: "",
+  styleTags: "",
+  heightInches: "",
+  widthInches: "",
+  depthInches: "",
+  weightKg: "",
+  yearCreated: (/* @__PURE__ */ new Date()).getFullYear(),
+  framed: false,
+  frameDetails: "",
+  signed: true,
+  basePrice: ""
+};
+function SellListing() {
+  const { listing, submission, terms = {}, restriction } = (0, import_inertia_react.usePage)().props;
+  const [v, setV] = (0, import_react.useState)(() => toForm(listing, submission));
+  const cover = submission ? submission.file_url : null;
+  const [photos, setPhotos] = (0, import_react.useState)(() => listing && listing.images ? listing.images.map((i) => i.image_url).filter((u) => u !== cover) : []);
+  const [errors, setErrors] = (0, import_react.useState)([]);
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const [upload, setUpload] = (0, import_react.useState)(null);
+  const fileRef = (0, import_react.useRef)(null);
+  const set = (k, x) => setV((p) => __spreadProps(__spreadValues({}, p), { [k]: x }));
+  const live = listing && listing.stock_status === "AVAILABLE";
+  const pct = Number(terms.artistPercent || 70);
+  const price = Number(String(v.basePrice).replace(/[^\d.]/g, "")) || 0;
+  const earn = Math.floor((price * pct + 1e-6) / 100);
+  const addPhotos = async (files) => {
+    for (const f of Array.from(files || []).slice(0, Math.max(0, 11 - photos.length))) {
+      const fd = new FormData();
+      fd.append("file", f);
+      setUpload(`Uploading ${f.name}\u2026`);
+      try {
+        const r = await import_axios.default.post("/api/studio/sell/images", fd);
+        setPhotos((p) => [...p, r.data.url]);
+        setUpload(null);
+      } catch (e) {
+        setUpload(null);
+        setErrors([e.response && e.response.data && e.response.data.message || `Couldn't upload ${f.name}.`]);
+      }
+    }
+    if (fileRef.current) fileRef.current.value = "";
+  };
+  const save = (intent) => {
+    const local = [];
+    if (v.title.trim().length < 3) local.push("Give the painting a title (3\u2013255 characters).");
+    if (v.description.trim().length < 20) local.push("Describe the painting in at least 20 characters.");
+    if (!v.medium.trim()) local.push("Choose the medium (for example Oil or Watercolour).");
+    if (!v.surface.trim()) local.push("Describe the surface (for example Stretched cotton canvas).");
+    if (!Number(v.heightInches) || !Number(v.widthInches)) local.push("Enter the height and width in inches.");
+    if (v.framed && v.frameDetails.trim().length < 3) local.push("Describe the frame (material and glazing).");
+    if (price < Number(terms.minPrice || 500)) local.push(`Set a price of at least ${(0, import_Journey.inr)(terms.minPrice || 500)}.`);
+    if (local.length && intent === "submit") {
+      setErrors(local);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setErrors([]);
+    setBusy(intent);
+    const body = __spreadValues(__spreadProps(__spreadValues({}, v), {
+      basePrice: price,
+      intent,
+      images: photos.map((url) => ({ url, primary: false, alt: v.title }))
+    }), listing ? { version: Number(listing.version) } : { submissionId: submission.id });
+    const req = listing ? import_axios.default.put(`/api/studio/sell/listings/${listing.id}`, body) : import_axios.default.post("/api/studio/sell/listings", body);
+    req.then((r) => {
+      try {
+        window.sessionStorage.setItem("ac.sell.flash", r.data.message);
+      } catch (e) {
+      }
+      window.location.assign("/dashboard/sell");
+    }).catch((e) => {
+      const d = e.response && e.response.data || {};
+      setErrors(d.errors && Array.isArray(d.errors) ? d.errors : [d.message || d.errors && Object.values(d.errors)[0] || "Something went wrong. Please try again."]);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }).finally(() => setBusy(null));
+  };
+  const input = (k, label, props = {}, hint) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "sl-field", htmlFor: `f-${k}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: label }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", __spreadValues({ id: `f-${k}`, value: v[k], onChange: (e) => set(k, e.target.value) }, props)),
+    hint && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: hint })
+  ] });
+  const title = listing ? `Edit \u201C${listing.title}\u201D` : "List your artwork";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_StudioLayout.default,
+    {
+      title,
+      active: "/dashboard/sell",
+      crumbs: [{ href: "/dashboard/sell", label: "Sell your art" }],
+      subtitle: submission ? `From your approved work in ${submission.course_title}.` : "Your listing",
+      children: [
+        restriction && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-alert", role: "alert", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-ban", "aria-hidden": "true" }),
+          " ",
+          restriction
+        ] }),
+        listing && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "sl-status-line", children: [
+          "Status: ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_Sell.statusOf)(listing).label }),
+          listing.changes_requested && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            " \xB7 ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "sl-note-inline", children: [
+              "From our team: ",
+              listing.review_notes
+            ] })
+          ] })
+        ] }),
+        live && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-alert sl-alert--info", role: "note", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-info-circle", "aria-hidden": "true" }),
+          " This piece is live. Saving changes sends it back to review; it returns to the marketplace once approved."
+        ] }),
+        errors.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-alert", role: "alert", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Please fix:" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { children: errors.map((e) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: e }, e)) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-editor", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-editor__main", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-panel", "aria-labelledby": "h-photos", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "h-photos", children: "Photos" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-small", children: "The approved photo is the cover. Add close-ups, the back and the signature: collectors buy from detail." }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-photos", children: [
+                cover && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figure", { className: "sl-photo is-cover", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: cover, alt: "Cover" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("figcaption", { children: "Cover" })
+                ] }),
+                photos.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figure", { className: "sl-photo", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: u, alt: "" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => setPhotos((p) => p.filter((x) => x !== u)), "aria-label": "Remove this photo", children: "\xD7" })
+                ] }, u)),
+                photos.length < 11 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "sl-photo sl-photo--add", htmlFor: "sl-file", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-plus", "aria-hidden": "true" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Add photos" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "sl-file", ref: fileRef, type: "file", accept: "image/jpeg,image/png", multiple: true, onChange: (e) => addPhotos(e.target.files) })
+                ] })
+              ] }),
+              upload && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-small", role: "status", children: upload })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-panel", "aria-labelledby": "h-story", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "h-story", children: "The story" }),
+              input("title", "Title", { maxLength: 255 }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "sl-field", htmlFor: "f-description", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Description" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-description", rows: 5, value: v.description, maxLength: 6e3, onChange: (e) => set("description", e.target.value) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "What it shows, the mood, the light. At least 20 characters." })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "sl-field", htmlFor: "f-artistNotes", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  "Artist's notes ",
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { className: "sl-opt", children: "optional" })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-artistNotes", rows: 3, value: v.artistNotes, maxLength: 6e3, onChange: (e) => set("artistNotes", e.target.value) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "What you learned or tried while painting it." })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-grid2", children: [
+                input("subject", "Subject", { maxLength: 100, placeholder: "Landscape, portrait, still life\u2026" }),
+                input("styleTags", "Style tags", { maxLength: 255, placeholder: "impressionist, monsoon" }, "Comma separated, optional.")
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-panel", "aria-labelledby": "h-details", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "h-details", children: "The piece" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-grid2", children: [
+                input("medium", "Medium", { list: "sl-mediums", maxLength: 100 }),
+                input("surface", "Surface", { list: "sl-surfaces", maxLength: 100 })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", { id: "sl-mediums", children: MEDIUMS.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: m }, m)) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", { id: "sl-surfaces", children: SURFACES.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: m }, m)) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-grid4", children: [
+                input("heightInches", "Height (in)", { inputMode: "decimal" }),
+                input("widthInches", "Width (in)", { inputMode: "decimal" }),
+                input("depthInches", "Depth (in)", { inputMode: "decimal", placeholder: "optional" }),
+                input("yearCreated", "Year", { inputMode: "numeric" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-checks", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: v.signed, onChange: (e) => set("signed", e.target.checked) }),
+                  " Signed by me"
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: v.framed, onChange: (e) => set("framed", e.target.checked) }),
+                  " Sold framed"
+                ] })
+              ] }),
+              v.framed && input("frameDetails", "Frame", { maxLength: 255, placeholder: "Black wood, glass" })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "sl-editor__side", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-panel sl-price", "aria-labelledby": "h-price", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "h-price", children: "Your price" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "sl-field", htmlFor: "f-basePrice", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Price of the original (\u20B9)" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-basePrice", inputMode: "numeric", value: v.basePrice, onChange: (e) => set("basePrice", e.target.value.replace(/[^\d]/g, "")), placeholder: String(terms.minPrice || 500) })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "sl-earn", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Collector pays" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_Journey.inr)(price) })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dt", { children: [
+                    "ArtistikCity (",
+                    terms.commissionPercent,
+                    "%)"
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+                    "\u2212 ",
+                    (0, import_Journey.inr)(price - earn)
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "is-total", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "You earn" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_Journey.inr)(earn) })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "sl-small", children: [
+                "Shipping of the original is included in the price. Payable ",
+                terms.payoutDays,
+                " days after the sale."
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-actions sl-actions--stack", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "sl-btn sl-btn--brand", disabled: !!busy || !!restriction, onClick: () => save("submit"), children: busy === "submit" ? "Sending\u2026" : live ? "Save and send for review" : "Submit for review" }),
+                !live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "sl-btn sl-btn--line", disabled: !!busy || !!restriction, onClick: () => save("draft"), children: busy === "draft" ? "Saving\u2026" : "Save draft" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/sell", className: "sl-btn sl-btn--ghost", children: "Cancel" })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "sl-small sl-side-note", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shield", "aria-hidden": "true" }),
+              " Our team checks every listing (photos, details, price) before it goes live, and tells you here if something needs a change."
+            ] })
+          ] })
+        ] })
+      ]
+    }
+  );
 }
 
 
@@ -31803,7 +32535,7 @@ function SellStep({ step, index, total, sell, signedIn }) {
   const perks = [
     ["fa-percent", `You keep ${sell.artistPercent}%`, "of every sale. Our share covers the listing, secure checkout and payment handling."],
     ["fa-clock-o", `Payable ${sell.payoutDays} days after the sale`, "Then paid out in our weekly payout run."],
-    ["fa-clone", "One painting, four ways to buy", "The one-of-a-kind original, plus numbered canvas editions, fine-art posters and digital downloads."],
+    ["fa-tag", "Your price, your story", "You set the price of each original and write what went into it; we check every listing before it goes live."],
     ["fa-globe", "Collectors in India and worldwide", "Rupee payments through Razorpay, international payments through PayPal."]
   ];
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { id: step.id, className: "hiw-step is-goal", "data-step": index, children: [
@@ -31818,14 +32550,14 @@ function SellStep({ step, index, total, sell, signedIn }) {
           " \xB7 The finish line"
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "hiw-goal__title", children: "Launch your gallery & sell" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "hiw-goal__text", children: "Your certificate proves the skill; your paintings can now earn from it. Once you're certified, your best approved studio pieces can be listed in the ArtistikCity Marketplace, each with its own gallery page: the original for one collector, and prints and downloads for many more. Our team reviews every piece before it goes live, and we run the checkout, payments and collector messages for you, so you can keep painting while your practice grows into a sustainable art career." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "hiw-goal__text", children: "Your certificate proves the skill; your paintings can now earn from it. Once you're certified, list the approved work from that course straight from My studio: write its story and set your own price. Every piece gets its own gallery page in the ArtistikCity Marketplace after our team reviews it, and we run the checkout, payments and collector messages for you, so you can keep painting while your practice grows into a sustainable art career." }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "hiw-goal__actions", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: step.href, className: "hiw-btn hiw-btn--light", children: [
             step.cta,
             " ",
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: signedIn ? "/dashboard" : "/join", className: "hiw-btn hiw-btn--ghost", children: signedIn ? "Back to my studio" : "Start creating" })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: signedIn ? "/dashboard/sell" : "/join", className: "hiw-btn hiw-btn--ghost", children: signedIn ? "Sell from my studio" : "Start creating" })
         ] }),
         Number(sell.listed) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "hiw-goal__note", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o", "aria-hidden": "true" }),
@@ -31848,8 +32580,7 @@ function HowItWorks() {
   const { auth, sell = { artistPercent: "70", payoutDays: 14, listed: 0 } } = (0, import_inertia_react.usePage)().props;
   const signedIn = auth && auth.user;
   const steps = [
-    ...import_Journey.JOURNEY.map((s) => __spreadProps(__spreadValues({}, s), { id: `step-${s.key.toLowerCase().replace("_", "-")}` })),
-    __spreadProps(__spreadValues({}, import_Journey.SELL_STEP), { id: "step-sell" })
+    ...import_Journey.JOURNEY.map((s) => s.key === "SELL" ? __spreadProps(__spreadValues(__spreadValues({}, s), import_Journey.SELL_STEP), { id: "step-sell" }) : __spreadProps(__spreadValues({}, s), { id: `step-${s.key.toLowerCase().replace("_", "-")}` }))
   ];
   const [active, setActive] = (0, import_react.useState)(0);
   const timeline = (0, import_react.useRef)(null);
@@ -31870,26 +32601,26 @@ function HowItWorks() {
     if (id && steps.some((s) => s.id === id)) setTimeout(() => scrollToStep(id), 150);
   }, []);
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: "How it works", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tw", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "relative overflow-hidden bg-ink text-white", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 opacity-40", style: { background: "radial-gradient(circle at 85% 20%, #9c0d48 0, transparent 45%), radial-gradient(circle at 10% 90%, #3b5bdb 0, transparent 40%)" }, "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide relative py-20 sm:py-28", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-300", children: "The ArtistikCity creative lifecycle" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { className: "mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-none text-white", children: [
+          "Learn.",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+          "Get certified.",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-brand", children: "Sell your art." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 max-w-2xl text-xl text-gray-300", children: "From your first guided lesson to a verifiable certificate, and from there to your paintings in front of collectors. Seven clear steps, one studio." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-8 flex flex-wrap gap-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: signedIn ? "/dashboard" : "/join", className: "inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-bold hover:bg-brand-dark", children: signedIn ? "Open my studio" : "Start for free" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink", children: "Browse courses" })
+        ] })
+      ] })
+    ] }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProcessTracker, { steps, active }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "tw", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "relative overflow-hidden bg-ink text-white", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 opacity-40", style: { background: "radial-gradient(circle at 85% 20%, #9c0d48 0, transparent 45%), radial-gradient(circle at 10% 90%, #3b5bdb 0, transparent 40%)" }, "aria-hidden": "true" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide relative py-20 sm:py-28", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-pink-300", children: "The ArtistikCity creative lifecycle" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { className: "mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-none text-white", children: [
-            "Learn.",
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-            "Get certified.",
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-brand", children: "Sell your art." })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 max-w-2xl text-xl text-gray-300", children: "From your first guided lesson to a verifiable certificate, and from there to your paintings in front of collectors. Seven clear steps, one studio." }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-8 flex flex-wrap gap-3", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: signedIn ? "/dashboard" : "/join", className: "inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-bold hover:bg-brand-dark", children: signedIn ? "Open my studio" : "Start for free" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink", children: "Browse courses" })
-          ] })
-        ] })
-      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide py-20", "aria-labelledby": "hiw-roadmap", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "max-w-2xl", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-mono text-xs tracking-widest uppercase text-brand", children: "Roadmap" }),
@@ -31907,7 +32638,7 @@ function HowItWorks() {
           ["fa-video-camera", "Guided classroom", "Structured units and lessons with progress tracking and study material."],
           ["fa-comments-o", "Milestone reviews", "Every submission gets personal notes from a reviewer before it is approved."],
           ["fa-certificate", "Verifiable certificates", "Finish a course with approved work to earn a certificate anyone can check online."],
-          ["fa-shopping-bag", "A marketplace for your work", `Approved pieces can be sold as originals, prints and downloads, and you keep ${sell.artistPercent}% of each sale.`]
+          ["fa-shopping-bag", "A marketplace for your work", `Once certified, sell your approved originals from My studio at your own price, and keep ${sell.artistPercent}% of each sale.`]
         ].map(([icon, t, d]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl bg-white border border-gray-200 p-6", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon} text-2xl text-brand`, "aria-hidden": "true" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mt-3 text-lg font-extrabold text-ink", children: t }),
@@ -37811,7 +38542,7 @@ var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components
 var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
 var import_Notices = __toESM(__webpack_require__("./resources/js/Components/Studio/Notices.js"));
 function Home() {
-  const { enrollments = [], submissions = [], stage = 3, auth, certificatesReady = 0, notices = [] } = (0, import_inertia_react.usePage)().props;
+  const { enrollments = [], submissions = [], stage = 3, auth, certificatesReady = 0, notices = [], selling = {} } = (0, import_inertia_react.usePage)().props;
   const name = auth && auth.user ? auth.user.name.split(" ")[0] : "artist";
   const next = import_Journey.JOURNEY[Math.min(stage, import_Journey.JOURNEY.length) - 1];
   const approved = submissions.filter((s) => s.admin_status === "Approved").length;
@@ -37856,6 +38587,14 @@ function Home() {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-sm text-gray-600", children: certificatesReady > 0 ? "Download your ArtistikCity certificates and a printable PDF portfolio of your work." : "Track what\u2019s left to earn each course certificate, and download your PDF portfolio any time." })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard/certificates", className: "inline-flex items-center justify-center h-11 px-5 rounded-full bg-ink text-white font-bold hover:bg-gray-800", children: "Open certificates & reports" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: `mt-4 sl-cta ${stage >= 7 ? "is-open" : ""}`, "aria-labelledby": "sl-cta-h", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sl-cta__icon", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-cta__text", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { id: "sl-cta-h", className: "sl-cta__title", children: stage >= 7 ? "Sell your art" : "Sell your art \xB7 unlocks with your first certificate" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-cta__sub", children: stage >= 7 ? Number(selling.live) || Number(selling.inReview) || Number(selling.sold) ? `${Number(selling.live) || 0} for sale \xB7 ${Number(selling.inReview) || 0} in review \xB7 ${Number(selling.sold) || 0} sold` : "You are certified: put your approved work up for sale in the marketplace, at your own price." : "Finish a course with approved work to earn its certificate; then you can sell the work you made for it." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: stage >= 7 ? "/dashboard/sell" : "/how-it-works#step-sell", className: "sl-cta__btn", children: stage >= 7 ? "Open Sell your art" : "How selling works" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "mt-12", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-end justify-between gap-4", children: [
@@ -113192,6 +113931,10 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Studio/SellListing": "./resources/js/Pages/Studio/SellListing.js",
+	"./Studio/SellListing.js": "./resources/js/Pages/Studio/SellListing.js",
+	"./Studio/Sell": "./resources/js/Pages/Studio/Sell.js",
+	"./Studio/Sell.js": "./resources/js/Pages/Studio/Sell.js",
 	"./Admin/Content/StudioStories": "./resources/js/Pages/Admin/Content/StudioStories.js",
 	"./Admin/Content/StudioStories.js": "./resources/js/Pages/Admin/Content/StudioStories.js",
 	"./Admin/Setup/Config": "./resources/js/Pages/Admin/Setup/Config.js",

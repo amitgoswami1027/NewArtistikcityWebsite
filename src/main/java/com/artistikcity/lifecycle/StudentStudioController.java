@@ -80,6 +80,11 @@ public class StudentStudioController {
         List<Map<String, Object>> creds = credentials.credentials(userId);
         props.put("stage", stage(repo.enrollments(userId), subs, creds));
         props.put("certificatesReady", creds.stream().filter(c -> Boolean.TRUE.equals(c.get("eligible")) || c.get("certificate") != null).count());
+        // step 7: what the student has in the marketplace (My studio > Sell your art)
+        props.put("selling", Map.of(
+                "live", repo.count("select count(*) from paintings where source = 'STUDENT' and artist_user_id = ? and stock_status in ('AVAILABLE', 'RESERVED')", userId),
+                "inReview", repo.count("select count(*) from paintings where source = 'STUDENT' and artist_user_id = ? and stock_status = 'PENDING_REVIEW'", userId),
+                "sold", repo.count("select count(*) from paintings where source = 'STUDENT' and artist_user_id = ? and stock_status = 'SOLD'", userId)));
         // messages from the course team (Admin > course > Students > Message students; cancellations; new dates)
         try {
             props.put("notices", courseNotices.forStudent(userId, 10));
@@ -194,14 +199,15 @@ public class StudentStudioController {
         return auth.userId(request);
     }
 
-    /** The next step in the lifecycle: 3 choose a course, 4 learn, 5 submit, 6 certify (the last step). */
+    /** The next step in the lifecycle: 3 choose a course, 4 learn, 5 submit, 6 certify, 7 sell (certified: My studio > Sell your art). */
     static int stage(List<Map<String, Object>> enrollments, List<Map<String, Object>> subs) {
         return stage(enrollments, subs, List.of());
     }
 
     static int stage(List<Map<String, Object>> enrollments, List<Map<String, Object>> subs, List<Map<String, Object>> credentials) {
         boolean certified = credentials.stream().anyMatch(c -> Boolean.TRUE.equals(c.get("eligible")) || c.get("certificate") != null);
-        if (certified || subs.stream().anyMatch(s -> "Approved".equals(s.get("admin_status")))) return 6;
+        if (certified) return 7;
+        if (subs.stream().anyMatch(s -> "Approved".equals(s.get("admin_status")))) return 6;
         if (!subs.isEmpty()) return 5;
         if (!enrollments.isEmpty()) return 4;
         return 3;

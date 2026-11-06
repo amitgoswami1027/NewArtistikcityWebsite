@@ -228,6 +228,10 @@ public class Routes {
         get("admin.setup.config.api", "admin/api/setup/config");
         get("admin.rooms", "admin/setup/room-preview");
         get("admin.setup.site_settings", "admin/setup/site-settings");
+        // My studio > Sell your art
+        get("studio.sell", "dashboard/sell");
+        get("studio.sell.new", "dashboard/sell/new");
+        get("studio.sell.listing", "dashboard/sell/listings/{id}");
         // Studio Stories CMS
         get("admin.content.stories", "admin/content/stories");
         get("admin.content.stories.create", "admin/content/stories/new");

@@ -7,6 +7,7 @@ export const TABS = [
     { href: '/user/my-courses', label: 'My courses', icon: 'fa-graduation-cap' },
     { href: '/dashboard/submissions', label: 'Submissions', icon: 'fa-upload' },
     { href: '/dashboard/certificates', label: 'Certificates & reports', icon: 'fa-certificate' },
+    { href: '/dashboard/sell', label: 'Sell your art', icon: 'fa-shopping-bag' },
 ];
 
 /** The studio tab bar (learning only; account pages live in the separate My account area). */
@@ -47,7 +48,7 @@ export function JourneyStepper({ stage = 4 }) {
 }
 
 /**
- * Shell of every My studio page: breadcrumbs, title, the five studio tabs, optional journey stepper.
+ * Shell of every My studio page: breadcrumbs, title, the studio tabs, optional journey stepper (7 steps, ending with Sell).
  * {@code crumbs} adds levels between "My studio" and the page, e.g. [{ href: '/user/my-courses', label: 'My courses' }].
  */
 export default function StudioLayout({ title, subtitle, active, stage, actions, crumbs = [], children }) {

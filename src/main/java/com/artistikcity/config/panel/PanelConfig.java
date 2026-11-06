@@ -90,6 +90,11 @@ public class PanelConfig {
         return box != null;
     }
 
+    /** The server's encryption box (null without a key), also used for students' payout details. */
+    public SecretBox secretBox() {
+        return box;
+    }
+
     public boolean overridden(String key) {
         return values.containsKey(key);
     }

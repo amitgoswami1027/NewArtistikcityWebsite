@@ -35,8 +35,13 @@ public class FinanceAdminController {
     private final Json json;
     private final LedgerService ledger;
     private final Settings settings;
+    private final com.artistikcity.selling.PayoutDetails payoutDetails;
+    private final com.artistikcity.admin.Audit audit;
 
-    public FinanceAdminController(AdminKit kit, Db db, Json json, LedgerService ledger, Settings settings) {
+    public FinanceAdminController(AdminKit kit, Db db, Json json, LedgerService ledger, Settings settings,
+                                  com.artistikcity.selling.PayoutDetails payoutDetails, com.artistikcity.admin.Audit audit) {
+        this.payoutDetails = payoutDetails;
+        this.audit = audit;
         this.kit = kit;
         this.db = db;
         this.json = json;
@@ -80,6 +85,24 @@ public class FinanceAdminController {
         Row b = db.first("select * from payout_batches where id = ?", id);
         if (b == null) return kit.fail(HttpStatus.NOT_FOUND, "No such batch.");
         return kit.ok(Map.of("batch", b, "lines", db.select("select * from payout_lines where batch_id = ? order by amount desc", id)));
+    }
+
+    /**
+     * Where to pay a student artist: the full payout details they saved in My studio > Sell your art. Every look is
+     * in the security log (who, whose details; never the details themselves).
+     */
+    @GetMapping("/admin/api/finance/payees/{userId}/payout-details")
+    public ResponseEntity<String> payoutDetails(HttpServletRequest request, @PathVariable("userId") long userId) {
+        Row admin = kit.admin(request);
+        if (!kit.can(admin, "revenue")) return kit.forbidden();
+        Row u = db.first("select id, name, email, phone_number from users where id = ?", userId);
+        if (u == null) return kit.fail(HttpStatus.NOT_FOUND, "No such student.");
+        Map<String, Object> d = payoutDetails.full(userId);
+        audit.log(admin, "payout_details", userId, "viewed", "Payout details of " + u.str("name", "#" + userId));
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("student", Map.of("id", userId, "name", u.str("name", ""), "email", u.str("email", ""), "phone", u.str("phone_number", "")));
+        out.put("details", d);
+        return kit.ok(out);
     }
 
     @PostMapping("/admin/api/finance/batches")
