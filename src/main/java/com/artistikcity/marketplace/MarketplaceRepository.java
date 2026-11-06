@@ -254,7 +254,7 @@ public class MarketplaceRepository {
         k.put("toShip", count("select count(*) from marketplace_orders o join paintings p on p.id = o.painting_id where o.status in ('PAID', 'PACKED')" + scope));
         k.put("refunds", count("select count(*) from marketplace_orders o join paintings p on p.id = o.painting_id where o.status = 'REFUND_REQUIRED'" + scope));
         Object gmv = jdbc.queryForObject("select coalesce(sum(o.price_inr), 0) from marketplace_orders o join paintings p on p.id = o.painting_id"
-                + " where o.status in ('PAID', 'PACKED', 'SHIPPED', 'DELIVERED')" + scope, Object.class);
+                + " where o.status in ('PAID', 'PACKED', 'SHIPPED', 'DELIVERED') and o.is_test = 0" + scope, Object.class);
         k.put("revenueInr", gmv);
         Object live = jdbc.queryForObject("select coalesce(sum(p.final_price), 0) from paintings p where p.stock_status in ('AVAILABLE', 'RESERVED')" + scope, Object.class);
         k.put("inventoryValueInr", live);

@@ -54,7 +54,7 @@ public class OrderAdminController {
 
     private Grid grid(HttpServletRequest request) {
         return Grid.from(db, request)
-                .columns("o.id, o.order_number, o.created_at, o.updated_at, o.price, o.price_type, o.payment_option, o.payment_status, o.issue_certificate,"
+                .columns("o.id, o.order_number, o.created_at, o.updated_at, o.price, o.price_type, o.payment_option, o.payment_status, o.issue_certificate, o.is_test,"
                         + " o.billing_name, o.billing_email, o.billing_country, u.id as user_id, u.name as student, u.email as student_email,"
                         + " c.id as course_id, c.title as course, c.course_type_id")
                 .from("orders o left join users u on u.id = o.user_id left join courses c on c.id = o.course_id")
@@ -69,6 +69,7 @@ public class OrderAdminController {
                     case "paypal" -> Grid.where("o.payment_option like 'PayPal%'");
                     case "manual" -> Grid.where("o.payment_option like 'Manual%'");
                     case "free" -> Grid.where("o.payment_option = 'Free'");
+                    case "test" -> Grid.where("o.is_test = 1");
                     default -> null;
                 })
                 .filter("from", v -> date(v) == null ? null : Grid.where("o.created_at >= ?", date(v).atStartOfDay()))
@@ -98,10 +99,10 @@ public class OrderAdminController {
                 s.put("refunded", db.count("select count(*) from orders where payment_status = 3"));
                 s.put("refundDue", db.count("select count(*) from orders where payment_status = 4"));
                 s.put("all", db.count("select count(*) from orders"));
-                s.put("revenueInr", db.scalar("select coalesce(sum(cast(nullif(price, '') as decimal(12,2))), 0) from orders where payment_status = 1 and price_type = 'inr'"));
-                s.put("revenueUsd", db.scalar("select coalesce(sum(cast(nullif(price, '') as decimal(12,2))), 0) from orders where payment_status = 1 and price_type = 'usd'"));
-                s.put("monthInr", db.scalar("select coalesce(sum(cast(nullif(price, '') as decimal(12,2))), 0) from orders where payment_status = 1 and price_type = 'inr' and created_at >= ?", month));
-                s.put("monthOrders", db.count("select count(*) from orders where payment_status = 1 and created_at >= ?", month));
+                s.put("revenueInr", db.scalar("select coalesce(sum(cast(nullif(price, '') as decimal(12,2))), 0) from orders where payment_status = 1 and is_test = 0 and price_type = 'inr'"));
+                s.put("revenueUsd", db.scalar("select coalesce(sum(cast(nullif(price, '') as decimal(12,2))), 0) from orders where payment_status = 1 and is_test = 0 and price_type = 'usd'"));
+                s.put("monthInr", db.scalar("select coalesce(sum(cast(nullif(price, '') as decimal(12,2))), 0) from orders where payment_status = 1 and is_test = 0 and price_type = 'inr' and created_at >= ?", month));
+                s.put("monthOrders", db.count("select count(*) from orders where payment_status = 1 and is_test = 0 and created_at >= ?", month));
                 s.put("certificatesDue", db.count("select count(*) from orders where payment_status = 1 and coalesce(issue_certificate, 0) = 0"));
                 return s;
             };

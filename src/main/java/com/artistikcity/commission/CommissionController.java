@@ -50,6 +50,11 @@ import java.util.UUID;
 @Controller
 public class CommissionController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.payments.TestPayments testPayments;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.support.Db testDb;
+
     private static final Logger log = LoggerFactory.getLogger(CommissionController.class);
     private static final String SESSION_ORDERS = "commission.orders";
     private static final long MAX_PHOTO_BYTES = 15L * 1024 * 1024;
@@ -110,6 +115,10 @@ public class CommissionController {
 
     @GetMapping("/commission/checkout")
     public ResponseEntity<String> checkout(HttpServletRequest request) {
+        if (auth.userId(request) == null) {
+            // buying starts with an account; the commission brief is kept in the browser while they sign in
+            return redirect.to(request, com.artistikcity.web.PurchaseIntent.signIn("/commission/checkout"));
+        }
         return page(request, "Commission/Checkout");
     }
 
@@ -127,7 +136,8 @@ public class CommissionController {
         props.put("gateways", Map.of(
                 "razorpay", payments.razorpayConfigured(),
                 "paypal", payments.paypalConfigured(),
-                "testMode", payments.testMode()));
+                "testMode", payments.testMode(),
+                "simulate", testPayments.offerSimulation(request)));
         Row user = auth.user(request);
         props.put("customer", user == null ? null : Map.of("name", user.str("name", ""), "email", user.str("email", ""),
                 "phone", user.str("phone", "")));
@@ -164,6 +174,10 @@ public class CommissionController {
         if (!Csrf.matches(request)) {
             return error(HttpStatus.FORBIDDEN, "Your session expired. Refresh the page and try again.");
         }
+        if (auth.userId(request) == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).contentType(MediaType.APPLICATION_JSON).body(json.encode(Map.of(
+                    "code", "SIGN_IN", "message", "Please log in to place your commission.", "redirect", com.artistikcity.web.PurchaseIntent.signIn("/commission/checkout"))));
+        }
         Map<String, Object> body = json.decodeMap(new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8));
         if (body == null) {
             return error(HttpStatus.BAD_REQUEST, "Invalid request.");
@@ -183,8 +197,13 @@ public class CommissionController {
         }
 
         boolean razorpay = !"PAYPAL".equals(req.paymentMethod());
-        boolean live = razorpay ? payments.razorpayConfigured() : payments.paypalConfigured();
-        if (!live && !payments.testMode()) {
+        // a test-buyer account (Admin > People) may simulate the payment on the live site
+        boolean simulate = Boolean.TRUE.equals(body.get("simulate"));
+        if (simulate && !testPayments.offerSimulation(request)) {
+            return error(HttpStatus.FORBIDDEN, "Simulated payments are only for test accounts.");
+        }
+        boolean live = !simulate && (razorpay ? payments.razorpayConfigured() : payments.paypalConfigured());
+        if (!live && !simulate && !payments.testMode()) {
             return error(HttpStatus.SERVICE_UNAVAILABLE, (razorpay ? "Card and UPI" : "PayPal")
                     + " payments are not available right now. Please choose another method or contact us.");
         }
@@ -197,6 +216,9 @@ public class CommissionController {
         orders.createPending(orderId, "ITEM-" + UUID.randomUUID().toString().substring(0, 18).toUpperCase(),
                 user == null ? null : user.lng("id"), req, currency, total);
         rememberOrder(request, orderId);
+        if (!live) {
+            testDb.update("update commission_orders set is_test = 1 where order_id = ?", orderId);
+        }
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("orderId", orderId);
@@ -249,7 +271,8 @@ public class CommissionController {
         if ("test".equals(provider)) {
             boolean usingRazorpay = !"PAYPAL".equals(order.get("payment_method"));
             boolean live = usingRazorpay ? payments.razorpayConfigured() : payments.paypalConfigured();
-            if (!payments.testMode() || live) {
+            boolean simulated = order.get("is_test") instanceof Number n && n.intValue() == 1;
+            if (!(simulated && testPayments.isTestBuyer(request)) && (!payments.testMode() || live)) {
                 return error(HttpStatus.FORBIDDEN, "Test payments are disabled.");
             }
             orders.markQueued(orderId, "TEST-" + System.currentTimeMillis());

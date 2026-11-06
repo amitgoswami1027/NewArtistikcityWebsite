@@ -108,6 +108,20 @@ public class CartService {
         repo.upsertItem(cartId, paintingId, q.selection(), q.maxQty());
     }
 
+    /**
+     * "Buy now": the basket holds exactly this one piece. Other lines go (an original among them gives its hold back),
+     * then the piece is added as chosen.
+     */
+    public void replaceWith(HttpServletRequest request, long paintingId, ShopPricing.Selection sel) {
+        Long cartId = cartId(request, true);
+        for (Map<String, Object> i : repo.items(cartId)) {
+            long pid = ((Number) i.get("painting_id")).longValue();
+            repo.deleteItem(cartId, ((Number) i.get("id")).longValue());
+            if ("ORIGINAL".equals(i.get("format")) && pid != paintingId) market.release(pid, Holders.all(request, auth));
+        }
+        add(request, paintingId, sel, false);
+    }
+
     public void setQuantity(HttpServletRequest request, long itemId, int qty) {
         Long cartId = cartId(request, false);
         Map<String, Object> item = cartId == null ? null : repo.item(cartId, itemId);

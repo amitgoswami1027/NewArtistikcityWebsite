@@ -2930,6 +2930,7 @@ const NAV = [
     { href: "/admin/orders", label: "Course orders", icon: "fa-shopping-cart", cap: "revenue", also: ["/admin/orders/"] },
     { href: "/admin/dashboard/commissions", label: "Commissions", icon: "fa-paint-brush", cap: "commissions", badge: "commissions" },
     { href: "/admin/dashboard/marketplace", label: "Marketplace", icon: "fa-tags", cap: "marketplace", badge: "marketplace", also: ["/admin/dashboard/marketplace/"] },
+    { href: "/admin/marketplace/rooms", label: "Room preview", icon: "fa-picture-o", cap: "marketplace.publish" },
     { href: "/admin/payments/refunds", label: "Refunds", icon: "fa-undo", cap: "revenue", badge: "refunds" },
     { href: "/admin/finance", label: "Payouts & ledger", icon: "fa-balance-scale", cap: "revenue", badge: "payouts", also: ["/admin/finance/"] }
   ] },
@@ -7440,7 +7441,8 @@ function CourseCard({ course, index }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-user-o" }),
           formatCount(course.students),
-          " students"
+          " ",
+          Number(course.students) === 1 ? "student" : "students"
         ] }),
         course.positive !== null && course.positive !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "is-good", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-thumbs-o-up" }),
@@ -7842,7 +7844,6 @@ var import_inertia_react = __webpack_require__("../../febuild/node_modules/@iner
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_Constants = __webpack_require__("./resources/js/Components/Constants.js");
 var import_nav = __webpack_require__("./resources/js/Components/Account/nav.js");
-var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
 const AGE_GROUPS = ["Sub-junior - 8 to 12 yrs", "Junior - 12 to 15 yrs", "Adult - 16 yrs and above"];
 function useAgeGroups() {
   const { site } = (0, import_inertia_react.usePage)().props;
@@ -7900,13 +7901,10 @@ function HeaderMenu({ id, button, buttonClass, label, align = "left", children }
 }
 function SiteHeader({ showCategories = false, activeMedium = null }) {
   const { auth, nav } = (0, import_inertia_react.usePage)().props;
-  const ageGroups = useAgeGroups();
   const user = auth && auth.user;
   const [mediums, setMediums] = (0, import_react.useState)([]);
-  const [open, setOpen] = (0, import_react.useState)(false);
   const [drawer, setDrawer] = (0, import_react.useState)(false);
   const [query, setQuery] = (0, import_react.useState)("");
-  const exploreRef = (0, import_react.useRef)(null);
   (0, import_react.useEffect)(() => {
     import_axios.default.get(`${import_Constants.API_URL}/get_mediums`).then((r) => setMediums(Array.isArray(r.data) ? r.data : [])).catch(() => setMediums([]));
     if (typeof window !== "undefined") {
@@ -7915,21 +7913,11 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
     }
   }, []);
   (0, import_react.useEffect)(() => {
-    const onDoc = (e) => {
-      if (exploreRef.current && !exploreRef.current.contains(e.target)) setOpen(false);
-    };
     const onKey = (e) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        setDrawer(false);
-      }
+      if (e.key === "Escape") setDrawer(false);
     };
-    document.addEventListener("mousedown", onDoc);
     window.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      window.removeEventListener("keydown", onKey);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
   const search = (e) => {
     e.preventDefault();
@@ -7943,42 +7931,7 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("welcome"), className: "ac-logo", "aria-label": "ArtistikCity home", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/logo.png", alt: "ArtistikCity" }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { className: "dm-links dm-links--main", "aria-label": "Main", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("how.it.works"), "aria-current": here.startsWith("/how-it-works") ? "page" : void 0, children: "How it works" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-explore", ref: exploreRef, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: open ? "is-open" : "", "aria-expanded": open, onClick: () => setOpen(!open), children: [
-            "Courses ",
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa fa-angle-${open ? "up" : "down"}` })
-          ] }),
-          open && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-dropdown", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "By medium" }),
-              mediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ medium: m.id }), children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-mega__thumb", style: { backgroundImage: `url(/storage/uploads/mediums/${m.id}/${m.photo})` } }),
-                m.name
-              ] }, m.id))
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "Format" }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ type: "course" }), children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-graduation-cap" }),
-                " Live courses"
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ type: "workshop" }), children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush" }),
-                " Workshops"
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { style: { marginTop: 16 }, children: "By age" }),
-              ageGroups.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({ age: a }), children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-user-o" }),
-                " ",
-                a
-              ] }, a))
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-all", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: catalogUrl({}), children: [
-              "Browse all courses ",
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right" })
-            ] }) })
-          ] })
-        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({}), "aria-current": /^\/(courses|course|workshop)/.test(here) ? "page" : void 0, children: "Courses" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("commission.step1"), "aria-current": here.startsWith("/commission") ? "page" : void 0, children: "Commission art" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", "aria-current": here.startsWith("/marketplace") ? "page" : void 0, children: "Marketplace" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("studio.stories"), className: "is-accent", "aria-current": here.startsWith("/studio-stories") ? "page" : void 0, children: "Studio Stories" })
@@ -8014,7 +7967,6 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: loginUrl(), children: "Log in" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("join"), className: "dm-btn dm-btn--brand", style: { marginLeft: 6 }, children: "Join for free" })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.CartButton, {}),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "ac-burger", "aria-label": "Menu", onClick: () => setDrawer(!drawer), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${drawer ? "fa-times" : "fa-bars"}` }) })
     ] }) }),
     showCategories && mediums.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-cats", "aria-label": "Categories", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
@@ -8028,10 +7980,7 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--ink", type: "submit", "aria-label": "Search", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search", "aria-hidden": "true" }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("how.it.works"), style: { fontWeight: 700 }, children: "How it works" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "Courses" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({}), children: "All courses" }),
-      mediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({ medium: m.id }), children: m.name }, m.id)),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({ type: "workshop" }), children: "Workshops" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({}), style: { fontWeight: 700 }, children: "Courses" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "ArtistikCity" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("commission.step1"), children: "Commission art" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", children: "Marketplace" }),
@@ -10537,414 +10486,222 @@ function Overview() {
 /***/ }),
 
 /***/ "./resources/js/Pages/Admin/People.js":
-/*!********************************************!*\
-  !*** ./resources/js/Pages/Admin/People.js ***!
-  \********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ People)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "../../febuild/node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _Components_Admin_AdminLayout__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Admin/AdminLayout */ "./resources/js/Components/Admin/AdminLayout.js");
-/* harmony import */ var _Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Studio/Journey */ "./resources/js/Components/Studio/Journey.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-
-var PERSONA_HELP = {
-  admin: 'Everything: people, revenue, catalog, settings.',
-  teacher: 'Reviews submissions and sees students of their own courses.',
-  moderator: 'Moderates submissions, marketplace, gallery, testimonials and commissions.'
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var People_exports = {};
+__export(People_exports, {
+  default: () => People
+});
+module.exports = __toCommonJS(People_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
+const PERSONA_HELP = {
+  admin: "Everything: people, revenue, catalog, settings.",
+  teacher: "Reviews submissions and sees students of their own courses.",
+  moderator: "Moderates submissions, marketplace, gallery, testimonials and commissions."
 };
 function People() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    admin = _usePage$props.admin,
-    _usePage$props$studen = _usePage$props.students,
-    initialStudents = _usePage$props$studen === void 0 ? [] : _usePage$props$studen,
-    _usePage$props$staff = _usePage$props.staff,
-    initialStaff = _usePage$props$staff === void 0 ? [] : _usePage$props$staff,
-    _usePage$props$person = _usePage$props.personas,
-    personas = _usePage$props$person === void 0 ? [] : _usePage$props$person;
-  var canManage = (admin.capabilities || []).includes('people.manage');
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('students'),
-    _useState2 = _slicedToArray(_useState, 2),
-    tab = _useState2[0],
-    setTab = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(initialStudents),
-    _useState4 = _slicedToArray(_useState3, 2),
-    students = _useState4[0],
-    setStudents = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(initialStaff),
-    _useState6 = _slicedToArray(_useState5, 2),
-    staff = _useState6[0],
-    setStaff = _useState6[1];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
-    _useState8 = _slicedToArray(_useState7, 2),
-    q = _useState8[0],
-    setQ = _useState8[1];
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('all'),
-    _useState0 = _slicedToArray(_useState9, 2),
-    segment = _useState0[0],
-    setSegment = _useState0[1];
-  var _useToast = (0,_Components_Admin_AdminLayout__WEBPACK_IMPORTED_MODULE_3__.useToast)(),
-    _useToast2 = _slicedToArray(_useToast, 2),
-    toastNode = _useToast2[0],
-    toast = _useToast2[1];
-  var segments = {
-    all: function all() {
-      return true;
-    },
-    learning: function learning(s) {
-      return Number(s.enrollments) > 0;
-    },
-    submitted: function submitted(s) {
-      return Number(s.submissions) > 0;
-    },
-    selling: function selling(s) {
-      return Number(s.listed) > 0;
-    },
-    inactive: function inactive(s) {
-      return String(s.status) === '0';
-    }
+  const { admin, students: initialStudents = [], staff: initialStaff = [], personas = [] } = (0, import_inertia_react.usePage)().props;
+  const canManage = (admin.capabilities || []).includes("people.manage");
+  const [tab, setTab] = (0, import_react.useState)("students");
+  const [students, setStudents] = (0, import_react.useState)(initialStudents);
+  const [staff, setStaff] = (0, import_react.useState)(initialStaff);
+  const [q, setQ] = (0, import_react.useState)("");
+  const [segment, setSegment] = (0, import_react.useState)("all");
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const segments = {
+    all: () => true,
+    learning: (s) => Number(s.enrollments) > 0,
+    submitted: (s) => Number(s.submissions) > 0,
+    selling: (s) => Number(s.listed) > 0,
+    inactive: (s) => String(s.status) === "0",
+    testers: (s) => String(s.test_buyer) === "1"
   };
-  var shownStudents = students.filter(function (s) {
-    return segments[segment](s) && (!q || "".concat(s.name, " ").concat(s.email, " ").concat(s.location || '').toLowerCase().includes(q.toLowerCase()));
-  });
-  var shownStaff = staff.filter(function (s) {
-    return !q || "".concat(s.name, " ").concat(s.email).toLowerCase().includes(q.toLowerCase());
-  });
-  var toggleStudent = function toggleStudent(s) {
-    var active = String(s.status) !== '1';
-    axios__WEBPACK_IMPORTED_MODULE_2___default().post("/admin/console/api/students/".concat(s.id, "/status"), {
-      active: active
-    }).then(function () {
-      setStudents(students.map(function (x) {
-        return x.id === s.id ? _objectSpread(_objectSpread({}, x), {}, {
-          status: active ? 1 : 0
-        }) : x;
-      }));
-      toast("".concat(s.name, " ").concat(active ? 'reactivated' : 'deactivated'));
-    })["catch"](function (e) {
-      return toast((0,_Components_Admin_AdminLayout__WEBPACK_IMPORTED_MODULE_3__.errorText)(e), 'error');
-    });
+  const shownStudents = students.filter((s) => segments[segment](s) && (!q || `${s.name} ${s.email} ${s.location || ""}`.toLowerCase().includes(q.toLowerCase())));
+  const shownStaff = staff.filter((s) => !q || `${s.name} ${s.email}`.toLowerCase().includes(q.toLowerCase()));
+  const toggleStudent = (s) => {
+    const active = String(s.status) !== "1";
+    import_axios.default.post(`/admin/console/api/students/${s.id}/status`, { active }).then(() => {
+      setStudents(students.map((x) => x.id === s.id ? __spreadProps(__spreadValues({}, x), { status: active ? 1 : 0 }) : x));
+      toast(`${s.name} ${active ? "reactivated" : "deactivated"}`);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
   };
-  var setPersona = function setPersona(s, persona) {
-    axios__WEBPACK_IMPORTED_MODULE_2___default().post("/admin/console/api/staff/".concat(s.id, "/persona"), {
-      persona: persona
-    }).then(function () {
-      setStaff(staff.map(function (x) {
-        return x.id === s.id ? _objectSpread(_objectSpread({}, x), {}, {
-          admin_type: persona
-        }) : x;
-      }));
-      toast("".concat(s.name, " is now ").concat(personas.find(function (p) {
-        return p.id === persona;
-      }).label));
-    })["catch"](function (e) {
-      return toast((0,_Components_Admin_AdminLayout__WEBPACK_IMPORTED_MODULE_3__.errorText)(e), 'error');
-    });
+  const setTestBuyer = (s, on) => {
+    import_axios.default.post(`/admin/console/api/students/${s.id}/test-buyer`, { on }).then((r) => {
+      setStudents(students.map((x) => x.id === s.id ? __spreadProps(__spreadValues({}, x), { test_buyer: on ? 1 : 0 }) : x));
+      toast(on ? `${s.name} can now simulate payments${r.data && r.data.enabled === false ? " (test buyers are switched off in the settings)" : ""}` : `${s.name} pays normally again`);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
   };
-  var exportCsv = function exportCsv() {
-    var rows = [['Name', 'Email', 'Phone', 'Location', 'Enrollments', 'Submissions', 'Listed', 'Status', 'Joined']].concat(_toConsumableArray(shownStudents.map(function (s) {
-      return [s.name, s.email, s.phone || '', s.location || '', s.enrollments, s.submissions, s.listed, String(s.status) === '1' ? 'Active' : 'Inactive', String(s.created_at).slice(0, 10)];
-    })));
-    var csv = rows.map(function (r) {
-      return r.map(function (v) {
-        return "\"".concat(String(v).replace(/"/g, '""'), "\"");
-      }).join(',');
-    }).join('\n');
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], {
-      type: 'text/csv'
-    }));
-    a.download = 'artistikcity-students.csv';
+  const setPersona = (s, persona) => {
+    import_axios.default.post(`/admin/console/api/staff/${s.id}/persona`, { persona }).then(() => {
+      setStaff(staff.map((x) => x.id === s.id ? __spreadProps(__spreadValues({}, x), { admin_type: persona }) : x));
+      toast(`${s.name} is now ${personas.find((p) => p.id === persona).label}`);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const exportCsv = () => {
+    const rows = [
+      ["Name", "Email", "Phone", "Location", "Enrollments", "Submissions", "Listed", "Status", "Joined"],
+      ...shownStudents.map((s) => [s.name, s.email, s.phone || "", s.location || "", s.enrollments, s.submissions, s.listed, String(s.status) === "1" ? "Active" : "Inactive", String(s.created_at).slice(0, 10)])
+    ];
+    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = "artistikcity-students.csv";
     a.click();
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(_Components_Admin_AdminLayout__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    title: "People & roles",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Admin_AdminLayout__WEBPACK_IMPORTED_MODULE_3__.PageHeader, {
-      title: "People & roles",
-      subtitle: admin.persona === 'teacher' ? 'Students enrolled in your courses.' : 'Students, instructors, moderators and admins, with what each persona can do.',
-      actions: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("input", {
-          type: "search",
-          value: q,
-          onChange: function onChange(e) {
-            return setQ(e.target.value);
-          },
-          placeholder: "Search name or email",
-          className: "h-11 w-64 rounded-full border-gray-300 px-4 focus:border-brand focus:ring-brand",
-          "aria-label": "Search people"
-        }), tab === 'students' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("button", {
-          type: "button",
-          onClick: exportCsv,
-          className: "h-11 px-5 rounded-full border border-gray-300 bg-white font-bold hover:border-ink",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-            className: "fa fa-download mr-2",
-            "aria-hidden": "true"
-          }), "Export CSV"]
-        }), canManage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-          href: "/admin/teacher/create",
-          className: "h-11 px-5 inline-flex items-center rounded-full bg-ink text-white font-bold hover:bg-gray-800",
-          children: "Invite staff"
-        })]
-      })
-    }), staff.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-      className: "flex gap-2 mb-6 border-b border-gray-200",
-      children: [['students', "Students (".concat(students.length, ")")], ['staff', "Staff (".concat(staff.length, ")")]].map(function (_ref) {
-        var _ref2 = _slicedToArray(_ref, 2),
-          k = _ref2[0],
-          l = _ref2[1];
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("button", {
-          type: "button",
-          onClick: function onClick() {
-            return setTab(k);
-          },
-          className: "px-4 py-3 font-bold border-b-2 -mb-px ".concat(tab === k ? 'border-ink text-ink' : 'border-transparent text-gray-500'),
-          children: l
-        }, k);
-      })
-    }), tab === 'students' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-        className: "flex flex-wrap gap-2 mb-4",
-        children: [['all', 'Everyone'], ['learning', 'Learning'], ['submitted', 'Submitted work'], ['selling', 'Selling'], ['inactive', 'Deactivated']].map(function (_ref3) {
-          var _ref4 = _slicedToArray(_ref3, 2),
-            k = _ref4[0],
-            l = _ref4[1];
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("button", {
-            type: "button",
-            onClick: function onClick() {
-              return setSegment(k);
-            },
-            className: "h-9 px-4 rounded-full text-sm font-bold border ".concat(segment === k ? 'bg-ink text-white border-ink' : 'bg-white border-gray-300'),
-            children: [l, " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-              className: "font-mono opacity-70",
-              children: students.filter(segments[k]).length
-            })]
-          }, k);
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "rounded-2xl bg-white border border-gray-200 overflow-x-auto",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("table", {
-          className: "w-full text-left text-sm",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("thead", {
-            className: "bg-gray-50",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("tr", {
-              className: "font-mono text-xs uppercase tracking-widest text-gray-500",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                className: "p-3",
-                children: "Student"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                children: "Location"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                className: "text-center",
-                children: "Courses"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                className: "text-center",
-                children: "Submissions"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                className: "text-center",
-                children: "For sale"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                children: "Joined"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                children: "Status"
-              }), canManage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                className: "p-3"
-              })]
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("tbody", {
-            children: shownStudents.map(function (s) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("tr", {
-                className: "border-t border-gray-100",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "p-3",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-                    className: "flex items-center gap-3",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                      className: "w-9 h-9 rounded-full bg-brand-soft text-brand font-black flex items-center justify-center",
-                      children: String(s.name).charAt(0)
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-                        className: "font-semibold text-ink",
-                        children: s.name
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-                        className: "text-xs text-gray-500",
-                        children: [s.email, s.provider ? " \xB7 ".concat(s.provider) : '']
-                      })]
-                    })]
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "text-gray-600",
-                  children: s.location || '—'
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "text-center font-mono",
-                  children: s.enrollments
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "text-center font-mono",
-                  children: s.submissions
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "text-center font-mono",
-                  children: s.listed
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "font-mono text-xs",
-                  children: (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__.shortDate)(s.created_at)
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                    className: "rounded-full px-2.5 py-1 text-xs font-bold ".concat(String(s.status) === '1' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'),
-                    children: String(s.status) === '1' ? 'Active' : 'Inactive'
-                  })
-                }), canManage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("td", {
-                  className: "p-3 text-right whitespace-nowrap",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-                    href: "/admin/students/details/".concat(s.id),
-                    className: "text-sm font-bold underline mr-3",
-                    children: "Details"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("button", {
-                    type: "button",
-                    onClick: function onClick() {
-                      return toggleStudent(s);
-                    },
-                    className: "text-sm font-bold text-gray-600 hover:text-ink",
-                    children: String(s.status) === '1' ? 'Deactivate' : 'Reactivate'
-                  })]
-                })]
-              }, s.id);
-            })
-          })]
-        }), shownStudents.length === 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-          className: "p-6 text-gray-600",
-          children: "No students match."
-        })]
-      })]
-    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      className: "grid grid-cols-1 lg:grid-cols-3 gap-6",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-        className: "lg:col-span-2 rounded-2xl bg-white border border-gray-200 overflow-x-auto",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("table", {
-          className: "w-full text-left text-sm",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("thead", {
-            className: "bg-gray-50",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("tr", {
-              className: "font-mono text-xs uppercase tracking-widest text-gray-500",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                className: "p-3",
-                children: "Name"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                children: "Role"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                children: "Joined"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                className: "p-3"
-              })]
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("tbody", {
-            children: shownStaff.map(function (s) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("tr", {
-                className: "border-t border-gray-100",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("td", {
-                  className: "p-3",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("p", {
-                    className: "font-semibold text-ink",
-                    children: [s.name, String(s.id) === String(admin.id) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                      className: "ml-2 font-mono text-xs text-brand",
-                      children: "you"
-                    })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-                    className: "text-xs text-gray-500",
-                    children: s.email
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  children: canManage && String(s.id) !== String(admin.id) ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("select", {
-                    value: s.admin_type,
-                    onChange: function onChange(e) {
-                      return setPersona(s, e.target.value);
-                    },
-                    className: "h-9 rounded-lg border-gray-300 text-sm",
-                    "aria-label": "Role for ".concat(s.name),
-                    children: personas.map(function (p) {
-                      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("option", {
-                        value: p.id,
-                        children: p.label
-                      }, p.id);
-                    })
-                  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                    className: "font-semibold",
-                    children: (personas.find(function (p) {
-                      return p.id === s.admin_type;
-                    }) || {}).label
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "font-mono text-xs",
-                  children: (0,_Components_Studio_Journey__WEBPACK_IMPORTED_MODULE_4__.shortDate)(s.created_at)
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "p-3 text-right",
-                  children: s.admin_type === 'teacher' && canManage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-                    href: "/admin/teacher/edit/".concat(s.id),
-                    className: "text-sm font-bold underline",
-                    children: "Edit profile"
-                  })
-                })]
-              }, s.id);
-            })
-          })]
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("aside", {
-        className: "rounded-2xl bg-white border border-gray-200 p-6 self-start",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h2", {
-          className: "text-lg font-black tracking-tight text-ink",
-          children: "What each role can do"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("ul", {
-          className: "mt-4 space-y-4",
-          children: [personas.map(function (p) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("li", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-                className: "font-bold text-ink",
-                children: p.label
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-                className: "text-sm text-gray-600",
-                children: PERSONA_HELP[p.id]
-              })]
-            }, p.id);
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("li", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-              className: "font-bold text-ink",
-              children: "Student"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-              className: "text-sm text-gray-600",
-              children: "Learns in the classroom, submits milestones and curates a portfolio."
-            })]
-          })]
-        })]
-      })]
-    }), toastNode]
-  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "People & roles", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        title: "People & roles",
+        subtitle: admin.persona === "teacher" ? "Students enrolled in your courses." : "Students, instructors, moderators and admins, with what each persona can do.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", value: q, onChange: (e) => setQ(e.target.value), placeholder: "Search name or email", className: "h-11 w-64 rounded-full border-gray-300 px-4 focus:border-brand focus:ring-brand", "aria-label": "Search people" }),
+          tab === "students" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: exportCsv, className: "h-11 px-5 rounded-full border border-gray-300 bg-white font-bold hover:border-ink", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-download mr-2", "aria-hidden": "true" }),
+            "Export CSV"
+          ] }),
+          canManage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/admin/teacher/create", className: "h-11 px-5 inline-flex items-center rounded-full bg-ink text-white font-bold hover:bg-gray-800", children: "Invite staff" })
+        ] })
+      }
+    ),
+    staff.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex gap-2 mb-6 border-b border-gray-200", children: [["students", `Students (${students.length})`], ["staff", `Staff (${staff.length})`]].map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => setTab(k), className: `px-4 py-3 font-bold border-b-2 -mb-px ${tab === k ? "border-ink text-ink" : "border-transparent text-gray-500"}`, children: l }, k)) }),
+    tab === "students" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex flex-wrap gap-2 mb-4", children: [["all", "Everyone"], ["learning", "Learning"], ["submitted", "Submitted work"], ["selling", "Selling"], ["inactive", "Deactivated"], ["testers", "Test buyers"]].map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: () => setSegment(k), className: `h-9 px-4 rounded-full text-sm font-bold border ${segment === k ? "bg-ink text-white border-ink" : "bg-white border-gray-300"}`, children: [
+        l,
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono opacity-70", children: students.filter(segments[k]).length })
+      ] }, k)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl bg-white border border-gray-200 overflow-x-auto", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { className: "w-full text-left text-sm", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { className: "bg-gray-50", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { className: "font-mono text-xs uppercase tracking-widest text-gray-500", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { className: "p-3", children: "Student" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Location" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { className: "text-center", children: "Courses" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { className: "text-center", children: "Submissions" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { className: "text-center", children: "For sale" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Joined" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Status" }),
+            canManage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { title: "May simulate payments at checkout; orders are marked TEST", children: "Test buyer" }),
+            canManage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { className: "p-3" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: shownStudents.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { className: "border-t border-gray-100", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "p-3", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-center gap-3", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-9 h-9 rounded-full bg-brand-soft text-brand font-black flex items-center justify-center", children: String(s.name).charAt(0) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-semibold text-ink", children: s.name }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "text-xs text-gray-500", children: [
+                  s.email,
+                  s.provider ? ` \xB7 ${s.provider}` : ""
+                ] })
+              ] })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "text-gray-600", children: s.location || "\u2014" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "text-center font-mono", children: s.enrollments }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "text-center font-mono", children: s.submissions }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "text-center font-mono", children: s.listed }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "font-mono text-xs", children: (0, import_Journey.shortDate)(s.created_at) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `rounded-full px-2.5 py-1 text-xs font-bold ${String(s.status) === "1" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`, children: String(s.status) === "1" ? "Active" : "Inactive" }) }),
+            canManage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "inline-flex items-center gap-2 text-sm", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: String(s.test_buyer) === "1", onChange: (e) => setTestBuyer(s, e.target.checked), "aria-label": `Test buyer: ${s.name}`, className: "rounded border-gray-300 text-brand focus:ring-brand" }),
+              String(s.test_buyer) === "1" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "rounded-full px-2 py-0.5 text-xs font-bold bg-yellow-100 text-yellow-900", children: "TEST" })
+            ] }) }),
+            canManage && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { className: "p-3 text-right whitespace-nowrap", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/students/details/${s.id}`, className: "text-sm font-bold underline mr-3", children: "Details" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => toggleStudent(s), className: "text-sm font-bold text-gray-600 hover:text-ink", children: String(s.status) === "1" ? "Deactivate" : "Reactivate" })
+            ] })
+          ] }, s.id)) })
+        ] }),
+        shownStudents.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "p-6 text-gray-600", children: "No students match." })
+      ] })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-6", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lg:col-span-2 rounded-2xl bg-white border border-gray-200 overflow-x-auto", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { className: "w-full text-left text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { className: "bg-gray-50", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { className: "font-mono text-xs uppercase tracking-widest text-gray-500", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { className: "p-3", children: "Name" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Role" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Joined" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { className: "p-3" })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: shownStaff.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { className: "border-t border-gray-100", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { className: "p-3", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-semibold text-ink", children: [
+              s.name,
+              String(s.id) === String(admin.id) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ml-2 font-mono text-xs text-brand", children: "you" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-xs text-gray-500", children: s.email })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: canManage && String(s.id) !== String(admin.id) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { value: s.admin_type, onChange: (e) => setPersona(s, e.target.value), className: "h-9 rounded-lg border-gray-300 text-sm", "aria-label": `Role for ${s.name}`, children: personas.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: p.id, children: p.label }, p.id)) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-semibold", children: (personas.find((p) => p.id === s.admin_type) || {}).label }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "font-mono text-xs", children: (0, import_Journey.shortDate)(s.created_at) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: "p-3 text-right", children: s.admin_type === "teacher" && canManage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/teacher/edit/${s.id}`, className: "text-sm font-bold underline", children: "Edit profile" }) })
+        ] }, s.id)) })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "rounded-2xl bg-white border border-gray-200 p-6 self-start", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "text-lg font-black tracking-tight text-ink", children: "What each role can do" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "mt-4 space-y-4", children: [
+          personas.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-bold text-ink", children: p.label }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-sm text-gray-600", children: PERSONA_HELP[p.id] })
+          ] }, p.id)),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "font-bold text-ink", children: "Student" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "text-sm text-gray-600", children: "Learns in the classroom, submits milestones and curates a portfolio." })
+          ] })
+        ] })
+      ] })
+    ] }),
+    toastNode
+  ] });
 }
+
 
 /***/ }),
 
@@ -13607,7 +13364,16 @@ function CheckoutCourse() {
                 ] }),
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-method__price", children: fmt(prices.usd, "USD") })
               ] }),
-              !methods.razorpay && !methods.paypal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ac-alert ac-alert--error", children: [
+              methods.simulate && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `co-method co-method--test ${method === "test" ? "is-on" : ""}`, "data-testid": "method-simulate", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "method", value: "test", checked: method === "test", onChange: () => setMethod("test") }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-method__icon", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-flask" }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "co-method__text", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Simulate payment" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Test account only \xB7 no money is charged \xB7 the order is marked TEST" })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "co-method__price", children: fmt(prices.inr, "INR") })
+              ] }),
+              !methods.razorpay && !methods.paypal && !methods.simulate && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ac-alert ac-alert--error", children: [
                 "Online payments aren't available right now. Please ",
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/contact", style: { textDecoration: "underline" }, children: "contact us" }),
                 " to enroll."
@@ -13622,7 +13388,7 @@ function CheckoutCourse() {
                 "Simulated payment of ",
                 fmt(test.amount, test.currency)
               ] }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted co-small", children: "This only happens while PAYMENT_TEST_MODE is on and no gateway keys are configured." }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted co-small", children: test.simulated ? "Your account is a test buyer: nothing is charged and the order is marked TEST." : "This only happens while PAYMENT_TEST_MODE is on and no gateway keys are configured." }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "co-row", children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--brand", onClick: completeTest, disabled: busy, children: busy ? "Completing\u2026" : "Complete test payment" }),
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--line", onClick: () => setTest(null), children: "Cancel" })
@@ -13633,10 +13399,10 @@ function CheckoutCourse() {
                 type: "button",
                 className: "dm-btn dm-btn--brand dm-btn--lg co-pay",
                 onClick: pay,
-                disabled: busy || !methods.free && !methods.razorpay && !methods.paypal,
+                disabled: busy || !methods.free && !methods.razorpay && !methods.paypal && !methods.simulate,
                 children: [
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
-                  busy ? "Opening secure payment\u2026" : methods.free ? "Enroll for free" : `Pay ${fmt(total, currency)}`
+                  busy ? "Opening secure payment\u2026" : methods.free ? "Enroll for free" : method === "test" ? `Simulate ${fmt(total, currency)}` : `Pay ${fmt(total, currency)}`
                 ]
               }
             ),
@@ -17057,7 +16823,13 @@ function Orders() {
       ] })
     ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "Deleted course" }) },
     { key: "amount", label: "Amount", sort: "amount", align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_kit.money)(r.price, r.price_type) }) },
-    { key: "method", label: "Method", hide: "lg", render: (r) => r.payment_option || /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) },
+    { key: "method", label: "Method", hide: "lg", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      r.payment_option || /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }),
+      String(r.is_test) === "1" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "amber", children: "TEST" })
+      ] })
+    ] }) },
     { key: "status", label: "Status", render: (r) => {
       const s = statusOf(r.payment_status);
       return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: s.tone, dot: true, children: s.label });
@@ -17092,7 +16864,7 @@ function Orders() {
     ), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: "Order no., student, e-mail or payment id" }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Course", value: g.filter("course"), onChange: (v) => g.go({ course: v }), options: courses.map((c) => ({ value: String(c.value), label: c.label })) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Method", value: g.filter("method"), onChange: (v) => g.go({ method: v }), options: [{ value: "razorpay", label: "Razorpay" }, { value: "paypal", label: "PayPal" }, { value: "manual", label: "Manual" }, { value: "free", label: "Free" }] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Method", value: g.filter("method"), onChange: (v) => g.go({ method: v }), options: [{ value: "razorpay", label: "Razorpay" }, { value: "paypal", label: "PayPal" }, { value: "manual", label: "Manual" }, { value: "free", label: "Free" }, { value: "test", label: "Test (simulated)" }] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Currency", value: g.filter("currency"), onChange: (v) => g.go({ currency: v }), options: [{ value: "inr", label: "INR" }, { value: "usd", label: "USD" }] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-filter", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "From" }),
@@ -20117,7 +19889,7 @@ var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/S
 var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
 const STEPS = [
   { n: 1, label: "Choose", href: "/purchase/step-1" },
-  { n: 2, label: "Room preview", href: "/purchase/step-2" },
+  { n: 2, label: "Preview", href: "/purchase/step-2" },
   { n: 3, label: "Payment", href: "/purchase/checkout" },
   { n: 4, label: "Confirmation", href: null }
 ];
@@ -20750,165 +20522,145 @@ var import_inertia_react = __webpack_require__("../../febuild/node_modules/@iner
 var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_PurchaseLayout = __toESM(__webpack_require__("./resources/js/Components/Shop/PurchaseLayout.js"));
-var import_RoomStage = __toESM(__webpack_require__("./resources/js/Components/Shop/RoomStage.js"));
-var import_rooms = __webpack_require__("./resources/js/Components/Shop/rooms.js");
+var import_ArtPreview = __toESM(__webpack_require__("./resources/js/Components/Shop/ArtPreview.js"));
 var import_BuyPanel = __webpack_require__("./resources/js/Components/Shop/BuyPanel.js");
 var import_ArtistHub = __webpack_require__("./resources/js/Components/Shop/ArtistHub.js");
-var import_CartStore = __webpack_require__("./resources/js/Components/Shop/CartStore.js");
 var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
-const ROOM_KEY = "artistikcity.room";
-const LINE_KEY = "artistikcity.flowline.";
 const FRAME_NOTES = {
   NONE: "Hangs as it comes",
-  BLACK_WOOD: "Matte black ash, 1\xBC\u2033",
-  OAK: "Solid natural oak, 1\xBC\u2033",
-  WHITE_FLOAT: "Floats the canvas in a white box"
+  BLACK_WOOD: "Matte black ash",
+  OAK: "Solid natural oak",
+  WHITE_FLOAT: "Floats in a white box"
 };
 function Step2Room() {
-  const { painting: p, offer, draft, hold, serverNow, contact, conversation: conv0, customer } = (0, import_inertia_react.usePage)().props;
-  const cart = (0, import_CartStore.useCart)();
+  const { painting: p, offer, draft, hold, serverNow, contact, conversation: conv0, customer, rooms = [], roomsEnabled = true } = (0, import_inertia_react.usePage)().props;
   const conversation = (0, import_ArtistHub.useConversation)(p.id, conv0);
-  (0, import_RoomStage.usePreloadRooms)();
   const [sel, setSel] = (0, import_react.useState)(() => (0, import_shop.normalise)(offer, __spreadValues({}, draft)));
-  const [room, setRoom] = (0, import_react.useState)(() => {
-    try {
-      return (0, import_rooms.roomById)(window.sessionStorage.getItem(ROOM_KEY) || "living").id;
-    } catch (e) {
-      return "living";
-    }
-  });
-  const [reset, setReset] = (0, import_react.useState)(0);
-  const [measure, setMeasure] = (0, import_react.useState)(true);
   const [busy, setBusy] = (0, import_react.useState)(false);
   const [err, setErr] = (0, import_react.useState)(null);
+  const [talk, setTalk] = (0, import_react.useState)(false);
   const f = (0, import_shop.formatOf)(offer, sel.format);
   const price = (0, import_react.useMemo)(() => (0, import_shop.priceOf)(offer, sel), [offer, sel]);
   const update = (patch) => setSel((s) => (0, import_shop.normalise)(offer, __spreadValues(__spreadValues({}, s), patch)));
-  const pickRoom = (k) => {
-    setRoom(k);
-    try {
-      window.sessionStorage.setItem(ROOM_KEY, k);
-    } catch (e) {
-    }
-  };
-  const surface = sel.format === "POSTER" || sel.format === "ORIGINAL" && !/canvas|panel|linen/i.test(p.surface) ? "paper" : "canvas";
-  const r = (0, import_rooms.roomById)(room);
-  const toPayment = () => {
+  const surface = sel.format === "POSTER" || sel.format === "ORIGINAL" && !/canvas|panel|linen/i.test(p.surface || "") ? "paper" : "canvas";
+  const buy = () => {
     setBusy(true);
     setErr(null);
-    const item = { paintingId: p.id, format: sel.format, size: sel.size, finish: sel.finish, frame: sel.frame, qty: sel.qty };
-    let previous = null;
-    try {
-      previous = JSON.parse(window.sessionStorage.getItem(LINE_KEY + p.id) || "null");
-    } catch (e) {
-    }
-    import_axios.default.post("/api/v1/purchase/draft", item).then(() => previous && previous.id && (previous.frame !== sel.frame || previous.size !== sel.size || previous.finish !== sel.finish) ? cart.remove(previous.id).catch(() => null) : null).then(() => cart.add(item, { openDrawer: false })).then((data) => {
-      const line = data && data.lines && data.lines.find((l) => l.paintingId === p.id && l.format === sel.format && l.frame === sel.frame && (l.size || "") === (sel.size || "") && (l.finish || "") === (sel.finish || ""));
-      try {
-        window.sessionStorage.setItem(LINE_KEY + p.id, JSON.stringify(line ? { id: line.id, frame: sel.frame, size: sel.size, finish: sel.finish } : null));
-      } catch (e) {
+    import_axios.default.post("/api/v1/purchase/draft", { paintingId: p.id, format: sel.format, size: sel.size, finish: sel.finish, frame: sel.frame, qty: sel.qty }).then(() => import_inertia.Inertia.visit("/purchase/buy-now")).catch((e) => {
+      const d = e.response && e.response.data;
+      if (d && d.code === "SIGN_IN" && d.redirect) {
+        window.location.assign(d.redirect);
+        return;
       }
-      import_inertia.Inertia.visit("/purchase/checkout");
-    }).catch((e) => {
       setBusy(false);
       setErr((0, import_shop.errorText)(e));
     });
   };
   if (!f || !price) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_PurchaseLayout.default, { painting: p, step: 2, title: "See it in your room", hold, serverNow, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-room pz-room--photo", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-room__stage", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-        import_RoomStage.default,
+  const facts = [
+    sel.format === "ORIGINAL" && p.is_signed && "Signed by the artist",
+    sel.format === "ORIGINAL" && p.has_certificate && "Certificate of authenticity",
+    sel.format === "ORIGINAL" ? "The one and only original" : sel.format === "CANVAS" && offer.edition && offer.edition.size ? `Numbered edition of ${offer.edition.size}` : null,
+    "Insured, tracked delivery"
+  ].filter(Boolean);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_PurchaseLayout.default, { painting: p, step: 2, title: "Preview and frame", hold, serverNow, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-page", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-page__stage", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_ArtPreview.default,
         {
-          room,
+          rooms: roomsEnabled ? rooms : [],
           image: p.image_url,
           title: p.title,
           widthIn: price.width,
           heightIn: price.height,
           frame: sel.frame,
-          surface,
-          showSize: measure,
-          resetToken: reset
+          surface
         }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_RoomStage.RoomSwitcher, { value: room, onChange: pickRoom }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-room__tools", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine", children: [
-          "Shown to scale, ",
-          r.note,
-          ". Drag the artwork to try another spot."
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "pz-check", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: measure, onChange: (e) => setMeasure(e.target.checked) }),
-            " Show size"
+      ) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "ap-page__panel", "aria-label": "Your choice", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "ap-head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: p.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+            "by ",
+            p.artist_name,
+            p.year_created ? `, ${p.year_created}` : ""
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-link", onClick: () => setReset((n) => n + 1), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-undo", "aria-hidden": "true" }),
-            " Re-centre"
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ap-head__format", children: [
+            import_shop.FORMAT_INFO[sel.format].name,
+            p.medium ? ` \xB7 ${p.medium}` : "",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${p.slug}#buy`, className: "ap-link", children: "Change" })
           ] })
-        ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-price", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { "data-testid": "room-price", children: (0, import_shop.inr)(price.total) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: (0, import_shop.variantLine)(sel, price) })
+        ] }),
+        sel.format === "ORIGINAL" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-opt", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ap-opt__label", children: "Size" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ap-static", children: [
+            (0, import_shop.num)(price.width),
+            " \xD7 ",
+            (0, import_shop.num)(price.height),
+            " in, the original's real size"
+          ] })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "ap-opt", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "ap-opt__label", children: "Size" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-sizes", children: f.sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", "aria-pressed": sel.size === s.code, className: `ap-size ${sel.size === s.code ? "is-on" : ""}`, onClick: () => update({ size: s.code }), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-size__shape", "aria-hidden": "true", style: { aspectRatio: `${s.width} / ${s.height}` } }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              (0, import_shop.num)(s.width),
+              " \xD7 ",
+              (0, import_shop.num)(s.height),
+              "\u2033"
+            ] })
+          ] }, s.code)) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "ap-opt", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "ap-opt__label", children: "Frame" }),
+          f.frames.length <= 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ap-static", children: p.is_framed ? "This original arrives framed, ready to hang." : "Framing is not offered for this format." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-frames", children: f.frames.map((code) => {
+            const extra = code === "NONE" ? 0 : (0, import_shop.frameCost)(offer, sel, code);
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `ap-frame ${sel.frame === code ? "is-on" : ""}`, "data-frame": code, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "frame", value: code, checked: sel.frame === code, onChange: () => update({ frame: code }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `ap-frame__sw ap-frame__sw--${code.toLowerCase()}`, "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ap-frame__text", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: import_shop.FRAME_INFO[code].name }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                  FRAME_NOTES[code],
+                  import_ArtPreview.FRAMES[code] && import_ArtPreview.FRAMES[code].t ? `, ${(0, import_shop.num)(import_ArtPreview.FRAMES[code].t)}\u2033` : ""
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-frame__price", children: code === "NONE" ? "Included" : `+${(0, import_shop.inr)(extra)}` })
+            ] }, code);
+          }) })
+        ] }),
+        err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-buy", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "ap-buy__btn", onClick: buy, disabled: busy, "data-testid": "room-continue", children: [
+            busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Buy now" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_shop.inr)(price.total) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Next: delivery address and secure payment." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "ap-facts", children: facts.map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+          x
+        ] }, x)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-talk", children: talk ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_BuyPanel.TalkToArtist, { painting: p, contact, conversation, customer, context: `${(0, import_shop.variantLine)(sel, price)} \xB7 ${(0, import_shop.inr)(price.total)}` }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "ap-link", onClick: () => setTalk(true), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-comments-o", "aria-hidden": "true" }),
+          " Questions about size or framing? Ask ",
+          String(p.artist_name).split(" ")[0]
+        ] }) })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "pz-room__panel", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-mini", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-mini__img", children: p.image_url && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: p.image_url, alt: "" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: p.title }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
-            import_shop.FORMAT_INFO[sel.format].name,
-            " \xB7 by ",
-            p.artist_name
-          ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${p.slug}#buy`, className: "pz-link", children: "Change" })
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-mobilebar", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_shop.inr)(price.total) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: import_shop.FRAME_INFO[sel.frame] ? import_shop.FRAME_INFO[sel.frame].name : "" })
       ] }),
-      sel.format === "ORIGINAL" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-option", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-legend", children: "Size" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-static", children: [
-          (0, import_shop.num)(price.width),
-          " \xD7 ",
-          (0, import_shop.num)(price.height),
-          " in ",
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-muted", children: "\xB7 the original's real size" })
-        ] })
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "pz-option", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "pz-legend", children: "Size" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-chips", children: f.sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", "aria-pressed": sel.size === s.code, className: sel.size === s.code ? "is-on" : "", onClick: () => update({ size: s.code }), children: [
-          (0, import_shop.num)(s.width),
-          " \xD7 ",
-          (0, import_shop.num)(s.height),
-          "\u2033"
-        ] }, s.code)) })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "pz-option", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "pz-legend", children: "Frame" }),
-        f.frames.length <= 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-static pz-muted", children: p.is_framed ? "This original arrives framed, ready to hang." : "Framing is not offered for this format." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-frames2", children: f.frames.map((code) => {
-          const extra = code === "NONE" ? 0 : (0, import_shop.frameCost)(offer, sel, code);
-          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `pz-frame2 ${sel.frame === code ? "is-on" : ""}`, "data-frame": code, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "frame", value: code, checked: sel.frame === code, onChange: () => update({ frame: code }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `pz-frame2__sw pz-frame2__sw--${code.toLowerCase()}`, "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}) }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-frame2__name", children: import_shop.FRAME_INFO[code].name }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-frame2__note", children: FRAME_NOTES[code] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-frame2__price", children: code === "NONE" ? "Included" : `+${(0, import_shop.inr)(extra)}` })
-          ] }, code);
-        }) })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-summary", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: sel.qty > 1 ? `${sel.qty} \xD7 ${(0, import_shop.inr)(price.unit)}` : "Price" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { "data-testid": "room-price", children: (0, import_shop.inr)(price.total) })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine", children: (0, import_shop.variantLine)(sel, price) })
-      ] }),
-      err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand pz-btn--lg pz-btn--block", onClick: toPayment, disabled: busy, "data-testid": "room-continue", children: [
-        busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
-        " Continue to payment"
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_BuyPanel.TalkToArtist, { painting: p, contact, conversation, customer, context: `${(0, import_shop.variantLine)(sel, price)} \xB7 ${(0, import_shop.inr)(price.total)}` })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", tabIndex: -1, onClick: buy, disabled: busy, children: "Buy now" })
     ] })
-  ] }) });
+  ] });
 }
 
 
@@ -21329,8 +21081,9 @@ function CheckoutBody() {
   const [open, setOpen] = (0, import_react.useState)(() => sectionValid(CONTACT) ? ship ? "delivery" : "payment" : "contact");
   const [done, setDone] = (0, import_react.useState)(() => sectionValid(CONTACT) ? { contact: true } : {});
   const [busy, setBusy] = (0, import_react.useState)(false);
-  const [notice, setNotice] = (0, import_react.useState)(payment === "failed" ? { type: "error", text: "Your PayPal payment did not complete. No money was taken. You can try again." } : payment === "cancelled" ? { type: "info", text: "You cancelled the PayPal payment. Your cart is still here." } : null);
+  const [notice, setNotice] = (0, import_react.useState)(payment === "failed" ? { type: "error", text: "Your PayPal payment did not complete. No money was taken. You can try again." } : payment === "cancelled" ? { type: "info", text: "You cancelled the PayPal payment. Your order is still here: you can try again." } : null);
   const [testOrder, setTestOrder] = (0, import_react.useState)(null);
+  const [simulate, setSimulate] = (0, import_react.useState)(false);
   const [sumOpen, setSumOpen] = (0, import_react.useState)(false);
   const set = (k, v) => {
     setF((x) => __spreadProps(__spreadValues({}, x), { [k]: v }));
@@ -21349,9 +21102,9 @@ function CheckoutBody() {
   const totals = data.totals;
   if (lines.length === 0) {
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-empty pz-empty--page", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-empty__art", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Your cart is empty" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Find an original, a numbered canvas or a print you love." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-empty__art", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Nothing to pay for yet" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Choose an original, a numbered canvas or a print, then press Buy now." }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "pz-btn pz-btn--brand", children: "Browse the marketplace" })
     ] });
   }
@@ -21409,7 +21162,7 @@ function CheckoutBody() {
       }
     }
     setBusy(true);
-    import_axios.default.post("/api/v1/purchase/checkout", __spreadValues({ gateway: domestic ? "RAZORPAY" : "PAYPAL" }, f)).then(async (r) => {
+    import_axios.default.post("/api/v1/purchase/checkout", __spreadValues({ gateway: domestic ? "RAZORPAY" : "PAYPAL", simulate: simulate && gateways.simulate }, f)).then(async (r) => {
       const d = r.data;
       if (d.provider === "test") {
         setTestOrder(d);
@@ -21446,6 +21199,10 @@ function CheckoutBody() {
     }).catch((x) => {
       setBusy(false);
       const d = x.response && x.response.data;
+      if (d && d.code === "SIGN_IN" && d.redirect) {
+        window.location.assign(d.redirect);
+        return;
+      }
       if (d && d.errors) {
         setServerErrors(d.errors);
         const sec = order.find((s2) => keysOf(s2).some((k) => d.errors[k]));
@@ -21455,34 +21212,17 @@ function CheckoutBody() {
       setNotice({ type: "error", text: (0, import_shop.errorText)(x) });
     });
   };
-  const unavailable = domestic ? !gateways.razorpay && !gateways.testMode : !gateways.paypal && !gateways.testMode;
+  const unavailable = !(simulate && gateways.simulate) && (domestic ? !gateways.razorpay && !gateways.testMode : !gateways.paypal && !gateways.testMode);
   const usd = (Number(totals.total) / Number(inrPerUsd || 84)).toFixed(2);
   const contactSummary = [f.name, f.email, f.phone, f.country].filter(Boolean).join(" \xB7 ");
   const deliverySummary = [f.line1, f.line2, f.city, f.state, f.postal].filter(Boolean).join(", ");
   const summary = /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "pz-card", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { className: "pz-card__head", children: [
-      "Order summary ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-muted", children: [
-        data.count,
-        " item",
-        data.count === 1 ? "" : "s"
-      ] })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "pz-lines", children: lines.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-      import_CartDrawer.CartLine,
-      {
-        line: l,
-        serverNow: cart.serverNow,
-        busy: cart.busy,
-        onQty: (line, q) => cart.setQty(line.id, q).then(() => cart.refresh(f.country)).catch(() => {
-        }),
-        onRemove: (line) => cart.remove(line.id).then(() => cart.refresh(f.country)).catch(() => {
-        }),
-        onReserve: (line) => cart.add({ paintingId: line.paintingId, format: "ORIGINAL", frame: line.frame, qty: 1 }, { openDrawer: false }).then(() => cart.refresh(f.country)).catch(() => {
-        })
-      },
-      l.id
-    )) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "pz-card__head", children: "Your order" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "pz-lines", children: lines.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.CartLine, { line: l, serverNow: cart.serverNow, busy: cart.busy, compact: true }, l.id)) }),
+    lines[0] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine pz-change", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: lines[0].format === "DIGITAL" ? `/marketplace/${lines[0].slug}#buy` : "/purchase/step-2", className: "pz-link", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-pencil", "aria-hidden": "true" }),
+      " Change size or frame"
+    ] }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CouponBox, { totals, country: f.country }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.Totals, { totals }),
     cart.error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: cart.error })
@@ -21568,11 +21308,23 @@ function CheckoutBody() {
           )
         ] }),
         !domestic && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine", children: "Paying from outside India? Check your country under Contact: it sets shipping and the currency." }),
+        gateways.simulate && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `pz-simulate ${simulate ? "is-on" : ""}`, "data-testid": "simulate", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: simulate, onChange: (e) => setSimulate(e.target.checked) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-flask", "aria-hidden": "true" }),
+              " Simulate this payment"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Your account is a test buyer: no money is charged and the order is marked TEST in the admin." })
+          ] })
+        ] }),
         unavailable && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-note is-error", children: "This payment option isn't available right now. Please try the other one or contact us." }),
         testOrder ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-testpay", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Test mode:" }),
-            " no payment gateway is configured, so you can simulate the payment for order ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: simulate ? "Test buyer:" : "Test mode:" }),
+            " ",
+            simulate ? "nothing is charged" : "no payment gateway is configured",
+            ", so you can simulate the payment for order ",
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: testOrder.orderId }),
             "."
           ] }),
@@ -21586,7 +21338,8 @@ function CheckoutBody() {
         ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "submit", className: "pz-btn pz-btn--brand pz-btn--lg pz-btn--block", disabled: busy || unavailable || totals.blocked, "data-testid": "pay", children: [
           busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
           " ",
-          "Pay ",
+          simulate && gateways.simulate ? "Simulate" : "Pay",
+          " ",
           domestic ? (0, import_shop.inr)(totals.total) : `$${usd}`
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine pz-center", children: [
@@ -22739,7 +22492,6 @@ var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/j
 var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
-var import_CartStore = __webpack_require__("./resources/js/Components/Shop/CartStore.js");
 var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
 var import_ArtistHub = __webpack_require__("./resources/js/Components/Shop/ArtistHub.js");
 var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
@@ -22790,7 +22542,6 @@ function startSelection(offer, draft, originalOk) {
   });
 }
 function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, conversation, customer }) {
-  const cart = (0, import_CartStore.useCart)();
   const [busy, setBusy] = (0, import_react.useState)(false);
   const [err, setErr] = (0, import_react.useState)(null);
   const [conflict, setConflict] = (0, import_react.useState)(null);
@@ -22813,15 +22564,13 @@ function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, co
     setBusy(true);
     setErr(null);
     setConflict(null);
-    import_axios.default.post("/api/v1/purchase/draft", __spreadProps(__spreadValues({ paintingId: p.id }, sel), { switch: switchHold })).then(() => {
-      if (sel.format !== "DIGITAL") {
-        import_inertia.Inertia.visit("/purchase/step-2");
-        return null;
-      }
-      return cart.add({ paintingId: p.id, format: "DIGITAL", size: sel.size, finish: "", frame: "NONE", qty: 1 }, { openDrawer: false }).then(() => import_inertia.Inertia.visit("/purchase/checkout"));
-    }).catch((e) => {
-      setBusy(false);
+    import_axios.default.post("/api/v1/purchase/draft", __spreadProps(__spreadValues({ paintingId: p.id }, sel), { switch: switchHold })).then(() => import_inertia.Inertia.visit(sel.format === "DIGITAL" ? "/purchase/buy-now" : "/purchase/step-2")).catch((e) => {
       const d = e.response && e.response.data;
+      if (d && d.code === "SIGN_IN" && d.redirect) {
+        window.location.assign(d.redirect);
+        return;
+      }
+      setBusy(false);
       if (d && d.code === "HOLD_LIMIT") setConflict(d);
       else if (d && (d.code === "HELD_BY_OTHER" || d.code === "JUST_TAKEN" || d.code === "SOLD")) {
         setErr(d.message);
@@ -22918,10 +22667,11 @@ function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, co
       sel.format === "ORIGINAL" && Number(p.discount_percentage) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("s", { className: "pz-muted", children: (0, import_shop.inr)(p.base_price) })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand pz-btn--lg pz-btn--block", "data-testid": "buy-continue", onClick: () => go(false), disabled: busy || !canGo, children: [
-      busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${sel.format === "DIGITAL" ? "fa-lock" : "fa-home"}`, "aria-hidden": "true" }),
-      sel.format === "DIGITAL" ? " Continue to payment" : " Continue: see it in your room"
+      busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+      " ",
+      "Buy now"
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine pz-center", children: sel.format === "ORIGINAL" && !mine ? "Continuing holds the original for you for 15 minutes. No payment yet." : sel.format === "DIGITAL" ? "Download link by e-mail right after payment." : "Next: pick a frame and see it on a wall, to scale." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine pz-center", children: !customer ? "Log in or join to buy: your choice is kept and you come straight back." : sel.format === "ORIGINAL" && !mine ? "Buying holds the original for you for 15 minutes. No payment yet." : sel.format === "DIGITAL" ? "Download link by e-mail right after payment." : "Next: choose a frame and see it on a wall, then pay." }),
     err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err }),
     conflict && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-conflict", role: "alertdialog", "aria-label": "You're already holding an original", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
@@ -22934,7 +22684,7 @@ function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, co
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ink", onClick: () => go(true), children: "Switch to this piece" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/purchase/checkout", className: "pz-btn pz-btn--line", children: "Go to my cart" })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: () => setConflict(null), children: "Keep my other piece" })
       ] })
     ] }),
     !preview && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TalkToArtist, { painting: p, contact, conversation, customer, context })
@@ -25808,7 +25558,7 @@ if (typeof window !== "undefined" && !window.__acSite401) {
   import_axios.default.interceptors.response.use((r) => r, (e) => {
     try {
       const url = new URL(e.config && e.config.url ? e.config.url : "", window.location.origin);
-      if (e.response && e.response.status === 401 && url.origin === window.location.origin && !SKIP.test(url.pathname) && !SKIP.test(window.location.pathname)) {
+      if (e.response && e.response.status === 401 && url.origin === window.location.origin && !SKIP.test(url.pathname) && !SKIP.test(window.location.pathname) && !(e.response.data && e.response.data.code === "SIGN_IN")) {
         window.dispatchEvent(new CustomEvent("ac:reauth"));
       }
     } catch (x) {
@@ -26103,6 +25853,639 @@ function PaymentPending({ pending, only, email }) {
 
 /***/ }),
 
+/***/ "./resources/js/Components/Auth/PurchaseIntent.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var PurchaseIntent_exports = {};
+__export(PurchaseIntent_exports, {
+  default: () => PurchaseIntentBanner
+});
+module.exports = __toCommonJS(PurchaseIntent_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+function PurchaseIntentBanner({ intent, mode = "login" }) {
+  if (!intent) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-intent", role: "status", "data-testid": "purchase-intent", children: [
+    intent.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: intent.image, alt: "", className: "ac-intent__img" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ac-intent__icon", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${intent.kind === "artwork" ? "fa-picture-o" : intent.kind === "commission" ? "fa-paint-brush" : "fa-graduation-cap"}` }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: mode === "join" ? "Join for free to finish buying" : "Log in to finish buying" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: intent.title }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "You come straight back to checkout; nothing you chose is lost." })
+    ] })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Shop/ArtPreview.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var ArtPreview_exports = {};
+__export(ArtPreview_exports, {
+  ArtworkView: () => ArtworkView,
+  FRAMES: () => FRAMES,
+  FramedArt: () => FramedArt,
+  RoomView: () => RoomView,
+  ViewPicker: () => ViewPicker,
+  default: () => ArtPreview,
+  framedSize: () => framedSize,
+  placeInRoom: () => placeInRoom,
+  usePreload: () => usePreload
+});
+module.exports = __toCommonJS(ArtPreview_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+const FRAMES = {
+  NONE: { t: 0, gap: 0, depth: 0.75 },
+  BLACK_WOOD: { t: 1.25, gap: 0, depth: 1.5 },
+  OAK: { t: 1.25, gap: 0, depth: 1.5 },
+  WHITE_FLOAT: { t: 1.1, gap: 0.45, depth: 1.75 }
+};
+function framedSize(widthIn, heightIn, frame) {
+  const f = FRAMES[frame] || FRAMES.NONE;
+  const add = 2 * (f.t + f.gap);
+  return { w: Number(widthIn) + add, h: Number(heightIn) + add, f };
+}
+function FramedArt({ image, title, widthIn, heightIn, frame = "NONE", surface = "canvas", lift = 1 }) {
+  const { w, f } = framedSize(widthIn, heightIn, frame);
+  const pad = (inches) => `${inches / w * 100}%`;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `ap-art ap-art--${String(frame).toLowerCase()} ap-art--${surface}`, style: { "--ap-lift": lift }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-art__frame", style: { padding: pad(f.t) }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-art__float", style: { padding: f.gap ? pad(f.gap) : 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-art__canvas", children: image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: image, alt: title ? `${title}` : "", draggable: "false" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-art__blank" }) }) }) }) });
+}
+function useWidth() {
+  const ref = (0, import_react.useRef)(null);
+  const [w, setW] = (0, import_react.useState)(0);
+  (0, import_react.useLayoutEffect)(() => {
+    const el = ref.current;
+    if (!el) return void 0;
+    const update = () => setW(el.clientWidth);
+    update();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    }
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, w];
+}
+function ArtworkView({ image, title, widthIn, heightIn, frame, surface }) {
+  const [ref, stageW] = useWidth();
+  const { w, h } = framedSize(widthIn, heightIn, frame);
+  const phone = stageW > 0 && stageW < 560;
+  const ratio = phone ? 1.05 : 4 / 3;
+  const maxW = phone ? 0.74 : 0.62;
+  const maxH = phone ? 0.7 : 0.72;
+  const scale = Math.min(maxW * ratio / w, maxH / h);
+  const boxW = w * scale / ratio;
+  const boxH = h * scale;
+  const left = (1 - boxW) / 2;
+  const top = (1 - boxH) / 2 - 0.02;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-stage ap-stage--wall", ref, style: { aspectRatio: `${ratio}` }, "data-view": "artwork", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-wall__light", "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-place", style: { left: `${left * 100}%`, top: `${top * 100}%`, width: `${boxW * 100}%`, height: `${boxH * 100}%` }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FramedArt, { image, title, widthIn, heightIn, frame, surface, lift: 1.4 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-dim ap-dim--w", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        (0, import_shop.num)(widthIn),
+        " in"
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-dim ap-dim--h", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        (0, import_shop.num)(heightIn),
+        " in"
+      ] }) })
+    ] })
+  ] });
+}
+function placeInRoom(room, outerWIn, outerHIn, stageW) {
+  const pw = Number(room.width) || 1600;
+  const ph = Number(room.height) || 1067;
+  const a = room.area || { x: 20, y: 15, w: 60, h: 50 };
+  const ax = a.x / 100 * pw;
+  const ay = a.y / 100 * ph;
+  const aw = a.w / 100 * pw;
+  const ah = a.h / 100 * ph;
+  let ppi;
+  let toScale = !!room.areaWidthIn;
+  if (toScale) ppi = aw / Number(room.areaWidthIn);
+  else ppi = Math.min(aw * 0.6 / outerWIn, ah * 0.75 / outerHIn);
+  let wpx = outerWIn * ppi;
+  let hpx = outerHIn * ppi;
+  let tooBig = false;
+  if (wpx > aw || hpx > ah) {
+    const k = Math.min(aw / wpx, ah / hpx);
+    wpx *= k;
+    hpx *= k;
+    tooBig = toScale;
+    toScale = false;
+  }
+  const cx = ax + aw / 2;
+  const cy = ay + ah / 2;
+  const want = 0.32 * pw / wpx;
+  const native = stageW > 0 ? pw / stageW : 1;
+  const zoom = Math.max(1, Math.min(want, native * 1.35, 2.4));
+  const cw = pw / zoom;
+  const ch = ph / zoom;
+  const crop = {
+    x: Math.min(pw - cw, Math.max(0, cx - cw / 2)),
+    y: Math.min(ph - ch, Math.max(0, cy - ch * 0.48)),
+    w: cw,
+    h: ch
+  };
+  return { pw, ph, box: { x: cx - wpx / 2, y: cy - hpx / 2, w: wpx, h: hpx }, crop, zoom, toScale, tooBig };
+}
+function RoomView({ room, image, title, widthIn, heightIn, frame, surface }) {
+  const [ref, stageW] = useWidth();
+  const [loaded, setLoaded] = (0, import_react.useState)(false);
+  const { w, h } = framedSize(widthIn, heightIn, frame);
+  const s = (0, import_react.useMemo)(() => placeInRoom(room, w, h, stageW), [room, w, h, stageW]);
+  (0, import_react.useEffect)(() => {
+    setLoaded(false);
+  }, [room.photo]);
+  const pct = (v, total) => `${v / total * 100}%`;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    "div",
+    {
+      className: `ap-stage ap-stage--room ${loaded ? "is-loaded" : ""}`,
+      ref,
+      style: { aspectRatio: `${s.pw} / ${s.ph}` },
+      "data-view": "room",
+      "data-room": room.id,
+      "data-zoom": s.zoom.toFixed(2),
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-scene", style: { width: `${s.zoom * 100}%`, height: `${s.zoom * 100}%`, transform: `translate(${-(s.crop.x / s.pw) * 100}%, ${-(s.crop.y / s.ph) * 100}%)` }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { className: "ap-scene__photo", src: room.photo, alt: `${room.label}${room.note ? `, ${room.note.toLowerCase()}` : ""}`, draggable: "false", onLoad: () => setLoaded(true) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-place", style: { left: pct(s.box.x, s.pw), top: pct(s.box.y, s.ph), width: pct(s.box.w, s.pw), height: pct(s.box.h, s.ph) }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FramedArt, { image, title, widthIn, heightIn, frame, surface, lift: 0.8 }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-scale", "data-testid": "room-scale", children: s.toScale ? `To scale \xB7 ${(0, import_shop.num)(widthIn)} \xD7 ${(0, import_shop.num)(heightIn)} in` : s.tooBig ? "Larger than this wall: shown smaller" : `${(0, import_shop.num)(widthIn)} \xD7 ${(0, import_shop.num)(heightIn)} in` })
+      ]
+    }
+  );
+}
+function ViewPicker({ rooms, value, onChange, image }) {
+  const list = [{ id: "art", label: "Artwork", thumb: image, isArt: true }, ...rooms.map((r) => ({ id: String(r.id), label: r.label, thumb: r.photo }))];
+  const refs = (0, import_react.useRef)([]);
+  const onKey = (e, i) => {
+    const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    const n = (i + d + list.length) % list.length;
+    onChange(list[n].id);
+    if (refs.current[n]) refs.current[n].focus();
+  };
+  if (rooms.length === 0) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `ap-views ${list.length > 5 ? "is-many" : ""}`, role: "radiogroup", "aria-label": "Preview", children: list.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    "button",
+    {
+      ref: (el) => {
+        refs.current[i] = el;
+      },
+      type: "button",
+      role: "radio",
+      "aria-checked": value === v.id,
+      tabIndex: value === v.id ? 0 : -1,
+      className: `ap-view ${value === v.id ? "is-on" : ""} ${v.isArt ? "ap-view--art" : ""}`,
+      "data-view-id": v.id,
+      onClick: () => onChange(v.id),
+      onKeyDown: (e) => onKey(e, i),
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-view__img", children: v.thumb ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: v.thumb, alt: "", loading: "lazy" }) : null }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-view__label", children: v.label })
+      ]
+    },
+    v.id
+  )) });
+}
+function usePreload(rooms) {
+  (0, import_react.useEffect)(() => {
+    const keep = rooms.map((r) => {
+      const i = new Image();
+      i.src = r.photo;
+      return i;
+    });
+    return () => {
+      keep.length = 0;
+    };
+  }, [rooms]);
+}
+function ArtPreview({ rooms = [], image, title, widthIn, heightIn, frame = "NONE", surface = "canvas", storageKey = "artistikcity.view" }) {
+  usePreload(rooms);
+  const [view, setView] = (0, import_react.useState)(() => {
+    try {
+      const v = window.sessionStorage.getItem(storageKey);
+      return v && (v === "art" || rooms.some((r) => String(r.id) === v)) ? v : "art";
+    } catch (e) {
+      return "art";
+    }
+  });
+  const pick = (v) => {
+    setView(v);
+    try {
+      window.sessionStorage.setItem(storageKey, v);
+    } catch (e) {
+    }
+  };
+  const room = rooms.find((r) => String(r.id) === view);
+  const common = { image, title, widthIn, heightIn, frame, surface };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap", children: [
+    room ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomView, __spreadValues({ room }, common)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArtworkView, __spreadValues({}, common)),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ViewPicker, { rooms, value: room ? view : "art", onChange: pick, image })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Rooms.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Rooms_exports = {};
+__export(Rooms_exports, {
+  default: () => Rooms
+});
+module.exports = __toCommonJS(Rooms_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+var import_ArtPreview = __webpack_require__("./resources/js/Components/Shop/ArtPreview.js");
+const EXAMPLE = { w: 24, h: 30 };
+const blankForm = () => ({ id: null, label: "", note: "", widthIn: "", active: true, area: { x: 25, y: 15, w: 50, h: 45 }, photo: null, file: null, width: 0, height: 0 });
+function AreaEditor({ src, area, onChange }) {
+  const box = (0, import_react.useRef)(null);
+  const drag = (0, import_react.useRef)(null);
+  const at = (e) => {
+    const r = box.current.getBoundingClientRect();
+    return { x: Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)), y: Math.max(0, Math.min(100, (e.clientY - r.top) / r.height * 100)) };
+  };
+  const down = (e) => {
+    if (e.button !== void 0 && e.button !== 0) return;
+    e.preventDefault();
+    if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId);
+    const p = at(e);
+    const inside = p.x >= area.x && p.x <= area.x + area.w && p.y >= area.y && p.y <= area.y + area.h;
+    drag.current = inside ? { mode: "move", p0: p, a0: area } : { mode: "draw", p0: p };
+  };
+  const move = (e) => {
+    if (!drag.current) return;
+    const p = at(e);
+    const d = drag.current;
+    if (d.mode === "move") {
+      const x = Math.max(0, Math.min(100 - d.a0.w, d.a0.x + p.x - d.p0.x));
+      const y = Math.max(0, Math.min(100 - d.a0.h, d.a0.y + p.y - d.p0.y));
+      onChange(__spreadProps(__spreadValues({}, d.a0), { x, y }));
+    } else {
+      onChange({ x: Math.min(d.p0.x, p.x), y: Math.min(d.p0.y, p.y), w: Math.abs(p.x - d.p0.x), h: Math.abs(p.y - d.p0.y) });
+    }
+  };
+  const up = () => {
+    drag.current = null;
+  };
+  const nudge = (e) => {
+    const step = e.shiftKey ? 5 : 1;
+    const m = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if (!m) return;
+    e.preventDefault();
+    onChange(__spreadProps(__spreadValues({}, area), { x: Math.max(0, Math.min(100 - area.w, area.x + m[0])), y: Math.max(0, Math.min(100 - area.h, area.y + m[1])) }));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    "div",
+    {
+      className: "rm-area",
+      ref: box,
+      onPointerDown: down,
+      onPointerMove: move,
+      onPointerUp: up,
+      onPointerCancel: up,
+      role: "application",
+      "aria-label": "Hanging area. Drag on the photo to draw it, drag inside it to move it, or use the arrow keys.",
+      tabIndex: 0,
+      onKeyDown: nudge,
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src, alt: "", draggable: "false" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "rm-area__box", style: { left: `${area.x}%`, top: `${area.y}%`, width: `${area.w}%`, height: `${area.h}%` }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hanging area" }) })
+      ]
+    }
+  );
+}
+function RoomEditor({ initial, minWidth, onClose, onSaved, toast }) {
+  const [f, setF] = (0, import_react.useState)(initial);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const set = (patch) => setF((x) => __spreadValues(__spreadValues({}, x), patch));
+  const pick = (file) => {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      set({ file, photo: url, width: img.naturalWidth, height: img.naturalHeight });
+      setErrors((e) => __spreadProps(__spreadValues({}, e), { photo: img.naturalWidth < minWidth ? `This photo is ${img.naturalWidth} px wide. Use one at least ${minWidth} px wide (2000+ looks best).` : null }));
+    };
+    img.src = url;
+  };
+  const save = () => {
+    setBusy(true);
+    setErrors({});
+    const fd = new FormData();
+    fd.append("label", f.label);
+    fd.append("note", f.note || "");
+    fd.append("widthIn", f.widthIn === null || f.widthIn === void 0 ? "" : String(f.widthIn));
+    fd.append("active", f.active ? "true" : "false");
+    ["x", "y", "w", "h"].forEach((k) => fd.append(k, String(Math.round(f.area[k] * 1e3) / 1e3)));
+    if (f.file) fd.append("photo", f.file);
+    import_axios.default.post(f.id ? `/admin/api/rooms/${f.id}` : "/admin/api/rooms", fd).then((r) => {
+      toast(f.id ? `${f.label} saved` : `${f.label} added`);
+      onSaved(r.data.rooms);
+    }).catch((e) => {
+      setBusy(false);
+      const d = e.response && e.response.data;
+      if (d && d.errors) setErrors(d.errors);
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    });
+  };
+  const preview = f.photo ? { id: "preview", label: f.label || "Room", photo: f.photo, width: f.width || 1600, height: f.height || 1067, area: f.area, areaWidthIn: Number(f.widthIn) > 0 ? Number(f.widthIn) : null } : null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Drawer,
+    {
+      open: true,
+      title: f.id ? `Edit ${initial.label}` : "Add a room",
+      subtitle: "Buyers see their painting hung on this wall.",
+      onClose,
+      size: "lg",
+      footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", busy, onClick: save, disabled: !f.photo || !f.label.trim(), children: f.id ? "Save room" : "Add room" })
+      ] }),
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rm-editor", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Room photo", name: "photo", error: errors.photo, hint: `Landscape, a straight-on view of a wall, at least ${minWidth} px wide (2000 px or more looks sharpest). JPG, PNG or WebP, up to 8 MB.`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "file", accept: "image/jpeg,image/png,image/webp", onChange: (e) => pick(e.target.files && e.target.files[0]), "aria-label": "Room photo" }) }),
+        f.photo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Where a painting hangs", name: "area", error: errors.area, hint: "Drag on the photo to mark the free part of the wall (for example above the sofa). Drag inside the box to move it.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AreaEditor, { src: f.photo, area: f.area, onChange: (area) => set({ area }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.Field,
+            {
+              label: "Real width of that area, in inches",
+              name: "widthIn",
+              error: errors.widthIn,
+              optional: true,
+              hint: "Measure the marked part of the wall. With it, every painting is shown to scale; without it, paintings are fitted into the area.",
+              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "number", min: "1", max: "1200", step: "0.5", value: f.widthIn, onChange: (e) => set({ widthIn: e.target.value }), className: "adm-input", style: { maxWidth: 180 } })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Name", name: "label", error: errors.label, required: true, hint: "Shown under the thumbnail, e.g. Living room.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: f.label, maxLength: 120, onChange: (e) => set({ label: e.target.value }), className: "adm-input" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Note", name: "note", error: errors.note, optional: true, hint: "Helps buyers judge the size, e.g. Above an 86-inch sofa.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: f.note || "", maxLength: 255, onChange: (e) => set({ note: e.target.value }), className: "adm-input" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: f.active, onChange: (v) => set({ active: v }), label: "Show this room to buyers", description: errors.active || "Hidden rooms stay here for later.", name: "active" }),
+        preview && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rm-preview", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "rm-preview__label", children: [
+            "Preview with a ",
+            EXAMPLE.w,
+            " \xD7 ",
+            EXAMPLE.h,
+            " in painting"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ArtPreview.RoomView, { room: preview, image: null, title: "Example", widthIn: EXAMPLE.w, heightIn: EXAMPLE.h, frame: "BLACK_WOOD", surface: "canvas" })
+        ] })
+      ] })
+    }
+  );
+}
+function Rooms() {
+  const { rooms: initialRooms = [], enabled: initialEnabled = true, maxActive = 12, minWidth = 1e3 } = (0, import_inertia_react.usePage)().props;
+  const [rooms, setRooms] = (0, import_react.useState)(initialRooms);
+  const [enabled, setEnabled] = (0, import_react.useState)(initialEnabled);
+  const [editing, setEditing] = (0, import_react.useState)(null);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [confirmNode, confirm] = (0, import_kit.useConfirm)();
+  const active = rooms.filter((r) => r.status === "ACTIVE");
+  const hidden = rooms.filter((r) => r.status !== "ACTIVE");
+  (0, import_react.useEffect)(() => {
+    setRooms(initialRooms);
+  }, [initialRooms]);
+  const toggleAll = (on) => {
+    setEnabled(on);
+    import_axios.default.post("/admin/api/rooms/settings", { enabled: on }).then(() => toast(on ? "Room preview is on" : "Room preview is off: buyers see the artwork on its own")).catch((e) => {
+      setEnabled(!on);
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    });
+  };
+  const moveRoom = (r, d) => {
+    const ids = active.map((x) => x.id);
+    const i = ids.indexOf(r.id);
+    const j = i + d;
+    if (j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    import_axios.default.post("/admin/api/rooms/order", { ids: [...ids, ...hidden.map((x) => x.id)] }).then((x) => setRooms(x.data.rooms)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const remove = (r) => confirm({ title: `Delete ${r.label}?`, body: "Buyers stop seeing this room. The photo file stays in storage.", confirmLabel: "Delete room", danger: true }).then((ok) => ok && import_axios.default.post(`/admin/api/rooms/${r.id}/delete`).then((x) => {
+    setRooms(x.data.rooms);
+    toast(`${r.label} deleted`);
+  }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")));
+  const edit = (r) => setEditing({
+    id: r.id,
+    label: r.label,
+    note: r.note || "",
+    widthIn: r.areaWidthIn === null || r.areaWidthIn === void 0 ? "" : r.areaWidthIn,
+    active: r.status === "ACTIVE",
+    area: r.area,
+    photo: r.photo,
+    file: null,
+    width: r.width,
+    height: r.height
+  });
+  const card = (r, i, list) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: `rm-card ${r.status !== "ACTIVE" ? "is-hidden" : ""}`, "data-room-id": r.id, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rm-card__img", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: r.photo, alt: "", loading: "lazy" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "rm-card__area", style: { left: `${r.area.x}%`, top: `${r.area.y}%`, width: `${r.area.w}%`, height: `${r.area.h}%` }, "aria-hidden": "true" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rm-card__body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "rm-card__title", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.label }),
+        r.status === "ACTIVE" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", dot: true, children: "Shown" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Hidden" })
+      ] }),
+      r.note && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: r.note }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted rm-card__meta", children: [
+        r.width,
+        " \xD7 ",
+        r.height,
+        " px \xB7 ",
+        r.areaWidthIn ? `to scale (area ${r.areaWidthIn} in wide)` : "no scale: paintings are fitted"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rm-card__actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-pencil", onClick: () => edit(r), children: "Edit" }),
+        r.status === "ACTIVE" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-arrow-up", onClick: () => moveRoom(r, -1), disabled: i === 0, "aria-label": `Move ${r.label} earlier` }),
+        r.status === "ACTIVE" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-arrow-down", onClick: () => moveRoom(r, 1), disabled: i === list.length - 1, "aria-label": `Move ${r.label} later` }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash", onClick: () => remove(r), "aria-label": `Delete ${r.label}` })
+      ] })
+    ] })
+  ] }, r.id);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Room preview", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        eyebrow: "Sales",
+        title: "Room preview",
+        subtitle: "The rooms buyers see a painting in before they pay. The artwork on its own is always shown first; each room you show adds one more view.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", icon: "fa-plus", onClick: () => setEditing(blankForm()), children: "Add a room" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_form.Toggle,
+      {
+        checked: enabled,
+        onChange: toggleAll,
+        name: "enabled",
+        label: "Show room photos on the purchase page",
+        description: enabled ? `${active.length} room${active.length === 1 ? "" : "s"} shown (up to ${maxActive}). Four or five work best.` : "Off: buyers see the artwork on its own, with frames and sizes."
+      }
+    ) }),
+    rooms.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-picture-o", title: "No rooms yet", action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", onClick: () => setEditing(blankForm()), children: "Add a room" }), children: "Upload 4 to 5 photos of real walls: a living room, a bedroom, a study, an office. Buyers see the painting on its own until you do." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "rm-h", children: "Shown to buyers, in this order" }),
+      active.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "rm-grid", children: active.map((r, i) => card(r, i, active)) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: 'No room is shown. Edit a room and switch on "Show this room to buyers".' }),
+      hidden.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "rm-h", children: "Hidden" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "rm-grid", children: hidden.map((r, i) => card(r, i, hidden)) })
+      ] })
+    ] }),
+    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      RoomEditor,
+      {
+        initial: editing,
+        minWidth,
+        onClose: () => setEditing(null),
+        toast,
+        onSaved: (list) => {
+          setRooms(list);
+          setEditing(null);
+        }
+      }
+    ),
+    confirmNode,
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
 /***/ "./resources/js/Pages/Auth/Login.js":
 /***/ ((module, exports, __webpack_require__) => {
 
@@ -26143,9 +26526,10 @@ var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/j
 var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
 var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
 var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/AuthLayout.js"));
+var import_PurchaseIntent = __toESM(__webpack_require__("./resources/js/Components/Auth/PurchaseIntent.js"));
 var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
 var import_SignInMethods = __webpack_require__("./resources/js/Components/Auth/SignInMethods.js");
-function Login({ status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, errors: pageErrors = {} }) {
+function Login({ intent, status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, errors: pageErrors = {} }) {
   const [tab, setTab] = (0, import_react.useState)(() => typeof window !== "undefined" && window.localStorage && safeGet("ac.login.tab") || "email");
   const [usePassword, setUsePassword] = (0, import_react.useState)(() => !!(pageErrors.email || pageErrors.password));
   const [passkeyError, setPasskeyError] = (0, import_react.useState)(null);
@@ -26168,7 +26552,7 @@ function Login({ status, canResetPassword, providers, defaultCountryCode, otpDev
   const verified = query.includes("verified=1");
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AuthLayout.default, { title: "Log in", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Log in" }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Welcome back. Pick up your courses right where you left off." }),
+    intent ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_PurchaseIntent.default, { intent }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Welcome back. Pick up your courses right where you left off." }),
     status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--ok", children: status }),
     verified && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--ok", children: "Your e-mail is confirmed. Log in to continue." }),
     passkeyError && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-alert ac-alert--error", role: "alert", children: passkeyError }),
@@ -26302,9 +26686,10 @@ var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/j
 var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
 var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
 var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/AuthLayout.js"));
+var import_PurchaseIntent = __toESM(__webpack_require__("./resources/js/Components/Auth/PurchaseIntent.js"));
 var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
 var import_SignInMethods = __webpack_require__("./resources/js/Components/Auth/SignInMethods.js");
-function Register({ providers, defaultCountryCode, otpDevMode, socialSetupHint }) {
+function Register({ intent, providers, defaultCountryCode, otpDevMode, socialSetupHint }) {
   const { data, setData, post, processing, errors, reset } = (0, import_inertia_react.useForm)({
     name: "",
     email: "",
@@ -26329,7 +26714,7 @@ function Register({ providers, defaultCountryCode, otpDevMode, socialSetupHint }
   const loginHref = query.includes("return_to") ? route("login") + query : route("login");
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AuthLayout.default, { title: "Join for free", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Join for free" }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Create your ArtistikCity account and start learning to draw and paint today." }),
+    intent ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_PurchaseIntent.default, { intent, mode: "join" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-lede", children: "Create your ArtistikCity account and start learning to draw and paint today." }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-perklist", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }),
@@ -26890,6 +27275,7 @@ function Field({ id, label, error, children, className = "" }) {
 const inputCls = (err) => `w-full h-11 rounded-lg text-sm ${err ? "border-red-400 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand focus:ring-brand"}`;
 function CheckoutForm() {
   const { pricing, gateways = {}, customer } = (0, import_inertia_react.usePage)().props;
+  const [simulate, setSimulate] = (0, import_react.useState)(false);
   const state = (0, import_useStepGuard.default)(6);
   const { update, reset } = (0, import_CommissionStore.useCommission)();
   const digital = (0, import_CommissionStore.isDigital)(state);
@@ -26951,7 +27337,8 @@ function CheckoutForm() {
       instructions: state.instructions,
       contact: state.contact,
       shipping: digital ? null : state.shipping,
-      paymentMethod: state.paymentMethod
+      paymentMethod: state.paymentMethod,
+      simulate: simulate && gateways.simulate
     };
     import_axios.default.post("/api/commissions/initialize-checkout", payload).then(async (r) => {
       const d = r.data;
@@ -26987,11 +27374,15 @@ function CheckoutForm() {
     }).catch((err) => {
       setBusy(false);
       const data = err.response && err.response.data;
+      if (data && data.code === "SIGN_IN" && data.redirect) {
+        window.location.assign(data.redirect);
+        return;
+      }
       setNotice({ type: "error", text: data && data.message || "Something went wrong. Please try again." });
     });
   };
   const payLabel = q ? `\u{1F512} Securely Confirm and Pay Total: ${currency === "INR" ? (0, import_CommissionStore.inr)(q.totalInr) : (0, import_CommissionStore.usd)(q.totalUsd)}` : "Securely Confirm and Pay";
-  const unavailable = (m) => !gateways.testMode && (m === "PAYPAL" ? !gateways.paypal : !gateways.razorpay);
+  const unavailable = (m) => !gateways.testMode && !(simulate && gateways.simulate) && (m === "PAYPAL" ? !gateways.paypal : !gateways.razorpay);
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: pay, noValidate: true, className: "grid grid-cols-1 lg:grid-cols-2 gap-8 items-start", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "space-y-6", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: () => (0, import_useStepGuard.go)("/commission/preview"), className: "text-sm font-bold text-gray-600 hover:text-ink", children: [
@@ -27085,6 +27476,16 @@ function CheckoutForm() {
           }) })
         ] }, group))
       ] }),
+      gateways.simulate && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "flex items-start gap-3 rounded-2xl border-2 border-dashed border-yellow-400 bg-yellow-50 p-4 cursor-pointer", "data-testid": "simulate", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: simulate, onChange: (e) => setSimulate(e.target.checked), className: "mt-1 h-5 w-5 rounded border-gray-300 text-brand focus:ring-brand" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "block font-bold text-yellow-900", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-flask mr-2", "aria-hidden": "true" }),
+            "Simulate this payment"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block text-sm text-yellow-900", children: "Your account is a test buyer: no money is charged and the order is marked TEST in the admin." })
+        ] })
+      ] }),
       notice && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { role: "alert", className: `rounded-xl px-4 py-3 text-sm font-semibold ${notice.type === "error" ? "bg-red-50 border border-red-200 text-red-700" : "bg-blue-50 border border-blue-200 text-blue-900"}`, children: notice.text }),
       testOrder ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "rounded-2xl border-2 border-dashed border-yellow-400 bg-yellow-50 p-5", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-bold text-yellow-900", children: [
@@ -27093,7 +27494,7 @@ function CheckoutForm() {
           testOrder.orderId,
           " was created"
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-1 text-sm text-yellow-900", children: "No payment keys are configured, so no real money will be taken." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-1 text-sm text-yellow-900", children: simulate ? "Your account is a test buyer, so no real money will be taken." : "No payment keys are configured, so no real money will be taken." }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           "button",
           {
@@ -28996,7 +29397,6 @@ function tree(items) {
   walk("", 0);
   return out;
 }
-const FORMATS = [{ value: "course", label: "Live courses" }, { value: "workshop", label: "Workshops" }];
 function CountBadge({ n }) {
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-hidden": "true", children: n }),
@@ -29150,7 +29550,7 @@ function Courses() {
     });
     return Object.keys(out).length ? out : direct;
   })();
-  const drawerCount = fType.size + fSkill.size + fGenre.size;
+  const drawerCount = fSkill.size + fGenre.size;
   const anyFilter = !!(q.trim() || fMedium.size || fGenre.size || fSkill.size || fAge.size || fType.size);
   const clearAll = () => {
     setQ("");
@@ -29161,7 +29561,6 @@ function Courses() {
     setFType(/* @__PURE__ */ new Set());
   };
   const clearDrawer = () => {
-    setFType(/* @__PURE__ */ new Set());
     setFSkill(/* @__PURE__ */ new Set());
     setFGenre(/* @__PURE__ */ new Set());
   };
@@ -29193,6 +29592,31 @@ function Courses() {
       topMediums.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: fMedium.size === 1 && fMedium.has(String(m.id)) ? "is-active" : "", "aria-pressed": fMedium.has(String(m.id)), onClick: () => onlyMedium(m.id), children: m.name }) }, m.id))
     ] }) }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide", style: { paddingBottom: 72 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cf-formats", role: "group", "aria-label": "Format", children: [
+        { value: "", label: "All formats", icon: "fa-th-large" },
+        { value: "course", label: "Live courses", icon: "fa-video-camera" },
+        { value: "workshop", label: "Workshops", icon: "fa-paint-brush" }
+      ].map((o) => {
+        const on = o.value ? fType.size === 1 && fType.has(o.value) : fType.size !== 1;
+        const n = o.value ? typeCounts[o.value] || 0 : (typeCounts.course || 0) + (typeCounts.workshop || 0);
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            type: "button",
+            className: `cf-format${on ? " is-on" : ""}`,
+            "aria-pressed": on,
+            onClick: () => setFType(o.value ? /* @__PURE__ */ new Set([o.value]) : /* @__PURE__ */ new Set()),
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${o.icon}`, "aria-hidden": "true" }),
+              " ",
+              o.label,
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cf-format__n", children: n })
+            ]
+          },
+          o.value || "all"
+        );
+      }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cf-bar", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-search cf-search", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search", "aria-hidden": "true" }),
@@ -29252,7 +29676,6 @@ function Courses() {
       ] })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Drawer, { open: drawer, onClose: () => setDrawer(false), count: results.length, onClear: clearDrawer, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckGroup, { legend: "Format", options: FORMATS, selected: fType, onToggle: toggle(setFType), counts: typeCounts }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckGroup, { legend: "Skill level", options: skills.map((s) => ({ value: s.id, label: s.name })), selected: fSkill, onToggle: toggle(setFSkill), counts: skillCounts }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckGroup, { legend: "Subject", options: tree(genres).map((g) => ({ value: g.id, label: g.name, depth: g.depth })), selected: fGenre, onToggle: toggle(setFGenre), counts: genreCounts })
     ] })
@@ -30788,7 +31211,7 @@ var import_SaveButton = __toESM(__webpack_require__("./resources/js/Components/W
 var import_ReportButton = __toESM(__webpack_require__("./resources/js/Components/Site/ReportButton.js"));
 var import_ArtistHub = __toESM(__webpack_require__("./resources/js/Components/Shop/ArtistHub.js"));
 var import_BuyPanel = __toESM(__webpack_require__("./resources/js/Components/Shop/BuyPanel.js"));
-var import_RoomStage = __toESM(__webpack_require__("./resources/js/Components/Shop/RoomStage.js"));
+var import_ArtPreview = __toESM(__webpack_require__("./resources/js/Components/Shop/ArtPreview.js"));
 var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
 var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
 function Spec({ label, value, hint }) {
@@ -30872,17 +31295,15 @@ function BuyBox({ p, hold, serverNow, preview, offer, sel, setSel, contact, conv
     ] })
   ] });
 }
-function RoomTab({ p, offer, sel }) {
-  const [room, setRoom] = (0, import_react.useState)("living");
-  (0, import_RoomStage.usePreloadRooms)();
+function RoomTab({ p, offer, sel, rooms }) {
   const price = offer ? (0, import_shop.priceOf)(offer, sel) : null;
   const w = price && price.width ? price.width : p.width_inches;
   const h = price && price.height ? price.height : p.height_inches;
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "max-w-5xl", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-      import_RoomStage.default,
+      import_ArtPreview.default,
       {
-        room,
+        rooms,
         image: p.images && p.images[0] ? p.images[0].url || p.images[0] : p.image_url,
         title: p.title,
         widthIn: w,
@@ -30891,22 +31312,21 @@ function RoomTab({ p, offer, sel }) {
         surface: sel.format === "POSTER" ? "paper" : "canvas"
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_RoomStage.RoomSwitcher, { value: room, onChange: setRoom }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-3 text-sm text-gray-500", children: [
-      "To scale: ",
       (0, import_shared.num)(w),
       " \xD7 ",
       (0, import_shared.num)(h),
       " in",
       sel.format && import_shop.FORMAT_INFO[sel.format] ? ` \xB7 ${import_shop.FORMAT_INFO[sel.format].name.toLowerCase()}` : "",
-      ". Frames and more rooms on the next step."
+      ". Frames are chosen on the next step."
     ] })
   ] });
 }
 function MarketplaceShow() {
-  const { painting: p, hold, holds = [], related = [], serverNow, preview, notice, offer, draft, contact, conversation: conv0, customer, openChat } = (0, import_inertia_react.usePage)().props;
+  const { painting: p, hold, holds = [], related = [], serverNow, preview, notice, offer, draft, contact, conversation: conv0, customer, openChat, rooms = [] } = (0, import_inertia_react.usePage)().props;
   const [tab, setTab] = (0, import_react.useState)("room");
   const conversation = (0, import_ArtistHub.useConversation)(p.id, conv0);
+  const unavailable = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("unavailable") : null;
   const originalOk = p.stock_status === "AVAILABLE" || !!(hold && hold.mine);
   const [sel, setSel] = (0, import_react.useState)(() => offer ? (0, import_BuyPanel.startSelection)(offer, draft, originalOk) : { format: "ORIGINAL", frame: "NONE", qty: 1 });
   const selPrice = offer ? (0, import_shop.priceOf)(offer, sel) : null;
@@ -30920,6 +31340,11 @@ function MarketplaceShow() {
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "hover:text-ink", children: "Marketplace" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mx-2", children: "/" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-ink font-semibold", children: p.title })
+        ] }),
+        unavailable && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900", role: "alert", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: unavailable === "SOLD" ? "This original has just found its collector." : "Another collector is holding the original right now." }),
+          " ",
+          unavailable === "SOLD" ? "Prints of it are still available below." : "Holds last 15 minutes; check back soon, or choose a print below."
         ] }),
         notice === "expired" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900", role: "alert", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "There's no active hold on this piece for you." }),
@@ -30945,7 +31370,7 @@ function MarketplaceShow() {
         ) }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide pb-8", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex gap-2 border-b border-gray-200 overflow-x-auto", role: "tablist", children: [["room", "View in a room", "fa-home"], ["specs", "Specifications", "fa-th-list"], ["shipping", "Shipping & care", "fa-truck"]].map(([k, l, i]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex gap-2 border-b border-gray-200 overflow-x-auto", role: "tablist", children: [["room", "On a wall", "fa-picture-o"], ["specs", "Specifications", "fa-th-list"], ["shipping", "Shipping & care", "fa-truck"]].map(([k, l, i]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
           "button",
           {
             type: "button",
@@ -30961,7 +31386,7 @@ function MarketplaceShow() {
           k
         )) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pt-8", children: [
-          tab === "room" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomTab, { p, offer, sel }),
+          tab === "room" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomTab, { p, offer, sel, rooms }),
           tab === "specs" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "max-w-3xl", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Medium", value: p.medium }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spec, { label: "Surface", value: p.surface }),
@@ -36969,7 +37394,7 @@ function Welcome() {
   while (heroArt.length < 4) heroArt.push("/assets/images/home-banner.png");
   const free = (0, import_inertia_react.useForm)({ name: "", email: "", free_course_type: "color" });
   const [q, setQ] = import_react.default.useState("");
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: "Online art courses", showCategories: true, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: "Online art courses", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "dm-hero", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-hero__bg", "aria-hidden": "true", children: heroArt.map((src, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { backgroundImage: `url(${src})` } }, i)) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-hero__inner", children: [
@@ -110834,6 +111259,8 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Admin/Rooms": "./resources/js/Pages/Admin/Rooms.js",
+	"./Admin/Rooms.js": "./resources/js/Pages/Admin/Rooms.js",
 	"./Admin/Moderation": "./resources/js/Pages/Admin/Moderation.js",
 	"./Admin/Moderation.js": "./resources/js/Pages/Admin/Moderation.js",
 	"./Admin/Finance": "./resources/js/Pages/Admin/Finance.js",

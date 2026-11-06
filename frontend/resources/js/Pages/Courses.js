@@ -46,7 +46,6 @@ function tree(items) {
     return out;
 }
 
-const FORMATS = [{ value: 'course', label: 'Live courses' }, { value: 'workshop', label: 'Workshops' }];
 
 function CountBadge({ n }) {
     return (
@@ -195,10 +194,10 @@ export default function Courses() {
         return Object.keys(out).length ? out : direct;
     })();
 
-    const drawerCount = fType.size + fSkill.size + fGenre.size;
+    const drawerCount = fSkill.size + fGenre.size;
     const anyFilter = !!(q.trim() || fMedium.size || fGenre.size || fSkill.size || fAge.size || fType.size);
     const clearAll = () => { setQ(''); setFMedium(new Set()); setFGenre(new Set()); setFSkill(new Set()); setFAge(new Set()); setFType(new Set()); };
-    const clearDrawer = () => { setFType(new Set()); setFSkill(new Set()); setFGenre(new Set()); };
+    const clearDrawer = () => { setFSkill(new Set()); setFGenre(new Set()); };
 
     // one chip per active value
     const chips = [];
@@ -241,6 +240,20 @@ export default function Courses() {
             </nav>
 
             <section className="ac-wide" style={{ paddingBottom: 72 }}>
+                <div className="cf-formats" role="group" aria-label="Format">
+                    {[{ value: '', label: 'All formats', icon: 'fa-th-large' }, { value: 'course', label: 'Live courses', icon: 'fa-video-camera' },
+                        { value: 'workshop', label: 'Workshops', icon: 'fa-paint-brush' }].map((o) => {
+                        const on = o.value ? fType.size === 1 && fType.has(o.value) : fType.size !== 1;
+                        const n = o.value ? (typeCounts[o.value] || 0) : (typeCounts.course || 0) + (typeCounts.workshop || 0);
+                        return (
+                            <button key={o.value || 'all'} type="button" className={`cf-format${on ? ' is-on' : ''}`} aria-pressed={on}
+                                    onClick={() => setFType(o.value ? new Set([o.value]) : new Set())}>
+                                <i className={`fa ${o.icon}`} aria-hidden="true"></i> {o.label} <span className="cf-format__n">{n}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
                 <div className="cf-bar">
                     <div className="dm-search cf-search">
                         <i className="fa fa-search" aria-hidden="true"></i>
@@ -304,7 +317,6 @@ export default function Courses() {
             </section>
 
             <Drawer open={drawer} onClose={() => setDrawer(false)} count={results.length} onClear={clearDrawer}>
-                <CheckGroup legend="Format" options={FORMATS} selected={fType} onToggle={toggle(setFType)} counts={typeCounts} />
                 <CheckGroup legend="Skill level" options={skills.map((s) => ({ value: s.id, label: s.name }))} selected={fSkill} onToggle={toggle(setFSkill)} counts={skillCounts} />
                 <CheckGroup legend="Subject" options={tree(genres).map((g) => ({ value: g.id, label: g.name, depth: g.depth }))} selected={fGenre} onToggle={toggle(setFGenre)} counts={genreCounts} />
             </Drawer>

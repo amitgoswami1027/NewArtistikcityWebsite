@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import axios from 'axios';
 import { Inertia } from '@inertiajs/inertia';
-import { useCart } from '@/Components/Shop/CartStore';
 import { Qty } from '@/Components/Shop/CartDrawer';
 import { ChatWindow } from '@/Components/Shop/ArtistHub';
 import { FORMAT_INFO, formatOf, normalise, priceOf, variantLine, inr, num, errorText } from '@/Components/Shop/shop';
@@ -65,7 +64,6 @@ export function startSelection(offer, draft, originalOk) {
 }
 
 export default function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, conversation, customer }) {
-    const cart = useCart();
     const [busy, setBusy] = useState(false);
     const [err, setErr] = useState(null);
     const [conflict, setConflict] = useState(null);
@@ -89,15 +87,13 @@ export default function BuyPanel({ p, offer, sel, setSel, hold, serverNow, previ
     const go = (switchHold = false) => {
         setBusy(true); setErr(null); setConflict(null);
         axios.post('/api/v1/purchase/draft', { paintingId: p.id, ...sel, switch: switchHold })
-            .then(() => {
-                if (sel.format !== 'DIGITAL') { Inertia.visit('/purchase/step-2'); return null; }
-                // nothing to hang: straight to payment
-                return cart.add({ paintingId: p.id, format: 'DIGITAL', size: sel.size, finish: '', frame: 'NONE', qty: 1 }, { openDrawer: false })
-                    .then(() => Inertia.visit('/purchase/checkout'));
-            })
+            // nothing to hang for a download: straight to payment; everything else is previewed on a wall first
+            .then(() => Inertia.visit(sel.format === 'DIGITAL' ? '/purchase/buy-now' : '/purchase/step-2'))
             .catch((e) => {
-                setBusy(false);
                 const d = e.response && e.response.data;
+                // buying starts with an account: the choice is saved, log in or join, then straight on to the next step
+                if (d && d.code === 'SIGN_IN' && d.redirect) { window.location.assign(d.redirect); return; }
+                setBusy(false);
                 if (d && d.code === 'HOLD_LIMIT') setConflict(d);
                 else if (d && (d.code === 'HELD_BY_OTHER' || d.code === 'JUST_TAKEN' || d.code === 'SOLD')) { setErr(d.message); setTimeout(() => window.location.reload(), 2200); }
                 else setErr(errorText(e));
@@ -186,12 +182,13 @@ export default function BuyPanel({ p, offer, sel, setSel, hold, serverNow, previ
             </div>
 
             <button type="button" className="pz-btn pz-btn--brand pz-btn--lg pz-btn--block" data-testid="buy-continue" onClick={() => go(false)} disabled={busy || !canGo}>
-                {busy ? <i className="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> : <i className={`fa ${sel.format === 'DIGITAL' ? 'fa-lock' : 'fa-home'}`} aria-hidden="true"></i>}
-                {sel.format === 'DIGITAL' ? ' Continue to payment' : ' Continue: see it in your room'}
+                {busy ? <i className="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> : <i className="fa fa-lock" aria-hidden="true"></i>}
+                {' '}Buy now
             </button>
             <p className="pz-fine pz-center">
-                {sel.format === 'ORIGINAL' && !mine ? 'Continuing holds the original for you for 15 minutes. No payment yet.'
-                    : sel.format === 'DIGITAL' ? 'Download link by e-mail right after payment.' : 'Next: pick a frame and see it on a wall, to scale.'}
+                {!customer ? 'Log in or join to buy: your choice is kept and you come straight back.'
+                    : sel.format === 'ORIGINAL' && !mine ? 'Buying holds the original for you for 15 minutes. No payment yet.'
+                    : sel.format === 'DIGITAL' ? 'Download link by e-mail right after payment.' : 'Next: choose a frame and see it on a wall, then pay.'}
             </p>
             {err && <p className="pz-error" role="alert">{err}</p>}
             {conflict && (
@@ -199,7 +196,7 @@ export default function BuyPanel({ p, offer, sel, setSel, hold, serverNow, previ
                     <p><b>You're already holding “{conflict.heldTitle}”.</b> You can hold one original at a time. Switch your hold to this piece?</p>
                     <div>
                         <button type="button" className="pz-btn pz-btn--ink" onClick={() => go(true)}>Switch to this piece</button>
-                        <a href="/purchase/checkout" className="pz-btn pz-btn--line">Go to my cart</a>
+                        <button type="button" className="pz-btn pz-btn--line" onClick={() => setConflict(null)}>Keep my other piece</button>
                     </div>
                 </div>
             )}

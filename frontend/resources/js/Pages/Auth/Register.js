@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/inertia-react';
 import AuthLayout from '@/Layouts/AuthLayout';
+import PurchaseIntentBanner from '@/Components/Auth/PurchaseIntent';
 import { Field, SocialButtons, StrengthMeter } from '@/Components/Auth/AuthFields';
 import { MagicLinkForm, MethodTabs, PhoneOtpForm } from '@/Components/Auth/SignInMethods';
 
 /** Join: Google / Facebook, phone (SMS code), or e-mail (password or passwordless link). */
-export default function Register({ providers, defaultCountryCode, otpDevMode, socialSetupHint }) {
+export default function Register({ intent, providers, defaultCountryCode, otpDevMode, socialSetupHint }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '', email: '', password: '', password_confirmation: '', newsletter_signup: true, remember: true,
     });
@@ -26,7 +27,7 @@ export default function Register({ providers, defaultCountryCode, otpDevMode, so
     return (
         <AuthLayout title="Join for free">
             <h1>Join for free</h1>
-            <p className="dm-lede">Create your ArtistikCity account and start learning to draw and paint today.</p>
+            {intent ? <PurchaseIntentBanner intent={intent} mode="join" /> : <p className="dm-lede">Create your ArtistikCity account and start learning to draw and paint today.</p>}
             <div className="dm-perklist">
                 <span><i className="fa fa-check"></i>Free starter lessons</span>
                 <span><i className="fa fa-check"></i>Save courses</span>

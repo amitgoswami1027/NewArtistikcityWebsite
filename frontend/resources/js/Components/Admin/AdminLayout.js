@@ -38,6 +38,7 @@ export const NAV = [
         { href: '/admin/orders', label: 'Course orders', icon: 'fa-shopping-cart', cap: 'revenue', also: ['/admin/orders/'] },
         { href: '/admin/dashboard/commissions', label: 'Commissions', icon: 'fa-paint-brush', cap: 'commissions', badge: 'commissions' },
         { href: '/admin/dashboard/marketplace', label: 'Marketplace', icon: 'fa-tags', cap: 'marketplace', badge: 'marketplace', also: ['/admin/dashboard/marketplace/'] },
+        { href: '/admin/marketplace/rooms', label: 'Room preview', icon: 'fa-picture-o', cap: 'marketplace.publish' },
         { href: '/admin/payments/refunds', label: 'Refunds', icon: 'fa-undo', cap: 'revenue', badge: 'refunds' },
         { href: '/admin/finance', label: 'Payouts & ledger', icon: 'fa-balance-scale', cap: 'revenue', badge: 'payouts', also: ['/admin/finance/'] },
     ] },

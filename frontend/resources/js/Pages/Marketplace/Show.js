@@ -7,7 +7,7 @@ import SaveButton from '@/Components/Wishlist/SaveButton';
 import ReportButton from '@/Components/Site/ReportButton';
 import ArtistHub, { useConversation } from '@/Components/Shop/ArtistHub';
 import BuyPanel, { startSelection } from '@/Components/Shop/BuyPanel';
-import RoomStage, { RoomSwitcher, usePreloadRooms } from '@/Components/Shop/RoomStage';
+import ArtPreview from '@/Components/Shop/ArtPreview';
 import { FORMAT_INFO, priceOf, variantLine, inr } from '@/Components/Shop/shop';
 import { TrustBadges, StatusChip, HoldBanner, dims, dimsCm, num } from '@/Components/Marketplace/shared';
 
@@ -62,27 +62,26 @@ function BuyBox({ p, hold, serverNow, preview, offer, sel, setSel, contact, conv
     );
 }
 
-/** "View in a room" tab: the current choice (format and size) on the walls of the photographed rooms. */
-function RoomTab({ p, offer, sel }) {
-    const [room, setRoom] = useState('living');
-    usePreloadRooms();
+/** "On a wall" tab: the current choice (format, size, frame) alone on a wall, or in the rooms from Admin > Room preview. */
+function RoomTab({ p, offer, sel, rooms }) {
     const price = offer ? priceOf(offer, sel) : null;
     const w = price && price.width ? price.width : p.width_inches;
     const h = price && price.height ? price.height : p.height_inches;
     return (
         <div className="max-w-5xl">
-            <RoomStage room={room} image={p.images && p.images[0] ? (p.images[0].url || p.images[0]) : p.image_url} title={p.title}
-                       widthIn={w} heightIn={h} frame={sel.frame || 'NONE'} surface={sel.format === 'POSTER' ? 'paper' : 'canvas'} />
-            <RoomSwitcher value={room} onChange={setRoom} />
-            <p className="mt-3 text-sm text-gray-500">To scale: {num(w)} × {num(h)} in{sel.format && FORMAT_INFO[sel.format] ? ` · ${FORMAT_INFO[sel.format].name.toLowerCase()}` : ''}. Frames and more rooms on the next step.</p>
+            <ArtPreview rooms={rooms} image={p.images && p.images[0] ? (p.images[0].url || p.images[0]) : p.image_url} title={p.title}
+                        widthIn={w} heightIn={h} frame={sel.frame || 'NONE'} surface={sel.format === 'POSTER' ? 'paper' : 'canvas'} />
+            <p className="mt-3 text-sm text-gray-500">{num(w)} × {num(h)} in{sel.format && FORMAT_INFO[sel.format] ? ` · ${FORMAT_INFO[sel.format].name.toLowerCase()}` : ''}. Frames are chosen on the next step.</p>
         </div>
     );
 }
 
 export default function MarketplaceShow() {
-    const { painting: p, hold, holds = [], related = [], serverNow, preview, notice, offer, draft, contact, conversation: conv0, customer, openChat } = usePage().props;
+    const { painting: p, hold, holds = [], related = [], serverNow, preview, notice, offer, draft, contact, conversation: conv0, customer, openChat, rooms = [] } = usePage().props;
     const [tab, setTab] = useState('room');
     const conversation = useConversation(p.id, conv0);
+    // back from signing in, the original was taken in the meantime (PurchaseController.holdAfterSignIn)
+    const unavailable = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('unavailable') : null;
     const originalOk = p.stock_status === 'AVAILABLE' || !!(hold && hold.mine);
     const [sel, setSel] = useState(() => (offer ? startSelection(offer, draft, originalOk) : { format: 'ORIGINAL', frame: 'NONE', qty: 1 }));
     const selPrice = offer ? priceOf(offer, sel) : null;
@@ -97,6 +96,12 @@ export default function MarketplaceShow() {
                         <a href="/marketplace" className="hover:text-ink">Marketplace</a><span className="mx-2">/</span>
                         <span className="text-ink font-semibold">{p.title}</span>
                     </nav>
+                    {unavailable && (
+                        <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900" role="alert">
+                            <strong>{unavailable === 'SOLD' ? 'This original has just found its collector.' : 'Another collector is holding the original right now.'}</strong>
+                            {' '}{unavailable === 'SOLD' ? 'Prints of it are still available below.' : 'Holds last 15 minutes; check back soon, or choose a print below.'}
+                        </div>
+                    )}
                     {notice === 'expired' && (
                         <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900" role="alert">
                             <strong>There's no active hold on this piece for you.</strong> Holds last 15 minutes. If it's still available, reserve it again below.
@@ -117,7 +122,7 @@ export default function MarketplaceShow() {
                 {/* ---------- see it at home / specs ---------- */}
                 <section className="ac-wide pb-8">
                     <div className="flex gap-2 border-b border-gray-200 overflow-x-auto" role="tablist">
-                        {[['room', 'View in a room', 'fa-home'], ['specs', 'Specifications', 'fa-th-list'], ['shipping', 'Shipping & care', 'fa-truck']].map(([k, l, i]) => (
+                        {[['room', 'On a wall', 'fa-picture-o'], ['specs', 'Specifications', 'fa-th-list'], ['shipping', 'Shipping & care', 'fa-truck']].map(([k, l, i]) => (
                             <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
                                     className={`whitespace-nowrap px-4 py-3 text-base font-bold border-b-2 -mb-px ${tab === k ? 'border-ink text-ink' : 'border-transparent text-gray-500 hover:text-ink'}`}>
                                 <i className={`fa ${i} mr-2`} aria-hidden="true"></i>{l}
@@ -125,7 +130,7 @@ export default function MarketplaceShow() {
                         ))}
                     </div>
                     <div className="pt-8">
-                        {tab === 'room' && <RoomTab p={p} offer={offer} sel={sel} />}
+                        {tab === 'room' && <RoomTab p={p} offer={offer} sel={sel} rooms={rooms} />}
                         {tab === 'specs' && (
                             <dl className="max-w-3xl">
                                 <Spec label="Medium" value={p.medium} />

@@ -112,8 +112,9 @@ function CheckoutBody() {
     const [done, setDone] = useState(() => (sectionValid(CONTACT) ? { contact: true } : {}));
     const [busy, setBusy] = useState(false);
     const [notice, setNotice] = useState(payment === 'failed' ? { type: 'error', text: 'Your PayPal payment did not complete. No money was taken. You can try again.' }
-        : payment === 'cancelled' ? { type: 'info', text: 'You cancelled the PayPal payment. Your cart is still here.' } : null);
+        : payment === 'cancelled' ? { type: 'info', text: 'You cancelled the PayPal payment. Your order is still here: you can try again.' } : null);
     const [testOrder, setTestOrder] = useState(null);
+    const [simulate, setSimulate] = useState(false);
     const [sumOpen, setSumOpen] = useState(false);
     const set = (k, v) => { setF((x) => ({ ...x, [k]: v })); if (serverErrors[k]) setServerErrors((e) => ({ ...e, [k]: null })); };
     const err = (k) => serverErrors[k] || (touched[k] ? check(k, f, ctx) : null);
@@ -128,9 +129,9 @@ function CheckoutBody() {
     if (lines.length === 0) {
         return (
             <div className="pz-empty pz-empty--page">
-                <div className="pz-empty__art" aria-hidden="true"><i className="fa fa-shopping-bag"></i></div>
-                <h1>Your cart is empty</h1>
-                <p>Find an original, a numbered canvas or a print you love.</p>
+                <div className="pz-empty__art" aria-hidden="true"><i className="fa fa-paint-brush"></i></div>
+                <h1>Nothing to pay for yet</h1>
+                <p>Choose an original, a numbered canvas or a print, then press Buy now.</p>
                 <a href="/marketplace" className="pz-btn pz-btn--brand">Browse the marketplace</a>
             </div>
         );
@@ -185,7 +186,7 @@ function CheckoutBody() {
             }
         }
         setBusy(true);
-        axios.post('/api/v1/purchase/checkout', { gateway: domestic ? 'RAZORPAY' : 'PAYPAL', ...f })
+        axios.post('/api/v1/purchase/checkout', { gateway: domestic ? 'RAZORPAY' : 'PAYPAL', simulate: simulate && gateways.simulate, ...f })
             .then(async (r) => {
                 const d = r.data;
                 if (d.provider === 'test') { setTestOrder(d); setBusy(false); return; }
@@ -204,6 +205,7 @@ function CheckoutBody() {
             .catch((x) => {
                 setBusy(false);
                 const d = x.response && x.response.data;
+                if (d && d.code === 'SIGN_IN' && d.redirect) { window.location.assign(d.redirect); return; }
                 if (d && d.errors) {
                     setServerErrors(d.errors);
                     const sec = order.find((s2) => keysOf(s2).some((k) => d.errors[k]));
@@ -214,22 +216,23 @@ function CheckoutBody() {
             });
     };
 
-    const unavailable = domestic ? !gateways.razorpay && !gateways.testMode : !gateways.paypal && !gateways.testMode;
+    const unavailable = !(simulate && gateways.simulate) && (domestic ? !gateways.razorpay && !gateways.testMode : !gateways.paypal && !gateways.testMode);
     const usd = (Number(totals.total) / Number(inrPerUsd || 84)).toFixed(2);
     const contactSummary = [f.name, f.email, f.phone, f.country].filter(Boolean).join(' · ');
     const deliverySummary = [f.line1, f.line2, f.city, f.state, f.postal].filter(Boolean).join(', ');
 
     const summary = (
         <section className="pz-card">
-            <h2 className="pz-card__head">Order summary <span className="pz-muted">{data.count} item{data.count === 1 ? '' : 's'}</span></h2>
+            <h2 className="pz-card__head">Your order</h2>
             <ul className="pz-lines">
-                {lines.map((l) => (
-                    <CartLine key={l.id} line={l} serverNow={cart.serverNow} busy={cart.busy}
-                              onQty={(line, q) => cart.setQty(line.id, q).then(() => cart.refresh(f.country)).catch(() => {})}
-                              onRemove={(line) => cart.remove(line.id).then(() => cart.refresh(f.country)).catch(() => {})}
-                              onReserve={(line) => cart.add({ paintingId: line.paintingId, format: 'ORIGINAL', frame: line.frame, qty: 1 }, { openDrawer: false }).then(() => cart.refresh(f.country)).catch(() => {})} />
-                ))}
+                {lines.map((l) => <CartLine key={l.id} line={l} serverNow={cart.serverNow} busy={cart.busy} compact />)}
             </ul>
+            {lines[0] && (
+                <p className="pz-fine pz-change">
+                    <a href={lines[0].format === 'DIGITAL' ? `/marketplace/${lines[0].slug}#buy` : '/purchase/step-2'} className="pz-link">
+                        <i className="fa fa-pencil" aria-hidden="true"></i> Change size or frame</a>
+                </p>
+            )}
             <CouponBox totals={totals} country={f.country} />
             <Totals totals={totals} />
             {cart.error && <p className="pz-error" role="alert">{cart.error}</p>}
@@ -287,10 +290,17 @@ function CheckoutBody() {
                             <b>International</b><span>PayPal · cards · about ${usd}</span></button>
                     </div>
                     {!domestic && <p className="pz-fine">Paying from outside India? Check your country under Contact: it sets shipping and the currency.</p>}
+                    {gateways.simulate && (
+                        <label className={`pz-simulate ${simulate ? 'is-on' : ''}`} data-testid="simulate">
+                            <input type="checkbox" checked={simulate} onChange={(e) => setSimulate(e.target.checked)} />
+                            <span><b><i className="fa fa-flask" aria-hidden="true"></i> Simulate this payment</b>
+                                <small>Your account is a test buyer: no money is charged and the order is marked TEST in the admin.</small></span>
+                        </label>
+                    )}
                     {unavailable && <p className="pz-note is-error">This payment option isn't available right now. Please try the other one or contact us.</p>}
                     {testOrder ? (
                         <div className="pz-testpay">
-                            <p><b>Test mode:</b> no payment gateway is configured, so you can simulate the payment for order <code>{testOrder.orderId}</code>.</p>
+                            <p><b>{simulate ? 'Test buyer:' : 'Test mode:'}</b> {simulate ? 'nothing is charged' : 'no payment gateway is configured'}, so you can simulate the payment for order <code>{testOrder.orderId}</code>.</p>
                             <button type="button" className="pz-btn pz-btn--brand pz-btn--block" onClick={() => { setBusy(true); confirm({ orderId: testOrder.orderId, provider: 'test' }); }} disabled={busy}>
                                 {busy && <i className="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i>} Simulate successful payment
                             </button>
@@ -298,7 +308,7 @@ function CheckoutBody() {
                     ) : (
                         <button type="submit" className="pz-btn pz-btn--brand pz-btn--lg pz-btn--block" disabled={busy || unavailable || totals.blocked} data-testid="pay">
                             {busy ? <i className="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> : <i className="fa fa-lock" aria-hidden="true"></i>}
-                            {' '}Pay {domestic ? inr(totals.total) : `$${usd}`}
+                            {' '}{simulate && gateways.simulate ? 'Simulate' : 'Pay'} {domestic ? inr(totals.total) : `$${usd}`}
                         </button>
                     )}
                     <p className="pz-fine pz-center">Payments are processed securely by {domestic ? 'Razorpay' : 'PayPal'}. We never see your card details.</p>

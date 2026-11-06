@@ -49,6 +49,8 @@ public class Settings {
     public String paypalApiBase() { return stripSlash(text("app.payments.paypal.api-base", "")); }
     /** Where alerts go: app.alerts.email, else the admin e-mail. */
     public String alertEmail() { return text("app.alerts.email", text("app.admin-email", "")); }
+    /** Accounts marked "Test buyer" may simulate payments on the live site (payments/TestPayments). */
+    public boolean testBuyersEnabled() { return flag("app.payments.test-buyers.enabled", true); }
 
     // ---- seats
     public int seatHoldMinutes() { return Math.max(1, integer("app.seats.hold-minutes", 15)); }

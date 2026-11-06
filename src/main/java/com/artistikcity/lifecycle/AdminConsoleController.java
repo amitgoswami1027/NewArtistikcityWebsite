@@ -139,7 +139,7 @@ public class AdminConsoleController {
         if (!Personas.can(admin, "people")) return denied(request, admin);
         Long teacher = teacherScope(admin);
         Map<String, Object> p = base(admin);
-        String studentSql = "select u.id, u.name, u.email, u.phone_number as phone, u.location, u.status,"
+        String studentSql = "select u.id, u.name, u.email, u.phone_number as phone, u.location, u.status, u.test_buyer,"
                 + " (select group_concat(l.provider_name order by l.provider_name) from linked_accounts l where l.user_id = u.id) as provider, u.created_at, u.profile_photo,"
                 + " (select count(*) from enrollments e where e.user_id = u.id) as enrollments,"
                 + " (select count(*) from student_submissions s where s.user_id = u.id) as submissions,"
@@ -404,7 +404,7 @@ public class AdminConsoleController {
         LocalDate from = YearMonth.now().minusMonths(11).atDay(1);
         Map<String, double[]> byMonth = new LinkedHashMap<>();
         for (int i = 11; i >= 0; i--) byMonth.put(YearMonth.now().minusMonths(i).toString(), new double[]{0, 0, 0});
-        for (Map<String, Object> r : repo.list("select price, price_type, created_at from orders where payment_status = 1 and created_at >= ?", Timestamp.valueOf(from.atStartOfDay()))) {
+        for (Map<String, Object> r : repo.list("select price, price_type, created_at from orders where payment_status = 1 and is_test = 0 and created_at >= ?", Timestamp.valueOf(from.atStartOfDay()))) {
             String key = month(r.get("created_at"));
             double[] v = byMonth.get(key);
             if (v == null) continue;

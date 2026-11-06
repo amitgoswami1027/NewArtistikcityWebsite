@@ -47,6 +47,7 @@ public class Routes {
         get("purchase.step1", "purchase/step-1");
         get("purchase.step2", "purchase/step-2");
         get("purchase.preview", "purchase/preview");
+        get("purchase.buynow", "purchase/buy-now");
         get("purchase.checkout", "purchase/checkout");
         get("purchase.order", "purchase/orders/{orderId}");
         get("marketplace.certificate", "marketplace/certificates/{orderId}/{item}");
@@ -222,6 +223,7 @@ public class Routes {
         get("admin.finance", "admin/finance");
         get("admin.finance.export", "admin/finance/export");
         get("admin.refunds", "admin/payments/refunds");
+        get("admin.rooms", "admin/marketplace/rooms");
         get("admin.security.audit", "admin/security/audit");
         get("admin.security.audit.export", "admin/security/audit/export");
         get("admin.orders", "admin/orders");

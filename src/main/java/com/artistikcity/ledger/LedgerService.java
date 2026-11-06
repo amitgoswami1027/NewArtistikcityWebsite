@@ -123,7 +123,7 @@ public class LedgerService {
         int n = 0;
         // originals
         for (Map<String, Object> o : jdbc.queryForList("select o.order_id, o.price_inr, o.paid_at, o.status, p.title, p.source, p.artist_user_id, p.artist_admin_id, p.artist_name"
-                + " from marketplace_orders o join paintings p on p.id = o.painting_id where o.status in ('PAID', 'PACKED', 'SHIPPED', 'DELIVERED', 'REFUNDED')")) {
+                + " from marketplace_orders o join paintings p on p.id = o.painting_id where o.status in ('PAID', 'PACKED', 'SHIPPED', 'DELIVERED', 'REFUNDED') and o.is_test = 0")) {
             String id = String.valueOf(o.get("order_id"));
             String prefix = "MKT:" + id;
             if ("REFUNDED".equals(o.get("status"))) {
@@ -136,7 +136,7 @@ public class LedgerService {
         // shop lines (prints, editions, downloads and originals bought through the cart)
         for (Map<String, Object> i : jdbc.queryForList("select i.id, i.order_id, i.status, i.title, i.format, i.line_total_inr, i.discount_inr, o.paid_at, o.status as order_status,"
                 + " p.source, p.artist_user_id, p.artist_admin_id, p.artist_name from shop_order_items i join shop_orders o on o.order_id = i.order_id"
-                + " join paintings p on p.id = i.painting_id where i.status in ('OK', 'REFUNDED') and o.paid_at is not null")) {
+                + " join paintings p on p.id = i.painting_id where i.status in ('OK', 'REFUNDED') and o.paid_at is not null and o.is_test = 0")) {
             String prefix = "SHOP:" + i.get("order_id") + ":" + i.get("id");
             boolean refunded = "REFUNDED".equals(i.get("status"));
             BigDecimal net = dec(i.get("line_total_inr")).subtract(dec(i.get("discount_inr")));
@@ -148,7 +148,7 @@ public class LedgerService {
         }
         // course sales: platform revenue
         for (Map<String, Object> o : jdbc.queryForList("select o.id, o.order_number, o.price, o.price_type, o.payment_status, o.updated_at, c.title from orders o"
-                + " left join courses c on c.id = o.course_id where o.payment_status in (1, 3) and coalesce(o.price, '') not in ('', '0') and lower(coalesce(o.price_type, 'inr')) = 'inr'")) {
+                + " left join courses c on c.id = o.course_id where o.payment_status in (1, 3) and o.is_test = 0 and coalesce(o.price, '') not in ('', '0') and lower(coalesce(o.price_type, 'inr')) = 'inr'")) {
             String prefix = "COURSE:" + o.get("id");
             if (((Number) o.get("payment_status")).intValue() == 1) {
                 if (postSale(prefix, "COURSE", String.valueOf(o.get("id")), Payee.PLATFORM, dec(o.get("price")), ldt(o.get("updated_at")), "Course: " + o.get("title"))) n++;

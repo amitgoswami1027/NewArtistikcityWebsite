@@ -65,6 +65,8 @@ public class CheckoutController {
     private final org.springframework.core.env.Environment env;
     private final com.artistikcity.payments.RefundQueue refunds;
     private final com.artistikcity.seats.SeatService seats;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.payments.TestPayments testPayments;
     private static final String ACCESS = "seat.access";
     @org.springframework.beans.factory.annotation.Autowired
     private org.springframework.beans.factory.ObjectProvider<com.artistikcity.ledger.LedgerService> ledger;
@@ -93,11 +95,15 @@ public class CheckoutController {
     public ResponseEntity<String> addToCart(HttpServletRequest request) {
         Input in = Input.of(request, json);
         Long courseId = in.lng("course_id");
-        Row course = courseId == null ? null : db.first("select id from courses where id = ? and status = 1", courseId);
+        Row course = courseId == null ? null : db.first("select id, slug from courses where id = ? and status = 1", courseId);
         if (course == null) {
             return redirect.route(request, "courses");
         }
         putCart(request, courseId);
+        // buying starts with an account: a guest logs in or joins first and comes straight back to this checkout
+        if (auth.userId(request) == null) {
+            return redirect.to(request, PurchaseIntent.signIn("/checkout?course=" + course.str("slug")));
+        }
         return redirect.to(request, "/checkout");
     }
 
@@ -189,6 +195,11 @@ public class CheckoutController {
             return redirect.route(request, "courses");
         }
         String access = request.getParameter("access");
+        if (auth.userId(request) == null) {
+            // a priority link survives the sign-in too
+            String back = "/checkout?course=" + course.get("slug") + (access != null && access.matches("[A-Za-z0-9_-]{16,64}") ? "&access=" + access : "");
+            return redirect.to(request, PurchaseIntent.signIn(back));
+        }
         if (access != null && access.matches("[A-Za-z0-9_-]{16,64}")) {
             // a priority / waitlist link: kept in the session until the student pays
             request.getSession(true).setAttribute(ACCESS, access);
@@ -206,6 +217,8 @@ public class CheckoutController {
         methods.put("paypal", gateways.paypalConfigured() || gateways.testMode());
         methods.put("testMode", gateways.testMode() && !(gateways.razorpayConfigured() && gateways.paypalConfigured()));
         methods.put("free", free);
+        // test-buyer accounts (Admin > People) may complete the checkout without paying
+        methods.put("simulate", !free && testPayments.offerSimulation(request));
         props.put("methods", methods);
         if (uid != null) {
             Row paid = db.first("select id from orders where user_id = ? and course_id = ? and payment_status = 1 order by id desc limit 1", uid, courseId);
@@ -331,6 +344,13 @@ public class CheckoutController {
                 db.updateById("orders", order.lng("id"), Row.of("price_type", "inr", "price", "0", "payment_option", "Free"));
                 return json(HttpStatus.OK, Map.of("gateway", "done", "redirect", markPaid(request, user, order.lng("id"), "Free", "free_" + order.get("id"), Map.of("free", true))));
             }
+            if ("test".equals(method)) {
+                if (!testPayments.offerSimulation(request)) {
+                    return error(HttpStatus.FORBIDDEN, "Simulated payments are only for test accounts.");
+                }
+                db.updateById("orders", order.lng("id"), Row.of("price_type", "inr", "price", price[0].toPlainString(), "payment_option", "Simulated (test)", "is_test", 1));
+                return json(HttpStatus.OK, Map.of("gateway", "test", "amount", price[0], "currency", "INR", "simulated", true));
+            }
             if ("razorpay".equals(method)) {
                 db.updateById("orders", order.lng("id"), Row.of("price_type", "inr", "price", price[0].toPlainString(), "payment_option", "RazorPay"));
                 if (!gateways.razorpayConfigured()) {
@@ -448,11 +468,14 @@ public class CheckoutController {
         Input in = Input.of(request, json);
         Row order = user == null ? null : ownOpenOrder(user, in.lng("orderId"));
         boolean usd = order != null && "usd".equals(order.str("price_type"));
-        boolean allowed = gateways.testMode() && (usd ? !gateways.paypalConfigured() : !gateways.razorpayConfigured());
+        boolean simulated = order != null && order.lng("is_test", 0) == 1;
+        boolean allowed = simulated ? testPayments.isTestBuyer(request)
+                : testPayments.allowed(request, usd ? gateways.paypalConfigured() : gateways.razorpayConfigured()) && testPayments.devMode();
         if (order == null || !allowed) {
             return error(HttpStatus.FORBIDDEN, "Test payments are not available.");
         }
-        return json(HttpStatus.OK, Map.of("redirect", markPaid(request, user, order.lng("id"), usd ? "PayPal (test)" : "RazorPay (test)",
+        db.updateById("orders", order.lng("id"), Row.of("is_test", 1));
+        return json(HttpStatus.OK, Map.of("redirect", markPaid(request, user, order.lng("id"), simulated ? "Simulated (test)" : usd ? "PayPal (test)" : "RazorPay (test)",
                 "test_" + order.get("id") + "_" + System.currentTimeMillis(), Map.of("test", true))));
     }
 

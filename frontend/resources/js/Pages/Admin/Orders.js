@@ -35,7 +35,7 @@ export default function Orders() {
         ) },
         { key: 'course', label: 'Course', sort: 'course', hide: 'md', render: (r) => (r.course ? <span>{r.course}{Number(r.course_type_id) === 2 && <> <Badge>Workshop</Badge></>}</span> : <span className="adm-muted">Deleted course</span>) },
         { key: 'amount', label: 'Amount', sort: 'amount', align: 'right', render: (r) => <b>{money(r.price, r.price_type)}</b> },
-        { key: 'method', label: 'Method', hide: 'lg', render: (r) => r.payment_option || <span className="adm-muted">—</span> },
+        { key: 'method', label: 'Method', hide: 'lg', render: (r) => <>{r.payment_option || <span className="adm-muted">—</span>}{String(r.is_test) === '1' && <> <Badge tone="amber">TEST</Badge></>}</> },
         { key: 'status', label: 'Status', render: (r) => { const s = statusOf(r.payment_status); return <Badge tone={s.tone} dot>{s.label}</Badge>; } },
         { key: 'cert', label: 'Certificate', hide: 'lg', render: (r) => (Number(r.issue_certificate) === 1 ? <Badge tone="green">Issued</Badge> : <span className="adm-muted">—</span>) },
         { key: 'open', label: <span className="sr-only">Details</span>, align: 'right', render: (r) => <Button size="sm" onClick={() => setOpenId(r.id)} aria-label={`Open order ${r.order_number || r.id}`}>Details</Button> },
@@ -58,7 +58,7 @@ export default function Orders() {
             </Toolbar>
             <Toolbar>
                 <FilterSelect label="Course" value={g.filter('course')} onChange={(v) => g.go({ course: v })} options={courses.map((c) => ({ value: String(c.value), label: c.label }))} />
-                <FilterSelect label="Method" value={g.filter('method')} onChange={(v) => g.go({ method: v })} options={[{ value: 'razorpay', label: 'Razorpay' }, { value: 'paypal', label: 'PayPal' }, { value: 'manual', label: 'Manual' }, { value: 'free', label: 'Free' }]} />
+                <FilterSelect label="Method" value={g.filter('method')} onChange={(v) => g.go({ method: v })} options={[{ value: 'razorpay', label: 'Razorpay' }, { value: 'paypal', label: 'PayPal' }, { value: 'manual', label: 'Manual' }, { value: 'free', label: 'Free' }, { value: 'test', label: 'Test (simulated)' }]} />
                 <FilterSelect label="Currency" value={g.filter('currency')} onChange={(v) => g.go({ currency: v })} options={[{ value: 'inr', label: 'INR' }, { value: 'usd', label: 'USD' }]} />
                 <label className="adm-filter"><span>From</span><input type="date" value={g.filter('from')} onChange={(e) => g.go({ from: e.target.value })} aria-label="From date" /></label>
                 <label className="adm-filter"><span>To</span><input type="date" value={g.filter('to')} onChange={(e) => g.go({ to: e.target.value })} aria-label="To date" /></label>

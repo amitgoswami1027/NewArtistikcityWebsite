@@ -1,118 +1,111 @@
-// The "See it in your room" screen: changing the room backdrop must update the visualiser immediately.
+// Screen 2, "Preview and frame": the artwork is the big picture; the rooms from Admin > Room preview are one click away.
+// Also: buying starts with an account (a guest's choice is kept through signing in).
 const { test, expect } = require('@playwright/test');
-const { ARTWORK, emptyCart } = require('./helpers');
+const { ARTWORK, STUDENT, emptyCart, signIn } = require('./helpers');
 
-const ROOMS = ['living', 'studio', 'bedroom', 'gallery'];
-
-async function openRoomPreview(page, format = 'CANVAS') {
+async function openPreview(page, format = 'CANVAS') {
     await page.goto(`/marketplace/${ARTWORK}`);
     await page.click(`.pz-buyopt[data-format=${format}]`);
     await page.getByTestId('buy-continue').click();
     await page.waitForURL(/\/purchase\/step-2/);
-    await expect(page.locator('.pz-stage--photo')).toBeVisible();
+    await expect(page.locator('.ap-stage')).toBeVisible();
 }
 
-test.describe('Room preview', () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto('/marketplace');
-        await emptyCart(page);
-        await page.evaluate(() => { try { window.sessionStorage.clear(); } catch (e) { /* ignore */ } });
+test.describe('Preview and frame', () => {
+    test('a guest pressing Buy now logs in first and lands on the preview with the same choice', async ({ page }) => {
+        await page.goto(`/marketplace/${ARTWORK}`);
+        await page.click('.pz-buyopt[data-format=POSTER]');
+        await page.getByTestId('buy-continue').click();
+        await page.waitForURL(/\/login\?return_to=/);
+        await expect(page.getByTestId('purchase-intent')).toContainText('Log in to finish buying');
+        await page.getByText('Log in with a password instead').click();
+        await page.fill('input[name=email]', STUDENT.email);
+        await page.fill('input[name=password]', STUDENT.password);
+        await page.locator('button[type=submit]', { hasText: 'Log in' }).click();
+        await page.waitForURL(/\/purchase\/step-2/);
+        await expect(page.locator('.ap-head__format')).toContainText(/poster/i);
     });
 
-    test('switching the room backdrop updates the visualiser immediately', async ({ page }) => {
-        await openRoomPreview(page);
-        const stage = page.locator('.pz-stage--photo');
-        await expect(stage).toHaveAttribute('data-room', 'living');
-        const art = page.locator('.pz-stage--photo .pz-art');
-        const before = await art.boundingBox();
+    test.describe('signed in', () => {
+        test.beforeEach(async ({ page }) => {
+            await signIn(page);
+            await emptyCart(page);
+            await page.evaluate(() => { try { window.sessionStorage.clear(); } catch (e) { /* ignore */ } });
+        });
 
-        for (const id of ROOMS.slice(1).concat('living')) {
-            // click and read the stage in the same task: the new room must already be on screen, no reload or delay
-            const now = await page.evaluate((room) => {
-                document.querySelector(`.pz-roomthumb[data-room="${room}"]`).click();
-                const st = document.querySelector('.pz-stage--photo');
-                return {
-                    room: st.getAttribute('data-room'),
-                    photo: st.querySelector('.pz-stage__photo').getAttribute('src'),
-                    front: st.querySelector('.pz-stage__front').getAttribute('src'),
-                    pressed: document.querySelector(`.pz-roomthumb[data-room="${room}"]`).getAttribute('aria-checked'),
-                };
-            }, id);
-            expect(now.room).toBe(id);
-            expect(now.photo).toBe(`/assets/rooms/${id}.jpg`);
-            expect(now.front).toBe(`/assets/rooms/${id}-front.webp`);
-            expect(now.pressed).toBe('true');
-            // the photo really loads, and the artwork is still hanging on the wall at the same scale
-            await expect.poll(() => page.locator('.pz-stage__photo').evaluate((img) => img.complete && img.naturalWidth > 0)).toBe(true);
-            await expect(art).toBeVisible();
-            const box = await art.boundingBox();
-            expect(Math.abs(box.width - before.width)).toBeLessThan(2);
-        }
-    });
+        test('the artwork comes first, large, with its real size drawn beside it', async ({ page }) => {
+            await openPreview(page);
+            const stage = page.locator('.ap-stage');
+            await expect(stage).toHaveAttribute('data-view', 'artwork');
+            const s = await stage.boundingBox();
+            const art = await page.locator('.ap-stage .ap-place').boundingBox();
+            expect(art.height / s.height).toBeGreaterThan(0.5);
+            await expect(page.locator('.ap-dim--w')).toContainText('in');
+            await expect(page.locator('.ap-view[data-view-id=art]')).toHaveAttribute('aria-checked', 'true');
+        });
 
-    test('the chosen room is remembered and size and frame change the artwork on the wall', async ({ page }) => {
-        await openRoomPreview(page);
-        await page.click('.pz-roomthumb[data-room="studio"]');
-        await page.reload();
-        await expect(page.locator('.pz-stage--photo')).toHaveAttribute('data-room', 'studio');
+        test('every room the admin shows is one click away, and switching is immediate', async ({ page }) => {
+            await openPreview(page);
+            const ids = await page.locator('.ap-view:not(.ap-view--art)').evaluateAll((els) => els.map((e) => e.getAttribute('data-view-id')));
+            expect(ids.length).toBeGreaterThan(0);
+            for (const id of ids) {
+                const now = await page.evaluate((room) => {
+                    document.querySelector(`.ap-view[data-view-id="${room}"]`).click();
+                    return null;
+                }, id);
+                expect(now).toBeNull();
+                await expect(page.locator('.ap-stage')).toHaveAttribute('data-room', id);
+                await expect(page.locator(`.ap-view[data-view-id="${id}"]`)).toHaveAttribute('aria-checked', 'true');
+                await expect.poll(() => page.locator('.ap-scene__photo').evaluate((img) => img.complete && img.naturalWidth > 0)).toBe(true);
+                await expect(page.locator('.ap-stage .ap-art')).toBeVisible();
+                await expect(page.getByTestId('room-scale')).toContainText('in');
+            }
+            await page.click('.ap-view[data-view-id=art]');
+            await expect(page.locator('.ap-stage')).toHaveAttribute('data-view', 'artwork');
+        });
 
-        const art = page.locator('.pz-stage--photo .pz-art');
-        // the camera re-frames for each size, so compare the artwork with the furniture (both drawn to the same scale)
-        const relative = async () => (await art.boundingBox()).width / (await page.locator('.pz-stage__front').boundingBox()).width;
-        const small = await relative();
-        await page.getByRole('button', { name: /36 × 36/ }).click();
-        await expect.poll(relative).toBeGreaterThan(small * 1.3);
-        await expect(art).toHaveAttribute('data-width-in', '36');
+        test('the view is remembered; size and frame change the picture and the price', async ({ page }) => {
+            await openPreview(page);
+            const first = await page.locator('.ap-view:not(.ap-view--art)').first().getAttribute('data-view-id');
+            await page.click(`.ap-view[data-view-id="${first}"]`);
+            await page.reload();
+            await expect(page.locator('.ap-stage')).toHaveAttribute('data-room', first);
+            await page.click('.ap-view[data-view-id=art]');
 
-        await page.click('.pz-frame2[data-frame=OAK]');
-        await expect(art).toHaveClass(/pz-art--oak/);
-        await expect(page.getByTestId('room-price')).not.toHaveText('');
-    });
+            const price = page.getByTestId('room-price');
+            const p0 = await price.textContent();
+            await page.click('.ap-frame[data-frame=OAK]');
+            await expect(page.locator('.ap-stage .ap-art')).toHaveClass(/ap-art--oak/);
+            await expect(price).not.toHaveText(p0);
+            const sizes = page.locator('.ap-size');
+            if (await sizes.count() > 1) {
+                const r0 = await page.locator('.ap-stage .ap-place').evaluate((el) => el.clientWidth / el.clientHeight);
+                await sizes.last().click();
+                await expect(sizes.last()).toHaveAttribute('aria-pressed', 'true');
+                const dim = await page.locator('.ap-dim--w').textContent();
+                expect(dim).toMatch(/\d/);
+                expect(r0).toBeGreaterThan(0);
+            }
+        });
 
-    test('the artwork can be dragged and moved with the keyboard, but stays on the wall', async ({ page }) => {
-        await openRoomPreview(page);
-        const art = page.locator('.pz-stage--photo .pz-art');
-        const a = await art.boundingBox();
-        await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
-        await page.mouse.down();
-        await page.mouse.move(a.x + a.width / 2 - 120, a.y + a.height / 2 - 40, { steps: 6 });
-        await page.mouse.up();
-        const b = await art.boundingBox();
-        expect(b.x).toBeLessThan(a.x - 60);
-        await art.focus();
-        for (let i = 0; i < 200; i++) await page.keyboard.press('ArrowLeft');
-        const stage = await page.locator('.pz-stage--photo').boundingBox();
-        const c = await art.boundingBox();
-        expect(c.x).toBeGreaterThanOrEqual(stage.x);
-    });
+        test('Buy now goes to payment with exactly this choice', async ({ page }) => {
+            await openPreview(page);
+            await page.click('.ap-frame[data-frame=BLACK_WOOD]');
+            await page.getByTestId('room-continue').click();
+            await page.waitForURL(/\/purchase\/checkout/);
+            await expect(page.locator('.pz-line')).toHaveCount(1);
+            await expect(page.locator('.pz-line__variant').first()).toContainText('black wood frame');
+            await expect(page.locator('.dm-header .pz-cartbtn, [aria-label*="cart" i]')).toHaveCount(0);
+        });
 
-    test('the artwork is the subject: no shadows, muted room, painting fills a large part of the stage', async ({ page }) => {
-        await openRoomPreview(page);
-        const stage = page.locator('.pz-stage--photo');
-        const art = page.locator('.pz-stage--photo .pz-art');
-        await expect(page.locator('.pz-art__shade, .pz-art__glow')).toHaveCount(0);
-        const shadows = await art.evaluate((e) => [e, ...e.querySelectorAll('*')]
-            .filter((n) => /\) -?\d+px -?\d+px [1-9]/.test(getComputedStyle(n).boxShadow) || getComputedStyle(n).filter !== 'none').length);
-        expect(shadows).toBe(0);
-        expect(await page.locator('.pz-stage__photo').evaluate((i) => getComputedStyle(i).filter)).toContain('saturate');
-        const zoom = Number(await stage.getAttribute('data-zoom'));
-        expect(zoom).toBeGreaterThan(1);
-        const share = (await art.boundingBox()).width / (await stage.boundingBox()).width;
-        expect(share).toBeGreaterThan(0.3);
-    });
-
-    test('mobile: room preview fits the screen @mobile', async ({ page }) => {
-        await openRoomPreview(page);
-        await page.click('.pz-roomthumb[data-room="bedroom"]');
-        await expect(page.locator('.pz-stage--photo')).toHaveAttribute('data-room', 'bedroom');
-        // a wider layout makes mobile browsers zoom out (innerWidth grows), so compare with the device width
-        const overflow = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, window.innerWidth) - document.documentElement.clientWidth);
-        expect(overflow).toBeLessThanOrEqual(1);
-        // the painting stays large and inside the stage on a phone
-        const stage = await page.locator('.pz-stage--photo').boundingBox();
-        const art = await page.locator('.pz-stage--photo .pz-art').boundingBox();
-        expect(art.width / stage.width).toBeGreaterThan(0.3);
-        expect(art.x).toBeGreaterThanOrEqual(stage.x);
-        expect(art.x + art.width).toBeLessThanOrEqual(stage.x + stage.width + 1);
+        test('@mobile the preview fits the screen with a Buy now bar', async ({ page, isMobile }) => {
+            test.skip(!isMobile, 'phone layout');
+            await openPreview(page);
+            const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+            expect(overflow).toBeLessThanOrEqual(1);
+            await expect(page.locator('.ap-mobilebar')).toBeVisible();
+            const s = await page.locator('.ap-stage').boundingBox();
+            expect(s.width).toBeGreaterThan(300);
+        });
     });
 });

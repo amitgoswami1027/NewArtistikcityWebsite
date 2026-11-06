@@ -3,7 +3,6 @@ import { usePage, InertiaLink } from '@inertiajs/inertia-react';
 import axios from 'axios';
 import { API_URL } from '@/Components/Constants';
 import { accountNav } from '@/Components/Account/nav';
-import { CartButton } from '@/Components/Shop/CartDrawer';
 
 // fallback only: the real list is managed in Admin > Catalog > Age groups and arrives as the shared prop site.ageGroups
 export const AGE_GROUPS = ['Sub-junior - 8 to 12 yrs', 'Junior - 12 to 15 yrs', 'Adult - 16 yrs and above'];
@@ -63,13 +62,10 @@ function HeaderMenu({ id, button, buttonClass, label, align = 'left', children }
 
 export default function SiteHeader({ showCategories = false, activeMedium = null }) {
     const { auth, nav } = usePage().props;
-    const ageGroups = useAgeGroups();
     const user = auth && auth.user;
     const [mediums, setMediums] = useState([]);
-    const [open, setOpen] = useState(false);
     const [drawer, setDrawer] = useState(false);
     const [query, setQuery] = useState('');
-    const exploreRef = useRef(null);
 
     useEffect(() => {
         axios.get(`${API_URL}/get_mediums`)
@@ -82,11 +78,9 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
     }, []);
 
     useEffect(() => {
-        const onDoc = (e) => { if (exploreRef.current && !exploreRef.current.contains(e.target)) setOpen(false); };
-        const onKey = (e) => { if (e.key === 'Escape') { setOpen(false); setDrawer(false); } };
-        document.addEventListener('mousedown', onDoc);
+        const onKey = (e) => { if (e.key === 'Escape') setDrawer(false); };
         window.addEventListener('keydown', onKey);
-        return () => { document.removeEventListener('mousedown', onDoc); window.removeEventListener('keydown', onKey); };
+        return () => window.removeEventListener('keydown', onKey);
     }, []);
 
     const search = (e) => { e.preventDefault(); window.location.href = catalogUrl({ q: query }); };
@@ -104,32 +98,7 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
 
                     <nav className="dm-links dm-links--main" aria-label="Main">
                         <a href={route('how.it.works')} aria-current={here.startsWith('/how-it-works') ? 'page' : undefined}>How it works</a>
-                        <div className="dm-explore" ref={exploreRef}>
-                            <button type="button" className={open ? 'is-open' : ''} aria-expanded={open} onClick={() => setOpen(!open)}>
-                                Courses <i className={`fa fa-angle-${open ? 'up' : 'down'}`}></i>
-                            </button>
-                            {open && (
-                                <div className="dm-dropdown">
-                                    <div>
-                                        <h6>By medium</h6>
-                                        {mediums.map((m) => (
-                                            <a key={m.id} href={catalogUrl({ medium: m.id })}>
-                                                <span className="ac-mega__thumb" style={{ backgroundImage: `url(/storage/uploads/mediums/${m.id}/${m.photo})` }}></span>
-                                                {m.name}
-                                            </a>
-                                        ))}
-                                    </div>
-                                    <div>
-                                        <h6>Format</h6>
-                                        <a href={catalogUrl({ type: 'course' })}><i className="fa fa-graduation-cap"></i> Live courses</a>
-                                        <a href={catalogUrl({ type: 'workshop' })}><i className="fa fa-paint-brush"></i> Workshops</a>
-                                        <h6 style={{ marginTop: 16 }}>By age</h6>
-                                        {ageGroups.map((a) => <a key={a} href={catalogUrl({ age: a })}><i className="fa fa-user-o"></i> {a}</a>)}
-                                    </div>
-                                    <div className="dm-all"><a href={catalogUrl({})}>Browse all courses <i className="fa fa-arrow-right"></i></a></div>
-                                </div>
-                            )}
-                        </div>
+                        <a href={catalogUrl({})} aria-current={/^\/(courses|course|workshop)/.test(here) ? 'page' : undefined}>Courses</a>
 
                         <a href={route('commission.step1')} aria-current={here.startsWith('/commission') ? 'page' : undefined}>Commission art</a>
                         <a href="/marketplace" aria-current={here.startsWith('/marketplace') ? 'page' : undefined}>Marketplace</a>
@@ -170,8 +139,6 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                         )}
                     </nav>
 
-                    <CartButton />
-
                     <button type="button" className="ac-burger" aria-label="Menu" onClick={() => setDrawer(!drawer)}>
                         <i className={`fa ${drawer ? 'fa-times' : 'fa-bars'}`}></i>
                     </button>
@@ -199,10 +166,7 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                         <button className="dm-btn dm-btn--ink" type="submit" aria-label="Search"><i className="fa fa-search" aria-hidden="true"></i></button>
                     </form>
                     <a href={route('how.it.works')} style={{ fontWeight: 700 }}>How it works</a>
-                    <h6>Courses</h6>
-                    <a href={catalogUrl({})}>All courses</a>
-                    {mediums.map((m) => <a key={m.id} href={catalogUrl({ medium: m.id })}>{m.name}</a>)}
-                    <a href={catalogUrl({ type: 'workshop' })}>Workshops</a>
+                    <a href={catalogUrl({})} style={{ fontWeight: 700 }}>Courses</a>
                     <h6>ArtistikCity</h6>
                     <a href={route('commission.step1')}>Commission art</a>
                     <a href="/marketplace">Marketplace</a>

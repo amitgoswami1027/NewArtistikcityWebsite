@@ -1,10 +1,11 @@
-// The four screens: artwork page (choose + talk to the artist) -> room preview -> payment -> order summary.
+// The four screens: artwork page (choose + talk to the artist) -> preview and frame -> payment -> order summary.
+// Buying needs an account: the tests sign in first (the guest path is in room-preview.spec.js).
 const { test, expect } = require('@playwright/test');
 const { ARTWORK, emptyCart, signIn } = require('./helpers');
 
 test.describe('Purchase flow', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('/marketplace');
+        await signIn(page);
         await emptyCart(page);
     });
 
@@ -31,11 +32,12 @@ test.describe('Purchase flow', () => {
         await page.click('.pz-buyopt[data-format=CANVAS]');
         await page.getByTestId('buy-continue').click();
         await page.waitForURL(/\/purchase\/step-2/);
-        await page.click('.pz-frame2[data-frame=BLACK_WOOD]');
+        await page.click('.ap-frame[data-frame=BLACK_WOOD]');
         await page.getByTestId('room-continue').click();
         await page.waitForURL(/\/purchase\/checkout/);
 
-        // contact is open, the rest closed; a bad e-mail is flagged when leaving the field
+        // contact (prefilled from the account) opens first unless it is already complete; a bad e-mail is flagged
+        if (!/is-open/.test(await page.locator('[data-section=contact]').getAttribute('class'))) await page.getByRole('button', { name: 'Edit contact' }).click();
         await expect(page.locator('[data-section=contact]')).toHaveClass(/is-open/);
         await expect(page.locator('.pz-line__variant').first()).toContainText('black wood frame');
         await page.fill('#co-name', 'Meera Rao');
@@ -79,9 +81,7 @@ test.describe('Purchase flow', () => {
         expect(pos).toBe('sticky');
     });
 
-    test('signed-in collectors find the order under Your orders', async ({ page }) => {
-        await signIn(page);
-        await emptyCart(page);
+    test('collectors find the order under Your orders', async ({ page }) => {
         await page.goto(`/marketplace/${ARTWORK}`);
         await page.click('.pz-buyopt[data-format=POSTER]');
         await page.getByTestId('buy-continue').click();

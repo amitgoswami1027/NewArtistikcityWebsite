@@ -55,6 +55,11 @@ import java.util.regex.Pattern;
 @Controller
 public class PurchaseController {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.payments.TestPayments testPayments;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.rooms.RoomScenes roomScenes;
+
     private static final Logger log = LoggerFactory.getLogger(PurchaseController.class);
     static final String DRAFT = "purchase.draft";
     static final String SESSION_ORDERS = "shop.orders";
@@ -116,8 +121,46 @@ public class PurchaseController {
     @GetMapping("/purchase/step-2")
     public ResponseEntity<String> step2(HttpServletRequest request) {
         Map<String, Object> draft = draft(request);
-        if (draft != null && "DIGITAL".equals(draft.get("format"))) return redirect.to(request, "/purchase/checkout");
+        if (auth.userId(request) == null) return redirect.to(request, draft == null ? "/marketplace" : com.artistikcity.web.PurchaseIntent.signIn("/purchase/step-2"));
+        if (draft != null && "DIGITAL".equals(draft.get("format"))) return redirect.to(request, "/purchase/buy-now");
+        ResponseEntity<String> held = holdAfterSignIn(request, draft);
+        if (held != null) return held;
         return draftPage(request, "Purchase/Step2Room");
+    }
+
+    /**
+     * A guest who chose the original was sent to sign in before it was held (nobody can block an original without an
+     * account). Back here, signed in, the hold is taken now; if someone else got there first, back to the artwork page.
+     */
+    private ResponseEntity<String> holdAfterSignIn(HttpServletRequest request, Map<String, Object> draft) {
+        if (draft == null || !"ORIGINAL".equals(draft.get("format"))) return null;
+        long id = ((Number) draft.get("paintingId")).longValue();
+        if (market.activeHold(id, Holders.all(request, auth)) != null) return null;
+        try {
+            // the piece they just chose wins over an older hold of theirs (one original at a time)
+            market.reserve(id, Holders.primary(request, auth), Holders.all(request, auth), auth.userId(request), true);
+            marketRepo.syncStudentListing(id);
+            return null;
+        } catch (MarketplaceException e) {
+            log.info("Original {} could not be held after sign-in: {}", id, e.getMessage());
+            return redirect.to(request, "/marketplace/" + draft.get("slug") + "?unavailable=" + e.body().get("code") + "#buy");
+        }
+    }
+
+    /**
+     * "Continue to payment": the chosen piece (the draft) becomes the only thing being bought. There is no cart: each
+     * purchase is one artwork, so whatever was in the basket before is replaced.
+     */
+    @GetMapping("/purchase/buy-now")
+    public ResponseEntity<String> buyNow(HttpServletRequest request) {
+        Map<String, Object> draft = draft(request);
+        if (draft == null) return redirect.to(request, "/marketplace");
+        if (auth.userId(request) == null) return redirect.to(request, com.artistikcity.web.PurchaseIntent.signIn("/purchase/buy-now"));
+        ResponseEntity<String> held = holdAfterSignIn(request, draft);
+        if (held != null) return held;
+        cart.replaceWith(request, ((Number) draft.get("paintingId")).longValue(), ShopPricing.Selection.of(draft.get("format"), draft.get("size"),
+                draft.get("finish"), draft.get("frame"), draft.get("qty")));
+        return redirect.to(request, "/purchase/checkout");
     }
 
     /** The old review step is now part of the room preview (price) and the checkout (coupon, totals). */
@@ -140,6 +183,9 @@ public class PurchaseController {
         props.put("conversation", hub.conversation(Holders.all(request, auth), ((Number) p.get("id")).longValue()));
         Row user = auth.user(request);
         props.put("customer", user == null ? null : Map.of("name", user.str("name", ""), "email", user.str("email", "")));
+        boolean roomsOn = roomScenes.enabled();
+        props.put("rooms", roomsOn ? roomScenes.active() : List.of());
+        props.put("roomsEnabled", roomsOn);
         return inertia.render(request, component, props);
     }
 
@@ -172,12 +218,18 @@ public class PurchaseController {
 
     @GetMapping("/purchase/checkout")
     public ResponseEntity<String> checkout(HttpServletRequest request, @RequestParam(value = "payment", required = false) String payment) {
+        if (auth.userId(request) == null) return redirect.to(request, com.artistikcity.web.PurchaseIntent.signIn("/purchase/checkout"));
         CartService.Priced priced = cart.price(request, "India", null, null);
+        if (priced.lines().stream().noneMatch(l -> l.itemId() != null)) {
+            Map<String, Object> draft = draft(request);
+            return redirect.to(request, draft == null ? "/marketplace" : "/marketplace/" + draft.get("slug") + "#buy");
+        }
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("cart", cart.json(priced));
         Row user = auth.user(request);
         props.put("customer", user == null ? null : Map.of("name", user.str("name", ""), "email", user.str("email", ""), "phone", user.str("phone", "")));
-        props.put("gateways", Map.of("razorpay", payments.razorpayConfigured(), "paypal", payments.paypalConfigured(), "testMode", payments.testMode()));
+        props.put("gateways", Map.of("razorpay", payments.razorpayConfigured(), "paypal", payments.paypalConfigured(), "testMode", payments.testMode(),
+                "simulate", testPayments.offerSimulation(request)));
         props.put("inrPerUsd", inrPerUsd());
         props.put("payment", payment);
         props.put("serverNow", System.currentTimeMillis());
@@ -217,7 +269,8 @@ public class PurchaseController {
         if (!q.ok()) return error(HttpStatus.UNPROCESSABLE_ENTITY, q.error());
         long id = ((Number) p.get("id")).longValue();
         Map<String, Object> res = new LinkedHashMap<>();
-        if ("ORIGINAL".equals(q.selection().format())) {
+        boolean guest = auth.userId(request) == null;
+        if ("ORIGINAL".equals(q.selection().format()) && !guest) {
             try {
                 MarketplaceService.Hold hold = market.reserve(id, Holders.primary(request, auth), Holders.all(request, auth), auth.userId(request),
                         Boolean.TRUE.equals(b.get("switch")));
@@ -236,6 +289,12 @@ public class PurchaseController {
         d.put("frame", q.selection().frame());
         d.put("qty", q.selection().qty());
         request.getSession(true).setAttribute(DRAFT, Collections.unmodifiableMap(d));
+        if (guest) {
+            // buying starts with an account: the choice is kept, the guest signs in and lands on the next step
+            String next = "DIGITAL".equals(q.selection().format()) ? "/purchase/buy-now" : "/purchase/step-2";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).contentType(MediaType.APPLICATION_JSON).body(json.encode(Map.of(
+                    "code", "SIGN_IN", "message", "Log in or join to buy this artwork.", "redirect", com.artistikcity.web.PurchaseIntent.signIn(next))));
+        }
         res.put("draft", d);
         res.put("quote", quoteJson(q));
         res.put("serverNow", System.currentTimeMillis());
@@ -300,6 +359,7 @@ public class PurchaseController {
     @PostMapping("/api/v1/purchase/checkout")
     public ResponseEntity<String> startCheckout(HttpServletRequest request) throws IOException {
         if (!Csrf.matches(request)) return error(HttpStatus.FORBIDDEN, "Your session expired. Refresh the page and try again.");
+        if (auth.userId(request) == null) return signInFirst("/purchase/checkout");
         Map<String, Object> b = body(request);
         String gateway = "PAYPAL".equals(b.get("gateway")) ? "PAYPAL" : "RAZORPAY";
         Map<String, String> f = new LinkedHashMap<>();
@@ -336,8 +396,11 @@ public class PurchaseController {
                     .body(json.encode(Map.of("message", errors.values().iterator().next(), "errors", errors)));
         }
         boolean razorpay = "RAZORPAY".equals(gateway);
-        boolean live = razorpay ? payments.razorpayConfigured() : payments.paypalConfigured();
-        if (!live && !payments.testMode()) {
+        // a test-buyer account (Admin > People) may simulate the payment on the live site
+        boolean simulate = Boolean.TRUE.equals(b.get("simulate"));
+        if (simulate && !testPayments.offerSimulation(request)) return error(HttpStatus.FORBIDDEN, "Simulated payments are only for test accounts.");
+        boolean live = !simulate && (razorpay ? payments.razorpayConfigured() : payments.paypalConfigured());
+        if (!live && !simulate && !payments.testMode()) {
             return error(HttpStatus.SERVICE_UNAVAILABLE, (razorpay ? "UPI and card" : "PayPal") + " payments are unavailable right now. Please try the other option or contact us.");
         }
         BigDecimal totalInr = priced.total();
@@ -350,6 +413,7 @@ public class PurchaseController {
                 new ShopOrderService.Buyer(f.get("name"), f.get("email"), f.get("phone"), f.get("line1"), f.get("line2"), f.get("city"), f.get("state"),
                         f.get("postal"), f.get("country")), priced, live ? gateway : "TEST", currency, amount);
         remember(request, orderId);
+        if (!live) jdbcMarkTest("shop_orders", orderId);
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("orderId", orderId);
         res.put("currency", currency);
@@ -394,7 +458,7 @@ public class PurchaseController {
         String provider = String.valueOf(b.get("provider"));
         String txn;
         if ("test".equals(provider)) {
-            if (!"TEST".equals(o.get("gateway")) || !payments.testMode()) return error(HttpStatus.FORBIDDEN, "Test payments are disabled.");
+            if (!"TEST".equals(o.get("gateway")) || !(payments.testMode() || testPayments.isTestBuyer(request))) return error(HttpStatus.FORBIDDEN, "Test payments are disabled.");
             txn = "TEST-" + System.currentTimeMillis();
         } else if ("razorpay".equals(provider)) {
             String rzpOrder = String.valueOf(b.get("razorpay_order_id"));
@@ -552,5 +616,18 @@ public class PurchaseController {
 
     private ResponseEntity<String> error(HttpStatus status, String message) {
         return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(json.encode(Map.of("message", message)));
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.support.Db testDb;
+
+    /** A simulated (test) order: kept out of revenue, the ledger, payouts and the reconciler. */
+    private void jdbcMarkTest(String table, String orderId) {
+        testDb.update("update " + table + " set is_test = 1 where order_id = ?", orderId);
+    }
+
+    private ResponseEntity<String> signInFirst(String returnTo) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).contentType(MediaType.APPLICATION_JSON).body(json.encode(Map.of(
+                "code", "SIGN_IN", "message", "Please log in to finish your purchase.", "redirect", com.artistikcity.web.PurchaseIntent.signIn(returnTo))));
     }
 }

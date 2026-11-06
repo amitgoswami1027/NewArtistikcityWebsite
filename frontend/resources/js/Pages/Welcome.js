@@ -56,7 +56,7 @@ export default function Welcome() {
     const [q, setQ] = React.useState('');
 
     return (
-        <SiteLayout title="Online art courses" showCategories>
+        <SiteLayout title="Online art courses">
             {/* ---------- hero ---------- */}
             <section className="dm-hero">
                 <div className="dm-hero__bg" aria-hidden="true">

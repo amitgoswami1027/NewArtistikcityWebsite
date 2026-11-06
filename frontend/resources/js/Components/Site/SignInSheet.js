@@ -16,7 +16,9 @@ if (typeof window !== 'undefined' && !window.__acSite401) {
         try {
             const url = new URL(e.config && e.config.url ? e.config.url : '', window.location.origin);
             if (e.response && e.response.status === 401 && url.origin === window.location.origin && !SKIP.test(url.pathname)
-                && !SKIP.test(window.location.pathname)) {
+                && !SKIP.test(window.location.pathname)
+                // a purchase that needs an account goes to the full log-in page instead (it names what they're buying)
+                && !(e.response.data && e.response.data.code === 'SIGN_IN')) {
                 window.dispatchEvent(new CustomEvent('ac:reauth'));
             }
         } catch (x) { /* never block the original error */ }

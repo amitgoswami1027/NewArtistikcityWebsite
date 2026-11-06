@@ -38,6 +38,7 @@ const inputCls = (err) => `w-full h-11 rounded-lg text-sm ${err ? 'border-red-40
 
 function CheckoutForm() {
     const { pricing, gateways = {}, customer } = usePage().props;
+    const [simulate, setSimulate] = useState(false);
     const state = useStepGuard(6);
     const { update, reset } = useCommission();
     const digital = isDigital(state);
@@ -94,6 +95,7 @@ function CheckoutForm() {
             theme: state.theme, fulfillmentType: state.fulfillmentType, size: state.size, orientation: state.orientation,
             frameMaterial: state.frameMaterial, hasMatting: state.hasMatting, photoUrl: state.photoUrl, instructions: state.instructions,
             contact: state.contact, shipping: digital ? null : state.shipping, paymentMethod: state.paymentMethod,
+            simulate: simulate && gateways.simulate,
         };
         axios.post('/api/commissions/initialize-checkout', payload).then(async (r) => {
             const d = r.data;
@@ -120,12 +122,13 @@ function CheckoutForm() {
         }).catch((err) => {
             setBusy(false);
             const data = err.response && err.response.data;
+            if (data && data.code === 'SIGN_IN' && data.redirect) { window.location.assign(data.redirect); return; }
             setNotice({ type: 'error', text: (data && data.message) || 'Something went wrong. Please try again.' });
         });
     };
 
     const payLabel = q ? `🔒 Securely Confirm and Pay Total: ${currency === 'INR' ? inr(q.totalInr) : usd(q.totalUsd)}` : 'Securely Confirm and Pay';
-    const unavailable = (m) => !gateways.testMode && (m === 'PAYPAL' ? !gateways.paypal : !gateways.razorpay);
+    const unavailable = (m) => !gateways.testMode && !(simulate && gateways.simulate) && (m === 'PAYPAL' ? !gateways.paypal : !gateways.razorpay);
 
     return (
         <form onSubmit={pay} noValidate className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -237,6 +240,14 @@ function CheckoutForm() {
                     ))}
                 </section>
 
+                {gateways.simulate && (
+                    <label className="flex items-start gap-3 rounded-2xl border-2 border-dashed border-yellow-400 bg-yellow-50 p-4 cursor-pointer" data-testid="simulate">
+                        <input type="checkbox" checked={simulate} onChange={(e) => setSimulate(e.target.checked)} className="mt-1 h-5 w-5 rounded border-gray-300 text-brand focus:ring-brand" />
+                        <span><span className="block font-bold text-yellow-900"><i className="fa fa-flask mr-2" aria-hidden="true"></i>Simulate this payment</span>
+                            <span className="block text-sm text-yellow-900">Your account is a test buyer: no money is charged and the order is marked TEST in the admin.</span></span>
+                    </label>
+                )}
+
                 {notice && (
                     <p role="alert" className={`rounded-xl px-4 py-3 text-sm font-semibold ${notice.type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-blue-50 border border-blue-200 text-blue-900'}`}>{notice.text}</p>
                 )}
@@ -244,7 +255,7 @@ function CheckoutForm() {
                 {testOrder ? (
                     <div className="rounded-2xl border-2 border-dashed border-yellow-400 bg-yellow-50 p-5">
                         <p className="font-bold text-yellow-900"><i className="fa fa-flask mr-2" aria-hidden="true"></i>Test mode: order {testOrder.orderId} was created</p>
-                        <p className="mt-1 text-sm text-yellow-900">No payment keys are configured, so no real money will be taken.</p>
+                        <p className="mt-1 text-sm text-yellow-900">{simulate ? 'Your account is a test buyer, so no real money will be taken.' : 'No payment keys are configured, so no real money will be taken.'}</p>
                         <button type="button" disabled={busy} onClick={() => { setBusy(true); confirm({ orderId: testOrder.orderId, provider: 'test' }); }}
                                 className="mt-4 w-full h-12 rounded-full bg-ink text-white font-bold hover:bg-gray-800 disabled:bg-gray-400">
                             Simulate a successful payment

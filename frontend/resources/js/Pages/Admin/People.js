@@ -26,6 +26,7 @@ export default function People() {
         submitted: (s) => Number(s.submissions) > 0,
         selling: (s) => Number(s.listed) > 0,
         inactive: (s) => String(s.status) === '0',
+        testers: (s) => String(s.test_buyer) === '1',
     };
     const shownStudents = students.filter((s) => segments[segment](s) && (!q || `${s.name} ${s.email} ${s.location || ''}`.toLowerCase().includes(q.toLowerCase())));
     const shownStaff = staff.filter((s) => !q || `${s.name} ${s.email}`.toLowerCase().includes(q.toLowerCase()));
@@ -34,6 +35,14 @@ export default function People() {
         const active = String(s.status) !== '1';
         axios.post(`/admin/console/api/students/${s.id}/status`, { active })
             .then(() => { setStudents(students.map((x) => (x.id === s.id ? { ...x, status: active ? 1 : 0 } : x))); toast(`${s.name} ${active ? 'reactivated' : 'deactivated'}`); })
+            .catch((e) => toast(errorText(e), 'error'));
+    };
+    const setTestBuyer = (s, on) => {
+        axios.post(`/admin/console/api/students/${s.id}/test-buyer`, { on })
+            .then((r) => {
+                setStudents(students.map((x) => (x.id === s.id ? { ...x, test_buyer: on ? 1 : 0 } : x)));
+                toast(on ? `${s.name} can now simulate payments${r.data && r.data.enabled === false ? ' (test buyers are switched off in the settings)' : ''}` : `${s.name} pays normally again`);
+            })
             .catch((e) => toast(errorText(e), 'error'));
     };
     const setPersona = (s, persona) => {
@@ -71,13 +80,13 @@ export default function People() {
             {tab === 'students' ? (
                 <>
                     <div className="flex flex-wrap gap-2 mb-4">
-                        {[['all', 'Everyone'], ['learning', 'Learning'], ['submitted', 'Submitted work'], ['selling', 'Selling'], ['inactive', 'Deactivated']].map(([k, l]) => (
+                        {[['all', 'Everyone'], ['learning', 'Learning'], ['submitted', 'Submitted work'], ['selling', 'Selling'], ['inactive', 'Deactivated'], ['testers', 'Test buyers']].map(([k, l]) => (
                             <button key={k} type="button" onClick={() => setSegment(k)} className={`h-9 px-4 rounded-full text-sm font-bold border ${segment === k ? 'bg-ink text-white border-ink' : 'bg-white border-gray-300'}`}>{l} <span className="font-mono opacity-70">{students.filter(segments[k]).length}</span></button>
                         ))}
                     </div>
                     <div className="rounded-2xl bg-white border border-gray-200 overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-gray-50"><tr className="font-mono text-xs uppercase tracking-widest text-gray-500"><th className="p-3">Student</th><th>Location</th><th className="text-center">Courses</th><th className="text-center">Submissions</th><th className="text-center">For sale</th><th>Joined</th><th>Status</th>{canManage && <th className="p-3"></th>}</tr></thead>
+                            <thead className="bg-gray-50"><tr className="font-mono text-xs uppercase tracking-widest text-gray-500"><th className="p-3">Student</th><th>Location</th><th className="text-center">Courses</th><th className="text-center">Submissions</th><th className="text-center">For sale</th><th>Joined</th><th>Status</th>{canManage && <th title="May simulate payments at checkout; orders are marked TEST">Test buyer</th>}{canManage && <th className="p-3"></th>}</tr></thead>
                             <tbody>{shownStudents.map((s) => (
                                 <tr key={s.id} className="border-t border-gray-100">
                                     <td className="p-3"><div className="flex items-center gap-3"><span className="w-9 h-9 rounded-full bg-brand-soft text-brand font-black flex items-center justify-center">{String(s.name).charAt(0)}</span><div><p className="font-semibold text-ink">{s.name}</p><p className="text-xs text-gray-500">{s.email}{s.provider ? ` · ${s.provider}` : ''}</p></div></div></td>
@@ -87,6 +96,12 @@ export default function People() {
                                     <td className="text-center font-mono">{s.listed}</td>
                                     <td className="font-mono text-xs">{shortDate(s.created_at)}</td>
                                     <td><span className={`rounded-full px-2.5 py-1 text-xs font-bold ${String(s.status) === '1' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>{String(s.status) === '1' ? 'Active' : 'Inactive'}</span></td>
+                                    {canManage && <td>
+                                        <label className="inline-flex items-center gap-2 text-sm">
+                                            <input type="checkbox" checked={String(s.test_buyer) === '1'} onChange={(e) => setTestBuyer(s, e.target.checked)} aria-label={`Test buyer: ${s.name}`} className="rounded border-gray-300 text-brand focus:ring-brand" />
+                                            {String(s.test_buyer) === '1' && <span className="rounded-full px-2 py-0.5 text-xs font-bold bg-yellow-100 text-yellow-900">TEST</span>}
+                                        </label>
+                                    </td>}
                                     {canManage && <td className="p-3 text-right whitespace-nowrap">
                                         <a href={`/admin/students/details/${s.id}`} className="text-sm font-bold underline mr-3">Details</a>
                                         <button type="button" onClick={() => toggleStudent(s)} className="text-sm font-bold text-gray-600 hover:text-ink">{String(s.status) === '1' ? 'Deactivate' : 'Reactivate'}</button>

@@ -122,7 +122,7 @@ public class PaymentReconciler {
 
     private void courseOrders(LocalDateTime youngest, LocalDateTime oldest, int[] n, List<String> notes) {
         List<Map<String, Object>> rows = jdbc.queryForList("select id, order_number, gateway_ref, price_type, price, created_at from orders"
-                + " where payment_status in (0, 2) and gateway_ref is not null and created_at <= ? and created_at >= ? order by id limit 200", ts(youngest), ts(oldest));
+                + " where payment_status in (0, 2) and is_test = 0 and gateway_ref is not null and created_at <= ? and created_at >= ? order by id limit 200", ts(youngest), ts(oldest));
         for (Map<String, Object> o : rows) {
             n[0]++;
             String ref = String.valueOf(o.get("gateway_ref"));

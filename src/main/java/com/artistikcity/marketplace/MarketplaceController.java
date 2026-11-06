@@ -54,6 +54,11 @@ import java.util.regex.Pattern;
 public class MarketplaceController {
 
     @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.payments.TestPayments testPayments;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.rooms.RoomScenes roomScenes;
+
+    @org.springframework.beans.factory.annotation.Autowired
     private org.springframework.beans.factory.ObjectProvider<com.artistikcity.ledger.LedgerService> ledger;
 
 
@@ -168,6 +173,7 @@ public class MarketplaceController {
         Row viewer = auth.user(request);
         props.put("customer", viewer == null ? null : Map.of("name", viewer.str("name", ""), "email", viewer.str("email", "")));
         props.put("openChat", "1".equals(request.getParameter("chat")));
+        props.put("rooms", roomScenes.enabled() ? roomScenes.active() : List.of());
         return inertia.render(request, "Marketplace/Show", props);
     }
 
@@ -175,6 +181,7 @@ public class MarketplaceController {
     public ResponseEntity<String> checkout(HttpServletRequest request, @PathVariable("slug") String slug) {
         Map<String, Object> p = repo.bySlug(slug);
         if (p == null) return redirect.to(request, "/marketplace");
+        if (auth.userId(request) == null) return redirect.to(request, com.artistikcity.web.PurchaseIntent.signIn("/marketplace/" + slug + "/checkout"));
         long id = ((Number) p.get("id")).longValue();
         MarketplaceService.Hold hold = market.activeHold(id, Holders.all(request, auth));
         if (hold == null) {
@@ -183,7 +190,7 @@ public class MarketplaceController {
         // the cart checkout replaced this single-original page: put the held original in the cart and go there
         if (!"single".equals(request.getParameter("mode"))) {
             try {
-                cart.add(request, id, com.artistikcity.shop.ShopPricing.Selection.of("ORIGINAL", "", "", "NONE", 1), false);
+                cart.replaceWith(request, id, com.artistikcity.shop.ShopPricing.Selection.of("ORIGINAL", "", "", "NONE", 1));
                 return redirect.to(request, "/purchase/checkout");
             } catch (MarketplaceException e) {
                 log.info("Could not move hold on {} into the cart: {}", id, e.getMessage());
@@ -196,7 +203,8 @@ public class MarketplaceController {
         props.put("serverNow", System.currentTimeMillis());
         props.put("usdPrice", toUsd((BigDecimal) p.get("final_price")));
         props.put("inrPerUsd", inrPerUsd());
-        props.put("gateways", Map.of("razorpay", payments.razorpayConfigured(), "paypal", payments.paypalConfigured(), "testMode", payments.testMode()));
+        props.put("gateways", Map.of("razorpay", payments.razorpayConfigured(), "paypal", payments.paypalConfigured(), "testMode", payments.testMode(),
+                "simulate", testPayments.offerSimulation(request)));
         props.put("customer", user == null ? null : Map.of("name", user.str("name", ""), "email", user.str("email", ""), "phone", user.str("phone", "")));
         props.put("payment", request.getParameter("payment"));
         return inertia.render(request, "Marketplace/Checkout", props);
@@ -232,6 +240,11 @@ public class MarketplaceController {
     @PostMapping("/api/v1/marketplace/paintings/{id}/reserve")
     public ResponseEntity<String> reserve(HttpServletRequest request, @PathVariable("id") long id) throws IOException {
         if (!Csrf.matches(request)) return error(HttpStatus.FORBIDDEN, "Your session expired. Refresh the page and try again.");
+        if (auth.userId(request) == null) {
+            // nobody can block an original without an account
+            Map<String, Object> p0 = repo.find(id);
+            return signInFirst(p0 == null ? "/marketplace" : "/marketplace/" + p0.get("slug") + "#buy");
+        }
         Map<String, Object> body = body(request);
         try {
             MarketplaceService.Hold hold = market.reserve(id, Holders.primary(request, auth), Holders.all(request, auth), auth.userId(request),
@@ -268,6 +281,7 @@ public class MarketplaceController {
     @PostMapping("/api/v1/marketplace/checkout")
     public ResponseEntity<String> startCheckout(HttpServletRequest request) throws IOException {
         if (!Csrf.matches(request)) return error(HttpStatus.FORBIDDEN, "Your session expired. Refresh the page and try again.");
+        if (auth.userId(request) == null) return signInFirst("/marketplace");
         Map<String, Object> b = body(request);
         Long paintingId = b.get("paintingId") instanceof Number n ? n.longValue() : null;
         if (paintingId == null) return error(HttpStatus.BAD_REQUEST, "Missing painting.");
@@ -306,8 +320,11 @@ public class MarketplaceController {
         }
 
         boolean razorpay = "RAZORPAY".equals(gateway);
-        boolean live = razorpay ? payments.razorpayConfigured() : payments.paypalConfigured();
-        if (!live && !payments.testMode()) {
+        // a test-buyer account (Admin > People) may simulate the payment on the live site
+        boolean simulate = Boolean.TRUE.equals(b.get("simulate"));
+        if (simulate && !testPayments.offerSimulation(request)) return error(HttpStatus.FORBIDDEN, "Simulated payments are only for test accounts.");
+        boolean live = !simulate && (razorpay ? payments.razorpayConfigured() : payments.paypalConfigured());
+        if (!live && !simulate && !payments.testMode()) {
             return error(HttpStatus.SERVICE_UNAVAILABLE, (razorpay ? "UPI and card" : "PayPal") + " payments are unavailable right now. Please try the other option or contact us.");
         }
         BigDecimal priceInr = (BigDecimal) p.get("final_price");
@@ -317,6 +334,7 @@ public class MarketplaceController {
         market.createPendingOrder(new MarketplaceService.NewOrder(orderId, paintingId, auth.userId(request), holder, buyer,
                 live ? gateway : "TEST", currency, amount, priceInr));
         rememberOrder(request, orderId);
+        if (!live) jdbcMarkTest("marketplace_orders", orderId);
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("orderId", orderId);
@@ -362,7 +380,7 @@ public class MarketplaceController {
         String provider = String.valueOf(b.get("provider"));
         String txn;
         if ("test".equals(provider)) {
-            if (!"TEST".equals(o.get("gateway")) || !payments.testMode()) return error(HttpStatus.FORBIDDEN, "Test payments are disabled.");
+            if (!"TEST".equals(o.get("gateway")) || !(payments.testMode() || testPayments.isTestBuyer(request))) return error(HttpStatus.FORBIDDEN, "Test payments are disabled.");
             txn = "TEST-" + System.currentTimeMillis();
         } else if ("razorpay".equals(provider)) {
             String rzpOrder = String.valueOf(b.get("razorpay_order_id"));
@@ -667,5 +685,18 @@ public class MarketplaceController {
 
     private ResponseEntity<String> error(HttpStatus status, String message) {
         return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(json.encode(Map.of("message", message)));
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.support.Db testDb;
+
+    /** A simulated (test) order: kept out of revenue, the ledger, payouts and the reconciler. */
+    private void jdbcMarkTest(String table, String orderId) {
+        testDb.update("update " + table + " set is_test = 1 where order_id = ?", orderId);
+    }
+
+    private ResponseEntity<String> signInFirst(String returnTo) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).contentType(MediaType.APPLICATION_JSON).body(json.encode(Map.of(
+                "code", "SIGN_IN", "message", "Please log in to buy this artwork.", "redirect", com.artistikcity.web.PurchaseIntent.signIn(returnTo))));
     }
 }

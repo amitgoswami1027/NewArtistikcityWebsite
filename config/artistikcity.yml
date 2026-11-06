@@ -181,6 +181,10 @@ app.payments.reconcile.alert-after-minutes: '${PAYMENTS_RECONCILE_ALERT_AFTER_MI
 # gateway API addresses (only change them for a test double)
 app.payments.razorpay.api-base: '${RAZORPAY_API_BASE:https://api.razorpay.com}'
 app.payments.paypal.api-base: '${PAYPAL_API_BASE:}'
+# Test-buyer accounts: a super admin ticks "Test buyer" on an account (Admin > People); only that signed-in account sees
+# "Simulate payment" at checkout, on the live site too. Its orders are marked TEST and kept out of revenue, the ledger and
+# payouts. false = the switch is ignored everywhere (nobody can simulate a payment, whatever the accounts say).
+app.payments.test-buyers.enabled: '${PAYMENTS_TEST_BUYERS:true}'
 # where payment / refund / security alerts are e-mailed (empty = the admin e-mail above)
 app.alerts.email: '${ALERT_EMAIL:}'
 

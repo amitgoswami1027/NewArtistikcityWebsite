@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/inertia-react';
 import AuthLayout from '@/Layouts/AuthLayout';
+import PurchaseIntentBanner from '@/Components/Auth/PurchaseIntent';
 import { Field, SocialButtons } from '@/Components/Auth/AuthFields';
 import { MagicLinkForm, MethodTabs, PasskeyButton, PhoneOtpForm } from '@/Components/Auth/SignInMethods';
 
 /**
  * Log in: Google / Facebook, passkey, then e-mail (magic link or password) or phone (SMS code).
  */
-export default function Login({ status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, errors: pageErrors = {} }) {
+export default function Login({ intent, status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, errors: pageErrors = {} }) {
     const [tab, setTab] = useState(() => (typeof window !== 'undefined' && window.localStorage && safeGet('ac.login.tab')) || 'email');
     const [usePassword, setUsePassword] = useState(() => !!(pageErrors.email || pageErrors.password));
     const [passkeyError, setPasskeyError] = useState(null);
@@ -26,7 +27,7 @@ export default function Login({ status, canResetPassword, providers, defaultCoun
     return (
         <AuthLayout title="Log in">
             <h1>Log in</h1>
-            <p className="dm-lede">Welcome back. Pick up your courses right where you left off.</p>
+            {intent ? <PurchaseIntentBanner intent={intent} /> : <p className="dm-lede">Welcome back. Pick up your courses right where you left off.</p>}
 
             {status && <div className="ac-alert ac-alert--ok">{status}</div>}
             {verified && <div className="ac-alert ac-alert--ok">Your e-mail is confirmed. Log in to continue.</div>}

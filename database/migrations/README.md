@@ -31,6 +31,8 @@ To change the schema of a database that already holds real data:
 | `2026-11-05_ledger_payouts.sql` | Escrow ledger: append-only `ledger_entries` (sale, commission, artist share, refund, payout, dispute loss), `payout_batches`, `payout_lines`, `ledger_disputes`. |
 | `2026-11-05_moderation.sql` | `account_restrictions` (ban / no posting / no selling, with reason and end date) and `content_reports` (Report button queue with reason codes). |
 | `2026-11-05_taxonomy_hierarchy.sql` | Tag & hierarchy manager: `parent_id` (nesting) and `archived_at` on `mediums`, `genres`, `skills` and `age_groups`. |
+| `2026-11-06_test_buyers.sql` | Test-buyer accounts: `users.test_buyer`, and `is_test` on `orders`, `marketplace_orders`, `shop_orders` and `commission_orders` (simulated payments, kept out of revenue, ledger and payouts). |
+| `2026-11-06_room_scenes.sql` | Room photos for the room preview (`room_scenes`, managed in Admin › Room preview) with the four original rooms, and the `room_preview.enabled` setting. |
 
 The earlier SQL Server (T-SQL) migrations were removed when the project moved to MySQL. Everything they did is
 already in `schema.sql`, and they remain available in git history.

@@ -53,9 +53,13 @@ check('drawer API returns before/after JSON', d['before_json'] and d['after_json
 t = admin_login('vaishali@artistikcity.com')
 codes = [post(t, '/admin/api/taxonomy/mediums', {'name': 'probe'}).status_code for _ in range(5)]
 check('teacher refused with 403', codes == [403] * 5 or codes[:5].count(403) >= 4, codes)
-import time; time.sleep(0.6)  # the refusal is logged after the response is sent
+import time
 tid = sql("select id from admins where email='vaishali@artistikcity.com'")
-check('5 DENIED entries for the teacher', int(sql(f"select count(*) from audit_logs where id>{start} and action_type='DENIED' and actor_type='admin' and actor_id={tid}")) >= 5)
+denied = lambda: int(sql(f"select count(*) from audit_logs where id>{start} and action_type='DENIED' and actor_type='admin' and actor_id={tid}"))
+for _ in range(20):                      # the refusal is logged after the response is sent
+    if denied() >= 5: break
+    time.sleep(0.25)
+check('5 DENIED entries for the teacher', denied() >= 5, denied())
 check('teacher session revoked', sql(f"select count(*) from audit_logs where id>{start} and action='session_revoked' and resource_type='admin' and resource_id='{tid}'") == '1')
 r = post(t, '/admin/api/taxonomy/mediums', {'name': 'probe'})
 check('revoked teacher now gets 401 JSON reauth', r.status_code == 401 and r.json().get('reauth') is True, r.status_code)

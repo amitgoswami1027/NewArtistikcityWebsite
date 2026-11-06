@@ -1,4 +1,4 @@
-// /courses: progressive disclosure (Medium + Age pills visible, Format / Level / Subject in "More filters"), search that
+// /courses: progressive disclosure (Medium tabs, Format buttons and Age pills visible, Level / Subject in "More filters"), search that
 // works with the filters (typo-tolerant), removable active-filter chips, a zero-results view that offers the change
 // that brings results back, and every change mirrored into the address bar.
 const { test, expect } = require('@playwright/test');
@@ -8,15 +8,16 @@ const cards = (page) => page.locator('main .dm-grid article');
 const agePill = (page, label) => page.getByRole('group', { name: 'Age group' }).getByRole('button', { name: label });
 
 test.describe('Course catalogue filters', () => {
-    test('Medium and Age are one click away; the drawer holds the rest', async ({ page }) => {
+    test('Medium, Format and Age are one click away; the drawer holds the rest', async ({ page }) => {
         await page.goto('/courses?type=all');
         await expect(page.getByRole('navigation', { name: 'Mediums' }).getByRole('button', { name: 'All' })).toBeVisible();
+        for (const f of ['All formats', 'Live courses', 'Workshops']) await expect(page.getByRole('group', { name: 'Format' }).getByRole('button', { name: new RegExp(f) })).toBeVisible();
         await expect(agePill(page, JUNIOR)).toBeVisible();
         await expect(page.getByRole('dialog')).toHaveCount(0);
         await page.getByRole('button', { name: /More filters/ }).click();
         const dialog = page.getByRole('dialog', { name: 'More filters' });
         await expect(dialog).toBeVisible();
-        for (const legend of ['Format', 'Skill level', 'Subject']) await expect(dialog.getByRole('group', { name: legend })).toBeVisible();
+        for (const legend of ['Skill level', 'Subject']) await expect(dialog.getByRole('group', { name: legend })).toBeVisible();
         await page.keyboard.press('Escape');
         await expect(dialog).toHaveCount(0);
         await expect(page.getByRole('button', { name: /More filters/ })).toBeFocused();
@@ -34,18 +35,18 @@ test.describe('Course catalogue filters', () => {
         expect(await cards(page).count()).toBeLessThanOrEqual(before);
     });
 
-    test('drawer filters combine with the pills; the count is announced', async ({ page }) => {
+    test('the Format buttons pick live courses or workshops; the count is announced', async ({ page }) => {
         await page.goto('/courses?type=all');
-        await page.getByRole('button', { name: /More filters/ }).click();
-        const dialog = page.getByRole('dialog', { name: 'More filters' });
-        await dialog.getByLabel('Workshops').check();
-        const show = dialog.getByRole('button', { name: /^Show \d+ course/ });
-        const n = Number((await show.innerText()).match(/\d+/)[0]);
-        await show.click();
-        await expect(page.getByRole('button', { name: /More filters\s*1/ })).toBeVisible();
+        const formats = page.getByRole('group', { name: 'Format' });
+        const workshops = formats.getByRole('button', { name: /Workshops/ });
+        const n = Number((await workshops.locator('.cf-format__n').innerText()).trim());
+        await workshops.click();
+        await expect(workshops).toHaveAttribute('aria-pressed', 'true');
         await expect(page).toHaveURL(/type=workshop/);
         await expect(page.locator('[aria-live="polite"]').first()).toHaveText(new RegExp(`^${n} course`));
         await expect(cards(page)).toHaveCount(n);
+        await formats.getByRole('button', { name: /All formats/ }).click();
+        await expect(page).not.toHaveURL(/type=workshop/);
     });
 
     test('search tolerates typos and works inside the active filters', async ({ page }) => {

@@ -59,6 +59,8 @@ public class AuthController {
     private final AuthEvents events;
     private final OtpService otp;
     private final Environment env;
+    @org.springframework.beans.factory.annotation.Autowired
+    private PurchaseIntent purchaseIntent;
 
     public AuthController(Inertia inertia, Auth auth, Db db, Json json, Validator validator, Redirects redirect, AccountService accounts,
                           AuthMail authMail, EmailTokenService emailTokens, SessionService sessions, RateLimiter limiter, AuthEvents events,
@@ -99,6 +101,7 @@ public class AuthController {
         rememberReturnTo(request);
         Map<String, Object> props = methods(request);
         props.put("canResetPassword", true);
+        props.put("intent", purchaseIntent.describe(request));
         return inertia.render(request, "Auth/Login", props);
     }
 
@@ -146,7 +149,9 @@ public class AuthController {
     @GetMapping({"/register", "/join"})
     public ResponseEntity<String> registerForm(HttpServletRequest request) {
         rememberReturnTo(request);
-        return inertia.render(request, "Auth/Register", methods(request));
+        Map<String, Object> props = methods(request);
+        props.put("intent", purchaseIntent.describe(request));
+        return inertia.render(request, "Auth/Register", props);
     }
 
     @PostMapping("/register")

@@ -6,7 +6,7 @@ import { useCountdown, mmss } from '@/Components/Marketplace/shared';
 /** The four screens: the artwork page (choose), the room preview, payment, and the order summary. */
 export const STEPS = [
     { n: 1, label: 'Choose', href: '/purchase/step-1' },
-    { n: 2, label: 'Room preview', href: '/purchase/step-2' },
+    { n: 2, label: 'Preview', href: '/purchase/step-2' },
     { n: 3, label: 'Payment', href: '/purchase/checkout' },
     { n: 4, label: 'Confirmation', href: null },
 ];

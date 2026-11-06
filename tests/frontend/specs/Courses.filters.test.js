@@ -48,7 +48,7 @@ function open(search = '?type=all', filters = {}) {
 const titles = () => screen.queryAllByTestId('course-card').map((c) => c.textContent);
 const params = () => new URLSearchParams(window.location.search);
 
-/** Age groups are visible pills; Format, Level and Subject sit in the "More filters" drawer. */
+/** Format buttons and age pills are visible; Level and Subject sit in the "More filters" drawer. */
 const age = (label) => within(screen.getByRole('group', { name: 'Age group' })).getByRole('button', { name: label });
 function openDrawer() {
     fireEvent.click(screen.getByRole('button', { name: /More filters/ }));
@@ -112,8 +112,7 @@ describe('Courses page filters', () => {
     test('a medium tab and the Format filter combine, and the URL holds both', () => {
         open();
         fireEvent.click(within(screen.getByRole('navigation', { name: 'Mediums' })).getByRole('button', { name: 'Watercolour' }));
-        fireEvent.click(within(openDrawer()).getByLabelText(/^Workshops/));
-        fireEvent.keyDown(document, { key: 'Escape' });
+        fireEvent.click(within(screen.getByRole('group', { name: 'Format' })).getByRole('button', { name: /Workshops/ }));
 
         expect(titles()).toEqual(['Weekend Watercolour Florals Workshop']);
         expect(params().get('medium')).toBe('1');
@@ -185,13 +184,21 @@ describe('Courses page filters', () => {
         expect(titles()).toEqual(['Pencil Sketching Essentials']);
     });
 
-    test('the drawer shows counts per option and closes with Escape', () => {
+    test('the Format buttons show how many of each there are', () => {
+        open();
+        const format = screen.getByRole('group', { name: 'Format' });
+        expect(within(format).getByRole('button', { name: /^Live courses\s*3$/ })).toBeInTheDocument();
+        expect(within(format).getByRole('button', { name: /^Workshops\s*1$/ })).toBeInTheDocument();
+        expect(within(format).getByRole('button', { name: /^All formats\s*4$/ })).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    test('the drawer holds level and subject with counts, and closes with Escape', () => {
         open();
         const d = openDrawer();
-        expect(within(d).getByRole('group', { name: 'Format' })).toBeInTheDocument();
-        const format = within(d).getByRole('group', { name: 'Format' });
-        expect(within(format).getByLabelText(/^Workshops.*, 1 course$/)).toBeInTheDocument();       // one workshop
-        expect(within(format).getByLabelText(/^Live courses.*, 3 courses$/)).toBeInTheDocument();
+        expect(within(d).queryByRole('group', { name: 'Format' })).toBeNull();
+        const level = within(d).getByRole('group', { name: 'Skill level' });
+        expect(within(level).getByLabelText(/^Beginner.*, \d+ courses?$/)).toBeInTheDocument();
+        expect(within(level).getByLabelText(/^Intermediate.*, \d+ courses?$/)).toBeInTheDocument();
         fireEvent.keyDown(document, { key: 'Escape' });
         expect(screen.queryByRole('dialog')).toBeNull();
     });

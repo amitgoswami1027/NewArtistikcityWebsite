@@ -301,7 +301,18 @@ export default function CheckoutCourse() {
                                                             <span className="co-method__price">{fmt(prices.usd, 'USD')}</span>
                                                         </label>
                                                     )}
-                                                    {!methods.razorpay && !methods.paypal && (
+                                                    {methods.simulate && (
+                                                        <label className={`co-method co-method--test ${method === 'test' ? 'is-on' : ''}`} data-testid="method-simulate">
+                                                            <input type="radio" name="method" value="test" checked={method === 'test'} onChange={() => setMethod('test')} />
+                                                            <span className="co-method__icon" aria-hidden="true"><i className="fa fa-flask"></i></span>
+                                                            <span className="co-method__text">
+                                                                <b>Simulate payment</b>
+                                                                <small>Test account only · no money is charged · the order is marked TEST</small>
+                                                            </span>
+                                                            <span className="co-method__price">{fmt(prices.inr, 'INR')}</span>
+                                                        </label>
+                                                    )}
+                                                    {!methods.razorpay && !methods.paypal && !methods.simulate && (
                                                         <p className="ac-alert ac-alert--error">Online payments aren't available right now. Please <a href="/contact" style={{ textDecoration: 'underline' }}>contact us</a> to enroll.</p>
                                                     )}
                                                 </div>
@@ -314,7 +325,7 @@ export default function CheckoutCourse() {
                                             {test ? (
                                                 <div className="co-testpay" role="dialog" aria-label="Test payment">
                                                     <p><b>Simulated payment of {fmt(test.amount, test.currency)}</b></p>
-                                                    <p className="dm-muted co-small">This only happens while PAYMENT_TEST_MODE is on and no gateway keys are configured.</p>
+                                                    <p className="dm-muted co-small">{test.simulated ? 'Your account is a test buyer: nothing is charged and the order is marked TEST.' : 'This only happens while PAYMENT_TEST_MODE is on and no gateway keys are configured.'}</p>
                                                     <div className="co-row">
                                                         <button type="button" className="dm-btn dm-btn--brand" onClick={completeTest} disabled={busy}>{busy ? 'Completing…' : 'Complete test payment'}</button>
                                                         <button type="button" className="dm-btn dm-btn--line" onClick={() => setTest(null)}>Cancel</button>
@@ -322,9 +333,9 @@ export default function CheckoutCourse() {
                                                 </div>
                                             ) : (
                                                 <button type="button" className="dm-btn dm-btn--brand dm-btn--lg co-pay" onClick={pay}
-                                                        disabled={busy || (!methods.free && !methods.razorpay && !methods.paypal)}>
+                                                        disabled={busy || (!methods.free && !methods.razorpay && !methods.paypal && !methods.simulate)}>
                                                     <i className="fa fa-lock" aria-hidden="true"></i>
-                                                    {busy ? 'Opening secure payment…' : methods.free ? 'Enroll for free' : `Pay ${fmt(total, currency)}`}
+                                                    {busy ? 'Opening secure payment…' : methods.free ? 'Enroll for free' : method === 'test' ? `Simulate ${fmt(total, currency)}` : `Pay ${fmt(total, currency)}`}
                                                 </button>
                                             )}
                                             <p className="dm-muted co-small co-center">

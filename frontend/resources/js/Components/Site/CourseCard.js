@@ -33,7 +33,7 @@ export default function CourseCard({ course, index }) {
                 <h3 className="dm-card__title"><a href={href}>{course.title}</a></h3>
                 {teacher && <div className="dm-card__by">A course by {teacher}</div>}
                 <div className="dm-card__stats">
-                    <span><i className="fa fa-user-o"></i>{formatCount(course.students)} students</span>
+                    <span><i className="fa fa-user-o"></i>{formatCount(course.students)} {Number(course.students) === 1 ? 'student' : 'students'}</span>
                     {course.positive !== null && course.positive !== undefined
                         ? <span className="is-good"><i className="fa fa-thumbs-o-up"></i>{course.positive}% ({formatCount(course.reviews)})</span>
                         : course.medium && course.medium.name && <span><i className="fa fa-tint"></i>{course.medium.name}</span>}
