@@ -34,7 +34,7 @@ class PreviewLockFilterTest {
         MockHttpServletResponse res = run(f, new MockHttpServletRequest("GET", "/marketplace"), page);
         assertNull(page.getRequest());
         assertEquals(401, res.getStatus());
-        assertTrue(res.getContentAsString().contains("Preview password"));
+        assertTrue(res.getContentAsString().contains("Access password"));
         assertEquals("noindex, nofollow, noarchive", res.getHeader("X-Robots-Tag"));
 
         MockFilterChain api = new MockFilterChain();
@@ -89,5 +89,126 @@ class PreviewLockFilterTest {
         assertEquals("/", PreviewLockFilter.safeNext("//evil.example.com"));
         assertEquals("/", PreviewLockFilter.safeNext("/\\evil.example.com"));
         assertEquals("/courses", PreviewLockFilter.safeNext("/courses"));
+    }
+
+    /** A SiteLock without a database: the admin switch as the filter sees it. */
+    static final class FakeLock extends SiteLock {
+        private final org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder enc = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(4);
+        State s = State.OFF;
+
+        FakeLock() {
+            super(null);
+        }
+
+        void set(boolean on, String password) {
+            String hash = password == null ? "" : enc.encode(password);
+            s = new State(on, !hash.isEmpty(), hash, on && !hash.isEmpty() ? SiteLock.token(hash) : "", "", "");
+        }
+
+        @Override
+        public State state() {
+            return s;
+        }
+    }
+
+    private static Cookie unlockWith(PreviewLockFilter f, String password) throws Exception {
+        MockHttpServletRequest ok = new MockHttpServletRequest("POST", PreviewLockFilter.FORM_PATH);
+        ok.addParameter("password", password);
+        ok.addParameter("next", "/courses");
+        MockHttpServletResponse res = run(f, ok, new MockFilterChain());
+        return res.getStatus() == 303 ? res.getCookie(PreviewLockFilter.COOKIE) : null;
+    }
+
+    private static boolean opens(PreviewLockFilter f, String path, Cookie c) throws Exception {
+        MockHttpServletRequest r = new MockHttpServletRequest("GET", path);
+        if (c != null) r.setCookies(c);
+        MockFilterChain chain = new MockFilterChain();
+        run(f, r, chain);
+        return chain.getRequest() != null;
+    }
+
+    @Test
+    void adminSwitchLocksTheSiteWithTheDatabasePassword() throws Exception {
+        FakeLock lock = new FakeLock();
+        PreviewLockFilter f = new PreviewLockFilter("", lock, null);
+        assertTrue(opens(f, "/marketplace", null), "off by default");
+
+        lock.set(false, "Gallery-Night-26");
+        assertTrue(opens(f, "/marketplace", null), "a password alone does not lock");
+
+        lock.set(true, "Gallery-Night-26");
+        assertTrue(!opens(f, "/marketplace", null));
+        MockHttpServletResponse page = run(f, new MockHttpServletRequest("GET", "/"), new MockFilterChain());
+        assertEquals(401, page.getStatus());
+        assertTrue(page.getContentAsString().contains("Site under construction"));
+        MockHttpServletResponse api = run(f, new MockHttpServletRequest("GET", "/api/v1/cart"), new MockFilterChain());
+        assertTrue(api.getContentAsString().contains("PREVIEW_LOCKED"));
+        MockHttpServletRequest inertia = new MockHttpServletRequest("GET", "/courses");
+        inertia.addHeader("X-Inertia", "true");
+        MockHttpServletResponse ir = run(f, inertia, new MockFilterChain());
+        assertEquals(409, ir.getStatus());
+        assertEquals("/courses", ir.getHeader("X-Inertia-Location"));
+
+        assertNull(unlockWith(f, "wrong-one-123"));
+        Cookie c = unlockWith(f, "Gallery-Night-26");
+        assertNotNull(c);
+        assertTrue(c.getValue().startsWith("s."), "the cookie holds a token, not the password");
+        assertTrue(!c.getValue().contains("Gallery"));
+        assertTrue(opens(f, "/marketplace", c));
+
+        lock.set(true, "Second-Password-9");            // a new password signs everybody out
+        assertTrue(!opens(f, "/marketplace", c));
+        assertNotNull(unlockWith(f, "Second-Password-9"));
+
+        lock.set(false, "Second-Password-9");
+        assertTrue(opens(f, "/marketplace", null), "switching off opens the site at once");
+    }
+
+    @Test
+    void adminAreaAndSignedInStaffStayIn() throws Exception {
+        FakeLock lock = new FakeLock();
+        lock.set(true, "Gallery-Night-26");
+        PreviewLockFilter f = new PreviewLockFilter("", lock, null);
+        assertTrue(opens(f, "/admin/login", null));
+        assertTrue(opens(f, "/admin/parameters", null));
+        assertTrue(opens(f, "/admin", null));
+        assertTrue(!opens(f, "/administrator", null));
+
+        MockHttpServletRequest staff = new MockHttpServletRequest("GET", "/marketplace");
+        staff.getSession(true).setAttribute("auth.admin.id", 1L);
+        MockFilterChain chain = new MockFilterChain();
+        run(f, staff, chain);
+        assertNotNull(chain.getRequest());
+    }
+
+    @Test
+    void eitherPasswordOpensWhenBothSwitchesAreOn() throws Exception {
+        FakeLock lock = new FakeLock();
+        lock.set(true, "Gallery-Night-26");
+        PreviewLockFilter f = new PreviewLockFilter("server-secret-1", lock, null);
+        assertTrue(opens(f, "/", unlockWith(f, "server-secret-1")));
+        assertTrue(opens(f, "/", unlockWith(f, "Gallery-Night-26")));
+    }
+
+    @Test
+    void tooManyWrongPasswordsAreRefusedForAWhile() throws Exception {
+        FakeLock lock = new FakeLock();
+        lock.set(true, "Gallery-Night-26");
+        PreviewLockFilter f = new PreviewLockFilter("", lock, new com.artistikcity.auth.RateLimiter());
+        for (int i = 0; i < PreviewLockFilter.MAX_TRIES; i++) assertNull(unlockWith(f, "guess-" + i + "-xxxx"));
+        MockHttpServletRequest r = new MockHttpServletRequest("POST", PreviewLockFilter.FORM_PATH);
+        r.addParameter("password", "Gallery-Night-26");
+        MockHttpServletResponse res = run(f, r, new MockFilterChain());
+        assertEquals(429, res.getStatus());
+        assertTrue(res.getContentAsString().contains("Too many tries"));
+    }
+
+    @Test
+    void passwordRules() {
+        assertNull(SiteLock.problem("Gallery-Night-26"));
+        assertNotNull(SiteLock.problem("short"));
+        assertNotNull(SiteLock.problem(" padded-password "));
+        assertNotNull(SiteLock.problem("password"));
+        assertNotNull(SiteLock.problem("x".repeat(129)));
     }
 }

@@ -60,6 +60,7 @@ export const NAV = [
         { href: '/admin/setup', label: 'Configuration Panel', icon: 'fa-sliders', cap: 'setup', exact: true, also: ['/admin/setup/config'] },
         { href: '/admin/setup/room-preview', label: 'Room Preview Setup', icon: 'fa-picture-o', cap: 'marketplace.publish', also: ['/admin/marketplace/rooms'] },
         { href: '/admin/setup/site-settings', label: 'SEO & Layout Controls', icon: 'fa-paint-brush', cap: 'settings', also: ['/admin/settings'] },
+        { href: '/admin/parameters', label: 'Site Access Password', icon: 'fa-key', cap: 'setup', also: ['/admin/setup/site-access'] },
         { href: '/admin/security/audit', label: 'Security log', icon: 'fa-shield', cap: 'security' },
     ] },
 ];

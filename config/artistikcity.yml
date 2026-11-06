@@ -156,7 +156,8 @@ server.forward-headers-strategy: '${FORWARD_HEADERS:none}'
 # the X-Origin-Verify header CloudFront adds (ORIGIN_VERIFY_SECRET), so nobody can bypass CloudFront or fake those headers.
 app.cloudfront.trust: '${TRUST_CLOUDFRONT:false}'
 app.cloudfront.origin-secret: '${ORIGIN_VERIFY_SECRET:}'
-# "Not open yet": when set, every page asks for this password first (cookie for 30 days) and search engines are told not to index
+# "Not open yet": when set, every page asks for this password first (cookie for 30 days) and search engines are told not to index.
+# Admins can do the same without a deploy at Admin > System parameters > Site Access Password (/admin/parameters); either works.
 app.preview.password: '${SITE_PREVIEW_PASSWORD:}'
 
 # gzip text responses (the React bundle is ~4.5 MB uncompressed)

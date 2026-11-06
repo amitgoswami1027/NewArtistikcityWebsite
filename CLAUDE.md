@@ -56,6 +56,13 @@ root `root` / `ArtistikRoot@2026`. Client: `.tools\mysql-8.4.13-winx64\bin\mysql
 
 **Demo logins** (password `password`): student `student@artistikcity.com` at `/login`, admin `admin@artistikcity.com`
 at `/admin/login`, teacher `vaishali@artistikcity.com` at `/admin/login`.
+`database/seed.sql` gives every entity 4-5 varied rows (ids are fixed by load order; the system tests rely on them): admins 1-5
+(admin, Vaishali, moderator, teacher `rajat@`, moderator `pooja@`), users 1-5 (1 Aarav certified + selling, 2 Diya `diya@example.com`
+print buyer / commission client, 3 Ishita `ishita.bose@example.com` email not verified + unpaid order, 4 Farhan
+`farhan.siddiqui@example.com` collector, refunded workshop, half-way through course 5, 5 Tanvi `tanvi.kulkarni@example.com` certified
+student with live listing `shaniwar-wada-at-dusk`), courses 1-5, course orders in every payment state, shop orders `AC-S-SEED01..05`
+(DELIVERED / SHIPPED / PACKED / PAID / PAYMENT_PENDING), 3 carts, commissions `AC-SEED-C01..04`, artist threads, reviews, wishlists,
+contacts, newsletter. Course 3 has no enrolments on purpose (test_platform caps it at one seat). Diya owns no course (tests buy for her).
 Optional demo pack `database/demo/demo-data.sql` (`LOAD-DEMO-DATA.bat` / `-DemoData`; generated, idempotent, ids 100+/1000+):
 teachers `ananya|kabir|meera|rohit|sana@artistikcity.com`, students `ishaan|neha|arjun|sophia|rahul|emily@example.com`,
 courses 101-113, workshops 121-126, orders 1001-1030. Same password. Its images are under `storage/uploads`.
@@ -96,6 +103,12 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
 
 ## Conventions and gotchas
 
+- **Errors** (`http/GlobalExceptionHandler`): API / admin API / XHR / `Accept: application/json` calls get JSON `{message, reference}`;
+  page visits get a small branded page (404 / 409 / 500) with a link home. A database refusal (foreign key) is a 409 "other records
+  still depend on it", not a 500; unexpected errors log `ref XXXXX` so a user's reference can be found in the log.
+- **Deleting a course** (`DELETE /admin/api/courses/{id}`) is refused (409, "hide it instead") when it has any order, enrolment,
+  submission or certificate; only untouched drafts can be deleted.
+- Newsletter links use `APP_URL`; without it, the address the admin used to send the campaign (never localhost).
 - **SQL is MySQL 8.** Page with `LIMIT n OFFSET m` at the end of the statement. Quote reserved words
   (`primary`, `like`, `order`, `key`, …) in backticks, and use MySQL functions (`DATE_ADD`, `CONCAT`, …). Backslashes in
   string literals are escape characters. Always pass parameters through `db.select/first/update(sql, params…)`,
@@ -208,8 +221,16 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   `deploy/ec2-deploy.sh` (deploy/rollback/status, runs from inside the image) and `deploy/db-migrate.sh` (schema on an empty
   DB, else pending migrations - same rules as the launcher). `http/CloudFrontFilter` (`TRUST_CLOUDFRONT`) takes the visitor IP and
   https from CloudFront headers and rejects requests without `X-Origin-Verify`. `GET /healthz` is the health check.
-  `http/PreviewLockFilter` (`SITE_PREVIEW_PASSWORD`): while set, every page asks for that password (cookie `ac_preview`, 30 days),
-  responses carry `X-Robots-Tag: noindex` and robots.txt disallows all; `/healthz`, the payment webhooks and static files stay open.
+  `http/PreviewLockFilter` ("Site under construction" wall): on when `SITE_PREVIEW_PASSWORD` is set on the server **or** when an
+  admin switches it on at Admin > System parameters > **Site Access Password** (`/admin/parameters`, alias `/admin/setup/site-access`,
+  `config/panel/SiteAccessController`, page `Admin/Setup/SiteAccess`, capability `setup`; `GET|POST /admin/api/setup/site-access`
+  `{enabled, password, confirm}`; min 8 chars, confirm must match, switching on needs a password; audited, never the value).
+  `http/SiteLock` keeps it in `settings` under the private tag `system` (`site_lock_enabled`, `site_lock_hash` = bcrypt,
+  `site_lock_changed_at|by`), cached 10 s and dropped on save. While on: pages answer 401 with the password form (no app shell, so no
+  flash), APIs a JSON 401 `PREVIEW_LOCKED`, Inertia visits 409 + `X-Inertia-Location`; `X-Robots-Tag: noindex`, robots.txt disallows
+  all. The form posts to `/__preview`; the cookie `ac_preview` (HttpOnly, Lax, 30 days) holds an HMAC token (keyed by the bcrypt hash
+  for the admin password, so a new password signs everyone out); 10 wrong tries per IP per 15 min -> 429. Always open: `/healthz`,
+  payment webhooks, static files, the whole `/admin` area, and any request from a signed-in admin. Either password opens the site.
   Migrations must stay compatible with the previous release (rollback only swaps the image).
 - **Marketplace collections** (`Pages/Marketplace/Index.js`): `/marketplace` shows **artist originals** (every source except STUDENT) by
   default; a toggle switches to **student paintings** (`source = 'STUDENT'`, listed by certified students from My studio > Sell your art),

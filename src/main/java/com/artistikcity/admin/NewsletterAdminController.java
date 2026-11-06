@@ -255,6 +255,7 @@ public class NewsletterAdminController {
         }
         Row test = new Row(c);
         test.put("subject", "[Test] " + c.str("subject"));
+        newsletter.rememberBase(com.artistikcity.inertia.Inertia.baseUrl(request));
         boolean ok = newsletter.sendOne(test, to);
         return ok ? kit.ok(Map.of("message", "Test sent to " + to + "."))
                 : kit.fail(HttpStatus.BAD_GATEWAY, "The mail server refused the test message. Check the mail settings.");
@@ -270,6 +271,7 @@ public class NewsletterAdminController {
         if (db.count("select count(*) from newsletters where unsubscribed_at is null") == 0) {
             return kit.fail(HttpStatus.CONFLICT, "There are no subscribers to send to yet.");
         }
+        newsletter.rememberBase(com.artistikcity.inertia.Inertia.baseUrl(request));
         int n = newsletter.start(id);
         if (n < 0) {
             return kit.fail(HttpStatus.CONFLICT, "This newsletter was already sent.");

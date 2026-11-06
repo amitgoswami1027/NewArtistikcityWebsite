@@ -941,7 +941,7 @@
 .contactpage h3 { font-family: var(--ac-font); font-weight: 800; color: #111; }
 .contactwrap { overflow: hidden; }
 .dm-footer { clear: both; }
-.newsLtr > .container { max-width: 1376px; margin: 0 auto; }
+.newsLtr > .container { width: 100%; max-width: 1376px; margin: 0 auto; }
 @media (max-width: 800px) { .contactpage { flex-direction: column; padding: 28px 20px !important; } .contactpage .col5 { width: 100% !important; } .inrbanrtxt h1 { font-size: 36px !important; } }
 .breadCrumb > .container, .inrbanrtxt > .container, .faqpage > .container, .contactwrap, .breadCrumb + .inrbanrtxt + .container { max-width: 1440px !important; width: 100% !important; padding-left: 32px !important; padding-right: 32px !important; }
 @media (max-width: 800px) { .breadCrumb > .container, .inrbanrtxt > .container, .faqpage > .container { padding-left: 16px !important; padding-right: 16px !important; } }
@@ -3658,3 +3658,14 @@ body.cf-noscroll { overflow: hidden; }
 .tw .sty-pager small { font-size: 13px; color: #6b7385; font-weight: 700; }
 .tw .sty-pager b { font-size: 16px; line-height: 1.35; }
 @media (max-width: 560px) { .tw .sty-pager { grid-template-columns: minmax(0, 1fr); } .tw .sty-pager .is-newer { text-align: left; } }
+
+/* Site access (/admin/parameters) */
+.adm .sa-label { font-weight: 700; color: var(--ac-ink); }
+@media (max-width: 720px) { .adm .cfg-group__head { flex-direction: column; align-items: flex-start; } }
+/* breadcrumbs on phones: middle crumbs overlapped the page name; show home + the current page, cut long names */
+.adm .adm-crumbs li > a, .adm .adm-crumbs li > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 640px) { .adm .adm-crumbs li:not(:first-child):not([aria-current]) { display: none; } }
+/* student profile tabs: scroll sideways inside the bar on phones instead of widening the page */
+.studentInfo .tabswrap { max-width: 100%; }
+.studentInfo ul.tabs { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.studentInfo ul.tabs > li { flex: 0 0 auto; }

@@ -517,6 +517,17 @@ public class CourseAdminController {
     public ResponseEntity<String> destroy(HttpServletRequest request, @PathVariable("id") long id) {
         Row c = owned(request, id);
         long orders = db.count("select count(*) from orders where course_id = ? and payment_status = 1", id);
+        // orders (also unpaid ones a buyer or a bank transfer may still complete), refunds, enrolments, submitted work and
+        // certificates are history worth keeping: hide such a course instead
+        long history = db.count("select count(*) from orders where course_id = ? and payment_status <> 1", id)
+                + db.count("select count(*) from enrollments where course_id = ?", id)
+                + db.count("select count(*) from student_submissions where course_id = ?", id)
+                + db.count("select count(*) from course_certificates where course_id = ?", id)
+                + db.count("select count(*) from certificates where course_id = ?", id);
+        if (orders == 0 && history > 0) {
+            return kit.fail(HttpStatus.CONFLICT, "There are orders, enrolments or certificates for this "
+                    + (c.lng("course_type_id", 1) == 2 ? "workshop" : "course") + ". Hide it instead of deleting it, so their history stays intact.");
+        }
         if (orders > 0) {
             return kit.fail(HttpStatus.CONFLICT, orders + (orders == 1 ? " student has" : " students have")
                     + " paid for this " + (c.lng("course_type_id", 1) == 2 ? "workshop" : "course") + ". Hide it instead of deleting it.");
@@ -529,6 +540,7 @@ public class CourseAdminController {
             db.update("delete from " + t + " where course_id = ?", id);
         }
         db.update("delete from wishlist_items where item_type = 'course' and item_id = ?", id);
+        db.update("delete from course_reviews where course_id = ?", id);
         db.deleteById("courses", id);
         audit.log(kit.admin(request), "course", id, "deleted", c.str("title"));
         return kit.ok(Map.of("message", "Deleted “" + c.str("title") + "”."));

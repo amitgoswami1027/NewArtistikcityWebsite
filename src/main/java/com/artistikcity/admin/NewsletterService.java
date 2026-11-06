@@ -56,9 +56,18 @@ public class NewsletterService {
         sender.shutdown();
     }
 
+    /** Address of the site for links in newsletters: APP_URL, else the address the admin used to send it (never localhost). */
     public String siteUrl() {
-        String url = env.getProperty("app.url", "http://localhost:8080");
+        String url = env.getProperty("app.url", "");
+        if (url == null || url.isBlank()) url = requestBase == null ? "" : requestBase;
         return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+    }
+
+    private volatile String requestBase;
+
+    /** Remembers the site address from the admin's request, for servers without APP_URL. */
+    public void rememberBase(String base) {
+        if (base != null && base.startsWith("http")) requestBase = base;
     }
 
     // ------------------------------------------------------------ unsubscribe

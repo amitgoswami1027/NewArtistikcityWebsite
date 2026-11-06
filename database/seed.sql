@@ -4,6 +4,9 @@
 --    admin panel : admin@artistikcity.com      (admin)
 --                  vaishali@artistikcity.com   (teacher / instructor)
 --    student     : student@artistikcity.com
+--  The last section tops every entity up to 4-5 varied records (buyers, a certified student seller,
+--  course orders in every payment state, print orders in every fulfilment state, carts, commissions,
+--  reviews, wishlists, enquiries, newsletter sign-ups). See "Wider demo records" below.
 --  Images referenced below are shipped in the project's uploads/ folder.
 -- =====================================================================
 
@@ -147,7 +150,7 @@ INSERT INTO settings (meta_tag, meta_key, meta_value, created_at, updated_at) VA
 ('seo', 'og_image', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('contact', 'email', 'info@artistickcity.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('contact', 'phone', '9876 543 201', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('contact', 'address', '505, Agate, MyHomes Jewel,\nMadinguda, Hyderabad - 540017\nTelanganma, India.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('contact', 'address', '505, Agate, MyHomes Jewel,\nMadinguda, Hyderabad - 540017\nTelangana, India.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('social', 'facebook', 'https://www.facebook.com/StudioVaishaliArts/', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('social', 'instagram', 'https://www.instagram.com/artistikcity/', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('social', 'youtube', 'https://www.youtube.com/@artistikcityYT', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -278,3 +281,258 @@ INSERT INTO marketplace_orders (order_id, painting_id, user_id, holder_key, buye
 ('AC-M-DEMO02', 10, NULL, 'S:demo', 'James Carter', 'james@example.com', NULL, '221 Baker Street', NULL, 'London', NULL, 'NW1 6XE', 'United Kingdom',
  'PAYPAL', 'USD', 142.86, 12000.00, 'PAYPAL-DEMO02', 'CAPTURE-DEMO02', 'PAID', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+
+-- =====================================================================
+--  Wider demo records: every entity has 4-5 varied rows, each one a different real-world case.
+--  Users 1-5: 1 Aarav (certified student, also sells), 2 Diya (print buyer, commission client), 3 Ishita
+--  (signed up, email NOT verified, unpaid order), 4 Farhan (collector; a refunded workshop),
+--  5 Tanvi (certified student artist with a live listing). Farhan is also half-way through the course 5 masterclass. Password for every login: "password".
+-- =====================================================================
+
+-- ---- staff: a second teacher and a second moderator --------------------------------------------
+INSERT INTO admins (name, slug, email, password, admin_type, location, profile_photo, profile_title, designation, profile_description, created_at, updated_at) VALUES
+('Rajat Malhotra', 'rajat-malhotra', 'rajat@artistikcity.com', '$2y$10$8uheEMmigBJbrXk8eKxWW.BEfBIWUeZtLGRdZ7a.ms.WP8GuMa31e', 'teacher', 'New Delhi, India', 'avatar.png', 'Portrait Artist & Charcoal Specialist', 'Portrait Instructor',
+ 'Rajat has drawn more than 600 commissioned portraits in charcoal and graphite. He teaches the measuring, value and edge control that make a likeness hold up.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Pooja Shetty', 'pooja-shetty', 'pooja@artistikcity.com', '$2y$10$8uheEMmigBJbrXk8eKxWW.BEfBIWUeZtLGRdZ7a.ms.WP8GuMa31e', 'moderator', 'Mangaluru, India', NULL, 'Community Moderator', 'Moderator', 'Looks after reviews, reports and the student gallery.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- ---- three more learners / buyers (ids 3-5) --------------------------------------------------
+INSERT INTO users (name, slug, email, email_verified_at, password_hash, phone_number, profile_title, profile_description, profile_photo, location, notifications, language_preference, free_courses, free_course_type, status, is_verified, phone_verified_at, last_login_at, created_at, updated_at) VALUES
+('Ishita Bose', 'ishita-bose', 'ishita.bose@example.com', NULL, '$2y$10$8uheEMmigBJbrXk8eKxWW.BEfBIWUeZtLGRdZ7a.ms.WP8GuMa31e', NULL, NULL, NULL, 'avatar.png', 'Kolkata, India', 1, 'English', 0, 'default', 1, 0, NULL, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY)),
+('Farhan Siddiqui', 'farhan-siddiqui', 'farhan.siddiqui@example.com', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 40 DAY), '$2y$10$8uheEMmigBJbrXk8eKxWW.BEfBIWUeZtLGRdZ7a.ms.WP8GuMa31e', '+919812345670', 'Art collector', 'I collect original Indian wildlife and portrait work for my home and office.', 'avatar.png', 'Lucknow, India', 0, 'English', 0, 'default', 1, 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 40 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 40 DAY), CURRENT_TIMESTAMP),
+('Tanvi Kulkarni', 'tanvi-kulkarni', 'tanvi.kulkarni@example.com', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 90 DAY), '$2y$10$8uheEMmigBJbrXk8eKxWW.BEfBIWUeZtLGRdZ7a.ms.WP8GuMa31e', '+919822001144', 'Watercolour student, Pune', 'Architecture student who paints the old city on weekends. Certified in Watercolour Landscapes.', 'avatar.png', 'Pune, India', 1, 'Marathi', 1, 'color', 1, 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 90 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 90 DAY), CURRENT_TIMESTAMP);
+
+INSERT INTO user_addresses (user_id, address_name, address, city, state, country, zipcode, `primary`, status, created_at, updated_at) VALUES
+(1, 'Aarav Sharma (office)', '4th floor, Kalpataru Square, Andheri East', 'Mumbai', 'Maharashtra', 'India', '400069', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Diya Patel', 'B-14, Vasant Vihar', 'New Delhi', 'Delhi', 'India', '110057', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 'Farhan Siddiqui', '22 Hazratganj, Near GPO', 'Lucknow', 'Uttar Pradesh', 'India', '226001', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, 'Tanvi Kulkarni', 'Flat 7, Shaniwar Peth', 'Pune', 'Maharashtra', 'India', '411030', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- ---- a fifth course (advanced, second teacher) and its curriculum -------------------------------
+INSERT INTO courses (admin_id, medium_id, genre_id, course_type_id, skill_id, category_id, title, slug, sub_title,
+    introduction, introduction_details, summary, summary_details, schedule, schedule_details, age_group, duration, sessions,
+    mini_projects, course_modules, time_required, course_includes, course_highlights, course_for, course_not_for,
+    course_problems_solved, course_learn, course_outcome, course_deliverables, course_prerequisites, course_start_date,
+    course_based, is_free_course, status, created_at, updated_at) VALUES
+(4, 5, '2', 1, 3, 2, 'Charcoal Portrait Masterclass', 'charcoal-portrait-masterclass', 'Measure, map values and control edges for portraits that hold a likeness.',
+ 'An advanced portrait course in compressed and vine charcoal.', '<p>Five weeks of live demonstrations and one-to-one critiques. You will draw from photo references and finish two large portraits.</p>',
+ 'Likeness, values and edges in charcoal.', '<ul><li>Measuring and block-in</li><li>Five-value mapping</li><li>Lost and found edges</li><li>Hair and skin texture</li></ul>',
+ 'Live sessions every Wednesday and Saturday evening (IST).', '<p>Week 1: Block-in<br>Week 2: Values<br>Week 3: Features<br>Week 4: Hair &amp; texture<br>Week 5: Final portrait</p>',
+ '16+ years', '5', '10', '4', '5', '3', '{"certificate":"yes","study_material_access":"yes"}', '["Live critiques","Reference pack"]', '["Intermediate and advanced artists"]', '["Absolute beginners"]', '["Faces that do not look like the sitter"]', '["Measuring","Value control","Edges"]',
+ 'Two finished A3 charcoal portraits.', '["Certificate","Reference pack"]', 'Comfortable with basic drawing and shading.', DATE_ADD(CURRENT_DATE, INTERVAL 75 DAY), 'instructor_based', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO course_prices (course_id, price_inr, price_usd, created_at, updated_at) VALUES
+(5, 9999, 129, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO course_photos (course_id, photo_name, created_at, updated_at) VALUES
+(5, 'course.jpg', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- modules 3-5: course 5 gets two modules with one lesson each; course 2's first module has no lessons yet
+-- (course 3 is left without enrolments on purpose: the system tests put a one-seat cap on it)
+INSERT INTO course_modules (admin_id, course_id, module_title, module_duration, status, created_at, updated_at) VALUES
+(4, 5, 'Measuring and Block-in', '1 week', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 5, 'Values and Edges', '2 weeks', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 2, 'Facial Proportions', '2 weeks', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO course_module_lessons (admin_id, course_id, module_id, lesson_title, lesson_description, lesson_pdf, status, created_at, updated_at) VALUES
+(4, 5, 3, 'Measuring with a Plumb Line', '<p>Use your pencil as a plumb line and a ruler to place the eyes, nose and mouth before any shading.</p>', NULL, '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 5, 4, 'Five-Value Mapping', '<p>Squint, group the face into five values and block them in with vine charcoal; keep edges soft until the end.</p>', NULL, '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO course_module_lesson_tasks (admin_id, course_id, module_id, lesson_id, task_title, task_description, status, created_at, updated_at) VALUES
+(2, 1, 2, 3, 'Sunset sky in three layers', 'Paint a graded sunset sky in three glazes and upload a photo taken in daylight.', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 5, 3, 4, 'Block-in from a reference', 'Block in a portrait from the reference pack using only straight lines and upload a photo.', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 5, 4, 5, 'Five-value study', 'Draw a 10-minute five-value study of the same face.', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO course_projects (admin_id, course_id, project_title, project_description, status, created_at, updated_at) VALUES
+(2, 2, 'Self-portrait in Acrylic', 'Paint a 12 x 16 inch self-portrait from a mirror or photo, focusing on warm and cool skin tones.', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 3, 'Sketchbook of Everyday Objects', 'Ten pages of shaded studies of objects from your home.', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 5, 'Final Charcoal Portrait', 'An A3 portrait of a family member or friend from your own reference photo.', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- ---- course orders in every payment state (paid INR, paid USD, unpaid, refunded) --------------
+INSERT INTO orders (order_number, user_id, course_id, session_id, billing_name, billing_email, billing_address, billing_city, billing_state, billing_zipcode, billing_country, price_type, price, payment_option, payment_id, payment_status, issue_certificate, created_at, updated_at) VALUES
+('ORD00002', 4, 5, 'seed', 'Farhan Siddiqui', 'farhan.siddiqui@example.com', '22 Hazratganj, Near GPO', 'Lucknow', 'Uttar Pradesh', '226001', 'India', 'inr', '9999', 'RazorPay', 'pay_seed_0002', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 DAY)),
+('ORD00003', 5, 1, 'seed', 'Tanvi Kulkarni', 'tanvi.kulkarni@example.com', 'Flat 7, Shaniwar Peth', 'Pune', 'Maharashtra', '411030', 'India', 'inr', '4999', 'RazorPay', 'pay_seed_0003', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 85 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 85 DAY)),
+('ORD00004', 3, 2, 'seed', 'Ishita Bose', 'ishita.bose@example.com', '9 Lake Place', 'Kolkata', 'West Bengal', '700029', 'India', 'inr', '7499', 'RazorPay', NULL, 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)),
+('ORD00005', 4, 4, 'seed', 'Farhan Siddiqui', 'farhan.siddiqui@example.com', '22 Hazratganj, Near GPO', 'Lucknow', 'Uttar Pradesh', '226001', 'India', 'inr', '1499', 'RazorPay', 'pay_seed_0005', 3, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 28 DAY));
+
+INSERT INTO enrollments (user_id, course_id, progress_percentage, status, created_at, updated_at) VALUES
+(4, 5, 50, 'Active', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 DAY), CURRENT_TIMESTAMP),
+(5, 1, 100, 'Completed', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 85 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY)),
+(4, 4, 0, 'Refunded', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 28 DAY));
+
+INSERT INTO lesson_completions (enrollment_id, lesson_id, completed_at) VALUES
+(2, 4, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY)),
+(3, 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 80 DAY)), (3, 2, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 70 DAY)), (3, 3, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 45 DAY));
+
+-- submissions 3-5: Tanvi has one listed and one approved-but-unlisted piece; Farhan has a rejected study
+INSERT INTO student_submissions (user_id, course_id, title, description, file_url, admin_status, reviewer_feedback, reviewed_by, reviewed_at, created_at, updated_at) VALUES
+(5, 1, 'Shaniwar Wada at Dusk', 'The fort gate in warm evening light, wet-in-wet sky with dry-brush stonework.', '/storage/uploads/artworks/5/artwork.jpg', 'Approved',
+ 'Lovely restraint in the sky and a convincing sense of scale. The stonework is the strongest passage.', 2, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 35 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY)),
+(5, 1, 'Lotus Pond, Morning', 'Lotus leaves and reflections painted in three glazes.', '/storage/uploads/artworks/4/artwork.jpg', 'Approved',
+ 'Clean glazes and a calm composition. Ready for your portfolio.', 2, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 12 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 14 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 12 DAY)),
+(4, 5, 'Portrait of My Father', 'Charcoal block-in and value study from a family photo.', '/storage/uploads/artworks/3/artwork.jpg', 'Rejected',
+ 'The eyes sit too high: measure the halfway line of the head again, then resubmit. The values are already strong.', 2, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 DAY));
+
+INSERT INTO portfolio_marketplace (submission_id, user_id, is_listed_for_sale, sale_price, currency, inventory_count, created_at, updated_at) VALUES
+(3, 5, 1, 4200.00, 'INR', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 28 DAY), CURRENT_TIMESTAMP);
+
+-- painting 11: Tanvi's student original, approved and live
+INSERT INTO paintings (slug, title, description, artist_notes, medium, surface, subject, style_tags, height_inches, width_inches, depth_inches, weight_kg, year_created,
+    is_framed, frame_details, is_signed, has_certificate, base_price, discount_percentage, final_price, currency, stock_status, version, source, artist_name,
+    artist_admin_id, artist_user_id, submission_id, is_featured, shop_formats, reviewed_by, reviewed_at, published_at, sold_at, created_at, updated_at) VALUES
+('shaniwar-wada-at-dusk', 'Shaniwar Wada at Dusk', 'The fort gate in warm evening light, wet-in-wet sky with dry-brush stonework.',
+ 'I sketched the gate on three evenings from the same bench. The stone changes colour every ten minutes at sunset, so I painted the sky first and the stone last.',
+ 'Watercolour', 'Cold-press 300gsm paper', 'Cityscape', 'Student original', 12, 16, 0.05, 0.30, 2026, 0, NULL, 1, 1, 4200.00, 0.00, 4200.00, 'INR', 'AVAILABLE', 0, 'STUDENT', 'Tanvi Kulkarni',
+ NULL, 5, 3, 0, NULL, 3, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 27 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 27 DAY), NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 28 DAY), CURRENT_TIMESTAMP);
+INSERT INTO painting_images (painting_id, image_url, is_primary, sort_order, alt_text) VALUES
+(11, '/storage/uploads/artworks/5/artwork.jpg', 1, 0, 'Shaniwar Wada at Dusk, student watercolour');
+
+INSERT INTO student_artworks (user_id, photo_name, comments, status, created_at, updated_at) VALUES
+(5, 'artwork.jpg', 'Practice wash for the Shaniwar Wada sky', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 'artwork.jpg', 'Charcoal block-in warm-up', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, 'artwork.jpg', 'Lotus leaves colour study', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- ---- course reviews (one waiting for moderation) and wishlists ------------------------------
+INSERT INTO course_reviews (course_id, added_by_id, added_by_type, rating, review, status, created_at, updated_at) VALUES
+(1, 1, 'Student', 5, 'The wash exercises in week one changed how I paint skies. Vaishali''s feedback on every task was specific and kind.', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 DAY)),
+(1, 5, 'Student', 5, 'Structured, calm and practical. I sold my first painting after this course.', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 25 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 25 DAY)),
+(5, 4, 'Student', 4, 'The measuring drills alone were worth it. I would love one more live critique session.', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 4 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 4 DAY)),
+(4, 4, 'Student', 3, 'Nice workshop, but the timing clashed with my work so I asked for a refund.', 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 27 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 27 DAY));
+
+INSERT INTO wishlist_items (user_id, item_type, item_id, created_at) VALUES
+(2, 'painting', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 DAY)),
+(2, 'course', 2, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 DAY)),
+(4, 'painting', 2, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY)),
+(4, 'painting', 11, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY)),
+(3, 'course', 5, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY));
+
+-- course cart (one guest session, three signed-in learners)
+INSERT INTO cart_items (session_id, user_id, order_id, course_id, price_type, price, created_at, updated_at) VALUES
+('seed-cart-ishita', 3, NULL, 2, 'inr', '7499', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)),
+('seed-cart-diya', 2, NULL, 5, 'usd', '129', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('seed-cart-farhan', 4, NULL, 1, 'inr', '4999', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('seed-cart-guest', NULL, NULL, 4, 'inr', '1499', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- ---- art shop: three open carts (5 items) and five print orders, one per fulfilment state -----
+INSERT INTO shop_carts (owner_key, user_id, coupon_code, created_at, updated_at) VALUES
+('U:2', 2, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP),
+('U:4', 4, 'WELCOME10', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 HOUR), CURRENT_TIMESTAMP),
+('S:seed-guest-cart', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO shop_cart_items (cart_id, painting_id, format, size_code, finish, frame, quantity, created_at, updated_at) VALUES
+(1, 2, 'CANVAS', 'M', 'STRETCHED', 'NONE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(1, 1, 'POSTER', 'M', 'MATTE', 'NONE', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 6, 'POSTER', 'L', 'GLOSSY', 'BLACK_WOOD', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 3, 'CANVAS', 'S', 'ROLLED', 'NONE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 5, 'POSTER', 'S', 'MATTE', 'NONE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO shop_orders (order_id, user_id, owner_key, buyer_name, buyer_email, buyer_phone, address_line1, address_line2, city, state, postal_code, country, needs_shipping,
+    gateway, currency, amount, subtotal_inr, discount_inr, shipping_inr, total_inr, coupon_code, provider_ref, transaction_id, status, courier, tracking_number, paid_at, created_at, updated_at) VALUES
+('AC-S-SEED01', 4, 'U:4', 'Farhan Siddiqui', 'farhan.siddiqui@example.com', '+919812345670', '22 Hazratganj, Near GPO', NULL, 'Lucknow', 'Uttar Pradesh', '226001', 'India', 1,
+ 'RAZORPAY', 'INR', 6248.00, 6099.00, 0.00, 149.00, 6248.00, NULL, 'order_seed_s01', 'pay_seed_s01', 'DELIVERED', 'Delhivery', 'DLV7781203345', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 21 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 21 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 14 DAY)),
+('AC-S-SEED02', 2, 'U:2', 'Diya Patel', 'diya@example.com', NULL, 'B-14, Vasant Vihar', NULL, 'New Delhi', 'Delhi', '110057', 'India', 1,
+ 'RAZORPAY', 'INR', 2307.20, 2398.00, 239.80, 149.00, 2307.20, 'WELCOME10', 'order_seed_s02', 'pay_seed_s02', 'SHIPPED', 'Blue Dart', 'BD558812090IN', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 4 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 4 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY)),
+('AC-S-SEED03', 5, 'U:5', 'Tanvi Kulkarni', 'tanvi.kulkarni@example.com', '+919822001144', 'Flat 7, Shaniwar Peth', NULL, 'Pune', 'Maharashtra', '411030', 'India', 1,
+ 'RAZORPAY', 'INR', 1848.00, 1699.00, 0.00, 149.00, 1848.00, NULL, 'order_seed_s03', 'pay_seed_s03', 'PACKED', NULL, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP),
+('AC-S-SEED04', NULL, 'S:seed-guest-intl', 'Emma Lindqvist', 'emma.lindqvist@example.se', NULL, 'Hornsgatan 48', NULL, 'Stockholm', NULL, '118 21', 'Sweden', 1,
+ 'PAYPAL', 'USD', 33.31, 799.00, 0.00, 1999.00, 2798.00, NULL, 'PAYPAL-SEED04', 'CAPTURE-SEED04', 'PAID', NULL, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR)),
+('AC-S-SEED05', 3, 'U:3', 'Ishita Bose', 'ishita.bose@example.com', NULL, '9 Lake Place', NULL, 'Kolkata', 'West Bengal', '700029', 'India', 1,
+ 'RAZORPAY', 'INR', 1348.00, 1199.00, 0.00, 149.00, 1348.00, NULL, 'order_seed_s05', NULL, 'PAYMENT_PENDING', NULL, NULL, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 MINUTE), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 MINUTE));
+
+INSERT INTO shop_order_items (order_id, painting_id, format, size_code, finish, frame, quantity, title, artist_name, image_url, variant_label, unit_price_inr, line_total_inr, discount_inr, edition_no, status) VALUES
+('AC-S-SEED01', 2, 'CANVAS', 'M', 'STRETCHED', 'NONE', 1, 'The Old Mill at Dawn', 'Vaishali J Goswami', '/assets/images/course1.jpg', 'Limited edition canvas · 24 × 24 in · stretched', 6099.00, 6099.00, 0.00, 1, 'OK'),
+('AC-S-SEED02', 1, 'POSTER', 'M', 'MATTE', 'NONE', 2, 'Scarlet Macaw Study', 'Vaishali J Goswami', '/assets/images/portfolio-2.jpg', 'Fine art poster · 18 × 13.5 in · matte', 1199.00, 2398.00, 239.80, NULL, 'OK'),
+('AC-S-SEED03', 6, 'POSTER', 'L', 'MATTE', 'NONE', 1, 'Copper Kettle Still Life', 'Vaishali J Goswami', '/assets/images/portfolio-5.jpg', 'Fine art poster · 24 × 18 in · matte', 1699.00, 1699.00, 0.00, NULL, 'OK'),
+('AC-S-SEED04', 3, 'POSTER', 'S', 'GLOSSY', 'NONE', 1, 'Lines of a Lifetime', 'Vaishali J Goswami', '/assets/images/course2.jpg', 'Fine art poster · 12 × 7.7 in · glossy', 799.00, 799.00, 0.00, NULL, 'OK'),
+('AC-S-SEED05', 5, 'POSTER', 'M', 'MATTE', 'NONE', 1, 'Flameback Woodpecker', 'Vaishali J Goswami', '/assets/images/login-banner.jpg', 'Fine art poster · 18 × 15.8 in · matte', 1199.00, 1199.00, 0.00, NULL, 'PENDING');
+UPDATE paintings SET editions_sold = 1 WHERE id = 2;
+
+-- more coupons: an expired one and one for a single painting
+INSERT INTO shop_coupons (code, description, discount_type, discount_value, painting_id, artist_name, min_subtotal, max_uses, used_count,
+    starts_at, expires_at, is_active, created_at, updated_at) VALUES
+('MONSOON15', 'Monsoon sale: 15% off (ended)', 'PERCENT', 15, NULL, NULL, 2000, 200, 37, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 120 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 60 DAY), 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 120 DAY), CURRENT_TIMESTAMP),
+('MILL1000', 'Rs 1,000 off The Old Mill at Dawn', 'FLAT', 1000, 2, NULL, NULL, 10, 1, NULL, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 30 DAY), 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+UPDATE shop_coupons SET used_count = 1 WHERE code = 'WELCOME10';
+
+-- original-art orders: a delivered sale to a signed-in collector and an abandoned checkout
+INSERT INTO marketplace_orders (order_id, painting_id, user_id, holder_key, buyer_name, buyer_email, buyer_phone, address_line1, address_line2, city, state, postal_code, country,
+    gateway, currency, amount, price_inr, provider_ref, transaction_id, status, courier, tracking_number, paid_at, created_at, updated_at) VALUES
+('AC-M-SEED03', 10, 4, 'U:4', 'Farhan Siddiqui', 'farhan.siddiqui@example.com', '+919812345670', '22 Hazratganj, Near GPO', NULL, 'Lucknow', 'Uttar Pradesh', '226001', 'India',
+ 'RAZORPAY', 'INR', 12000.00, 12000.00, 'order_seed_m03', NULL, 'CANCELLED', NULL, NULL, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 50 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 50 DAY)),
+('AC-M-SEED04', 2, 3, 'U:3', 'Ishita Bose', 'ishita.bose@example.com', NULL, '9 Lake Place', NULL, 'Kolkata', 'West Bengal', '700029', 'India',
+ 'RAZORPAY', 'INR', 58500.00, 58500.00, 'order_seed_m04', NULL, 'EXPIRED', NULL, NULL, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY));
+
+-- ---- custom commissions, one per stage --------------------------------------------------------
+INSERT INTO commission_orders (order_id, user_id, customer_name, customer_email, customer_phone, fulfillment_type, special_instructions, uploaded_photo_url,
+    shipping_address_line1, shipping_city, shipping_postal_code, shipping_country, payment_method, payment_provider_ref, payment_transaction_id, order_status, currency, total_price, created_at, updated_at) VALUES
+('AC-SEED-C01', 2, 'Diya Patel', 'diya@example.com', NULL, 'ORIGINAL_PAINTING', 'Portrait of my grandmother for her 80th birthday. Please keep her smile and the red bindi.', '/assets/images/portfolio-4.jpg',
+ 'B-14, Vasant Vihar', 'New Delhi', '110057', 'India', 'RAZORPAY_UPI', 'order_seed_c01', 'pay_seed_c01', 'IN_PRODUCTION', 'INR', 57790.00, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 12 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 DAY)),
+('AC-SEED-C02', 4, 'Farhan Siddiqui', 'farhan.siddiqui@example.com', '+919812345670', 'PHYSICAL_PRINT', 'Our family house in Lucknow, from the photo I uploaded. Warm evening light please.', '/assets/images/portfolio-6.jpg',
+ '22 Hazratganj, Near GPO', 'Lucknow', '226001', 'India', 'RAZORPAY_UPI', 'order_seed_c02', 'pay_seed_c02', 'PROOF_SENT', 'INR', 12100.00, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 8 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)),
+('AC-SEED-C03', NULL, 'Liam O''Connor', 'liam.oconnor@example.ie', NULL, 'DIGITAL_ONLY', 'Charcoal sketch of our dog Biscuit for a phone wallpaper.', '/assets/images/portfolio-1.jpg',
+ NULL, NULL, NULL, NULL, 'PAYPAL', 'PAYPAL-SEED-C03', 'CAPTURE-SEED-C03', 'COMPLETED', 'USD', 39.20, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 40 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 33 DAY)),
+('AC-SEED-C04', 5, 'Tanvi Kulkarni', 'tanvi.kulkarni@example.com', '+919822001144', 'ORIGINAL_PAINTING', 'A watercolour of the Pune hills for my parents'' anniversary.', '/assets/images/portfolio-3.jpg',
+ 'Flat 7, Shaniwar Peth', 'Pune', '411030', 'India', 'RAZORPAY_UPI', 'order_seed_c04', NULL, 'PAYMENT_PENDING', 'INR', 38060.00, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 MINUTE), NULL);
+INSERT INTO commission_artwork_items (item_id, order_id, artwork_theme, width_inches, height_inches, frame_material, has_matting) VALUES
+('AC-SEED-C01-1', 'AC-SEED-C01', 'PORTRAIT', 16, 20, 'WARM_WALNUT', 1),
+('AC-SEED-C02-1', 'AC-SEED-C02', 'LANDSCAPE', 12, 16, 'NONE', 0),
+('AC-SEED-C03-1', 'AC-SEED-C03', 'CHARCOAL', 8, 10, 'NONE', 0),
+('AC-SEED-C04-1', 'AC-SEED-C04', 'WATERCOLOR', 12, 16, 'GALLERY_WHITE', 1);
+
+-- ---- "Meet the artist" conversations ------------------------------------------------------------
+INSERT INTO artist_threads (painting_id, user_id, owner_key, buyer_name, buyer_email, context, status, staff_unread, buyer_unread, last_message_at, created_at) VALUES
+(1, 2, 'U:2', 'Diya Patel', 'diya@example.com', 'Original', 'OPEN', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 HOUR), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)),
+(2, 4, 'U:4', 'Farhan Siddiqui', 'farhan.siddiqui@example.com', 'Canvas print', 'CLOSED', 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 22 DAY)),
+(11, NULL, 'S:seed-guest-intl', 'Emma Lindqvist', 'emma.lindqvist@example.se', 'Original', 'OPEN', 0, 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 HOUR));
+INSERT INTO artist_thread_messages (thread_id, sender, admin_id, body, created_at) VALUES
+(1, 'BUYER', NULL, 'Hello! Is the macaw study on archival paper, and can it ship to Delhi before the 20th?', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 HOUR)),
+(2, 'BUYER', NULL, 'Would the canvas print of The Old Mill work in a 24 inch space above a sofa?', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 22 DAY)),
+(2, 'ARTIST', 2, 'Yes, the medium canvas is 24 x 24 inches. Leave a hand''s width each side and it will sit well.', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 DAY)),
+(3, 'BUYER', NULL, 'Could you ship this original to Sweden? Happy to pay for tracked shipping.', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 HOUR)),
+(3, 'ARTIST', 1, 'Yes, we ship originals worldwide with tracking. The studio will confirm the cost by email today.', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR));
+
+-- ---- blog: two more topics, three more tags, two more stories (one still a draft) ---------------
+INSERT INTO categories (name, slug, status, created_at, updated_at) VALUES
+('Materials & Tools', 'materials-and-tools', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Artist Interviews', 'artist-interviews', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tags (name, slug, status, created_at, updated_at) VALUES
+('florals', 'florals', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('landscapes', 'landscapes', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('studio life', 'studio-life', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO posts (title, subtitle, slug, body, status, posted_by, author_id, image, featured, `like`, dislike, read_minutes, published_at, created_at, updated_at) VALUES
+('How to Stretch Watercolour Paper', 'Flat paper, every time', 'how-to-stretch-watercolour-paper',
+ '<p>Buckling paper ruins washes. Soak a sheet of 300gsm paper for five minutes, lay it on a board, sponge off the extra water and tape all four edges with gummed tape.</p><h2>What you need</h2><ul><li>Gummed paper tape</li><li>A wooden or MDF board</li><li>A clean sponge</li></ul><p>Leave it to dry flat overnight and it will stay drum-tight while you paint.</p>',
+ 1, 2, 2, 'blog-4.jpg', 0, 0, 0, 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY)),
+('In the Studio with Rajat Malhotra', 'Six hundred portraits later', 'in-the-studio-with-rajat-malhotra',
+ '<p>Rajat talks about measuring, why he still starts every portrait with a plumb line, and the charcoal he cannot work without.</p>',
+ 0, 4, 4, 'blog-5.jpg', 0, 0, 0, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO category_post (category_id, post_id, created_at, updated_at) VALUES
+(4, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO post_tag (post_id, tag_id, created_at, updated_at) VALUES
+(3, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+UPDATE posts SET author_id = posted_by WHERE author_id IS NULL;
+
+-- ---- site content: testimonials, free lessons, enquiries, newsletter --------------------------
+INSERT INTO testimonials (name, slug, title, photo, description, status, created_at, updated_at) VALUES
+('Tanvi Kulkarni', 'tanvi-kulkarni', 'Watercolour Landscapes, certified', 'avatar.png', 'I came in painting muddy skies and left with a certificate and my first sale in the marketplace.', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Sneha Reddy', 'sneha-reddy', 'Parent of a young learner', 'avatar.png', 'My 11-year-old looks forward to every class. The teachers are patient and the projects are just the right size.', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Daniel Brooks', 'daniel-brooks', 'Learner from Toronto', 'avatar.png', 'The live sessions fit my evenings in Canada and the recordings meant I never missed a demo.', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO free_courses (admin_id, title, slug, description, status, photo, video_url, created_at, updated_at) VALUES
+(2, 'Holding a Pencil for Sketching', 'holding-a-pencil-for-sketching', 'Tripod, overhand and underhand grips, and when to use each for line and shading.', 1, 'free.jpg', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Mixing Greens for Landscapes', 'mixing-greens-for-landscapes', 'Mix natural greens from two blues and two yellows instead of using green straight from the tube.', 1, 'free.jpg', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 'Five-Value Thumbnails', 'five-value-thumbnails', 'Plan any painting with a two-minute value sketch before you start.', 0, 'free.jpg', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO contacts (name, mobile_no, email, message, status, read_at, created_at, updated_at) VALUES
+('Kunal Deshpande', '+919850011223', 'kunal.d@example.com', 'Do you run weekend classes for children aged 8 to 10? I would like to enrol my son.', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY)),
+('Aisha Khan', NULL, 'aisha.khan@example.com', 'Our office wants a 2-hour team painting workshop for 25 people in Hyderabad. Is that possible?', 1, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 HOUR), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 HOUR)),
+('Robert Fernandes', '+919900887766', 'robert.f@example.com', 'The print I received is perfect. Can I order the same canvas in a larger size?', 1, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)),
+('Meghna Iyer', NULL, 'meghna.iyer@example.com', 'I missed the live class on Saturday. Will there be a recording?', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 DAY));
+
+INSERT INTO newsletters (email, source, unsubscribed_at, created_at, updated_at) VALUES
+('student@artistikcity.com', 'signup', NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 60 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 60 DAY)),
+('diya@example.com', 'footer', NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY)),
+('kunal.d@example.com', 'footer', NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY)),
+('emma.lindqvist@example.se', 'checkout', NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR)),
+('farhan.siddiqui@example.com', 'footer', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 40 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY));

@@ -2952,6 +2952,7 @@ const NAV = [
     { href: "/admin/setup", label: "Configuration Panel", icon: "fa-sliders", cap: "setup", exact: true, also: ["/admin/setup/config"] },
     { href: "/admin/setup/room-preview", label: "Room Preview Setup", icon: "fa-picture-o", cap: "marketplace.publish", also: ["/admin/marketplace/rooms"] },
     { href: "/admin/setup/site-settings", label: "SEO & Layout Controls", icon: "fa-paint-brush", cap: "settings", also: ["/admin/settings"] },
+    { href: "/admin/parameters", label: "Site Access Password", icon: "fa-key", cap: "setup", also: ["/admin/setup/site-access"] },
     { href: "/admin/security/audit", label: "Security log", icon: "fa-shield", cap: "security" }
   ] }
 ];
@@ -5490,25 +5491,39 @@ function useStepGuard(step) {
 /***/ }),
 
 /***/ "./resources/js/Components/Constants.js":
-/*!**********************************************!*\
-  !*** ./resources/js/Components/Constants.js ***!
-  \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   API_URL: () => (/* binding */ API_URL),
-/* harmony export */   COURSE_TAGS_COLOR: () => (/* binding */ COURSE_TAGS_COLOR)
-/* harmony export */ });
-// export const API_URL = "http://artistik.loc/api";
-// export const API_URL = "http://ec2-54-163-58-246.compute-1.amazonaws.com/api";
-var API_URL = "/api";
-var COURSE_TAGS_COLOR = {
-  'medium': '#f10066',
-  'age': '#fdaa2a',
-  'skill': '#2058b7'
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Constants_exports = {};
+__export(Constants_exports, {
+  API_URL: () => API_URL,
+  COURSE_TAGS_COLOR: () => COURSE_TAGS_COLOR
+});
+module.exports = __toCommonJS(Constants_exports);
+const API_URL = `/api`;
+const COURSE_TAGS_COLOR = {
+  "medium": "#f10066",
+  "age": "#fdaa2a",
+  "skill": "#2058b7"
+};
+
 
 /***/ }),
 
@@ -29152,6 +29167,242 @@ function StoryDetails() {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "sty-btn sty-btn--light", children: "Explore courses" })
       ] }) })
     ] })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Setup/SiteAccess.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SiteAccess_exports = {};
+__export(SiteAccess_exports, {
+  default: () => SiteAccess
+});
+module.exports = __toCommonJS(SiteAccess_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+function PasswordBox({ id, label, value, onChange, error, help, autoComplete }) {
+  const [show, setShow] = (0, import_react.useState)(false);
+  const describedBy = [help && `${id}-help`, error && `${id}-err`].filter(Boolean).join(" ") || void 0;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("cfg-field", error && "has-error"), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cfg-field__label", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: id, children: label }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-field__control", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-secret", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "input",
+          {
+            id,
+            type: show ? "text" : "password",
+            className: "adm-input",
+            value,
+            onChange: (e) => onChange(e.target.value),
+            autoComplete,
+            spellCheck: false,
+            maxLength: 128,
+            "aria-invalid": error ? "true" : void 0,
+            "aria-describedby": describedBy
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "cfg-eye", onClick: () => setShow((x) => !x), "aria-label": show ? "Hide password" : "Show password", "aria-pressed": show, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${show ? "fa-eye-slash" : "fa-eye"}`, "aria-hidden": "true" }) })
+      ] }),
+      error ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "cfg-help cfg-help--err", id: `${id}-err`, role: "alert", children: error }) : help && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "cfg-help", id: `${id}-help`, children: help })
+    ] })
+  ] });
+}
+function SiteAccess() {
+  const { access: initial } = (0, import_inertia_react.usePage)().props;
+  const [a, setA] = (0, import_react.useState)(initial);
+  const [enabled, setEnabled] = (0, import_react.useState)(!!initial.enabled);
+  const [password, setPassword] = (0, import_react.useState)("");
+  const [confirm, setConfirm] = (0, import_react.useState)("");
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const dirty = enabled !== !!a.enabled || password !== "" || confirm !== "";
+  (0, import_form.useUnsavedGuard)(dirty);
+  const save = () => {
+    setBusy(true);
+    import_axios.default.post("/admin/api/setup/site-access", { enabled, password, confirm }).then((r) => {
+      setA(r.data.access);
+      setEnabled(!!r.data.access.enabled);
+      setPassword("");
+      setConfirm("");
+      setErrors({});
+      toast(r.data.message);
+    }).catch((e) => {
+      if (e.response && e.response.status === 422) {
+        const errs = e.response.data.errors || {};
+        setErrors(errs);
+        toast(e.response.data.message || "Please fix the highlighted fields.", "error");
+        setTimeout(() => {
+          const el = document.getElementById(errs.password ? "sa-password" : "sa-confirm");
+          if (el) el.focus();
+        }, 50);
+      } else toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const discard = () => {
+    setEnabled(!!a.enabled);
+    setPassword("");
+    setConfirm("");
+    setErrors({});
+  };
+  const [tone, label] = a.active ? ["amber", "Protected: password required"] : ["green", "Open to everyone"];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Site access", crumbs: [{ label: "System parameters" }, { label: "Site access" }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        eyebrow: "System parameters",
+        title: "Site access",
+        subtitle: "Put the whole public site behind one password while it is being tested. Visitors see a \u201CSite under construction\u201D page until they enter it."
+      }
+    ),
+    a.serverLock && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-alert", role: "note", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-server", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "The server also has a preview password" }),
+        " (",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "SITE_PREVIEW_PASSWORD" }),
+        "). While it is set the site stays protected whatever you choose here; either password lets people in."
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: (e) => {
+      e.preventDefault();
+      save();
+    }, noValidate: true, autoComplete: "off", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "adm-card cfg-group", "aria-labelledby": "sa-switch-h", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "cfg-group__head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sa-switch-h", className: "rm-h", children: "Site Password Protection" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Applies within a few seconds on every server. The admin area stays reachable, and you see the site as normal while you are signed in here." })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone, dot: true, children: label })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cfg-fields", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cfg-field__label", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sa-label", children: "Enable/Disable Site Password Protection" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-field__control", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              import_form.Toggle,
+              {
+                name: "enabled",
+                checked: enabled,
+                onChange: (x) => {
+                  setEnabled(x);
+                  setErrors((e) => __spreadProps(__spreadValues({}, e), { password: null }));
+                },
+                label: enabled ? "Protection on" : "Protection off",
+                description: enabled ? "Every page and API asks for the password first." : "Anyone can visit the site."
+              }
+            ),
+            enabled && !a.enabled && !a.hasPassword && !password && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "cfg-help cfg-help--warn", children: "Set a password below to switch protection on." })
+          ] })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "adm-card cfg-group", "aria-labelledby": "sa-pw-h", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "cfg-group__head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sa-pw-h", className: "rm-h", children: "Global Site Access Password" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+              a.hasPassword ? "A password is set. Leave both boxes empty to keep it; a new one signs everyone out of the preview." : "No password yet.",
+              " ",
+              "It is stored hashed and can't be shown again, so keep it somewhere safe."
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: a.hasPassword ? "blue" : "grey", children: a.hasPassword ? "Password set" : "Not set" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-fields", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            PasswordBox,
+            {
+              id: "sa-password",
+              label: a.hasPassword ? "New password" : "Password",
+              value: password,
+              autoComplete: "new-password",
+              onChange: (x) => {
+                setPassword(x);
+                setErrors((e) => __spreadProps(__spreadValues({}, e), { password: null }));
+              },
+              error: errors.password,
+              help: `At least ${a.minLength || 8} characters. Share it only with the people testing the site.`
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            PasswordBox,
+            {
+              id: "sa-confirm",
+              label: "Confirm password",
+              value: confirm,
+              autoComplete: "new-password",
+              onChange: (x) => {
+                setConfirm(x);
+                setErrors((e) => __spreadProps(__spreadValues({}, e), { confirm: null }));
+              },
+              error: errors.confirm
+            }
+          )
+        ] }),
+        a.changedAt && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "cfg-meta", children: [
+          "Last changed ",
+          (0, import_kit.fmtDate)(a.changedAt, true),
+          a.changedBy ? ` by ${a.changedBy}` : "",
+          ". Every change is in the Security log."
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SaveBar, { dirty, busy, onSave: save, saveLabel: "Save site access", children: dirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", onClick: discard, children: "Discard" }) })
+    ] }),
+    toastNode
   ] });
 }
 
@@ -114182,6 +114433,8 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Admin/Setup/SiteAccess": "./resources/js/Pages/Admin/Setup/SiteAccess.js",
+	"./Admin/Setup/SiteAccess.js": "./resources/js/Pages/Admin/Setup/SiteAccess.js",
 	"./StoryDetails": "./resources/js/Pages/StoryDetails.js",
 	"./StoryDetails.js": "./resources/js/Pages/StoryDetails.js",
 	"./Studio/SellListing": "./resources/js/Pages/Studio/SellListing.js",

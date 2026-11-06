@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -20,8 +21,15 @@ import java.util.HexFormat;
 import java.util.List;
 
 /**
- * "Not open yet" switch for a site that is online but not launched. When {@code SITE_PREVIEW_PASSWORD} is set, every
- * page asks for that password first (one form, remembered in a cookie for 30 days); without it the site behaves as usual.
+ * Site password wall ("Site under construction"). Two independent switches turn it on:
+ * <ul>
+ *   <li>{@code SITE_PREVIEW_PASSWORD} on the server (Parameter Store), for a site that has never launched;</li>
+ *   <li>the admin switch at Admin > System parameters > Site access ({@code /admin/parameters}), stored hashed in the
+ *       database by {@link SiteLock} and applied within seconds, no deploy needed.</li>
+ * </ul>
+ * While either is on, every page asks for the password first (one form, remembered in a cookie for 30 days) and every API
+ * call without the cookie gets a JSON 401, so nothing renders and no data leaks before the check. The check runs here,
+ * in the first servlet filter, before any controller, so there is no flash of the real page. Either password opens the site.
  * While the lock is on, every response also says {@code X-Robots-Tag: noindex} and robots.txt disallows everything, so
  * search engines don't list the site.
  *
@@ -29,7 +37,9 @@ import java.util.List;
  * their servers) and static files (styles, scripts, fonts, images of the site itself). Uploaded files under /storage
  * are served by CloudFront straight from S3 and are not covered: they only have unguessable names.</p>
  *
- * <p>Turn it off by removing the setting (Parameter Store) and re-running the deploy.</p>
+ * <p>Also left open: the admin area ({@code /admin...}), so staff can always sign in and switch the wall off, and anyone
+ * signed in to the admin sees the site without the password. Turn the server switch off by removing the setting and
+ * re-running the deploy; the admin switch by unticking it.</p>
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
@@ -42,22 +52,41 @@ public class PreviewLockFilter extends OncePerRequestFilter {
     private static final List<String> OPEN_PATHS = List.of("/healthz", "/favicon.ico", "/favicon.png", "/apple-touch-icon.png",
             "/api/v1/courses/razorpay-webhook", "/api/v1/marketplace/webhook", "/api/commissions/finalize-webhook");
 
+    private static final String ADMIN_SESSION_KEY = "auth.admin.id";   // Auth.ADMIN_KEY
+
     private final String password;
     private final String token;
+    private final SiteLock siteLock;
+    private final com.artistikcity.auth.RateLimiter limiter;
+    static final int MAX_TRIES = 10;            // wrong passwords per address per 15 minutes
 
-    public PreviewLockFilter(@Value("${app.preview.password:}") String password) {
-        this.password = password == null ? "" : password.trim();
-        this.token = this.password.isEmpty() ? "" : hmac(this.password, "artistikcity-preview-v1");
+    /** Server switch only (tests, or a server without a database). */
+    public PreviewLockFilter(String password) {
+        this(password, null, null);
     }
 
+    @Autowired
+    public PreviewLockFilter(@Value("${app.preview.password:}") String password, SiteLock siteLock, com.artistikcity.auth.RateLimiter limiter) {
+        this.password = password == null ? "" : password.trim();
+        this.token = this.password.isEmpty() ? "" : hmac(this.password, "artistikcity-preview-v1");
+        this.siteLock = siteLock;
+        this.limiter = limiter;
+    }
+
+    /** True when the server switch (SITE_PREVIEW_PASSWORD) is on. */
     public boolean enabled() {
         return !password.isEmpty();
+    }
+
+    private SiteLock.State db() {
+        return siteLock == null ? SiteLock.State.OFF : siteLock.state();
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        if (!enabled()) {
+        SiteLock.State db = db();
+        if (!enabled() && !db.active()) {
             chain.doFilter(request, response);
             return;
         }
@@ -72,45 +101,71 @@ public class PreviewLockFilter extends OncePerRequestFilter {
             response.getOutputStream().write(body);
             return;
         }
-        if (OPEN_PATHS.contains(path) || OPEN_PREFIXES.stream().anyMatch(path::startsWith)) {
+        if (OPEN_PATHS.contains(path) || OPEN_PREFIXES.stream().anyMatch(path::startsWith) || isAdminArea(path) || isStaff(request)) {
             chain.doFilter(request, response);
             return;
         }
         if (FORM_PATH.equals(path) && "POST".equals(request.getMethod())) {
-            unlock(request, response);
+            unlock(request, response, db);
             return;
         }
-        if (hasPass(request)) {
+        if (hasPass(request, db)) {
+            if (FORM_PATH.equals(path)) {          // already in: the form page just sends you on
+                response.setStatus(303);
+                response.setHeader("Location", safeNext(request.getParameter("next")));
+                return;
+            }
             chain.doFilter(request, response);
             return;
         }
         String accept = String.valueOf(request.getHeader("Accept"));
         response.setHeader("Cache-Control", "no-store");
+        String next = request.getRequestURI() + (request.getQueryString() == null ? "" : "?" + request.getQueryString());
+        if (request.getHeader("X-Inertia") != null) {
+            // an in-app page visit after the cookie ran out: make Inertia reload the page, which then shows the form
+            response.setStatus(409);
+            response.setHeader("X-Inertia-Location", safeNext(next));
+            return;
+        }
         if (path.startsWith("/api/") || accept.contains("application/json")) {
             response.setStatus(401);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"code\":\"PREVIEW_LOCKED\",\"message\":\"This site is not open yet.\"}");
+            response.getWriter().write("{\"code\":\"PREVIEW_LOCKED\",\"message\":\"This site is password protected while it is being tested.\"}");
             return;
         }
-        String next = request.getRequestURI() + (request.getQueryString() == null ? "" : "?" + request.getQueryString());
-        page(response, 401, safeNext(next), false);
+        page(response, 401, FORM_PATH.equals(path) ? safeNext(request.getParameter("next")) : safeNext(next), null);
     }
 
-    private void unlock(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void unlock(HttpServletRequest request, HttpServletResponse response, SiteLock.State db) throws IOException {
         String given = request.getParameter("password");
         String next = safeNext(request.getParameter("next"));
         response.setHeader("Cache-Control", "no-store");
-        if (given == null || !MessageDigest.isEqual(hmac(given.trim(), "artistikcity-preview-v1").getBytes(StandardCharsets.UTF_8),
+        String key = "site-lock:ip:" + request.getRemoteAddr();
+        if (limiter != null && !limiter.peek(key, MAX_TRIES, 900).allowed()) {
+            long wait = Math.max(1, (limiter.peek(key, MAX_TRIES, 900).retryAfterSeconds() + 59) / 60);
+            response.setHeader("Retry-After", String.valueOf(wait * 60));
+            page(response, 429, next, "Too many tries. Please wait " + wait + (wait == 1 ? " minute" : " minutes") + " and try again.");
+            return;
+        }
+        String pass = null;
+        if (given != null && enabled() && MessageDigest.isEqual(hmac(given.trim(), "artistikcity-preview-v1").getBytes(StandardCharsets.UTF_8),
                 token.getBytes(StandardCharsets.UTF_8))) {
+            pass = token;
+        } else if (given != null && db.active() && siteLock.matches(given, db)) {
+            pass = db.token();
+        }
+        if (pass == null) {
+            if (limiter != null) limiter.hit(key, MAX_TRIES, 900);
             try {
                 Thread.sleep(600);   // slows down guessing
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            page(response, 401, next, true);
+            page(response, 401, next, "That password isn't right.");
             return;
         }
-        Cookie c = new Cookie(COOKIE, token);
+        if (limiter != null) limiter.reset(key);
+        Cookie c = new Cookie(COOKIE, pass);
         c.setHttpOnly(true);
         c.setSecure(request.isSecure());
         c.setPath("/");
@@ -122,15 +177,30 @@ public class PreviewLockFilter extends OncePerRequestFilter {
     }
 
     boolean hasPass(HttpServletRequest request) {
+        return hasPass(request, db());
+    }
+
+    private boolean hasPass(HttpServletRequest request, SiteLock.State db) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) return false;
         for (Cookie c : cookies) {
-            if (COOKIE.equals(c.getName()) && c.getValue() != null
-                    && MessageDigest.isEqual(token.getBytes(StandardCharsets.UTF_8), c.getValue().getBytes(StandardCharsets.UTF_8))) {
-                return true;
-            }
+            if (!COOKIE.equals(c.getName()) || c.getValue() == null) continue;
+            byte[] v = c.getValue().getBytes(StandardCharsets.UTF_8);
+            if (enabled() && MessageDigest.isEqual(token.getBytes(StandardCharsets.UTF_8), v)) return true;
+            if (db.active() && MessageDigest.isEqual(db.token().getBytes(StandardCharsets.UTF_8), v)) return true;
         }
         return false;
+    }
+
+    /** The admin area stays reachable so staff can sign in and switch the wall off (it has its own sign-in). */
+    static boolean isAdminArea(String path) {
+        return "/admin".equals(path) || path.startsWith("/admin/");
+    }
+
+    /** Signed in to the admin: sees the site as visitors will once it opens. */
+    private static boolean isStaff(HttpServletRequest request) {
+        jakarta.servlet.http.HttpSession s = request.getSession(false);
+        return s != null && s.getAttribute(ADMIN_SESSION_KEY) instanceof Long;
     }
 
     /** Only paths on this site (no //host or scheme), so the form can't be used to send people elsewhere. */
@@ -139,13 +209,13 @@ public class PreviewLockFilter extends OncePerRequestFilter {
         return next.replaceAll("[\\r\\n]", "");
     }
 
-    private static void page(HttpServletResponse response, int status, String next, boolean wrong) throws IOException {
+    private static void page(HttpServletResponse response, int status, String next, String error) throws IOException {
         response.setStatus(status);
         response.setContentType("text/html;charset=UTF-8");
         String html = """
                 <!doctype html><html lang="en"><head><meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
-                <title>ArtistikCity · Coming soon</title>
+                <title>ArtistikCity · Site under construction</title>
                 <style>
                   *{box-sizing:border-box} body{margin:0;min-height:100vh;display:grid;place-items:center;padding:16px;
                   font-family:'Plus Jakarta Sans','Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f7f7fb;color:#0e1a3a}
@@ -157,15 +227,15 @@ public class PreviewLockFilter extends OncePerRequestFilter {
                   .err{color:#b80f55;font-size:14px;margin:10px 0 0}
                 </style></head><body><main>
                 <img src="/assets/images/logo.png" alt="ArtistikCity">
-                <h1>We're getting ready</h1>
-                <p>ArtistikCity opens soon. If you're helping us test, enter the preview password.</p>
+                <h1>Site under construction</h1>
+                <p>We're putting the finishing touches to ArtistikCity. If you're helping us test, enter the access password.</p>
                 <form method="post" action="%s">
                   <input type="hidden" name="next" value="%s">
-                  <input type="password" name="password" placeholder="Preview password" aria-label="Preview password" autocomplete="current-password" required autofocus>
+                  <input type="password" name="password" placeholder="Access password" aria-label="Access password" autocomplete="current-password" required autofocus>
                   %s
                   <button type="submit">Enter</button>
                 </form></main></body></html>
-                """.formatted(FORM_PATH, esc(next), wrong ? "<p class=\"err\" role=\"alert\">That password isn't right.</p>" : "");
+                """.formatted(FORM_PATH, esc(next), error == null ? "" : "<p class=\"err\" role=\"alert\">" + esc(error) + "</p>");
         byte[] body = html.getBytes(StandardCharsets.UTF_8);
         response.setContentLength(body.length);
         response.getOutputStream().write(body);
