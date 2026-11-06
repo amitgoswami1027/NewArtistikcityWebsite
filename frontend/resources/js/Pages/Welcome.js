@@ -5,6 +5,7 @@ import CourseCard from '@/Components/Site/CourseCard';
 import { isWorkshop } from '@/Components/Site/ProgramCard';
 import { catalogUrl } from '@/Components/Site/SiteHeader';
 import StudioStoriesStrip from '@/Components/Site/StudioStoriesStrip';
+import { landingOf, isExternal } from '@/Components/Site/siteContent';
 
 const BENEFITS = [
     { icon: 'fa-video-camera', title: 'Live, small-group classes', text: 'Watch every demo up close and ask questions in real time.' },
@@ -45,7 +46,8 @@ function Row({ title, subtitle, link, courses }) {
 }
 
 export default function Welcome() {
-    const { mediums = [], open_courses, home_artworks = [], testimonials = [], instructor = {} } = usePage().props;
+    const { mediums = [], open_courses, home_artworks = [], testimonials = [], instructor = {}, site } = usePage().props;
+    const hero = landingOf(site);
     const programs = (open_courses && open_courses.data) || [];
     const popular = [...programs].sort((a, b) => Number(b.students || 0) - Number(a.students || 0));
     const courses = programs.filter((c) => !isWorkshop(c));
@@ -64,12 +66,16 @@ export default function Welcome() {
                 </div>
                 <div className="ac-wide">
                     <div className="dm-hero__inner">
-                        <h1>Learn to draw and paint <em>with a real artist.</em></h1>
-                        <p>Live online art courses and workshops for every age and level. Pick a medium, join a small group and finish artwork you're proud of.</p>
+                        <h1>{hero.hero_heading}{hero.hero_emphasis && <> <em>{hero.hero_emphasis}</em></>}</h1>
+                        {hero.hero_subtext && <p>{hero.hero_subtext}</p>}
                         <form className="dm-hero__search" onSubmit={(e) => { e.preventDefault(); window.location.href = catalogUrl({ q }); }}>
-                            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="What do you want to learn?" aria-label="Search courses" />
+                            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={hero.search_placeholder} aria-label="Search courses" />
                             <button type="submit" className="dm-btn dm-btn--brand dm-btn--lg">Search</button>
                         </form>
+                        {hero.cta_label && hero.cta_link && (
+                            <a href={hero.cta_link} className="dm-btn dm-btn--ink dm-btn--lg dm-hero__cta"
+                                {...(isExternal(hero.cta_link) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{hero.cta_label} <i className="fa fa-arrow-right" aria-hidden="true"></i></a>
+                        )}
                         <div className="dm-hero__tags">
                             {mediums.slice(0, 5).map((m) => <a key={m.id} href={catalogUrl({ medium: m.id })}>{m.name}</a>)}
                         </div>

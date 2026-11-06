@@ -54,7 +54,7 @@ public class CommissionPayments {
     // ------------------------------------------------------------------ Razorpay
 
     public boolean razorpayConfigured() {
-        return !prop("razorpay.key").isEmpty() && !prop("razorpay.secret").isEmpty();
+        return !"false".equalsIgnoreCase(prop("app.payments.razorpay.enabled")) && !prop("razorpay.key").isEmpty() && !prop("razorpay.secret").isEmpty();
     }
 
     public String razorpayKey() {
@@ -162,7 +162,7 @@ public class CommissionPayments {
     // -------------------------------------------------------------------- PayPal
 
     public boolean paypalConfigured() {
-        return !prop("paypal.client-id").isEmpty() && !prop("paypal.secret").isEmpty();
+        return !"false".equalsIgnoreCase(prop("app.payments.paypal.enabled")) && !prop("paypal.client-id").isEmpty() && !prop("paypal.secret").isEmpty();
     }
 
     private String paypalBase() {

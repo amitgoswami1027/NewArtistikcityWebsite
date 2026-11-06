@@ -6,6 +6,7 @@ import SiteErrorBoundary from '@/Components/Site/SiteErrorBoundary';
 import SignInSheet from '@/Components/Site/SignInSheet';
 import UndoToast from '@/Components/Site/UndoToast';
 import SlowVisit from '@/Components/Site/SlowVisit';
+import CookieBanner from '@/Components/Site/CookieBanner';
 
 export default function SiteLayout({ title, children, showCategories = false, activeMedium = null }) {
     const { flash } = usePage().props;
@@ -23,6 +24,7 @@ export default function SiteLayout({ title, children, showCategories = false, ac
             <SignInSheet />
             <UndoToast />
             <SlowVisit />
+            <CookieBanner />
         </div>
     );
 }

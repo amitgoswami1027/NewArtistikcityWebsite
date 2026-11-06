@@ -3,21 +3,13 @@ import axios from 'axios';
 import { usePage } from '@inertiajs/inertia-react';
 import { API_URL } from '@/Components/Constants';
 import { catalogUrl, useAgeGroups } from '@/Components/Site/SiteHeader';
-
-const SOCIAL = [
-    ['facebook', 'Facebook', 'fa-facebook', 'https://www.facebook.com/StudioVaishaliArts/'],
-    ['instagram', 'Instagram', 'fa-instagram', 'https://www.instagram.com/artistikcity/'],
-    ['youtube', 'YouTube', 'fa-youtube-play', 'https://www.youtube.com/@artistikcityYT'],
-    ['linkedin', 'LinkedIn', 'fa-linkedin', 'https://in.linkedin.com/in/vaishali-jetly-goswami-4b5874233'],
-];
+import { socialOf } from '@/Components/Site/siteContent';
 
 export default function SiteFooter() {
     const { site } = usePage().props;
     const ageGroups = useAgeGroups();
-    // links come from Admin > Site settings; without saved settings the original links are used
-    const social = site && site.social && Object.keys(site.social).length
-        ? SOCIAL.filter(([k]) => site.social[k]).map(([k, l, i]) => [k, l, i, site.social[k]])
-        : SOCIAL;
+    // links come from Admin > SEO & Layout Controls (social links matrix); without saved links the original ones are used
+    const social = socialOf(site);
     const [mediums, setMediums] = useState([]);
     useEffect(() => {
         axios.get(`${API_URL}/get_mediums`).then((r) => setMediums(Array.isArray(r.data) ? r.data : [])).catch(() => {});

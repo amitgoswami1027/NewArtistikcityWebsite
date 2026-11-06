@@ -38,7 +38,6 @@ export const NAV = [
         { href: '/admin/orders', label: 'Course orders', icon: 'fa-shopping-cart', cap: 'revenue', also: ['/admin/orders/'] },
         { href: '/admin/dashboard/commissions', label: 'Commissions', icon: 'fa-paint-brush', cap: 'commissions', badge: 'commissions' },
         { href: '/admin/dashboard/marketplace', label: 'Marketplace', icon: 'fa-tags', cap: 'marketplace', badge: 'marketplace', also: ['/admin/dashboard/marketplace/'] },
-        { href: '/admin/marketplace/rooms', label: 'Room preview', icon: 'fa-picture-o', cap: 'marketplace.publish' },
         { href: '/admin/payments/refunds', label: 'Refunds', icon: 'fa-undo', cap: 'revenue', badge: 'refunds' },
         { href: '/admin/finance', label: 'Payouts & ledger', icon: 'fa-balance-scale', cap: 'revenue', badge: 'payouts', also: ['/admin/finance/'] },
     ] },
@@ -50,14 +49,17 @@ export const NAV = [
         { href: '/admin/dashboard/gallery', label: 'Gallery', icon: 'fa-picture-o', cap: 'gallery' },
     ] },
     { group: 'Content', items: [
-        { href: '/admin/blog/post', label: 'Blog posts', icon: 'fa-pencil-square-o', cap: 'settings', also: ['/admin/blog/post/'] },
+        { href: '/admin/content/stories', label: 'Studio Stories', icon: 'fa-pencil-square-o', cap: 'settings', also: ['/admin/content/stories/', '/admin/blog/post'] },
         { href: '/admin/blog/taxonomy', label: 'Blog categories & tags', icon: 'fa-bookmark-o', cap: 'settings' },
         { href: '/admin/faq', label: 'FAQ', icon: 'fa-question-circle-o', cap: 'settings' },
         { href: '/admin/newsletter', label: 'Newsletter', icon: 'fa-envelope-o', cap: 'settings', also: ['/admin/newsletter/'] },
         { href: '/admin/contacts', label: 'Contact messages', icon: 'fa-inbox', cap: 'settings', badge: 'contacts' },
     ] },
-    { group: 'Setup', items: [
-        { href: '/admin/settings', label: 'Site settings & SEO', icon: 'fa-cog', cap: 'settings' },
+    // collapsible: the group header is a button; it opens by itself on its own pages
+    { group: 'System Parameters', icon: 'fa-cogs', collapsible: true, items: [
+        { href: '/admin/setup', label: 'Configuration Panel', icon: 'fa-sliders', cap: 'setup', exact: true, also: ['/admin/setup/config'] },
+        { href: '/admin/setup/room-preview', label: 'Room Preview Setup', icon: 'fa-picture-o', cap: 'marketplace.publish', also: ['/admin/marketplace/rooms'] },
+        { href: '/admin/setup/site-settings', label: 'SEO & Layout Controls', icon: 'fa-paint-brush', cap: 'settings', also: ['/admin/settings'] },
         { href: '/admin/security/audit', label: 'Security log', icon: 'fa-shield', cap: 'security' },
     ] },
 ];
@@ -66,8 +68,12 @@ const NAV_KEY = 'ac.admin.nav';
 const readCollapsed = () => { try { return window.localStorage.getItem(NAV_KEY) === 'collapsed'; } catch (e) { return false; } };
 const saveCollapsed = (v) => { try { window.localStorage.setItem(NAV_KEY, v ? 'collapsed' : 'open'); } catch (e) { /* private mode */ } };
 
-const isActive = (item, path) => item.exact ? path === item.href
-    : path === item.href || (item.also || []).some((p) => path.startsWith(p));
+const isActive = (item, path) => path === item.href || (item.also || []).some((p) => path === p || path.startsWith(`${p}/`) || (p.endsWith('/') && path.startsWith(p)))
+    || (!item.exact && path.startsWith(`${item.href}/`));
+
+const GROUPS_KEY = 'ac.admin.groups';
+const readGroups = () => { try { return JSON.parse(window.localStorage.getItem(GROUPS_KEY) || '{}') || {}; } catch (e) { return {}; } };
+const saveGroups = (v) => { try { window.localStorage.setItem(GROUPS_KEY, JSON.stringify(v)); } catch (e) { /* private mode */ } };
 
 export function activeItem(path) {
     let found = null;
@@ -166,6 +172,7 @@ export default function AdminLayout({ title, crumbs, children, wide = false }) {
     const caps = admin.capabilities || [];
     const [collapsed, setCollapsed] = useState(readCollapsed);
     const [drawer, setDrawer] = useState(false);
+    const [openGroups, setOpenGroups] = useState(readGroups);
     const path = typeof window !== 'undefined' ? window.location.pathname.replace(/\/+$/, '') || '/' : '';
     const token = typeof document !== 'undefined' ? (document.head.querySelector('meta[name="csrf-token"]') || {}).content : '';
     const current = activeItem(path);
@@ -203,9 +210,21 @@ export default function AdminLayout({ title, crumbs, children, wide = false }) {
                     <button type="button" className="adm-side__close" onClick={() => setDrawer(false)} aria-label="Close menu"><i className="fa fa-times" aria-hidden="true"></i></button>
                 </div>
                 <nav className="adm-side__nav">
-                    {groups.map((g) => (
-                        <div key={g.group} className="adm-side__group">
-                            <p className="adm-side__label">{g.group}</p>
+                    {groups.map((g) => {
+                        const hasActive = g.items.some((i) => isActive(i, path));
+                        const open = !g.collapsible || hasActive || openGroups[g.group] === true || (collapsed && !drawer);
+                        const gid = `adm-grp-${g.group.toLowerCase().replace(/[^a-z]+/g, '-')}`;
+                        const flip = () => setOpenGroups((o) => { const next = { ...o, [g.group]: !open }; saveGroups(next); return next; });
+                        return (
+                        <div key={g.group} className={`adm-side__group ${g.collapsible ? 'is-collapsible' : ''} ${open ? 'is-open' : ''}`}>
+                            {g.collapsible ? (
+                                <button type="button" className="adm-side__label adm-side__toggle" aria-expanded={open} aria-controls={gid} onClick={flip} disabled={hasActive}
+                                    title={hasActive ? undefined : open ? 'Collapse' : 'Expand'}>
+                                    <span><i className={`fa ${g.icon || 'fa-cog'}`} aria-hidden="true"></i> {g.group}</span>
+                                    <i className={`fa ${open ? 'fa-angle-up' : 'fa-angle-down'}`} aria-hidden="true"></i>
+                                </button>
+                            ) : <p className="adm-side__label">{g.group}</p>}
+                            <div id={gid} hidden={!open}>
                             {g.items.map((i) => {
                                 const on = isActive(i, path);
                                 const n = i.badge ? Number(badges[i.badge]) || 0 : 0;
@@ -217,8 +236,10 @@ export default function AdminLayout({ title, crumbs, children, wide = false }) {
                                     </a>
                                 );
                             })}
+                            </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </nav>
                 <button type="button" className="adm-side__collapse" onClick={toggle} aria-label={collapsed ? 'Expand menu' : 'Collapse menu'}>
                     <i className={`fa ${collapsed ? 'fa-angle-double-right' : 'fa-angle-double-left'}`} aria-hidden="true"></i>

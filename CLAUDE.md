@@ -40,7 +40,10 @@ cd frontend && npm install && npm run dev                 # or: npm run prod / n
 Unit tests cover the auth crypto (`src/test/java/com/artistikcity/auth`: tokens, password policy, JWT/JWKS, WebAuthn), the
 rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/VideoUploadCheckTest`), S3 request signing against
 AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing (`shop/ShopPricingTest`) and
-the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc): `mvn test`. Browser tests for the purchase flow live in `tests/e2e`.
+the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc), the configuration panel's encryption and allow-list
+(`config/panel/ConfigPanelTest`), SNS SMS requests (`auth/sms/SnsSmsSenderTest`) and the Studio Stories / site layout checks
+(`admin/StudioAndLayoutTest`): `mvn test`. `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
+new admin API, secret masking, validation and commit of panel values, site settings and the Studio Stories workflow. Browser tests for the purchase flow live in `tests/e2e`.
 The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
 the rest get 409 or REFUND_REQUIRED) and `seats/SeatRaceIT` (20 students, 5 seats: exactly 5 get one) run only with
 `ARTISTIK_IT_DB_URL` set: `mvn test -Dtest=MarketplaceConcurrencyIT,SeatRaceIT` (the deploy workflow runs both).
@@ -154,9 +157,14 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   A course picks one in the editor and `courses.age_group` stores the group's **name** (renaming a group renames it on its
   courses; a group in use can't be deleted). The list reaches React as `site.ageGroups` (`SiteSettings.ageGroups`, cached) and
   feeds the /courses Age filter (exact name match) and the header/footer "By age" menus via `useAgeGroups()` in `SiteHeader`.
-- Site settings (`settings` table, tags `home`, `seo`, `contact`, `social`) are read through `admin/SiteSettings` (cached,
-  invalidated on save). SEO values go into the root templates' `<head>` (`seo.*`; a controller can override them with the
-  request attribute `Inertia.SEO_ATTRIBUTE`), contact/social reach React as the shared prop `site`.
+- Site settings (`settings` table, tags `home`, `seo`, `contact`, `social`, `landing`, `nav`, `cookie`) are read through
+  `admin/SiteSettings` (cached, invalidated on save) and edited in Admin > System parameters > SEO & Layout Controls
+  (`/admin/setup/site-settings`, page `Admin/Setup/SiteSettings`: form + live desktop/mobile preview; `POST /admin/api/setup/site-settings`,
+  only the groups sent are saved; `/admin/settings` redirects there). SEO values go into the root templates' `<head>` (`seo.*`; a controller
+  can override them with the request attribute `Inertia.SEO_ATTRIBUTE`); contact, social (links + `hidden` list), landing hero, header menu
+  (`nav.menu`, JSON list of {label, href, visible, accent}) and cookie banner reach React as the shared prop `site`. The public site reads
+  them only through `Components/Site/siteContent.js` (defaults = the original texts/menu, so empty settings change nothing): `Welcome` hero,
+  `SiteHeader` menu, `SiteFooter` icons, `CookieBanner` (cookie `ac_consent` = all | essential). Links must be a site path or https (`ContentAdminController.siteLink`).
 - **Course videos are separate:** `courses.intro_video_url` is the trailer on the public course page; `course_module_lessons.video_url`
   is each lesson's own video in the learning view (no fallback to another video). Both hold a link or `/storage/uploads/courses/<id>/videos/<file>`,
   uploaded through `POST /admin/api/courses/{id}/videos` (streamed to disk, 500 MB). The old `course_videos` table is no longer used.
@@ -176,7 +184,7 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   `/dashboard/documents/{id}/file`. Never link to `private/` keys any other way. PDF palette: `CredentialsService` constants
   (ink #2C3E50, soft #34495E, panels #F8F9FA / #ECF0F1); the cover is page 1 via `@page :first` (no named page: that forced a blank page).
 - **Preview and frame** (`/purchase/step-2`, `Components/Shop/ArtPreview.js`): the artwork is the default, large view (lit wall,
-  framer's dimension lines); the room photos come from `room_scenes`, managed in Admin > Sales > Room preview (`rooms/RoomAdminController`,
+  framer's dimension lines); the room photos come from `room_scenes`, managed in Admin > System parameters > Room Preview Setup (`/admin/setup/room-preview`, `rooms/RoomAdminController`,
   capability `marketplace.publish`): upload a photo (>= 1000 px wide), drag the hanging area (percent of the photo), optionally give its real
   width in inches (then paintings are drawn to scale), order / hide rooms, or switch the room step off (`settings` room_preview.enabled).
   The page adapts to 0..12 rooms. The artwork page's "On a wall" tab uses the same component. `RoomStage.js` / `rooms.js` are no longer used.
@@ -190,7 +198,7 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
 - **Marketplace shop** (package `shop/`, docs/marketplace-shop.md): every listing can also sell a numbered canvas edition, a poster and a
   digital download (`paintings.shop_formats`), priced from the global list `shop_price_options` by `ShopPricing` (the one source of prices;
   `Components/Shop/shop.js` only mirrors it for live UI). Four screens: the artwork page (buy box `Components/Shop/BuyPanel`: format, size,
-  price, "Talk to the artist") → `/purchase/step-2` preview and frame (`Components/Shop/ArtPreview`, rooms from Admin > Room preview) → `/purchase/checkout` (accordion contact/delivery/
+  price, "Talk to the artist") → `/purchase/step-2` preview and frame (`Components/Shop/ArtPreview`, rooms from Admin > System parameters > Room Preview Setup) → `/purchase/checkout` (accordion contact/delivery/
   payment, sticky summary) → `/purchase/orders/{id}`. `/purchase/step-1` and `/purchase/preview` only redirect. The choice is the session draft
   `purchase.draft`. There is no cart in the UI: "Buy now" saves the draft and `/purchase/buy-now` makes it the only line of the
   basket (`CartService.replaceWith`; `shop_carts` per owner key `U:<id>`, JSON API `/api/v1/cart/**` kept for the checkout's pricing and
@@ -200,7 +208,12 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   `/shop/download/{token}`. Admin: one console, Sales > Marketplace (`/admin/dashboard/marketplace`: paintings, review, holds, orders, messages, prices, coupons;
   `MarketplaceAdminController` + `ShopAdminController`, sections in `Components/Admin/ShopSections`; `/admin/dashboard/shop` only redirects). The old single-original checkout
   page now forwards into the cart checkout. Browser tests: `tests/e2e` (Playwright, against the dev profile).
-- Blog posts are public only when `status = 1`; drafts 404 for visitors (admins can preview). `/faq` reads the `faqs` table.
+- Blog posts ("Studio Stories") are public only when `status = 1`; drafts 404 for visitors (admins can preview). Status: 0 draft, 1 published,
+  2 archived, 3 in review, 4 scheduled (`publish_at`; `BlogAdminController.publishDue` publishes due ones every minute). CMS: Admin > Content >
+  Studio Stories (`/admin/content/stories`, `/new`, `/{id}`; page `Admin/Content/StudioStories` = dashboard or editor), JSON API
+  `GET/POST /admin/api/content/stories`, `POST|PUT /admin/api/content/stories/{id}`, `POST .../{id}/workflow` (old `/admin/api/posts` kept,
+  `/admin/blog/post*` redirect). Views: `BlogController.countView` (one per visitor session; admins and bots not counted) -> `posts.views` +
+  daily `post_views`; `read_minutes` = words / 200. `/faq` reads the `faqs` table.
   Order `payment_status`: 0 pending, 1 paid, 2 failed, 3 refunded; course access needs 1.
 - Wish list: table `wishlist_items` (type `course` or `painting`), `POST /wishlist {type, id, saved}`, page `/user/wishlist`
   (`Pages/Students/Wishlist.js`), and the heart button `Components/Wishlist/SaveButton.js`.
@@ -221,6 +234,16 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   The `dev` profile is its last section. New settings go there, with a comment and an env name, and are read through
   `config/Settings` (typed getters), never as raw strings in feature code. `application.properties` only imports it.
   Never commit `.env` or real keys (README §4, `.env.example`).
+- **Configuration Panel** (Admin > System parameters, `/admin/setup`, capability `setup` = super admin only; `config/panel/`):
+  payment, SMS and Google sign-in settings stored in `config_overrides`. `PanelConfig` adds them as the **first** Spring property
+  source, so they win over Parameter Store / env and the yml, and features see them at once because they read `env.getProperty` at call
+  time (keep it that way: no caching of these values in fields). Only keys in `ConfigCatalog` (the allow-list, with format checks) can be
+  set. Secrets are AES-256-GCM encrypted (`SecretBox`, key from `CONFIG_ENCRYPTION_KEY`, else `OTP_SECRET`), are sent to the browser only as
+  `ConfigCatalog.MASK`, and sending the mask (or an empty box) back keeps them; `reset` gives a key back to the server value. The audit
+  snapshot shows secrets as "(secret, saved <time>)". SMS goes through `auth/sms/DynamicSmsSender` (log | twilio | sns | infobip, picked per send).
+  Stripe keys are stored only (not wired to the checkout). API: `GET/POST /admin/api/setup/config`, `POST /admin/api/setup/sms-test`.
+- The admin sidebar group **System Parameters** (`AdminLayout` NAV, `collapsible: true`) holds Configuration Panel, Room Preview Setup,
+  SEO & Layout Controls and the Security log; it opens by itself on its pages and remembers its state (`ac.admin.groups`).
 - **Security log** (`security/AuditLog`, Admin > Setup > Security log, capability `security`): every `Audit.log` also writes the
   append-only, hash-chained `audit_logs` (actor, action type CREATE/UPDATE/DELETE/AUTH/EXPORT/DENIED, resource, IP + CloudFront
   country/city). Use `audit.change(admin, entity, id, action, details, before, after)` with `audit.snapshot(table, id)` for

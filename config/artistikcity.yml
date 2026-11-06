@@ -92,6 +92,13 @@ razorpay.secret: '${RAZORPAY_SECRET:}'
 paypal.client-id: '${PAYPAL_CLIENT_ID:}'
 paypal.secret: '${PAYPAL_SECRET:}'
 paypal.mode: '${PAYPAL_MODE:sandbox}'
+# Switch a gateway off without removing its keys (also in Admin > System parameters > Configuration panel)
+app.payments.razorpay.enabled: '${RAZORPAY_ENABLED:true}'
+app.payments.paypal.enabled: '${PAYPAL_ENABLED:true}'
+# Stripe: keys can be stored for later; Stripe is not connected to the checkout yet
+app.payments.stripe.publishable-key: '${STRIPE_PUBLISHABLE_KEY:}'
+app.payments.stripe.secret-key: '${STRIPE_SECRET_KEY:}'
+app.payments.stripe.webhook-secret: '${STRIPE_WEBHOOK_SECRET:}'
 
 # ---------------------------------------------------------------------
 # Authentication (package com.artistikcity.auth) - see README "Sign-in & security"
@@ -119,12 +126,24 @@ app.auth.expose-dev-otp: '${AUTH_EXPOSE_DEV_OTP:false}'
 app.auth.webauthn.rp-id: '${WEBAUTHN_RP_ID:}'
 app.auth.webauthn.origins: '${WEBAUTHN_ORIGINS:}'
 
-# SMS gateway for OTP codes: "log" (development: written to the log) or "twilio"
+# SMS gateway for OTP codes: "log" (development: written to the log), "twilio", "sns" or "infobip"
 app.sms.provider: '${SMS_PROVIDER:log}'
 app.sms.twilio.account-sid: '${TWILIO_ACCOUNT_SID:}'
 app.sms.twilio.auth-token: '${TWILIO_AUTH_TOKEN:}'
 app.sms.twilio.from: '${TWILIO_FROM:}'
 app.sms.twilio.messaging-service-sid: '${TWILIO_MESSAGING_SERVICE_SID:}'
+# Amazon SNS (SMS_PROVIDER=sns): empty access keys = the server's IAM role; DLT ids are required by Indian carriers
+app.sms.sns.region: '${SMS_SNS_REGION:ap-south-1}'
+app.sms.sns.access-key-id: '${SMS_SNS_ACCESS_KEY_ID:}'
+app.sms.sns.secret-access-key: '${SMS_SNS_SECRET_ACCESS_KEY:}'
+app.sms.sns.sender-id: '${SMS_SNS_SENDER_ID:}'
+app.sms.sns.sms-type: '${SMS_SNS_TYPE:Transactional}'
+app.sms.sns.entity-id: '${SMS_SNS_ENTITY_ID:}'
+app.sms.sns.template-id: '${SMS_SNS_TEMPLATE_ID:}'
+# Infobip (SMS_PROVIDER=infobip)
+app.sms.infobip.base-url: '${SMS_INFOBIP_BASE_URL:}'
+app.sms.infobip.api-key: '${SMS_INFOBIP_API_KEY:}'
+app.sms.infobip.sender: '${SMS_INFOBIP_SENDER:ArtistikCity}'
 
 # HTTP session (CSRF token, flash messages, cart; the login itself lives in auth_sessions)
 server.servlet.session.cookie.same-site: 'lax'
@@ -151,6 +170,9 @@ server.compression.min-response-size: '2048'
 # ---------------------------------------------------------------------
 social.google.client-id: '${GOOGLE_CLIENT_ID:}'
 social.google.client-secret: '${GOOGLE_CLIENT_SECRET:}'
+# empty = {APP_URL}/social-login/google/callback; openid and email are always requested
+social.google.redirect-uri: '${GOOGLE_REDIRECT_URI:}'
+social.google.scopes: '${GOOGLE_SCOPES:openid email profile}'
 social.facebook.client-id: '${FACEBOOK_CLIENT_ID:}'
 social.facebook.client-secret: '${FACEBOOK_CLIENT_SECRET:}'
 # Facebook only returns confirmed e-mail addresses; set to false to never merge accounts on a Facebook e-mail
@@ -181,6 +203,11 @@ app.payments.reconcile.alert-after-minutes: '${PAYMENTS_RECONCILE_ALERT_AFTER_MI
 # gateway API addresses (only change them for a test double)
 app.payments.razorpay.api-base: '${RAZORPAY_API_BASE:https://api.razorpay.com}'
 app.payments.paypal.api-base: '${PAYPAL_API_BASE:}'
+# Configuration panel (Admin > System parameters): values saved there win over environment variables and these defaults.
+# Its secrets are encrypted with this key (any long random string; empty = OTP_SECRET). Changing it makes saved
+# secrets unreadable (the panel then asks for them again).
+app.config.encryption-key: '${CONFIG_ENCRYPTION_KEY:}'
+
 # Test-buyer accounts: a super admin ticks "Test buyer" on an account (Admin > People); only that signed-in account sees
 # "Simulate payment" at checkout, on the live site too. Its orders are marked TEST and kept out of revenue, the ledger and
 # payouts. false = the switch is ignored everywhere (nobody can simulate a payment, whatever the accounts say).

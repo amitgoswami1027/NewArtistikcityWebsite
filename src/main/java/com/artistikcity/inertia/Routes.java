@@ -223,7 +223,16 @@ public class Routes {
         get("admin.finance", "admin/finance");
         get("admin.finance.export", "admin/finance/export");
         get("admin.refunds", "admin/payments/refunds");
-        get("admin.rooms", "admin/marketplace/rooms");
+        // System parameters (Admin > System parameters)
+        get("admin.setup", "admin/setup");
+        get("admin.setup.config.api", "admin/api/setup/config");
+        get("admin.rooms", "admin/setup/room-preview");
+        get("admin.setup.site_settings", "admin/setup/site-settings");
+        // Studio Stories CMS
+        get("admin.content.stories", "admin/content/stories");
+        get("admin.content.stories.create", "admin/content/stories/new");
+        get("admin.content.stories.edit", "admin/content/stories/{id}");
+        get("admin.content.stories.api", "admin/api/content/stories");
         get("admin.security.audit", "admin/security/audit");
         get("admin.security.audit.export", "admin/security/audit/export");
         get("admin.orders", "admin/orders");

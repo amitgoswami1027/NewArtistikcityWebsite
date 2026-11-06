@@ -41,7 +41,9 @@ public class PaymentGateways {
     }
 
     public boolean razorpayConfigured() {
-        return !razorpayKey().isBlank() && !env.getProperty("razorpay.secret", "").isBlank();
+        // Admin > System parameters can switch a gateway off without removing its keys
+        return env.getProperty("app.payments.razorpay.enabled", Boolean.class, true)
+                && !razorpayKey().isBlank() && !env.getProperty("razorpay.secret", "").isBlank();
     }
 
     /** Test mode (dev profile): lets you complete a simulated payment when no gateway keys are set. */
@@ -73,7 +75,8 @@ public class PaymentGateways {
     // --------------------------------------------------------------- PayPal
 
     public boolean paypalConfigured() {
-        return !env.getProperty("paypal.client-id", "").isBlank() && !env.getProperty("paypal.secret", "").isBlank();
+        return env.getProperty("app.payments.paypal.enabled", Boolean.class, true)
+                && !env.getProperty("paypal.client-id", "").isBlank() && !env.getProperty("paypal.secret", "").isBlank();
     }
 
     private String paypalBase() {

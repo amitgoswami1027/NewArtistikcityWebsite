@@ -7,7 +7,7 @@ import { Field, Toggle } from '@/Components/Admin/form';
 import { RoomView } from '@/Components/Shop/ArtPreview';
 
 /*
- * Admin > Sales > Room preview. The room photos buyers see a painting in before they pay (/purchase/step-2 and the
+ * Admin > System parameters > Room Preview Setup (/admin/setup/room-preview). The room photos buyers see a painting in before they pay (/purchase/step-2 and the
  * artwork page's "On a wall" tab). Each photo has a hanging area, drawn on the photo here, and optionally the real
  * width of that area so paintings are shown to scale. The page adapts to however many rooms are shown (none = the
  * artwork on its own).
@@ -181,8 +181,8 @@ export default function Rooms() {
     );
 
     return (
-        <AdminLayout title="Room preview">
-            <PageHeader eyebrow="Sales" title="Room preview"
+        <AdminLayout title='Room Preview Setup' crumbs={[{ label: 'System parameters' }, { label: "Room Preview Setup" }]}>
+            <PageHeader eyebrow="System parameters" title="Room Preview Setup"
                         subtitle="The rooms buyers see a painting in before they pay. The artwork on its own is always shown first; each room you show adds one more view."
                         actions={<Button variant="dark" icon="fa-plus" onClick={() => setEditing(blankForm())}>Add a room</Button>} />
 

@@ -88,6 +88,10 @@ public class SiteSettings {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("contact", all().getOrDefault("contact", Map.of()));
         m.put("social", all().getOrDefault("social", Map.of()));
+        // SEO & Layout Controls: landing hero, header menu (JSON in nav.menu), cookie banner; empty = the built-in defaults
+        m.put("landing", all().getOrDefault("landing", Map.of()));
+        m.put("nav", all().getOrDefault("nav", Map.of()));
+        m.put("cookie", all().getOrDefault("cookie", Map.of()));
         m.put("ageGroups", ageGroups());
         return m;
     }

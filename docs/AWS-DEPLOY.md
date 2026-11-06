@@ -170,7 +170,13 @@ Set-AppSetting NEWSLETTER_SECRET   "<any long random text>"
 ```
 
 Settings are read on every deploy. After changing one, re-run the last deploy (Actions → Deploy to AWS → Run workflow) or
-roll back and forward. Don't set `FORWARD_HEADERS` (the CloudFront filter does that job) or `PAYMENT_TEST_MODE=true` in production.
+roll back and forward.
+
+Payment, SMS and Google sign-in settings can instead be changed live in **Admin › System parameters › Configuration Panel**
+(super admin): values saved there win over Parameter Store and apply without a deploy; "Reset to server value" goes back.
+Secrets saved there are encrypted in the database with `CONFIG_ENCRYPTION_KEY` (falls back to `OTP_SECRET`). Set a dedicated
+key once and never change it, or the saved secrets can no longer be read (the panel then shows "Can't decrypt" and the
+Parameter Store value is used): `Set-AppSetting CONFIG_ENCRYPTION_KEY "<64 random characters>"`. Don't set `FORWARD_HEADERS` (the CloudFront filter does that job) or `PAYMENT_TEST_MODE=true` in production.
 
 Also update the addresses registered with your providers to the real domain:
 Razorpay webhook `https://www.yourdomain.com/api/v1/courses/razorpay-webhook`,

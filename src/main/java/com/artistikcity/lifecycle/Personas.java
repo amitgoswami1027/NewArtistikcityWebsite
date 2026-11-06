@@ -33,7 +33,7 @@ public final class Personas {
 
     private static final Map<String, List<String>> CAPS = Map.of(
             "admin", List.of("overview", "revenue", "submissions", "commissions", "marketplace", "marketplace.edit", "marketplace.publish",
-                    "marketplace.orders", "people", "people.manage", "testimonials", "gallery", "catalog", "settings", "security", "security.export", "moderation", "moderation.ban"),
+                    "marketplace.orders", "people", "people.manage", "testimonials", "gallery", "catalog", "settings", "setup", "security", "security.export", "moderation", "moderation.ban"),
             "teacher", List.of("overview", "submissions", "marketplace", "marketplace.own", "people", "catalog"),
             "moderator", List.of("overview", "submissions", "marketplace", "marketplace.publish", "marketplace.orders", "testimonials", "gallery", "commissions", "moderation"));
 

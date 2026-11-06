@@ -48,7 +48,7 @@ public class RoomAdminController {
         this.rooms = rooms;
     }
 
-    @GetMapping({"/admin/marketplace/rooms", "/admin/rooms"})
+    @GetMapping({"/admin/setup/room-preview", "/admin/setup/room-preview/", "/admin/marketplace/rooms", "/admin/rooms"})
     public ResponseEntity<String> page(HttpServletRequest request) {
         return kit.page(request, "marketplace.publish", "Admin/Rooms", () -> {
             Map<String, Object> p = new LinkedHashMap<>(kit.base(kit.admin(request)));

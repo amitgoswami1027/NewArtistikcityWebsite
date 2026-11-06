@@ -3,6 +3,7 @@ import { usePage, InertiaLink } from '@inertiajs/inertia-react';
 import axios from 'axios';
 import { API_URL } from '@/Components/Constants';
 import { accountNav } from '@/Components/Account/nav';
+import { visibleMenu, isCurrent, isExternal } from '@/Components/Site/siteContent';
 
 // fallback only: the real list is managed in Admin > Catalog > Age groups and arrives as the shared prop site.ageGroups
 export const AGE_GROUPS = ['Sub-junior - 8 to 12 yrs', 'Junior - 12 to 15 yrs', 'Adult - 16 yrs and above'];
@@ -61,7 +62,7 @@ function HeaderMenu({ id, button, buttonClass, label, align = 'left', children }
 }
 
 export default function SiteHeader({ showCategories = false, activeMedium = null }) {
-    const { auth, nav } = usePage().props;
+    const { auth, nav, site } = usePage().props;
     const user = auth && auth.user;
     const [mediums, setMediums] = useState([]);
     const [drawer, setDrawer] = useState(false);
@@ -87,6 +88,7 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
     const here = typeof window !== 'undefined' ? window.location.pathname : '';
     const initials = user && user.name ? user.name.trim().charAt(0).toUpperCase() : 'A';
     const account = user ? accountNav(nav) : [];
+    const menu = visibleMenu(site);
 
     return (
         <>
@@ -97,12 +99,11 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                     </a>
 
                     <nav className="dm-links dm-links--main" aria-label="Main">
-                        <a href={route('how.it.works')} aria-current={here.startsWith('/how-it-works') ? 'page' : undefined}>How it works</a>
-                        <a href={catalogUrl({})} aria-current={/^\/(courses|course|workshop)/.test(here) ? 'page' : undefined}>Courses</a>
-
-                        <a href={route('commission.step1')} aria-current={here.startsWith('/commission') ? 'page' : undefined}>Commission art</a>
-                        <a href="/marketplace" aria-current={here.startsWith('/marketplace') ? 'page' : undefined}>Marketplace</a>
-                        <a href={route('studio.stories')} className="is-accent" aria-current={here.startsWith('/studio-stories') ? 'page' : undefined}>Studio Stories</a>
+                        {menu.map((m) => (
+                            <a key={`${m.label}-${m.href}`} href={m.href} className={m.accent ? 'is-accent' : undefined}
+                                aria-current={isCurrent(m.href, here) ? 'page' : undefined}
+                                {...(isExternal(m.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{m.label}</a>
+                        ))}
                     </nav>
 
                     <form className="dm-search" onSubmit={search} role="search">
@@ -165,12 +166,10 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                         <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search courses" />
                         <button className="dm-btn dm-btn--ink" type="submit" aria-label="Search"><i className="fa fa-search" aria-hidden="true"></i></button>
                     </form>
-                    <a href={route('how.it.works')} style={{ fontWeight: 700 }}>How it works</a>
-                    <a href={catalogUrl({})} style={{ fontWeight: 700 }}>Courses</a>
-                    <h6>ArtistikCity</h6>
-                    <a href={route('commission.step1')}>Commission art</a>
-                    <a href="/marketplace">Marketplace</a>
-                    <a href={route('studio.stories')}>Studio Stories</a>
+                    {menu.map((m, i) => (
+                        <a key={`${m.label}-${m.href}`} href={m.href} style={i < 2 ? { fontWeight: 700 } : undefined}
+                            {...(isExternal(m.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{m.label}</a>
+                    ))}
                     {user ? (
                         <>
                             <a href="/dashboard" className="dm-btn dm-btn--line dm-btn--block" style={{ marginTop: 16 }}>My studio</a>

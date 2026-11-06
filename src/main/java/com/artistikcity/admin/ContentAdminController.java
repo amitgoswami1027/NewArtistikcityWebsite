@@ -38,7 +38,31 @@ public class ContentAdminController {
         SETTINGS.put("home", List.of("course_text_1", "course_text_2", "course_text_3", "workshop_text_1", "workshop_text_2", "workshop_text_3"));
         SETTINGS.put("seo", List.of("site_title", "meta_description", "meta_keywords", "og_image"));
         SETTINGS.put("contact", List.of("email", "phone", "address"));
-        SETTINGS.put("social", List.of("facebook", "instagram", "youtube", "linkedin"));
+        SETTINGS.put("social", List.of("facebook", "instagram", "youtube", "linkedin", "x", "pinterest", "whatsapp", "hidden"));
+        // SEO & Layout Controls (/admin/setup/site-settings)
+        SETTINGS.put("landing", List.of("hero_heading", "hero_emphasis", "hero_subtext", "cta_label", "cta_link", "search_placeholder"));
+        SETTINGS.put("nav", List.of("menu"));
+        SETTINGS.put("cookie", List.of("enabled", "message", "accept_label", "decline_label", "policy_link"));
+    }
+
+    /** Longest allowed value per key (default 255). */
+    static int maxLength(String tag, String key) {
+        return switch (tag + "." + key) {
+            case "seo.meta_description", "contact.address", "cookie.message" -> 500;
+            case "landing.hero_heading" -> 120;
+            case "landing.hero_emphasis" -> 80;
+            case "landing.hero_subtext" -> 300;
+            case "landing.cta_label", "cookie.accept_label", "cookie.decline_label" -> 40;
+            case "nav.menu" -> 4000;
+            default -> 255;
+        };
+    }
+
+    static final List<String> SOCIAL_NETWORKS = List.of("facebook", "instagram", "youtube", "linkedin", "x", "pinterest", "whatsapp");
+
+    /** A site link: a path on this site ("/courses?type=all", no "//") or a full https:// address. */
+    static boolean siteLink(String s) {
+        return s.matches("^/(?!/)[^\\s<>\"']*$") || s.matches("(?i)^https://[^\\s<>\"']+$");
     }
 
     private final AdminKit kit;
@@ -219,8 +243,14 @@ public class ContentAdminController {
     // ================================================================ settings
 
     @GetMapping({"/admin/settings", "/admin/settings/"})
+    public ResponseEntity<String> legacySettingsPage(HttpServletRequest request) {
+        return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND).header("Location", "/admin/setup/site-settings").build();
+    }
+
+    /** SEO & Layout Controls: landing hero, search & sharing, menu builder, cookie banner, social links, contact details. */
+    @GetMapping({"/admin/setup/site-settings", "/admin/setup/site-settings/"})
     public ResponseEntity<String> settingsPage(HttpServletRequest request) {
-        return kit.page(request, "settings", "Admin/Settings", () -> {
+        return kit.page(request, "settings", "Admin/Setup/SiteSettings", () -> {
             Map<String, Object> values = new LinkedHashMap<>();
             for (Map.Entry<String, List<String>> e : SETTINGS.entrySet()) {
                 Map<String, String> group = new LinkedHashMap<>();
@@ -233,7 +263,7 @@ public class ContentAdminController {
         });
     }
 
-    @PostMapping({"/admin/api/settings", "/admin/settings/update"})
+    @PostMapping({"/admin/api/settings", "/admin/settings/update", "/admin/api/setup/site-settings"})
     public ResponseEntity<String> saveSettings(HttpServletRequest request) {
         Row admin = kit.admin(request);
         if (!kit.can(admin, "settings")) {
@@ -247,25 +277,61 @@ public class ContentAdminController {
         Map<String, String> errors = new LinkedHashMap<>();
         Map<String, Map<String, String>> clean = new LinkedHashMap<>();
         for (Map.Entry<String, List<String>> e : SETTINGS.entrySet()) {
-            Map<String, String> group = new LinkedHashMap<>();
             Object raw = d.get(e.getKey());
+            if (!(raw instanceof Map<?, ?> m)) continue;                 // groups not sent are left as they are
+            Map<String, String> group = new LinkedHashMap<>();
             for (String k : e.getValue()) {
-                Object v = raw instanceof Map<?, ?> m ? m.get(k) : null;
-                String s = v == null ? "" : String.valueOf(v).trim();
+                if (!m.containsKey(k)) {                                  // keys not sent keep their saved value
+                    group.put(k, site.get(e.getKey(), k, ""));
+                    continue;
+                }
+                Object v = m.get(k);
+                String s = v == null ? "" : v instanceof String str ? str.trim() : json.encode(v);
                 group.put(k, s);
                 String field = e.getKey() + "." + k;
-                if (s.length() > ("meta_description".equals(k) || "address".equals(k) ? 500 : 255)) {
-                    errors.put(field, "This is too long.");
-                } else if ("social".equals(e.getKey()) && !s.isEmpty() && !s.matches("(?i)^https?://\\S+$")) {
+                if ("nav.menu".equals(field)) {
+                    continue;                                             // checked below
+                } else if (s.length() > maxLength(e.getKey(), k)) {
+                    errors.put(field, "Keep this under " + maxLength(e.getKey(), k) + " characters.");
+                } else if ("social".equals(e.getKey()) && "hidden".equals(k)) {
+                    for (String n : s.isEmpty() ? new String[0] : s.split(",")) {
+                        if (!SOCIAL_NETWORKS.contains(n.trim())) { errors.put(field, "Unknown network: " + n.trim()); break; }
+                    }
+                } else if ("social".equals(e.getKey()) && !s.isEmpty() && !s.matches("(?i)^https?://[^\\s<>\"']+$")) {
                     errors.put(field, "Enter the full link, starting with https://");
                 } else if ("contact".equals(e.getKey()) && "email".equals(k) && !s.isEmpty() && !s.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
                     errors.put(field, "Enter a valid e-mail address.");
+                } else if (("landing.cta_link".equals(field) || "cookie.policy_link".equals(field)) && !s.isEmpty() && !siteLink(s)) {
+                    errors.put(field, "Use a page on this site such as /courses?type=all, or a full https:// link.");
+                } else if ("cookie.enabled".equals(field) && !s.isEmpty() && !s.equals("1") && !s.equals("0")) {
+                    errors.put(field, "Choose on or off.");
                 }
             }
             clean.put(e.getKey(), group);
         }
-        if (AdminKit.blank(clean.get("seo").get("site_title"))) {
+        if (clean.containsKey("seo") && AdminKit.blank(clean.get("seo").get("site_title"))) {
             errors.put("seo.site_title", "The site needs a title for search results.");
+        }
+        Map<String, String> landing = clean.get("landing");
+        if (landing != null) {
+            if (AdminKit.blank(landing.get("hero_heading"))) errors.put("landing.hero_heading", "The landing page needs a heading.");
+            if (!AdminKit.blank(landing.get("cta_label")) && AdminKit.blank(landing.get("cta_link"))) errors.putIfAbsent("landing.cta_link", "Where should the button go?");
+            if (AdminKit.blank(landing.get("cta_label")) && !AdminKit.blank(landing.get("cta_link"))) errors.putIfAbsent("landing.cta_label", "Give the button a label, or clear the link.");
+        }
+        Map<String, String> cookie = clean.get("cookie");
+        if (cookie != null && "1".equals(cookie.get("enabled")) && AdminKit.blank(cookie.get("message"))) {
+            errors.put("cookie.message", "Write the banner text, or switch the banner off.");
+        }
+        if (clean.containsKey("nav")) {
+            String menu = clean.get("nav").get("menu");
+            Object parsed = null;
+            String menuError = null;
+            if (!AdminKit.blank(menu)) {
+                try { parsed = json.decode(menu); } catch (RuntimeException ex) { parsed = null; }
+                menuError = checkMenu(parsed);
+            }
+            if (menuError != null) errors.put("nav.menu", menuError);
+            else if (parsed != null) clean.get("nav").put("menu", json.encode(normalizeMenu((List<?>) parsed)));
         }
         UploadedFile og = in.hasFile("og_image") ? in.file("og_image") : null;
         String ogError = AdminKit.checkImage(og);
@@ -275,7 +341,7 @@ public class ContentAdminController {
         if (!errors.isEmpty()) {
             return kit.invalid(errors);
         }
-        if (og != null) {
+        if (og != null && clean.containsKey("seo")) {
             clean.get("seo").put("og_image", "/storage/uploads/site/" + storage.storeUpload(og, "uploads/site"));
         }
         Map<String, Object> before = settingsSnapshot(clean.keySet());
@@ -289,6 +355,41 @@ public class ContentAdminController {
         site.invalidate();
         audit.change(admin, "settings", 0, "updated", String.join(", ", clean.keySet()), before, settingsSnapshot(clean.keySet()));
         return kit.ok(Map.of("values", clean, "message", "Settings saved. The site uses them straight away."));
+    }
+
+    /**
+     * The header menu: 1 to 10 items {label (1-30 characters), href (site path or https link), visible, accent}.
+     * Returns the first problem, or null.
+     */
+    static String checkMenu(Object parsed) {
+        if (!(parsed instanceof List<?> items)) return "The menu could not be read. Reload the page and try again.";
+        if (items.isEmpty()) return "Keep at least one menu item (or reset the menu to the default).";
+        if (items.size() > 10) return "Up to 10 menu items fit in the header.";
+        java.util.Set<String> labels = new java.util.HashSet<>();
+        for (int i = 0; i < items.size(); i++) {
+            if (!(items.get(i) instanceof Map<?, ?> it)) return "Menu item " + (i + 1) + " is not valid.";
+            String label = it.get("label") == null ? "" : String.valueOf(it.get("label")).trim();
+            String href = it.get("href") == null ? "" : String.valueOf(it.get("href")).trim();
+            if (label.isEmpty()) return "Menu item " + (i + 1) + " needs a label.";
+            if (label.length() > 30) return "“" + label + "” is too long for the header (30 characters at most).";
+            if (!labels.add(label.toLowerCase())) return "“" + label + "” is in the menu twice.";
+            if (href.isEmpty() || !siteLink(href)) return "“" + label + "”: use a page on this site such as /marketplace, or a full https:// link.";
+        }
+        return null;
+    }
+
+    static List<Map<String, Object>> normalizeMenu(List<?> items) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (Object o : items) {
+            Map<?, ?> it = (Map<?, ?>) o;
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("label", String.valueOf(it.get("label")).trim());
+            m.put("href", String.valueOf(it.get("href")).trim());
+            m.put("visible", !Boolean.FALSE.equals(it.get("visible")) && !"false".equals(String.valueOf(it.get("visible"))));
+            m.put("accent", Boolean.TRUE.equals(it.get("accent")) || "true".equals(String.valueOf(it.get("accent"))));
+            out.add(m);
+        }
+        return out;
     }
 
     /** The saved values of these settings groups as {"tag.key": value}, for the before/after diff of the security log. */

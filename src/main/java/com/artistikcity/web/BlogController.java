@@ -71,10 +71,33 @@ public class BlogController {
             seo.put("image", Inertia.baseUrl(request) + "/storage/uploads/blog/" + post.str("image"));
         }
         request.setAttribute(Inertia.SEO_ATTRIBUTE, seo);
+        if (post.lng("status", 0) == 1) countView(request, post.lng("id"));
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("post", posts.present(post, true));
         props.put("category_list", db.select("select * from categories order by id"));
         props.put("featured_post", posts.present(db.select("select * from posts where featured = 1 and status = 1 order by id"), false));
         return inertia.render(request, "PostDetails", props);
+    }
+
+    /**
+     * One view per visitor session and post (bots and admins previewing are not counted): the total on the post and a
+     * daily row in post_views, for Admin > Content > Studio Stories.
+     */
+    private void countView(HttpServletRequest request, long postId) {
+        if (auth.admin(request) != null) return;
+        String ua = String.valueOf(request.getHeader("User-Agent")).toLowerCase(java.util.Locale.ROOT);
+        if (ua.equals("null") || ua.matches(".*(bot|crawl|spider|slurp|preview|monitor|curl|wget|python-requests).*")) return;
+        jakarta.servlet.http.HttpSession session = request.getSession(true);
+        @SuppressWarnings("unchecked")
+        java.util.Set<Long> seen = (java.util.Set<Long>) session.getAttribute("blog.viewed");
+        if (seen == null) seen = new java.util.HashSet<>();
+        if (!seen.add(postId)) return;
+        session.setAttribute("blog.viewed", seen);
+        try {
+            db.update("update posts set views = views + 1 where id = ?", postId);
+            db.update("insert into post_views (post_id, day, views) values (?, ?, 1) on duplicate key update views = views + 1", postId, java.time.LocalDate.now());
+        } catch (RuntimeException e) {
+            // counting is best effort: the page still renders
+        }
     }
 }

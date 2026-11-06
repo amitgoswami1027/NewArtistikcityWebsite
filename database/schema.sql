@@ -1572,3 +1572,32 @@ INSERT INTO room_scenes (label, note, photo, photo_width, photo_height, area_x, 
 
 INSERT INTO settings (meta_tag, meta_key, meta_value, created_at, updated_at) VALUES
 ('room_preview', 'enabled', '1', NOW(), NOW());
+
+-- Admin > System parameters and the Studio Stories CMS (see migrations/2026-11-06_admin_setup.sql)
+CREATE TABLE config_overrides (
+    config_key  VARCHAR(190) NOT NULL PRIMARY KEY,
+    value_text  TEXT         NULL,
+    value_enc   TEXT         NULL,
+    is_secret   TINYINT      NOT NULL DEFAULT 0,
+    updated_by  BIGINT       NULL,
+    created_at  DATETIME     NULL,
+    updated_at  DATETIME     NULL
+);
+
+-- Studio Stories CMS: workflow (0 draft, 1 published, 2 archived, 3 in review), author, scheduled publishing,
+-- views and read time.
+ALTER TABLE posts ADD COLUMN author_id BIGINT NULL;
+ALTER TABLE posts ADD COLUMN publish_at DATETIME NULL;
+ALTER TABLE posts ADD COLUMN published_at DATETIME NULL;
+ALTER TABLE posts ADD COLUMN archived_at DATETIME NULL;
+ALTER TABLE posts ADD COLUMN views INT NOT NULL DEFAULT 0;
+ALTER TABLE posts ADD COLUMN read_minutes INT NOT NULL DEFAULT 0;
+
+-- one row per post and day: the dashboard's views over time
+CREATE TABLE post_views (
+    post_id  BIGINT NOT NULL,
+    day      DATE   NOT NULL,
+    views    INT    NOT NULL DEFAULT 0,
+    PRIMARY KEY (post_id, day)
+);
+CREATE INDEX post_views_day_index ON post_views (day);

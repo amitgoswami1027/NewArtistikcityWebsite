@@ -131,7 +131,8 @@ public class SocialController {
                 .append("&code_challenge=").append(Tokens.pkceChallenge(verifier))
                 .append("&code_challenge_method=S256");
         if ("google".equals(provider)) {
-            url.append("&scope=").append(enc("openid email profile")).append("&nonce=").append(nonce)
+            // Admin > System parameters > Configuration panel can widen the scopes; openid and email are always asked for
+            url.append("&scope=").append(enc(googleScopes())).append("&nonce=").append(nonce)
                     .append("&prompt=select_account");
         } else {
             url.append("&scope=").append(enc("email,public_profile"));
@@ -309,7 +310,18 @@ public class SocialController {
         return redirect.route(request, "login");
     }
 
+    private String googleScopes() {
+        java.util.LinkedHashSet<String> s = new java.util.LinkedHashSet<>(List.of("openid", "email"));
+        for (String x : env.getProperty("social.google.scopes", "openid email profile").split("[\\s,]+")) {
+            if (x.matches("[A-Za-z0-9_.:/-]{2,200}")) s.add(x);
+        }
+        return String.join(" ", s);
+    }
+
     private String callbackUrl(HttpServletRequest request, String provider) {
+        // an exact redirect URI registered with the provider wins (social.<provider>.redirect-uri)
+        String fixed = env.getProperty("social." + provider + ".redirect-uri", "").trim();
+        if (fixed.matches("(?i)^https?://\\S+/social-login/" + provider + "/callback$")) return fixed;
         String base = env.getProperty("app.url", "");
         return (base.isBlank() ? Inertia.baseUrl(request) : base.replaceAll("/+$", "")) + "/social-login/" + provider + "/callback";
     }

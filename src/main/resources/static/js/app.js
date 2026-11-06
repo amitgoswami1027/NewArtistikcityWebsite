@@ -2930,7 +2930,6 @@ const NAV = [
     { href: "/admin/orders", label: "Course orders", icon: "fa-shopping-cart", cap: "revenue", also: ["/admin/orders/"] },
     { href: "/admin/dashboard/commissions", label: "Commissions", icon: "fa-paint-brush", cap: "commissions", badge: "commissions" },
     { href: "/admin/dashboard/marketplace", label: "Marketplace", icon: "fa-tags", cap: "marketplace", badge: "marketplace", also: ["/admin/dashboard/marketplace/"] },
-    { href: "/admin/marketplace/rooms", label: "Room preview", icon: "fa-picture-o", cap: "marketplace.publish" },
     { href: "/admin/payments/refunds", label: "Refunds", icon: "fa-undo", cap: "revenue", badge: "refunds" },
     { href: "/admin/finance", label: "Payouts & ledger", icon: "fa-balance-scale", cap: "revenue", badge: "payouts", also: ["/admin/finance/"] }
   ] },
@@ -2942,14 +2941,17 @@ const NAV = [
     { href: "/admin/dashboard/gallery", label: "Gallery", icon: "fa-picture-o", cap: "gallery" }
   ] },
   { group: "Content", items: [
-    { href: "/admin/blog/post", label: "Blog posts", icon: "fa-pencil-square-o", cap: "settings", also: ["/admin/blog/post/"] },
+    { href: "/admin/content/stories", label: "Studio Stories", icon: "fa-pencil-square-o", cap: "settings", also: ["/admin/content/stories/", "/admin/blog/post"] },
     { href: "/admin/blog/taxonomy", label: "Blog categories & tags", icon: "fa-bookmark-o", cap: "settings" },
     { href: "/admin/faq", label: "FAQ", icon: "fa-question-circle-o", cap: "settings" },
     { href: "/admin/newsletter", label: "Newsletter", icon: "fa-envelope-o", cap: "settings", also: ["/admin/newsletter/"] },
     { href: "/admin/contacts", label: "Contact messages", icon: "fa-inbox", cap: "settings", badge: "contacts" }
   ] },
-  { group: "Setup", items: [
-    { href: "/admin/settings", label: "Site settings & SEO", icon: "fa-cog", cap: "settings" },
+  // collapsible: the group header is a button; it opens by itself on its own pages
+  { group: "System Parameters", icon: "fa-cogs", collapsible: true, items: [
+    { href: "/admin/setup", label: "Configuration Panel", icon: "fa-sliders", cap: "setup", exact: true, also: ["/admin/setup/config"] },
+    { href: "/admin/setup/room-preview", label: "Room Preview Setup", icon: "fa-picture-o", cap: "marketplace.publish", also: ["/admin/marketplace/rooms"] },
+    { href: "/admin/setup/site-settings", label: "SEO & Layout Controls", icon: "fa-paint-brush", cap: "settings", also: ["/admin/settings"] },
     { href: "/admin/security/audit", label: "Security log", icon: "fa-shield", cap: "security" }
   ] }
 ];
@@ -2967,7 +2969,21 @@ const saveCollapsed = (v) => {
   } catch (e) {
   }
 };
-const isActive = (item, path) => item.exact ? path === item.href : path === item.href || (item.also || []).some((p) => path.startsWith(p));
+const isActive = (item, path) => path === item.href || (item.also || []).some((p) => path === p || path.startsWith(`${p}/`) || p.endsWith("/") && path.startsWith(p)) || !item.exact && path.startsWith(`${item.href}/`);
+const GROUPS_KEY = "ac.admin.groups";
+const readGroups = () => {
+  try {
+    return JSON.parse(window.localStorage.getItem(GROUPS_KEY) || "{}") || {};
+  } catch (e) {
+    return {};
+  }
+};
+const saveGroups = (v) => {
+  try {
+    window.localStorage.setItem(GROUPS_KEY, JSON.stringify(v));
+  } catch (e) {
+  }
+};
 function activeItem(path) {
   let found = null;
   NAV.forEach((g) => g.items.forEach((i) => {
@@ -3071,6 +3087,7 @@ function AdminLayout({ title, crumbs, children, wide = false }) {
   const caps = admin.capabilities || [];
   const [collapsed, setCollapsed] = (0, import_react.useState)(readCollapsed);
   const [drawer, setDrawer] = (0, import_react.useState)(false);
+  const [openGroups, setOpenGroups] = (0, import_react.useState)(readGroups);
   const path = typeof window !== "undefined" ? window.location.pathname.replace(/\/+$/, "") || "/" : "";
   const token = typeof document !== "undefined" ? (document.head.querySelector('meta[name="csrf-token"]') || {}).content : "";
   const current = activeItem(path);
@@ -3107,18 +3124,47 @@ function AdminLayout({ title, crumbs, children, wide = false }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__tag", children: "Admin" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-side__close", onClick: () => setDrawer(false), "aria-label": "Close menu", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "adm-side__nav", children: groups.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-side__group", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-side__label", children: g.group }),
-        g.items.map((i) => {
-          const on = isActive(i, path);
-          const n = i.badge ? Number(badges[i.badge]) || 0 : 0;
-          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: i.href, className: `adm-side__link ${on ? "is-on" : ""}`, "aria-current": on ? "page" : void 0, title: collapsed ? i.label : void 0, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${i.icon}`, "aria-hidden": "true" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__text", children: i.label }),
-            n > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__badge", "aria-label": `${n} waiting`, children: n > 99 ? "99+" : n })
-          ] }, i.href);
-        })
-      ] }, g.group)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "adm-side__nav", children: groups.map((g) => {
+        const hasActive = g.items.some((i) => isActive(i, path));
+        const open = !g.collapsible || hasActive || openGroups[g.group] === true || collapsed && !drawer;
+        const gid = `adm-grp-${g.group.toLowerCase().replace(/[^a-z]+/g, "-")}`;
+        const flip = () => setOpenGroups((o) => {
+          const next = __spreadProps(__spreadValues({}, o), { [g.group]: !open });
+          saveGroups(next);
+          return next;
+        });
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `adm-side__group ${g.collapsible ? "is-collapsible" : ""} ${open ? "is-open" : ""}`, children: [
+          g.collapsible ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+            "button",
+            {
+              type: "button",
+              className: "adm-side__label adm-side__toggle",
+              "aria-expanded": open,
+              "aria-controls": gid,
+              onClick: flip,
+              disabled: hasActive,
+              title: hasActive ? void 0 : open ? "Collapse" : "Expand",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${g.icon || "fa-cog"}`, "aria-hidden": "true" }),
+                  " ",
+                  g.group
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${open ? "fa-angle-up" : "fa-angle-down"}`, "aria-hidden": "true" })
+              ]
+            }
+          ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-side__label", children: g.group }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: gid, hidden: !open, children: g.items.map((i) => {
+            const on = isActive(i, path);
+            const n = i.badge ? Number(badges[i.badge]) || 0 : 0;
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: i.href, className: `adm-side__link ${on ? "is-on" : ""}`, "aria-current": on ? "page" : void 0, title: collapsed ? i.label : void 0, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${i.icon}`, "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__text", children: i.label }),
+              n > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__badge", "aria-label": `${n} waiting`, children: n > 99 ? "99+" : n })
+            ] }, i.href);
+          }) })
+        ] }, g.group);
+      }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "adm-side__collapse", onClick: toggle, "aria-label": collapsed ? "Expand menu" : "Collapse menu", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${collapsed ? "fa-angle-double-right" : "fa-angle-double-left"}`, "aria-hidden": "true" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-side__text", children: "Collapse menu" })
@@ -7717,16 +7763,11 @@ var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios
 var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
 var import_Constants = __webpack_require__("./resources/js/Components/Constants.js");
 var import_SiteHeader = __webpack_require__("./resources/js/Components/Site/SiteHeader.js");
-const SOCIAL = [
-  ["facebook", "Facebook", "fa-facebook", "https://www.facebook.com/StudioVaishaliArts/"],
-  ["instagram", "Instagram", "fa-instagram", "https://www.instagram.com/artistikcity/"],
-  ["youtube", "YouTube", "fa-youtube-play", "https://www.youtube.com/@artistikcityYT"],
-  ["linkedin", "LinkedIn", "fa-linkedin", "https://in.linkedin.com/in/vaishali-jetly-goswami-4b5874233"]
-];
+var import_siteContent = __webpack_require__("./resources/js/Components/Site/siteContent.js");
 function SiteFooter() {
   const { site } = (0, import_inertia_react.usePage)().props;
   const ageGroups = (0, import_SiteHeader.useAgeGroups)();
-  const social = site && site.social && Object.keys(site.social).length ? SOCIAL.filter(([k]) => site.social[k]).map(([k, l, i]) => [k, l, i, site.social[k]]) : SOCIAL;
+  const social = (0, import_siteContent.socialOf)(site);
   const [mediums, setMediums] = (0, import_react.useState)([]);
   (0, import_react.useEffect)(() => {
     import_axios.default.get(`${import_Constants.API_URL}/get_mediums`).then((r) => setMediums(Array.isArray(r.data) ? r.data : [])).catch(() => {
@@ -7804,10 +7845,27 @@ function SiteFooter() {
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -7844,6 +7902,7 @@ var import_inertia_react = __webpack_require__("../../febuild/node_modules/@iner
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_Constants = __webpack_require__("./resources/js/Components/Constants.js");
 var import_nav = __webpack_require__("./resources/js/Components/Account/nav.js");
+var import_siteContent = __webpack_require__("./resources/js/Components/Site/siteContent.js");
 const AGE_GROUPS = ["Sub-junior - 8 to 12 yrs", "Junior - 12 to 15 yrs", "Adult - 16 yrs and above"];
 function useAgeGroups() {
   const { site } = (0, import_inertia_react.usePage)().props;
@@ -7900,7 +7959,7 @@ function HeaderMenu({ id, button, buttonClass, label, align = "left", children }
   ] });
 }
 function SiteHeader({ showCategories = false, activeMedium = null }) {
-  const { auth, nav } = (0, import_inertia_react.usePage)().props;
+  const { auth, nav, site } = (0, import_inertia_react.usePage)().props;
   const user = auth && auth.user;
   const [mediums, setMediums] = (0, import_react.useState)([]);
   const [drawer, setDrawer] = (0, import_react.useState)(false);
@@ -7926,16 +7985,21 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
   const here = typeof window !== "undefined" ? window.location.pathname : "";
   const initials = user && user.name ? user.name.trim().charAt(0).toUpperCase() : "A";
   const account = user ? (0, import_nav.accountNav)(nav) : [];
+  const menu = (0, import_siteContent.visibleMenu)(site);
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", { className: "dm-header", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide dm-header__row", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("welcome"), className: "ac-logo", "aria-label": "ArtistikCity home", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/logo.png", alt: "ArtistikCity" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { className: "dm-links dm-links--main", "aria-label": "Main", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("how.it.works"), "aria-current": here.startsWith("/how-it-works") ? "page" : void 0, children: "How it works" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({}), "aria-current": /^\/(courses|course|workshop)/.test(here) ? "page" : void 0, children: "Courses" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("commission.step1"), "aria-current": here.startsWith("/commission") ? "page" : void 0, children: "Commission art" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", "aria-current": here.startsWith("/marketplace") ? "page" : void 0, children: "Marketplace" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("studio.stories"), className: "is-accent", "aria-current": here.startsWith("/studio-stories") ? "page" : void 0, children: "Studio Stories" })
-      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-links dm-links--main", "aria-label": "Main", children: menu.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "a",
+        __spreadProps(__spreadValues({
+          href: m.href,
+          className: m.accent ? "is-accent" : void 0,
+          "aria-current": (0, import_siteContent.isCurrent)(m.href, here) ? "page" : void 0
+        }, (0, import_siteContent.isExternal)(m.href) ? { target: "_blank", rel: "noopener noreferrer" } : {}), {
+          children: m.label
+        }),
+        `${m.label}-${m.href}`
+      )) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "dm-search", onSubmit: search, role: "search", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", value: query, onChange: (e) => setQuery(e.target.value), placeholder: "Search courses\u2026", "aria-label": "Search courses" })
@@ -7979,12 +8043,16 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", value: query, onChange: (e) => setQuery(e.target.value), placeholder: "Search courses" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { className: "dm-btn dm-btn--ink", type: "submit", "aria-label": "Search", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search", "aria-hidden": "true" }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("how.it.works"), style: { fontWeight: 700 }, children: "How it works" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: catalogUrl({}), style: { fontWeight: 700 }, children: "Courses" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "ArtistikCity" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("commission.step1"), children: "Commission art" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", children: "Marketplace" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("studio.stories"), children: "Studio Stories" }),
+      menu.map((m, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "a",
+        __spreadProps(__spreadValues({
+          href: m.href,
+          style: i < 2 ? { fontWeight: 700 } : void 0
+        }, (0, import_siteContent.isExternal)(m.href) ? { target: "_blank", rel: "noopener noreferrer" } : {}), {
+          children: m.label
+        }),
+        `${m.label}-${m.href}`
+      )),
       user ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/dashboard", className: "dm-btn dm-btn--line dm-btn--block", style: { marginTop: 16 }, children: "My studio" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h6", { children: "My account" }),
@@ -8049,6 +8117,7 @@ var import_SiteErrorBoundary = __toESM(__webpack_require__("./resources/js/Compo
 var import_SignInSheet = __toESM(__webpack_require__("./resources/js/Components/Site/SignInSheet.js"));
 var import_UndoToast = __toESM(__webpack_require__("./resources/js/Components/Site/UndoToast.js"));
 var import_SlowVisit = __toESM(__webpack_require__("./resources/js/Components/Site/SlowVisit.js"));
+var import_CookieBanner = __toESM(__webpack_require__("./resources/js/Components/Site/CookieBanner.js"));
 function SiteLayout({ title, children, showCategories = false, activeMedium = null }) {
   const { flash } = (0, import_inertia_react.usePage)().props;
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac", children: [
@@ -8059,7 +8128,8 @@ function SiteLayout({ title, children, showCategories = false, activeMedium = nu
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteFooter.default, {}),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInSheet.default, {}),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_UndoToast.default, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SlowVisit.default, {})
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SlowVisit.default, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CookieBanner.default, {})
   ] });
 }
 
@@ -26437,12 +26507,12 @@ function Rooms() {
       ] })
     ] })
   ] }, r.id);
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Room preview", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Room Preview Setup", crumbs: [{ label: "System parameters" }, { label: "Room Preview Setup" }], children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
       import_AdminLayout.PageHeader,
       {
-        eyebrow: "Sales",
-        title: "Room preview",
+        eyebrow: "System parameters",
+        title: "Room Preview Setup",
         subtitle: "The rooms buyers see a painting in before they pay. The artwork on its own is always shown first; each room you show adds one more view.",
         actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", icon: "fa-plus", onClick: () => setEditing(blankForm()), children: "Add a room" })
       }
@@ -26481,6 +26551,1681 @@ function Rooms() {
     confirmNode,
     toastNode
   ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Site/siteContent.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var siteContent_exports = {};
+__export(siteContent_exports, {
+  DEFAULT_COOKIE: () => DEFAULT_COOKIE,
+  DEFAULT_LANDING: () => DEFAULT_LANDING,
+  DEFAULT_MENU: () => DEFAULT_MENU,
+  SOCIAL_NETWORKS: () => SOCIAL_NETWORKS,
+  cookieOf: () => cookieOf,
+  isCurrent: () => isCurrent,
+  isExternal: () => isExternal,
+  landingOf: () => landingOf,
+  menuOf: () => menuOf,
+  parseMenu: () => parseMenu,
+  socialOf: () => socialOf,
+  visibleMenu: () => visibleMenu
+});
+module.exports = __toCommonJS(siteContent_exports);
+const DEFAULT_LANDING = {
+  hero_heading: "Learn to draw and paint",
+  hero_emphasis: "with a real artist.",
+  hero_subtext: "Live online art courses and workshops for every age and level. Pick a medium, join a small group and finish artwork you're proud of.",
+  cta_label: "",
+  cta_link: "",
+  search_placeholder: "What do you want to learn?"
+};
+const DEFAULT_MENU = [
+  { label: "How it works", href: "/how-it-works", visible: true, accent: false },
+  { label: "Courses", href: "/courses?type=all", visible: true, accent: false },
+  { label: "Commission art", href: "/commission/step-1", visible: true, accent: false },
+  { label: "Marketplace", href: "/marketplace", visible: true, accent: false },
+  { label: "Studio Stories", href: "/studio-stories", visible: true, accent: true }
+];
+const DEFAULT_COOKIE = {
+  enabled: "0",
+  message: "We use essential cookies to keep you signed in and your checkout safe, and optional ones to understand how the site is used.",
+  accept_label: "Accept all",
+  decline_label: "Essential only",
+  policy_link: "/privacy-policy"
+};
+const SOCIAL_NETWORKS = [
+  ["facebook", "Facebook", "fa-facebook", "https://www.facebook.com/StudioVaishaliArts/"],
+  ["instagram", "Instagram", "fa-instagram", "https://www.instagram.com/artistikcity/"],
+  ["youtube", "YouTube", "fa-youtube-play", "https://www.youtube.com/@artistikcityYT"],
+  ["linkedin", "LinkedIn", "fa-linkedin", "https://in.linkedin.com/in/vaishali-jetly-goswami-4b5874233"],
+  ["x", "X (Twitter)", "fa-twitter", ""],
+  ["pinterest", "Pinterest", "fa-pinterest", ""],
+  ["whatsapp", "WhatsApp", "fa-whatsapp", ""]
+];
+const filled = (v) => v !== void 0 && v !== null && String(v).trim() !== "";
+function landingOf(site) {
+  const l = site && site.landing || {};
+  const out = __spreadValues({}, DEFAULT_LANDING);
+  Object.keys(DEFAULT_LANDING).forEach((k) => {
+    if (filled(l[k])) out[k] = l[k];
+  });
+  if (filled(l.hero_heading) && !filled(l.hero_emphasis)) out.hero_emphasis = "";
+  return out;
+}
+function parseMenu(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (!filled(raw)) return null;
+  try {
+    const m = JSON.parse(raw);
+    return Array.isArray(m) && m.length ? m : null;
+  } catch (e) {
+    return null;
+  }
+}
+function menuOf(site) {
+  const m = parseMenu(site && site.nav && site.nav.menu);
+  return (m || DEFAULT_MENU).map((i) => ({ label: String(i.label || ""), href: String(i.href || ""), visible: i.visible !== false, accent: !!i.accent }));
+}
+const visibleMenu = (site) => menuOf(site).filter((i) => i.visible && i.label && i.href);
+function isCurrent(href, here) {
+  const path = String(href || "").split(/[?#]/)[0].replace(/\/+$/, "") || "/";
+  if (path === "/") return here === "/";
+  if (path === "/courses") return /^\/(courses|course|workshop)/.test(here);
+  if (path.startsWith("/commission")) return here.startsWith("/commission");
+  return here === path || here.startsWith(`${path}/`);
+}
+function cookieOf(site) {
+  const c = site && site.cookie || {};
+  const out = __spreadValues({}, DEFAULT_COOKIE);
+  Object.keys(DEFAULT_COOKIE).forEach((k) => {
+    if (filled(c[k])) out[k] = c[k];
+  });
+  return out;
+}
+function socialOf(site) {
+  const s = site && site.social || {};
+  const anySaved = SOCIAL_NETWORKS.some(([k]) => filled(s[k]));
+  const hidden = String(s.hidden || "").split(",").map((x) => x.trim()).filter(Boolean);
+  return SOCIAL_NETWORKS.map(([k, label, icon, def]) => [k, label, icon, anySaved ? s[k] || "" : def]).filter(([k, , , href]) => filled(href) && !hidden.includes(k));
+}
+const isExternal = (href) => /^https?:\/\//i.test(String(href || ""));
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Site/CookieBanner.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var CookieBanner_exports = {};
+__export(CookieBanner_exports, {
+  CookieBar: () => CookieBar,
+  default: () => CookieBanner,
+  readConsent: () => readConsent
+});
+module.exports = __toCommonJS(CookieBanner_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_siteContent = __webpack_require__("./resources/js/Components/Site/siteContent.js");
+const NAME = "ac_consent";
+function readConsent() {
+  try {
+    const m = document.cookie.match(/(?:^|;\s*)ac_consent=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : null;
+  } catch (e) {
+    return null;
+  }
+}
+function saveConsent(value) {
+  try {
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `${NAME}=${encodeURIComponent(value)}; Max-Age=${60 * 60 * 24 * 365}; Path=/; SameSite=Lax${secure}`;
+  } catch (e) {
+  }
+  try {
+    window.dispatchEvent(new CustomEvent("ac:consent", { detail: value }));
+  } catch (e) {
+  }
+}
+function CookieBar({ cookie, onAccept, onDecline, preview = false }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `ac-cookie ${preview ? "is-preview" : ""}`, role: preview ? void 0 : "region", "aria-label": "Cookie consent", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+      cookie.message,
+      cookie.policy_link && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: cookie.policy_link, target: preview ? "_blank" : void 0, rel: "noopener noreferrer", children: "Privacy policy" })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-cookie__actions", children: [
+      cookie.decline_label && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--line", onClick: onDecline, children: cookie.decline_label }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--brand", onClick: onAccept, children: cookie.accept_label || "OK" })
+    ] })
+  ] });
+}
+function CookieBanner() {
+  const { site } = (0, import_inertia_react.usePage)().props;
+  const cookie = (0, import_siteContent.cookieOf)(site);
+  const [open, setOpen] = (0, import_react.useState)(false);
+  (0, import_react.useEffect)(() => {
+    setOpen(cookie.enabled === "1" && !readConsent());
+  }, [cookie.enabled]);
+  if (!open) return null;
+  const choose = (v) => {
+    saveConsent(v);
+    setOpen(false);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CookieBar, { cookie, onAccept: () => choose("all"), onDecline: () => choose("essential") });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Setup/SiteSettings.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SiteSettings_exports = {};
+__export(SiteSettings_exports, {
+  default: () => SiteSettings
+});
+module.exports = __toCommonJS(SiteSettings_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+var import_siteContent = __webpack_require__("./resources/js/Components/Site/siteContent.js");
+var import_CookieBanner = __webpack_require__("./resources/js/Components/Site/CookieBanner.js");
+const SECTIONS = [
+  ["landing", "Landing hero", "fa-home"],
+  ["menu", "Menu", "fa-bars"],
+  ["seo", "Search & sharing", "fa-search"],
+  ["cookie", "Cookie banner", "fa-shield"],
+  ["social", "Social links", "fa-share-alt"],
+  ["contact", "Contact & homepage", "fa-address-card-o"]
+];
+const flatten = (values) => {
+  const out = {};
+  Object.entries(values || {}).forEach(([g, kv]) => Object.entries(kv || {}).forEach(([k, v]) => {
+    out[`${g}.${k}`] = v == null ? "" : String(v);
+  }));
+  return out;
+};
+function initialState(values) {
+  const v = flatten(values);
+  const landing = (0, import_siteContent.landingOf)({ landing: values.landing });
+  Object.entries(landing).forEach(([k, x]) => {
+    v[`landing.${k}`] = x;
+  });
+  const cookie = (0, import_siteContent.cookieOf)({ cookie: values.cookie });
+  Object.entries(cookie).forEach(([k, x]) => {
+    v[`cookie.${k}`] = x;
+  });
+  const social = values.social || {};
+  const anySaved = import_siteContent.SOCIAL_NETWORKS.some(([k]) => social[k]);
+  import_siteContent.SOCIAL_NETWORKS.forEach(([k, , , def]) => {
+    v[`social.${k}`] = anySaved ? social[k] || "" : def;
+  });
+  v["social.hidden"] = social.hidden || "";
+  return { v, menu: (0, import_siteContent.menuOf)({ nav: values.nav }) };
+}
+const LINK_RE = /^(\/(?!\/)[^\s<>"']*|https:\/\/[^\s<>"']+)$/i;
+function checkAll(v, menu) {
+  const e = {};
+  if (!String(v["landing.hero_heading"] || "").trim()) e["landing.hero_heading"] = "The landing page needs a heading.";
+  if (v["landing.cta_label"] && !v["landing.cta_link"]) e["landing.cta_link"] = "Where should the button go?";
+  if (!v["landing.cta_label"] && v["landing.cta_link"]) e["landing.cta_label"] = "Give the button a label, or clear the link.";
+  ["landing.cta_link", "cookie.policy_link"].forEach((k) => {
+    if (v[k] && !LINK_RE.test(v[k])) e[k] = "Use a page on this site such as /courses?type=all, or a full https:// link.";
+  });
+  if (!String(v["seo.site_title"] || "").trim()) e["seo.site_title"] = "The site needs a title for search results.";
+  if (v["cookie.enabled"] === "1" && !String(v["cookie.message"] || "").trim()) e["cookie.message"] = "Write the banner text, or switch the banner off.";
+  import_siteContent.SOCIAL_NETWORKS.forEach(([k]) => {
+    const x = v[`social.${k}`];
+    if (x && !/^https?:\/\/\S+$/i.test(x)) e[`social.${k}`] = "Enter the full link, starting with https://";
+  });
+  if (v["contact.email"] && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v["contact.email"])) e["contact.email"] = "Enter a valid e-mail address.";
+  if (!menu.length) e["nav.menu"] = "Keep at least one menu item (or reset the menu to the default).";
+  const seen = /* @__PURE__ */ new Set();
+  menu.forEach((m, i) => {
+    const label = m.label.trim();
+    if (!label) e["nav.menu"] = e["nav.menu"] || `Menu item ${i + 1} needs a label.`;
+    else if (seen.has(label.toLowerCase())) e["nav.menu"] = e["nav.menu"] || `\u201C${label}\u201D is in the menu twice.`;
+    else if (!LINK_RE.test(m.href.trim())) e["nav.menu"] = e["nav.menu"] || `\u201C${label}\u201D: use a page on this site such as /marketplace, or a full https:// link.`;
+    seen.add(label.toLowerCase());
+  });
+  return e;
+}
+function MenuBuilder({ items, onChange, error, onFocus }) {
+  const [drag, setDrag] = (0, import_react.useState)(null);
+  const [over, setOver] = (0, import_react.useState)(null);
+  const listRef = (0, import_react.useRef)(null);
+  const update = (i, patch) => onChange(items.map((m, j) => j === i ? __spreadValues(__spreadValues({}, m), patch) : m));
+  const move = (from, to) => {
+    if (to < 0 || to >= items.length || from === to) return;
+    const next = items.slice();
+    const [x] = next.splice(from, 1);
+    next.splice(to, 0, x);
+    onChange(next);
+  };
+  const moveKey = (i, to) => {
+    move(i, to);
+    setTimeout(() => {
+      const el = listRef.current && listRef.current.querySelectorAll(".ss-menu__handle")[to];
+      if (el) el.focus();
+    }, 0);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-menu", onFocus, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { ref: listRef, className: "ss-menu__list", "aria-label": "Header menu items, in order", children: items.map((m, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "li",
+      {
+        className: (0, import_kit.cx)("ss-menu__item", drag === i && "is-drag", over === i && drag !== i && "is-over", !m.visible && "is-hidden"),
+        draggable: true,
+        onDragStart: (e) => {
+          setDrag(i);
+          e.dataTransfer.effectAllowed = "move";
+          try {
+            e.dataTransfer.setData("text/plain", String(i));
+          } catch (x) {
+          }
+        },
+        onDragOver: (e) => {
+          e.preventDefault();
+          setOver(i);
+        },
+        onDragLeave: () => setOver((o) => o === i ? null : o),
+        onDrop: (e) => {
+          e.preventDefault();
+          if (drag !== null) move(drag, i);
+          setDrag(null);
+          setOver(null);
+        },
+        onDragEnd: () => {
+          setDrag(null);
+          setOver(null);
+        },
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              type: "button",
+              className: "ss-menu__handle",
+              "aria-label": `Move ${m.label || `item ${i + 1}`}: use the up and down arrow keys`,
+              title: "Drag to reorder (or focus and use \u2191 \u2193)",
+              onKeyDown: (e) => {
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  moveKey(i, i - 1);
+                }
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  moveKey(i, i + 1);
+                }
+              },
+              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-bars", "aria-hidden": "true" })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", "aria-label": `Label of menu item ${i + 1}`, value: m.label, maxLength: 30, placeholder: "Label", onChange: (e) => update(i, { label: e.target.value }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", "aria-label": `Link of menu item ${i + 1}`, value: m.href, maxLength: 255, placeholder: "/page or https://\u2026", onChange: (e) => update(i, { href: e.target.value }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "ss-check", title: "Show in the header", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: m.visible, onChange: (e) => update(i, { visible: e.target.checked }) }),
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Show" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "ss-check", title: "Highlight in brand colour", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: m.accent, onChange: (e) => update(i, { accent: e.target.checked }) }),
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Highlight" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "ss-menu__remove", onClick: () => onChange(items.filter((_, j) => j !== i)), "aria-label": `Remove ${m.label || `item ${i + 1}`}`, title: "Remove", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }) })
+        ]
+      },
+      i
+    )) }),
+    error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", id: "f-nav.menu", tabIndex: -1, children: error }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", disabled: items.length >= 10, onClick: () => onChange([...items, { label: "", href: "/", visible: true, accent: false }]), children: "Add link" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-undo", onClick: () => onChange(import_siteContent.DEFAULT_MENU.map((m) => __spreadValues({}, m))), children: "Reset to the default menu" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted adm-small", children: [
+        items.length,
+        " / 10 \xB7 drag the \u2630 handle, or focus it and press \u2191 \u2193"
+      ] })
+    ] })
+  ] });
+}
+function Simulator({ v, menu, device, focus, onDevice }) {
+  const wrap = (0, import_react.useRef)(null);
+  const [scale, setScale] = (0, import_react.useState)(0.5);
+  const width = device === "mobile" ? 390 : 1100;
+  const siteRef = (0, import_react.useRef)(null);
+  const [frameH, setFrameH] = (0, import_react.useState)(700);
+  const [drawer, setDrawer] = (0, import_react.useState)(false);
+  (0, import_react.useEffect)(() => {
+    const el = wrap.current;
+    if (!el) return void 0;
+    const fit = () => setScale(Math.min(width < 500 ? 0.72 : 1, (el.clientWidth - 2) / width));
+    fit();
+    let ro;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(fit);
+      ro.observe(el);
+    } else window.addEventListener("resize", fit);
+    return () => {
+      if (ro) ro.disconnect();
+      else window.removeEventListener("resize", fit);
+    };
+  }, [width]);
+  (0, import_react.useEffect)(() => {
+    if (device !== "mobile") setDrawer(false);
+  }, [device]);
+  const shown = menu.filter((m) => m.visible && m.label);
+  const hidden = String(v["social.hidden"] || "").split(",").filter(Boolean);
+  const social = import_siteContent.SOCIAL_NETWORKS.filter(([k]) => v[`social.${k}`] && !hidden.includes(k));
+  const cookie = { message: v["cookie.message"], accept_label: v["cookie.accept_label"], decline_label: v["cookie.decline_label"], policy_link: v["cookie.policy_link"] };
+  const title = v["seo.site_title"] || "ArtistikCity";
+  const desc = v["seo.meta_description"] || "";
+  const mobile = device === "mobile";
+  const zone = (name) => (0, import_kit.cx)("ss-zone", focus === name && "is-focus");
+  (0, import_react.useLayoutEffect)(() => {
+    const h = siteRef.current ? siteRef.current.offsetHeight : 0;
+    if (h && Math.abs(h - frameH) > 1) setFrameH(h);
+  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-sim", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-sim__bar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ss-sim__title", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-eye", "aria-hidden": "true" }),
+        " Live preview"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-segments", role: "group", "aria-label": "Preview size", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: (0, import_kit.cx)(!mobile && "is-on"), "aria-pressed": !mobile, onClick: () => onDevice("desktop"), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-desktop", "aria-hidden": "true" }),
+          " Desktop"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: (0, import_kit.cx)(mobile && "is-on"), "aria-pressed": mobile, onClick: () => onDevice("mobile"), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-mobile", "aria-hidden": "true" }),
+          " Mobile"
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-sim__chrome", "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "artistikcity.com" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { title, children: title })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { ref: wrap, className: (0, import_kit.cx)("ss-sim__viewport", mobile && "is-mobile"), style: { height: frameH * scale + 2 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("ss-site", mobile && "is-mobile"), ref: siteRef, style: { width, transform: `scale(${scale})` }, "aria-hidden": "true", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: zone("menu"), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/logo.png", alt: "", className: "ss-site__logo" }),
+        !mobile && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "ss-site__nav", children: shown.map((m, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: (0, import_kit.cx)(m.accent && "is-accent"), children: m.label }, i)) }),
+        !mobile && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ss-site__search", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search" }),
+          " Search courses\u2026"
+        ] }),
+        !mobile && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ss-site__login", children: "Log in" }),
+        !mobile && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ss-site__join", children: "Join for free" }),
+        mobile && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ss-site__burger", onClick: () => setDrawer((d) => !d), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${drawer ? "fa-times" : "fa-bars"}` }) })
+      ] }),
+      mobile && drawer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ss-site__drawer", children: shown.map((m, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: (0, import_kit.cx)(m.accent && "is-accent"), children: m.label }, i)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: (0, import_kit.cx)("ss-site__hero", zone("landing")), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-site__heroin", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { children: [
+          v["landing.hero_heading"] || " ",
+          v["landing.hero_emphasis"] && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: v["landing.hero_emphasis"] })
+          ] })
+        ] }),
+        v["landing.hero_subtext"] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: v["landing.hero_subtext"] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-site__searchbig", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: v["landing.search_placeholder"] || "What do you want to learn?" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Search" })
+        ] }),
+        v["landing.cta_label"] && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ss-site__cta", children: [
+          v["landing.cta_label"],
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right" })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ss-site__row", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Popular right now" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ss-site__cards", children: [0, 1, 2, 3].slice(0, mobile ? 2 : 4).map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", {})
+        ] }, i)) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: (0, import_kit.cx)("ss-site__serp", zone("seo")), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "How Google shows the site" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ss-serp__url", children: "https://www.artistikcity.com" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ss-serp__title", children: title.length > 60 ? `${title.slice(0, 59)}\u2026` : title }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ss-serp__text", children: desc.length > 160 ? `${desc.slice(0, 159)}\u2026` : desc || "Add a meta description so search engines show a helpful summary." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("footer", { className: zone("social"), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/footerlogo.png", alt: "" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ss-site__social", children: social.map(([k, , icon]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}` }) }, k)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          v["contact.email"] || "",
+          v["contact.email"] && v["contact.phone"] ? " \xB7 " : "",
+          v["contact.phone"] || ""
+        ] })
+      ] }),
+      v["cookie.enabled"] === "1" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: zone("cookie"), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CookieBanner.CookieBar, { cookie, preview: true, onAccept: () => {
+      }, onDecline: () => {
+      } }) })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small ss-sim__note", children: [
+      v["cookie.enabled"] === "1" ? "The cookie banner shows until a visitor chooses. " : "",
+      "The preview updates as you type; nothing changes on the site until you save."
+    ] })
+  ] });
+}
+function SiteSettings() {
+  const { values = {}, defaults = {} } = (0, import_inertia_react.usePage)().props;
+  const start = (0, import_react.useRef)(initialState(values));
+  const [saved, setSaved] = (0, import_react.useState)(start.current);
+  const [v, setV] = (0, import_react.useState)(start.current.v);
+  const [menu, setMenu] = (0, import_react.useState)(start.current.menu);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [og, setOg] = (0, import_react.useState)([]);
+  const [device, setDevice] = (0, import_react.useState)("desktop");
+  const [focus, setFocus] = (0, import_react.useState)("landing");
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const dirty = JSON.stringify(v) !== JSON.stringify(saved.v) || JSON.stringify(menu) !== JSON.stringify(saved.menu) || og.length > 0;
+  (0, import_form.useUnsavedGuard)(dirty);
+  const set = (k, x) => {
+    setV((p) => __spreadProps(__spreadValues({}, p), { [k]: x }));
+    setErrors((e) => __spreadProps(__spreadValues({}, e), { [k]: null }));
+  };
+  const input = (k, label, { hint, rows, placeholder, max = 255, type = "text", optional = true } = {}) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label, name: k, hint, error: errors[k], max, counter: (v[k] || "").length, optional, children: rows ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: `f-${k}`, className: "adm-input", rows, value: v[k] || "", placeholder, maxLength: max, onChange: (e) => set(k, e.target.value), "aria-invalid": errors[k] ? "true" : void 0 }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-${k}`, type, className: "adm-input", value: v[k] || "", placeholder, maxLength: max, onChange: (e) => set(k, e.target.value), "aria-invalid": errors[k] ? "true" : void 0 }) });
+  const showErrors = (errs, message) => {
+    setErrors(errs);
+    toast(message || "Please fix the highlighted fields.", "error");
+    const first = Object.keys(errs)[0];
+    const el = first && document.getElementById(`f-${first}`);
+    if (el) {
+      el.focus();
+      el.scrollIntoView({ block: "center" });
+    }
+  };
+  const save = () => {
+    const local = checkAll(v, menu);
+    if (Object.keys(local).length) {
+      showErrors(local);
+      return;
+    }
+    setBusy(true);
+    const data = { landing: {}, seo: {}, cookie: {}, social: {}, contact: {}, home: {}, nav: { menu } };
+    Object.entries(v).forEach(([key, x]) => {
+      const [g, k] = key.split(".");
+      if (data[g] && g !== "nav") data[g][k] = x;
+    });
+    const fd = new FormData();
+    fd.append("data", JSON.stringify(data));
+    if (og[0]) fd.append("og_image", og[0]);
+    import_axios.default.post("/admin/api/setup/site-settings", fd).then((r) => {
+      const next = initialState(r.data.values);
+      const merged = { v: __spreadValues(__spreadValues({}, v), next.v), menu: next.menu };
+      setSaved(merged);
+      setV(merged.v);
+      setMenu(merged.menu);
+      setOg([]);
+      setErrors({});
+      toast(r.data.message);
+    }).catch((e) => {
+      if (e.response && e.response.status === 422) showErrors(e.response.data.errors || {}, e.response.data.message);
+      else toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const discard = () => {
+    setV(saved.v);
+    setMenu(saved.menu);
+    setOg([]);
+    setErrors({});
+  };
+  const hidden = String(v["social.hidden"] || "").split(",").filter(Boolean);
+  const toggleHidden = (k, show) => set("social.hidden", (show ? hidden.filter((x) => x !== k) : [...hidden, k]).join(","));
+  const sectionErrors = (id) => Object.keys(errors).filter((k) => errors[k] && (k.startsWith(`${id === "menu" ? "nav" : id === "contact" ? "contact" : id}.`) || id === "contact" && k.startsWith("home."))).length;
+  const section = (id, title, description, children) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { id: `sec-${id}`, className: (0, import_kit.cx)("adm-card ss-sec", focus === id && "is-focus"), onFocus: () => setFocus(id), "aria-labelledby": `h-${id}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-sec__head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: `h-${id}`, className: "rm-h", children: title }),
+      description && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: description })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-stack", children })
+  ] });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "SEO & Layout Controls", wide: true, crumbs: [{ label: "System parameters" }, { label: "SEO & Layout Controls" }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        eyebrow: "System parameters",
+        title: "SEO & Layout Controls",
+        subtitle: "The public landing page, header menu, search snippet, cookie banner and social links. The preview on the right follows your typing; the site changes when you save.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-external-link", href: "/", target: "_blank", rel: "noopener noreferrer", children: "Open the site" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "ss-jump", "aria-label": "Sections", children: SECTIONS.map(([id, label, icon]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `#sec-${id}`, className: (0, import_kit.cx)(focus === id && "is-on"), onClick: (e) => {
+      e.preventDefault();
+      setFocus(id);
+      const el = document.getElementById(`sec-${id}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+      " ",
+      label,
+      sectionErrors(id) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "red", children: sectionErrors(id) })
+    ] }, id)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-split", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "ss-form", onSubmit: (e) => {
+        e.preventDefault();
+        save();
+      }, noValidate: true, children: [
+        section("landing", "Landing hero", "The first thing visitors read on the home page.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          input("landing.hero_heading", "Heading", { max: 120, optional: false, hint: "Short and specific: what someone gets here." }),
+          input("landing.hero_emphasis", "Emphasised words", { max: 80, hint: "Shown after the heading in brand colour. Leave empty for none." }),
+          input("landing.hero_subtext", "Subtext", { rows: 3, max: 300 }),
+          input("landing.search_placeholder", "Search box hint", { max: 255 }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+            input("landing.cta_label", "Button label", { max: 40, placeholder: "Browse courses", hint: "Optional extra button under the search." }),
+            input("landing.cta_link", "Button link", { placeholder: "/courses?type=all", hint: "A page on this site, or https://\u2026" })
+          ] })
+        ] })),
+        section("menu", "Menu builder", "The links in the site header, in order. Hidden links stay here for later.", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MenuBuilder, { items: menu, onChange: (m) => {
+          setMenu(m);
+          setErrors((e) => __spreadProps(__spreadValues({}, e), { "nav.menu": null }));
+        }, error: errors["nav.menu"], onFocus: () => setFocus("menu") })),
+        section("seo", "Search & sharing", "The default title and description search engines and social networks show. Stories and courses can override them.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          input("seo.site_title", "Site title", { hint: `Best under 60 characters (${(v["seo.site_title"] || "").length} now).`, optional: false, placeholder: defaults.site_title }),
+          input("seo.meta_description", "Meta description", { rows: 3, max: 500, hint: `Best between 120 and 160 characters (${(v["seo.meta_description"] || "").length} now).`, placeholder: defaults.meta_description }),
+          input("seo.meta_keywords", "Keywords", { hint: "Comma separated. Most search engines ignore these." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Share image", name: "seo.og_image", hint: "Shown when the site is shared on WhatsApp, Facebook or LinkedIn. 1200 \xD7 630 px works best.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.DropZone,
+            {
+              name: "seo.og_image",
+              value: og,
+              onChange: setOg,
+              error: errors["seo.og_image"],
+              existing: v["seo.og_image"] ? [{ id: "og", url: v["seo.og_image"], name: "Current share image" }] : [],
+              onRemoveExisting: () => set("seo.og_image", "")
+            }
+          ) })
+        ] })),
+        section("cookie", "Cookie & privacy banner", "A bar at the bottom of every public page until the visitor chooses. Their choice is remembered for a year.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.Toggle,
+            {
+              name: "cookie.enabled",
+              checked: v["cookie.enabled"] === "1",
+              onChange: (x) => {
+                set("cookie.enabled", x ? "1" : "0");
+                setFocus("cookie");
+              },
+              label: v["cookie.enabled"] === "1" ? "Banner on" : "Banner off",
+              description: "Switch on if you use analytics or marketing cookies."
+            }
+          ),
+          input("cookie.message", "Banner text", { rows: 3, max: 500, optional: v["cookie.enabled"] !== "1" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+            input("cookie.accept_label", "Accept button", { max: 40 }),
+            input("cookie.decline_label", "Decline button", { max: 40, hint: "Empty = no decline button." }),
+            input("cookie.policy_link", "Policy link", { placeholder: "/privacy-policy" })
+          ] })
+        ] })),
+        section("social", "Social links matrix", "Footer icons. A network shows when it has a link and \u201CShow\u201D is ticked.", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ss-matrixwrap", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { className: "ss-matrix", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Network" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Link" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Show" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: import_siteContent.SOCIAL_NETWORKS.map(([k, label, icon]) => {
+            const key = `social.${k}`;
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("th", { scope: "row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+                " ",
+                label
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                  "input",
+                  {
+                    id: `f-${key}`,
+                    className: "adm-input",
+                    value: v[key] || "",
+                    placeholder: "https://\u2026",
+                    "aria-label": `${label} link`,
+                    onChange: (e) => set(key, e.target.value.trim()),
+                    "aria-invalid": errors[key] ? "true" : void 0
+                  }
+                ),
+                errors[key] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-field__error", children: errors[key] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", "aria-label": `Show ${label}`, disabled: !v[key], checked: !!v[key] && !hidden.includes(k), onChange: (e) => toggleHidden(k, e.target.checked) }) })
+            ] }, k);
+          }) })
+        ] }) })),
+        section("contact", "Contact details & homepage points", "Contact details show on the contact page and in the footer; leave a field empty to hide it.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+            input("contact.email", "E-mail", { type: "email", placeholder: "hello@artistikcity.com" }),
+            input("contact.phone", "Phone / WhatsApp", { placeholder: "+91 98765 43210" })
+          ] }),
+          input("contact.address", "Office address", { rows: 3, max: 500 }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+            input("home.course_text_1", "Course point 1", { max: 60 }),
+            input("home.course_text_2", "Course point 2", { max: 60 }),
+            input("home.course_text_3", "Course point 3", { max: 60 })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+            input("home.workshop_text_1", "Workshop point 1", { max: 60 }),
+            input("home.workshop_text_2", "Workshop point 2", { max: 60 }),
+            input("home.workshop_text_3", "Workshop point 3", { max: 60 })
+          ] })
+        ] })),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SaveBar, { dirty, busy, onSave: save, children: dirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", onClick: discard, children: "Discard changes" }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "ss-preview", "aria-label": "Live preview", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Simulator, { v, menu, device, focus, onDevice: setDevice }) })
+    ] }),
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Setup/Config.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Config_exports = {};
+__export(Config_exports, {
+  default: () => Config
+});
+module.exports = __toCommonJS(Config_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+const STATUS = {
+  connected: ["green", "Connected"],
+  incomplete: ["amber", "Incomplete"],
+  not_set: ["grey", "Not set up"],
+  off: ["grey", "Switched off"],
+  unused: ["grey", "Not in use"],
+  development: ["blue", "Development (log only)"],
+  not_connected: ["amber", "Not connected"]
+};
+const SOURCE = {
+  panel: ["brand", "Set here", "Saved in this panel. It wins over the server and the defaults."],
+  server: ["blue", "Server", "From the server environment (AWS Parameter Store / environment variable)."],
+  default: ["grey", "Default", "The default from config/artistikcity.yml."],
+  none: ["grey", "Empty", "Not set anywhere."]
+};
+const toBool = (v) => String(v).toLowerCase() === "true";
+function initialValues(tabs) {
+  const v = {};
+  tabs.forEach((t) => t.groups.forEach((g) => g.fields.forEach((f) => {
+    v[f.key] = f.value == null ? "" : String(f.value);
+  })));
+  return v;
+}
+function SourceBadge({ field }) {
+  const [tone, label, title] = SOURCE[field.source] || SOURCE.none;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: (0, import_kit.cx)("cfg-src", `is-${tone}`), title, children: label });
+}
+function FieldRow({ field, value, onChange, error, mask, resetMarked, onReset, canStoreSecrets }) {
+  const id = `cfg-${field.key}`;
+  const [reveal, setReveal] = (0, import_react.useState)(false);
+  const describedBy = [field.help && `${id}-help`, error && `${id}-err`].filter(Boolean).join(" ") || void 0;
+  const common = { id, name: field.key, "aria-invalid": error ? "true" : void 0, "aria-describedby": describedBy };
+  let control;
+  if (field.type === "bool") {
+    control = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: field.key, checked: toBool(value), onChange: (x) => onChange(x ? "true" : "false"), label: toBool(value) ? "On" : "Off" });
+  } else if (field.type === "select") {
+    control = /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", __spreadProps(__spreadValues({}, common), { className: "adm-input", value, onChange: (e) => onChange(e.target.value), children: [
+      !(field.options || []).includes(value) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value, children: value || "Choose\u2026" }),
+      (field.options || []).map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: o, children: o }, o))
+    ] }));
+  } else if (field.type === "secret") {
+    const masked = value === mask;
+    control = /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-secret", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        __spreadProps(__spreadValues({}, common), {
+          type: reveal && !masked ? "text" : "password",
+          className: "adm-input",
+          autoComplete: "new-password",
+          spellCheck: "false",
+          value,
+          maxLength: field.maxLength || 4e3,
+          disabled: !canStoreSecrets,
+          placeholder: field.isSet ? "Saved (type to replace)" : field.placeholder || "Not set",
+          onFocus: (e) => {
+            if (masked) e.target.select();
+          },
+          onChange: (e) => onChange(e.target.value)
+        })
+      ),
+      !masked && value && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "cfg-eye", onClick: () => setReveal((r) => !r), "aria-label": reveal ? "Hide what you typed" : "Show what you typed", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${reveal ? "fa-eye-slash" : "fa-eye"}`, "aria-hidden": "true" }) })
+    ] });
+  } else {
+    control = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "input",
+      __spreadProps(__spreadValues({}, common), {
+        type: field.type === "number" ? "text" : "text",
+        inputMode: field.type === "number" ? "decimal" : void 0,
+        className: "adm-input",
+        value,
+        spellCheck: "false",
+        maxLength: field.maxLength || 4e3,
+        placeholder: field.placeholder || "",
+        onChange: (e) => onChange(e.target.value)
+      })
+    );
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("cfg-field", error && "has-error", resetMarked && "is-reset"), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-field__label", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: field.type === "bool" ? void 0 : id, children: field.label }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SourceBadge, { field }),
+      field.unreadable && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "red", children: "Can't decrypt" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-field__control", children: [
+      control,
+      field.help && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { id: `${id}-help`, className: "cfg-help", children: field.help }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { id: `${id}-err`, className: "adm-field__error", role: "alert", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-circle", "aria-hidden": "true" }),
+        error
+      ] }),
+      resetMarked && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "cfg-help cfg-help--warn", children: [
+        "Will go back to the ",
+        field.serverSet ? "server value" : "default",
+        " when you save."
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "cfg-meta", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { title: "Environment variable on the server", children: field.env }),
+        field.changed && field.changed.at && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          " \xB7 changed ",
+          (0, import_kit.fmtDate)(field.changed.at, true),
+          field.changed.by ? ` by ${field.changed.by}` : ""
+        ] }),
+        field.source === "panel" && !resetMarked && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          " \xB7 ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "cfg-link", onClick: onReset, children: [
+            "Reset to ",
+            field.serverSet ? "server value" : "default"
+          ] })
+        ] }),
+        resetMarked && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          " \xB7 ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "cfg-link", onClick: onReset, children: "Keep the panel value" })
+        ] })
+      ] })
+    ] })
+  ] });
+}
+function SmsTest({ provider }) {
+  const [to, setTo] = (0, import_react.useState)("");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [result, setResult] = (0, import_react.useState)(null);
+  const send = () => {
+    setBusy(true);
+    setResult(null);
+    import_axios.default.post("/admin/api/setup/sms-test", { to }).then((r) => setResult({ ok: true, text: r.data.message })).catch((e) => setResult({ ok: false, text: e.response && e.response.data && e.response.data.errors && e.response.data.errors.to || (0, import_AdminLayout.errorText)(e) })).finally(() => setBusy(false));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-test", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { htmlFor: "cfg-sms-to", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Send a test message" }),
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted", children: [
+        "through ",
+        provider,
+        " (saved settings)"
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "cfg-sms-to", className: "adm-input", type: "tel", value: to, onChange: (e) => setTo(e.target.value), placeholder: "+919876543210", style: { maxWidth: 220 } }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-paper-plane", busy, disabled: !to.trim(), onClick: send, children: "Send test" })
+    ] }),
+    result && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { role: "status", className: (0, import_kit.cx)("cfg-help", !result.ok && "cfg-help--err"), children: result.text })
+  ] });
+}
+function Config() {
+  const props = (0, import_inertia_react.usePage)().props;
+  const [data, setData] = (0, import_react.useState)({ tabs: props.tabs || [], mask: props.mask, canStoreSecrets: props.canStoreSecrets, googleCallback: props.googleCallback, smsProvider: props.smsProvider });
+  const initialTab = (() => {
+    try {
+      const h = window.location.hash.replace("#", "");
+      if ((props.tabs || []).some((t) => t.id === h)) return h;
+    } catch (e) {
+    }
+    return props.tabs && props.tabs[0] && props.tabs[0].id || "payments";
+  })();
+  const [tab, setTab] = (0, import_react.useState)(initialTab);
+  const [base, setBase] = (0, import_react.useState)(() => initialValues(props.tabs || []));
+  const [v, setV] = (0, import_react.useState)(base);
+  const [reset, setReset] = (0, import_react.useState)([]);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const changedKeys = (0, import_react.useMemo)(() => Object.keys(v).filter((k) => v[k] !== base[k]), [v, base]);
+  const dirty = changedKeys.length > 0 || reset.length > 0;
+  (0, import_form.useUnsavedGuard)(dirty);
+  const fieldTab = (0, import_react.useMemo)(() => {
+    const m = {};
+    data.tabs.forEach((t) => t.groups.forEach((g) => g.fields.forEach((f) => {
+      m[f.key] = t.id;
+    })));
+    return m;
+  }, [data.tabs]);
+  const pick = (id) => {
+    setTab(id);
+    try {
+      window.history.replaceState(window.history.state, "", `#${id}`);
+    } catch (e) {
+    }
+  };
+  const set = (k, x) => {
+    setV((p) => __spreadProps(__spreadValues({}, p), { [k]: x }));
+    setErrors((e) => __spreadProps(__spreadValues({}, e), { [k]: null }));
+    setReset((r) => r.filter((y) => y !== k));
+  };
+  const toggleReset = (k) => {
+    setReset((r) => r.includes(k) ? r.filter((y) => y !== k) : [...r, k]);
+    setV((p) => __spreadProps(__spreadValues({}, p), { [k]: base[k] }));
+    setErrors((e) => __spreadProps(__spreadValues({}, e), { [k]: null }));
+  };
+  const save = () => {
+    const values = {};
+    changedKeys.forEach((k) => {
+      values[k] = v[k];
+    });
+    setBusy(true);
+    import_axios.default.post("/admin/api/setup/config", { values, reset }).then((r) => {
+      const cfg = r.data.config;
+      setData({ tabs: cfg.tabs, mask: cfg.mask, canStoreSecrets: cfg.canStoreSecrets, googleCallback: cfg.googleCallback, smsProvider: cfg.smsProvider });
+      const next = initialValues(cfg.tabs);
+      setBase(next);
+      setV(next);
+      setReset([]);
+      setErrors({});
+      toast(r.data.message);
+    }).catch((e) => {
+      if (e.response && e.response.status === 422) {
+        const errs = e.response.data.errors || {};
+        setErrors(errs);
+        const first = Object.keys(errs).find((k) => fieldTab[k]);
+        if (first && fieldTab[first] !== tab) setTab(fieldTab[first]);
+        toast(e.response.data.message || "Please fix the highlighted settings.", "error");
+        setTimeout(() => {
+          const el = first && document.getElementById(`cfg-${first}`);
+          if (el) {
+            el.focus();
+            el.scrollIntoView({ block: "center" });
+          }
+        }, 50);
+      } else toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const discard = () => {
+    setV(base);
+    setReset([]);
+    setErrors({});
+  };
+  const current = data.tabs.find((t) => t.id === tab) || data.tabs[0];
+  const tabErrors = (t) => t.groups.reduce((n, g) => n + g.fields.filter((f) => errors[f.key]).length, 0);
+  const tabChanges = (t) => t.groups.reduce((n, g) => n + g.fields.filter((f) => changedKeys.includes(f.key) || reset.includes(f.key)).length, 0);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Configuration Panel", crumbs: [{ label: "System parameters" }, { label: "Configuration Panel" }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        eyebrow: "System parameters",
+        title: "Configuration Panel",
+        subtitle: "Payment gateways, SMS and Google sign-in. Saved values win over the server's settings and apply straight away; every change is in the security log (secrets never are)."
+      }
+    ),
+    !data.canStoreSecrets && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-alert", role: "alert", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Secrets can't be saved here yet." }),
+        " The server has no encryption key. Set ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "CONFIG_ENCRYPTION_KEY" }),
+        " (or ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "OTP_SECRET" }),
+        ") on the server; other settings still work."
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-tabs", role: "tablist", "aria-label": "Configuration sections", children: data.tabs.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "tab", id: `tab-${t.id}`, "aria-controls": `panel-${t.id}`, "aria-selected": t.id === tab, className: (0, import_kit.cx)(t.id === tab && "is-on"), onClick: () => pick(t.id), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${t.icon}`, "aria-hidden": "true" }),
+      " ",
+      t.title,
+      tabErrors(t) > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "red", children: tabErrors(t) }) : tabChanges(t) > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "amber", children: tabChanges(t) }) : null
+    ] }, t.id)) }),
+    current && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { id: `panel-${current.id}`, role: "tabpanel", "aria-labelledby": `tab-${current.id}`, onSubmit: (e) => {
+      e.preventDefault();
+      save();
+    }, noValidate: true, autoComplete: "off", children: [
+      current.id === "google" && data.googleCallback && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "cfg-note", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Authorised redirect URI for the Google console:" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { className: "cfg-copy", children: data.googleCallback }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-clipboard", onClick: () => {
+          try {
+            navigator.clipboard.writeText(data.googleCallback);
+            toast("Copied.");
+          } catch (e) {
+            toast("Select the address and copy it.", "error");
+          }
+        }, children: "Copy" })
+      ] }),
+      current.groups.map((g) => {
+        const [tone, label] = STATUS[g.status] || ["grey", g.status || ""];
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: (0, import_kit.cx)("adm-card cfg-group", g.status === "not_connected" && "is-muted"), "aria-labelledby": `grp-${g.id}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "cfg-group__head", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: `grp-${g.id}`, className: "rm-h", children: g.title }),
+              g.intro && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: g.intro })
+            ] }),
+            g.status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone, dot: true, children: label })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "cfg-fields", children: g.fields.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            FieldRow,
+            {
+              field: f,
+              value: v[f.key] == null ? "" : v[f.key],
+              onChange: (x) => set(f.key, x),
+              error: errors[f.key],
+              mask: data.mask,
+              resetMarked: reset.includes(f.key),
+              onReset: () => toggleReset(f.key),
+              canStoreSecrets: data.canStoreSecrets
+            },
+            f.key
+          )) }),
+          current.id === "sms" && g.id === "provider" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SmsTest, { provider: data.smsProvider })
+        ] }, g.id);
+      }),
+      errors.reset && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: errors.reset }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SaveBar, { dirty, busy, onSave: save, saveLabel: dirty ? `Save ${changedKeys.length + reset.length} change${changedKeys.length + reset.length === 1 ? "" : "s"}` : "Save changes", children: dirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", onClick: discard, children: "Discard" }) })
+    ] }),
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Content/StudioStories.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var StudioStories_exports = {};
+__export(StudioStories_exports, {
+  StatusBadge: () => StatusBadge,
+  WORKFLOW: () => WORKFLOW,
+  default: () => StudioStories
+});
+module.exports = __toCommonJS(StudioStories_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+const WORKFLOW = {
+  draft: { tone: "grey", label: "Draft", icon: "fa-pencil" },
+  review: { tone: "blue", label: "In review", icon: "fa-eye" },
+  scheduled: { tone: "amber", label: "Scheduled", icon: "fa-clock-o" },
+  published: { tone: "green", label: "Published", icon: "fa-globe" },
+  archived: { tone: "pink", label: "Archived", icon: "fa-archive" }
+};
+const PHASES = ["draft", "review", "scheduled", "published", "archived"];
+const strip = (html) => String(html || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+const num = (n) => Number(n || 0).toLocaleString("en-IN");
+const change = (now, before) => {
+  const a = Number(now || 0);
+  const b = Number(before || 0);
+  if (!b) return a ? { tone: "up", text: "new" } : null;
+  const pct = Math.round((a - b) / b * 100);
+  return { tone: pct > 0 ? "up" : pct < 0 ? "down" : "flat", text: `${pct > 0 ? "+" : ""}${pct}%` };
+};
+function StatusBadge({ workflow }) {
+  const w = WORKFLOW[workflow] || WORKFLOW.draft;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: w.tone, dot: true, children: w.label });
+}
+function Sparkline({ series = [] }) {
+  const max = Math.max(1, ...series.map((d) => Number(d.views) || 0));
+  const w = 300;
+  const h = 56;
+  const step = series.length > 1 ? w / (series.length - 1) : w;
+  const pts = series.map((d, i) => `${(i * step).toFixed(1)},${(h - (Number(d.views) || 0) / max * (h - 6) - 3).toFixed(1)}`).join(" ");
+  const total = series.reduce((s, d) => s + (Number(d.views) || 0), 0);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { className: "st-spark", viewBox: `0 0 ${w} ${h}`, preserveAspectRatio: "none", role: "img", "aria-label": `Daily views over the last ${series.length} days, ${num(total)} in total`, children: [
+    series.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polygon", { points: `0,${h} ${pts} ${w},${h}`, className: "st-spark__area" }),
+    series.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: pts, className: "st-spark__line" })
+  ] });
+}
+function Kpi({ label, value, sub, delta, icon, children }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "st-kpi", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "st-kpi__label", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+      " ",
+      label
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { className: "st-kpi__value", children: value }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "st-kpi__sub", children: [
+      delta && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: (0, import_kit.cx)("st-delta", `is-${delta.tone}`), children: [
+        delta.tone === "up" ? "\u25B2" : delta.tone === "down" ? "\u25BC" : "\u2022",
+        " ",
+        delta.text
+      ] }),
+      " ",
+      sub
+    ] }),
+    children
+  ] });
+}
+function Dashboard() {
+  const { counts = {}, analytics = {}, categories = [], authors = [] } = (0, import_inertia_react.usePage)().props;
+  const g = (0, import_kit.useGrid)("grid", ["counts", "analytics"]);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const [busyId, setBusyId] = (0, import_react.useState)(null);
+  const move = (r, workflow) => {
+    setBusyId(r.id);
+    import_axios.default.post(`/admin/api/content/stories/${r.id}/workflow`, { workflow }).then((x) => {
+      toast(x.data.message);
+      g.reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusyId(null));
+  };
+  const remove = async (r) => {
+    if (!await confirm({ title: `Delete \u201C${r.title}\u201D?`, body: "The story, its link and its view history are removed for good. Archive it instead to keep it.", confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`/admin/api/content/stories/${r.id}`).then((x) => {
+      toast(x.data.message);
+      g.reload();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const a = analytics || {};
+  const columns = [
+    { key: "title", label: "Story", sort: "title", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell", children: [
+      r.image_url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: r.image_url, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-thumb", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-text-o", "aria-hidden": "true" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-cell__text", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/content/stories/${r.id}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.title }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          r.tags || "No tags",
+          Number(r.featured) === 1 ? " \xB7 Featured" : "",
+          Number(r.read_minutes) > 0 ? ` \xB7 ${r.read_minutes} min read` : ""
+        ] })
+      ] })
+    ] }) },
+    { key: "author", label: "Author", hide: "lg", render: (r) => r.author || /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) },
+    { key: "views", label: "Views", sort: "views", align: "right", hide: "md", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "st-views", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: num(r.views) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+        num(r.views_30d),
+        " in 30 days"
+      ] })
+    ] }) },
+    { key: "updated", label: "Updated", sort: "updated", hide: "lg", render: (r) => (0, import_kit.fmtDate)(r.updated_at, true) },
+    { key: "status", label: "Status", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "st-status", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { workflow: r.workflow }),
+      r.workflow === "scheduled" && r.publish_at && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: (0, import_kit.fmtDate)(r.publish_at, true) }),
+      r.workflow === "published" && r.published_at && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: (0, import_kit.fmtDate)(r.published_at) })
+    ] }) },
+    { key: "actions", label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Actions" }), align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions st-quick", "aria-busy": busyId === r.id, children: [
+      r.workflow !== "draft" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "st-chip", onClick: () => move(r, "draft"), disabled: busyId === r.id, "aria-label": `Move ${r.title} to drafts`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-pencil", "aria-hidden": "true" }),
+        " Draft"
+      ] }),
+      r.workflow !== "published" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "st-chip is-green", onClick: () => move(r, "published"), disabled: busyId === r.id, "aria-label": `Publish ${r.title}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-globe", "aria-hidden": "true" }),
+        " Publish"
+      ] }),
+      r.workflow !== "archived" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "st-chip is-pink", onClick: () => move(r, "archived"), disabled: busyId === r.id, "aria-label": `Archive ${r.title}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-archive", "aria-hidden": "true" }),
+        " Archive"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", variant: "ghost", icon: "fa-pencil-square-o", href: `/admin/content/stories/${r.id}`, "aria-label": `Edit ${r.title}`, title: "Edit" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", variant: "ghost", icon: "fa-external-link", href: r.public_url, target: "_blank", rel: "noopener noreferrer", "aria-label": `View ${r.title}`, title: r.workflow === "published" ? "View on site" : "Preview" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => remove(r), "aria-label": `Delete ${r.title}`, title: "Delete" })
+    ] }) }
+  ];
+  const vDelta = change(a.views30, a.views30Previous);
+  const velDelta = change(a.velocity, a.velocityPrevious);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Studio Stories", crumbs: [{ label: "Content" }, { label: "Studio Stories" }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        eyebrow: "Content",
+        title: "Studio Stories",
+        subtitle: "Write, review, schedule and publish the stories on /studio-stories. Only published stories are public.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-bookmark-o", href: "/admin/blog/taxonomy", children: "Categories & tags" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", variant: "brand", icon: "fa-plus", href: "/admin/content/stories/new", children: "New story" })
+        ] })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "st-kpis", "aria-label": "Content analytics", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Kpi, { label: "Views \xB7 30 days", icon: "fa-eye", value: num(a.views30), delta: vDelta, sub: `vs previous 30 days \xB7 ${num(a.viewsTotal)} all time`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkline, { series: a.series || [] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Kpi, { label: "Engagement velocity", icon: "fa-bolt", value: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        a.velocity || 0,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: " views/day" })
+      ] }), delta: velDelta, sub: "last 7 days vs the 7 before" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Kpi, { label: "Average read time", icon: "fa-clock-o", value: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        a.avgReadMinutes || 0,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: " min" })
+      ] }), sub: `across ${num(a.published)} published ${Number(a.published) === 1 ? "story" : "stories"}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "st-kpi st-top", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "st-kpi__label", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trophy", "aria-hidden": "true" }),
+          " Top stories \xB7 30 days"
+        ] }),
+        (a.top || []).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Views appear here once published stories are read." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: a.top.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/content/stories/${t.id}`, children: t.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: num(t.views) })
+        ] }, t.id)) })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Segments,
+      {
+        label: "Status",
+        value: g.filter("status"),
+        onChange: (x) => g.go({ status: x }),
+        options: [{ value: "", label: "All", count: counts.all }, ...PHASES.map((p) => ({ value: p, label: WORKFLOW[p].label, count: counts[p] }))]
+      }
+    ), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: g.meta.q, onSearch: g.search, placeholder: "Search title, summary or URL", label: "Search stories" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Author", value: g.filter("author"), onChange: (x) => g.go({ author: x }), options: authors.map((o) => ({ value: String(o.value), label: o.label })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Category", value: g.filter("category"), onChange: (x) => g.go({ category: x }), options: categories.map((c) => ({ value: String(c.value), label: c.label })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Featured", value: g.filter("featured"), onChange: (x) => g.go({ featured: x }), options: [{ value: "1", label: "Featured only" }], allLabel: "Any" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        columns,
+        rows: g.rows,
+        meta: g.meta,
+        loading: g.loading,
+        onSort: g.sortBy,
+        caption: "Studio stories",
+        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_kit.EmptyState,
+          {
+            icon: "fa-pencil-square-o",
+            title: g.meta.q || g.filter("status") ? "No stories match" : "No stories yet",
+            action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", variant: "brand", icon: "fa-plus", href: "/admin/content/stories/new", children: "Write a story" })
+          }
+        )
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Pagination, { meta: g.meta, onPage: g.setPage, onPer: g.setPer }),
+    dialog,
+    toastNode
+  ] });
+}
+const toLocalInput = (s) => s ? String(s).replace(" ", "T").slice(0, 16) : "";
+function Editor() {
+  const { post, categories = [], tags = [], authors = [], me } = (0, import_inertia_react.usePage)().props;
+  const [saved, setSaved] = (0, import_react.useState)(post);
+  const isNew = !saved;
+  const [image, setImage] = (0, import_react.useState)([]);
+  const [removeImage, setRemoveImage] = (0, import_react.useState)(false);
+  const [focusMode, setFocusMode] = (0, import_react.useState)(false);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const initial = post ? {
+    title: post.title,
+    slug: post.slug,
+    subtitle: post.subtitle,
+    body: post.body,
+    workflow: post.workflow,
+    featured: post.featured,
+    category_ids: post.category_ids,
+    tags: post.tags,
+    meta_title: post.meta_title,
+    meta_description: post.meta_description,
+    author_id: String(post.author_id || ""),
+    publish_at: toLocalInput(post.publish_at)
+  } : { title: "", slug: "", subtitle: "", body: "", workflow: "draft", featured: false, category_ids: [], tags: [], meta_title: "", meta_description: "", author_id: me ? String(me) : "", publish_at: "" };
+  const form = (0, import_form.useForm)(initial, { title: ["required", "max:256"], slug: ["slug", "max:100"], subtitle: ["max:500"], meta_title: ["max:255"], meta_description: ["max:500"] });
+  const v = form.values;
+  (0, import_form.useUnsavedGuard)(form.dirty || image.length > 0 || removeImage);
+  const words = (0, import_react.useMemo)(() => strip(v.body) ? strip(v.body).split(" ").length : 0, [v.body]);
+  const minutes = words ? Math.max(1, Math.ceil(words / 200)) : 0;
+  const savedFlow = saved ? saved.workflow : "draft";
+  const save = (workflow) => {
+    const next = __spreadProps(__spreadValues({}, v), { workflow: workflow || v.workflow, remove_image: removeImage });
+    const extra = {};
+    if (next.workflow === "published" || next.workflow === "scheduled") {
+      if (!strip(next.subtitle)) extra.subtitle = "Add a short summary; it shows in the story list.";
+      if (!strip(next.body)) extra.body = "Write the story before publishing it.";
+    }
+    if (next.workflow === "scheduled") {
+      if (!next.publish_at) extra.publish_at = "Pick the date and time to publish.";
+      else if (new Date(next.publish_at).getTime() < Date.now() - 6e4) extra.publish_at = "Pick a time in the future, or publish now.";
+    }
+    const ok = form.validate();
+    if (!ok || Object.keys(extra).length) {
+      form.setErrors((prev) => __spreadValues(__spreadValues({}, prev), extra));
+      toast("Please fix the highlighted fields.", "error");
+      return;
+    }
+    const fd = new FormData();
+    fd.append("data", JSON.stringify(next));
+    if (image[0]) fd.append("image", image[0]);
+    form.submit(() => import_axios.default.post(isNew ? "/admin/api/content/stories" : `/admin/api/content/stories/${saved.id}`, fd), { skipValidation: true }).then((r) => {
+      toast(r.data.message);
+      if (isNew) {
+        import_inertia.Inertia.visit(r.data.editUrl, { replace: true });
+        return;
+      }
+      const p = r.data.post;
+      setSaved(p);
+      form.reset(__spreadProps(__spreadValues({}, v), { workflow: p.workflow, slug: p.slug, publish_at: toLocalInput(p.publish_at) }));
+      setImage([]);
+      setRemoveImage(false);
+    }).catch((e) => toast(e.response && e.response.status === 422 ? e.response.data.message : (0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const primary = {
+    draft: ["Save draft", "fa-floppy-o"],
+    review: ["Send for review", "fa-paper-plane"],
+    scheduled: ["Schedule", "fa-clock-o"],
+    published: [savedFlow === "published" ? "Update live story" : "Publish now", "fa-globe"],
+    archived: ["Archive", "fa-archive"]
+  }[v.workflow] || ["Save", "fa-check"];
+  const snippetTitle = v.meta_title || v.title || "Story title";
+  const snippetText = v.meta_description || v.subtitle || strip(v.body).slice(0, 160) || "A short description of the story appears here in search results.";
+  const title = isNew ? "New story" : saved.title || "Untitled story";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title, wide: true, crumbs: [{ label: "Content" }, { href: "/admin/content/stories", label: "Studio Stories" }, { label: title }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "st-editbar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/admin/content/stories", className: "st-back", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-left", "aria-hidden": "true" }),
+        " All stories"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "st-editbar__state", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { workflow: savedFlow }),
+        !isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted adm-small", children: [
+          "saved ",
+          (0, import_kit.fmtDate)(saved.updated_at, true)
+        ] }),
+        (form.dirty || image.length > 0 || removeImage) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-small adm-warn", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle", "aria-hidden": "true" }),
+          " Unsaved"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "st-editbar__actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: focusMode ? "fa-compress" : "fa-expand", onClick: () => setFocusMode((f) => !f), "aria-pressed": focusMode, children: focusMode ? "Show sidebar" : "Focus" }),
+        !isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", icon: "fa-external-link", href: saved.public_url, target: "_blank", rel: "noopener noreferrer", children: savedFlow === "published" ? "View" : "Preview" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "brand", busy: form.busy, icon: primary[1], onClick: () => save(), children: primary[0] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("st-workspace", focusMode && "is-focus"), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "st-sheet", "aria-label": "Story", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "f-title", className: "sr-only", children: "Title" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "textarea",
+          {
+            id: "f-title",
+            rows: 1,
+            className: (0, import_kit.cx)("st-sheet__title", form.error("title") && "has-error"),
+            value: v.title,
+            maxLength: 256,
+            placeholder: "Story title",
+            onChange: (e) => form.set("title", e.target.value.replace(/\n/g, " ")),
+            onInput: (e) => {
+              e.target.style.height = "auto";
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            },
+            "aria-invalid": form.error("title") ? "true" : void 0
+          }
+        ),
+        form.error("title") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: form.error("title") }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "f-subtitle", className: "sr-only", children: "Summary" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "textarea",
+          {
+            id: "f-subtitle",
+            rows: 2,
+            className: (0, import_kit.cx)("st-sheet__dek", form.error("subtitle") && "has-error"),
+            value: v.subtitle,
+            maxLength: 500,
+            placeholder: "A one- or two-sentence summary shown in the story list",
+            onChange: (e) => form.set("subtitle", e.target.value),
+            "aria-invalid": form.error("subtitle") ? "true" : void 0
+          }
+        ),
+        form.error("subtitle") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: form.error("subtitle") }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "st-sheet__body", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.RichText,
+            {
+              name: "body",
+              value: v.body,
+              onChange: (x) => form.set("body", x),
+              minHeight: 520,
+              onUpload: import_form.uploadImage,
+              error: form.error("body"),
+              placeholder: "Tell the story. Use headings to split it into sections, and add photos of the work in progress\u2026"
+            }
+          ),
+          form.error("body") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: form.error("body") })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "st-side", "aria-label": "Story settings", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "st-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "st-panel__h", children: "Workflow" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "st-phases", role: "radiogroup", "aria-label": "Workflow phase", children: PHASES.map((p) => {
+            const w = WORKFLOW[p];
+            const on = v.workflow === p;
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "radio", "aria-checked": on, className: (0, import_kit.cx)("st-phase", on && "is-on", savedFlow === p && "is-saved"), onClick: () => form.set("workflow", p), children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${w.icon}`, "aria-hidden": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: w.label }),
+                savedFlow === p && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "current" })
+              ] })
+            ] }) }, p);
+          }) }),
+          v.workflow === "scheduled" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Publish on", name: "publish_at", error: form.error("publish_at"), hint: "Goes live within a minute of this time (server time).", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-publish_at", type: "datetime-local", className: "adm-input", value: v.publish_at, onChange: (e) => form.set("publish_at", e.target.value), "aria-invalid": form.error("publish_at") ? "true" : void 0 }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+            v.workflow === "draft" && "Private. Only admins can open it.",
+            v.workflow === "review" && "Private, flagged for an editor to read before it goes live.",
+            v.workflow === "scheduled" && "Private until the time above, then published automatically.",
+            v.workflow === "published" && "Public on /studio-stories and in search.",
+            v.workflow === "archived" && "Taken off the site; kept here with its views."
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: "featured", checked: v.featured, onChange: (x) => form.set("featured", x), label: "Featured", description: "Shown in the featured slot." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy: form.busy, icon: primary[1], onClick: () => save(), className: "st-block", children: primary[0] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "st-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "st-panel__h", children: "Author" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "f-author_id", className: "sr-only", children: "Author" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-author_id", className: "adm-input", value: v.author_id, onChange: (e) => form.set("author_id", e.target.value), "aria-invalid": form.error("author_id") ? "true" : void 0, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Me" }),
+            authors.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: String(a.value), children: a.label }, a.value))
+          ] }),
+          form.error("author_id") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: form.error("author_id") })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "st-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "st-panel__h", children: "Clean URL" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.SlugField,
+            {
+              form,
+              source: "title",
+              prefix: "/blog/post/",
+              label: "URL slug",
+              onCheck: (s) => import_axios.default.get("/admin/api/slug", { params: { table: "posts", slug: s, except: saved ? saved.id : 0 } }).then((r) => r.data)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "st-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "st-panel__h", children: "Tags" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TagInput, { name: "tags", value: v.tags, onChange: (x) => form.set("tags", x), suggestions: tags }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Press Enter after each tag. New tags are created when you save." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "st-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "st-panel__h", children: "Categories" }),
+          categories.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted", children: [
+            "No categories yet. ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/admin/blog/taxonomy", children: "Create one" }),
+            "."
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.ChoiceChips, { name: "category_ids", options: categories.map((c) => ({ value: String(c.value), label: c.label })), value: v.category_ids, onChange: (x) => form.set("category_ids", x) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "st-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "st-panel__h", children: "Cover image" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.DropZone,
+            {
+              name: "image",
+              value: image,
+              onChange: setImage,
+              error: form.error("image"),
+              label: "Drop an image or click to choose",
+              existing: saved && saved.image && !removeImage ? [__spreadValues({ id: "img" }, saved.image)] : [],
+              onRemoveExisting: () => setRemoveImage(true)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "st-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "st-panel__h", children: "Search & sharing" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-serp", "aria-label": "Search result preview", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-serp__url", children: [
+              "artistikcity.com \u203A blog \u203A ",
+              v.slug || "story-url"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-serp__title", children: snippetTitle.length > 60 ? `${snippetTitle.slice(0, 59)}\u2026` : snippetTitle }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-serp__text", children: snippetText.length > 160 ? `${snippetText.slice(0, 159)}\u2026` : snippetText })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "meta_title", label: "SEO title", max: 255, hint: "Best under 60 characters.", optional: true }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.TextField, { form, name: "meta_description", label: "Meta description", rows: 3, max: 500, hint: "Best between 120 and 160 characters.", optional: true })
+        ] }),
+        !isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "st-panel st-panel--stats", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "st-panel__h", children: "Performance" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Views" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: num(saved.views) })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Read time" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+                saved.read_minutes || 0,
+                " min"
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Published" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: saved.published_at ? (0, import_kit.fmtDate)(saved.published_at) : "\u2014" })
+            ] })
+          ] })
+        ] })
+      ] })
+    ] }),
+    toastNode
+  ] });
+}
+function StudioStories() {
+  const { mode } = (0, import_inertia_react.usePage)().props;
+  return mode === "edit" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Editor, {}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dashboard, {});
 }
 
 
@@ -37313,10 +39058,27 @@ function Teacher() {
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -37351,6 +39113,7 @@ var import_CourseCard = __toESM(__webpack_require__("./resources/js/Components/S
 var import_ProgramCard = __webpack_require__("./resources/js/Components/Site/ProgramCard.js");
 var import_SiteHeader = __webpack_require__("./resources/js/Components/Site/SiteHeader.js");
 var import_StudioStoriesStrip = __toESM(__webpack_require__("./resources/js/Components/Site/StudioStoriesStrip.js"));
+var import_siteContent = __webpack_require__("./resources/js/Components/Site/siteContent.js");
 const BENEFITS = [
   { icon: "fa-video-camera", title: "Live, small-group classes", text: "Watch every demo up close and ask questions in real time." },
   { icon: "fa-comments-o", title: "Personal feedback", text: "Submit your projects and get specific notes from your instructor." },
@@ -37385,7 +39148,8 @@ function Row({ title, subtitle, link, courses }) {
   ] }) });
 }
 function Welcome() {
-  const { mediums = [], open_courses, home_artworks = [], testimonials = [], instructor = {} } = (0, import_inertia_react.usePage)().props;
+  const { mediums = [], open_courses, home_artworks = [], testimonials = [], instructor = {}, site } = (0, import_inertia_react.usePage)().props;
+  const hero = (0, import_siteContent.landingOf)(site);
   const programs = open_courses && open_courses.data || [];
   const popular = [...programs].sort((a, b) => Number(b.students || 0) - Number(a.students || 0));
   const courses = programs.filter((c) => !(0, import_ProgramCard.isWorkshop)(c));
@@ -37399,17 +39163,33 @@ function Welcome() {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-hero__bg", "aria-hidden": "true", children: heroArt.map((src, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { backgroundImage: `url(${src})` } }, i)) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-hero__inner", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { children: [
-          "Learn to draw and paint ",
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: "with a real artist." })
+          hero.hero_heading,
+          hero.hero_emphasis && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: hero.hero_emphasis })
+          ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Live online art courses and workshops for every age and level. Pick a medium, join a small group and finish artwork you're proud of." }),
+        hero.hero_subtext && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: hero.hero_subtext }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "dm-hero__search", onSubmit: (e) => {
           e.preventDefault();
           window.location.href = (0, import_SiteHeader.catalogUrl)({ q });
         }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", value: q, onChange: (e) => setQ(e.target.value), placeholder: "What do you want to learn?", "aria-label": "Search courses" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", value: q, onChange: (e) => setQ(e.target.value), placeholder: hero.search_placeholder, "aria-label": "Search courses" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--lg", children: "Search" })
         ] }),
+        hero.cta_label && hero.cta_link && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "a",
+          __spreadProps(__spreadValues({
+            href: hero.cta_link,
+            className: "dm-btn dm-btn--ink dm-btn--lg dm-hero__cta"
+          }, (0, import_siteContent.isExternal)(hero.cta_link) ? { target: "_blank", rel: "noopener noreferrer" } : {}), {
+            children: [
+              hero.cta_label,
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+            ]
+          })
+        ),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-hero__tags", children: mediums.slice(0, 5).map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: (0, import_SiteHeader.catalogUrl)({ medium: m.id }), children: m.name }, m.id)) })
       ] }) })
     ] }),
@@ -111259,6 +113039,12 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Admin/Content/StudioStories": "./resources/js/Pages/Admin/Content/StudioStories.js",
+	"./Admin/Content/StudioStories.js": "./resources/js/Pages/Admin/Content/StudioStories.js",
+	"./Admin/Setup/Config": "./resources/js/Pages/Admin/Setup/Config.js",
+	"./Admin/Setup/Config.js": "./resources/js/Pages/Admin/Setup/Config.js",
+	"./Admin/Setup/SiteSettings": "./resources/js/Pages/Admin/Setup/SiteSettings.js",
+	"./Admin/Setup/SiteSettings.js": "./resources/js/Pages/Admin/Setup/SiteSettings.js",
 	"./Admin/Rooms": "./resources/js/Pages/Admin/Rooms.js",
 	"./Admin/Rooms.js": "./resources/js/Pages/Admin/Rooms.js",
 	"./Admin/Moderation": "./resources/js/Pages/Admin/Moderation.js",
@@ -112170,4 +113956,4 @@ module.exports = JSON.parse('{"name":"axios","version":"0.21.4","description":"P
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()
-;
+;
