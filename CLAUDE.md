@@ -232,8 +232,14 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   2 archived, 3 in review, 4 scheduled (`publish_at`; `BlogAdminController.publishDue` publishes due ones every minute). CMS: Admin > Content >
   Studio Stories (`/admin/content/stories`, `/new`, `/{id}`; page `Admin/Content/StudioStories` = dashboard or editor), JSON API
   `GET/POST /admin/api/content/stories`, `POST|PUT /admin/api/content/stories/{id}`, `POST .../{id}/workflow` (old `/admin/api/posts` kept,
-  `/admin/blog/post*` redirect). Views: `BlogController.countView` (one per visitor session; admins and bots not counted) -> `posts.views` +
-  daily `post_views`; `read_minutes` = words / 200. `/faq` reads the `faqs` table.
+  `/admin/blog/post*` redirect). **Public journal:** `web/StudioStoriesController`: `/studio-stories` (page `StudioStories`: featured story in
+  the banner, topic tabs from `categories`, tags, search, load more; `?category=slug&tag=&q=` mirrored in the address bar) and
+  `/studio-stories/{slug}` (page `StoryDetails`: progress bar, byline, cover, body, tags, share links, author box, newer/older, related;
+  drafts only for signed-in admins, with a Preview bar). `/blog/posts[?id=]` and `/blog/post/{slug}` answer 301 to these (`BlogController`
+  is an empty stub). Views: `StudioStoriesController.countView` (one per visitor session; admins and bots not counted) -> `posts.views` +
+  daily `post_views`; `read_minutes` = words / 200. `/api/studio-stories` (home page strip) gives published stories, topped up from the
+  Studio Vaishali Arts WordPress blog (`service/StudioStoriesService`), which the journal also shows lazily as "More from Studio Vaishali Arts"
+  (`/api/studio-stories/studio-blog`). The old `Pages/Posts.js` / `PostDetails.js` are no longer used. `/faq` reads the `faqs` table.
   Order `payment_status`: 0 pending, 1 paid, 2 failed, 3 refunded; course access needs 1.
 - Wish list: table `wishlist_items` (type `course` or `painting`), `POST /wishlist {type, id, saved}`, page `/user/wishlist`
   (`Pages/Students/Wishlist.js`), and the heart button `Components/Wishlist/SaveButton.js`.

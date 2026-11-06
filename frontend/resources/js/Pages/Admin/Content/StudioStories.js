@@ -310,7 +310,7 @@ function Editor() {
 
                     <section className="st-panel">
                         <h2 className="st-panel__h">Clean URL</h2>
-                        <SlugField form={form} source="title" prefix="/blog/post/" label="URL slug"
+                        <SlugField form={form} source="title" prefix="/studio-stories/" label="URL slug"
                             onCheck={(s) => axios.get('/admin/api/slug', { params: { table: 'posts', slug: s, except: saved ? saved.id : 0 } }).then((r) => r.data)} />
                     </section>
 
@@ -335,7 +335,7 @@ function Editor() {
                     <section className="st-panel">
                         <h2 className="st-panel__h">Search & sharing</h2>
                         <div className="adm-serp" aria-label="Search result preview">
-                            <span className="adm-serp__url">artistikcity.com › blog › {v.slug || 'story-url'}</span>
+                            <span className="adm-serp__url">artistikcity.com › studio-stories › {v.slug || 'story-url'}</span>
                             <span className="adm-serp__title">{snippetTitle.length > 60 ? `${snippetTitle.slice(0, 59)}…` : snippetTitle}</span>
                             <span className="adm-serp__text">{snippetText.length > 160 ? `${snippetText.slice(0, 159)}…` : snippetText}</span>
                         </div>

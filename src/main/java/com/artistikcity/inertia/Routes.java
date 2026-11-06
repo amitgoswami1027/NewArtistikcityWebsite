@@ -64,6 +64,7 @@ public class Routes {
         get("artistikcity.vision", "artistikcity-vision");
         get("how.it.works", "how-it-works");
         get("studio.stories", "studio-stories");
+        get("studio.stories.show", "studio-stories/{slug}");
         get("studio.home", "dashboard");
         get("studio.classroom", "dashboard/classroom/{id}");
         get("studio.submissions", "dashboard/submissions");

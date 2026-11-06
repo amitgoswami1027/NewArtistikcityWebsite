@@ -8156,142 +8156,145 @@ function SiteLayout({ title, children, showCategories = false, activeMedium = nu
 /***/ }),
 
 /***/ "./resources/js/Components/Site/StoryCard.js":
-/*!***************************************************!*\
-  !*** ./resources/js/Components/Site/StoryCard.js ***!
-  \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ StoryCard),
-/* harmony export */   storyDate: () => (/* binding */ storyDate)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var StoryCard_exports = {};
+__export(StoryCard_exports, {
+  default: () => StoryCard,
+  storyDate: () => storyDate
+});
+module.exports = __toCommonJS(StoryCard_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
 function storyDate(d) {
-  if (!d) return '';
-  var dt = new Date(d);
-  return isNaN(dt) ? d : dt.toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
+  if (!d) return "";
+  const dt = new Date(String(d).replace(" ", "T"));
+  return isNaN(dt) ? d : dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
-function StoryCard(_ref) {
-  var story = _ref.story;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("article", {
-    className: "dm-story",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
-      className: "dm-story__img",
-      href: story.url,
-      target: "_blank",
-      rel: "noopener",
-      children: story.image ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("img", {
-        src: story.image,
-        alt: story.title,
-        loading: "lazy"
-      }) : null
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "dm-story__meta",
-      children: [story.category || 'Studio Stories', story.date ? " \xB7 ".concat(storyDate(story.date)) : '']
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h3", {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
-        href: story.url,
-        target: "_blank",
-        rel: "noopener",
-        children: story.title
-      })
-    }), story.excerpt && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-      children: story.excerpt
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
-      className: "dm-readlink",
-      href: story.url,
-      target: "_blank",
-      rel: "noopener",
-      children: ["Read the story ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("i", {
-        className: "fa fa-external-link"
-      })]
-    })]
-  });
+function StoryCard({ story }) {
+  const ext = story.external || /^https?:\/\//i.test(String(story.url || ""));
+  const link = ext ? { target: "_blank", rel: "noopener noreferrer" } : {};
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "dm-story", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", __spreadProps(__spreadValues({ className: "dm-story__img", href: story.url }, link), { tabIndex: -1, "aria-hidden": "true", children: story.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: story.image, alt: "", loading: "lazy" }) : null })),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-story__meta", children: [
+      story.category || "Studio Stories",
+      story.date ? ` \xB7 ${storyDate(story.date)}` : ""
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", __spreadProps(__spreadValues({ href: story.url }, link), { children: story.title })) }),
+    story.excerpt && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: story.excerpt }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", __spreadProps(__spreadValues({ className: "dm-readlink", href: story.url }, link), { children: [
+      "Read the story ",
+      ext ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+    ] }))
+  ] });
 }
+
 
 /***/ }),
 
 /***/ "./resources/js/Components/Site/StudioStoriesStrip.js":
-/*!************************************************************!*\
-  !*** ./resources/js/Components/Site/StudioStoriesStrip.js ***!
-  \************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ StudioStoriesStrip)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "../../febuild/node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _Components_Site_StoryCard__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Site/StoryCard */ "./resources/js/Components/Site/StoryCard.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-/** Latest Studio Stories (from studiovaishaliarts.com) shown as a strip on other pages. */
-
-function StudioStoriesStrip(_ref) {
-  var _ref$limit = _ref.limit,
-    limit = _ref$limit === void 0 ? 4 : _ref$limit,
-    _ref$title = _ref.title,
-    title = _ref$title === void 0 ? 'Fresh from Studio Stories' : _ref$title;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
-    _useState2 = _slicedToArray(_useState, 2),
-    stories = _useState2[0],
-    setStories = _useState2[1];
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    axios__WEBPACK_IMPORTED_MODULE_1___default().get("/api/studio-stories?limit=".concat(limit)).then(function (r) {
-      return setStories(r.data && r.data.stories || []);
-    })["catch"](function () {
-      return setStories([]);
-    });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var StudioStoriesStrip_exports = {};
+__export(StudioStoriesStrip_exports, {
+  default: () => StudioStoriesStrip
+});
+module.exports = __toCommonJS(StudioStoriesStrip_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_StoryCard = __toESM(__webpack_require__("./resources/js/Components/Site/StoryCard.js"));
+function StudioStoriesStrip({ limit = 4, title = "Fresh from Studio Stories" }) {
+  const [stories, setStories] = (0, import_react.useState)([]);
+  (0, import_react.useEffect)(() => {
+    import_axios.default.get(`/api/studio-stories?limit=${limit}`).then((r) => setStories(r.data && r.data.stories || [])).catch(() => setStories([]));
   }, [limit]);
   if (!stories.length) return null;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("section", {
-    className: "dm-section",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-      className: "ac-wide",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-        className: "dm-head",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h2", {
-            children: title
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("p", {
-            children: "Ideas, inspiration and honest notes on the artist's life from Studio Vaishali Arts."
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("a", {
-          href: route('studio.stories'),
-          children: "Explore all stories"
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
-        className: "dm-grid",
-        children: stories.map(function (s) {
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Components_Site_StoryCard__WEBPACK_IMPORTED_MODULE_2__["default"], {
-            story: s
-          }, s.url);
-        })
-      })]
-    })
-  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "dm-section", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: title }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Techniques, materials and honest notes on the artist's life, from the ArtistikCity journal." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("studio.stories"), children: "Explore all stories" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "dm-grid", children: stories.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StoryCard.default, { story: s }, s.url)) })
+  ] }) });
 }
+
 
 /***/ }),
 
@@ -28211,7 +28214,7 @@ function Editor() {
             {
               form,
               source: "title",
-              prefix: "/blog/post/",
+              prefix: "/studio-stories/",
               label: "URL slug",
               onCheck: (s) => import_axios.default.get("/admin/api/slug", { params: { table: "posts", slug: s, except: saved ? saved.id : 0 } }).then((r) => r.data)
             }
@@ -28249,7 +28252,7 @@ function Editor() {
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "st-panel__h", children: "Search & sharing" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-serp", "aria-label": "Search result preview", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-serp__url", children: [
-              "artistikcity.com \u203A blog \u203A ",
+              "artistikcity.com \u203A studio-stories \u203A ",
               v.slug || "story-url"
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-serp__title", children: snippetTitle.length > 60 ? `${snippetTitle.slice(0, 59)}\u2026` : snippetTitle }),
@@ -28981,6 +28984,175 @@ function SellListing() {
       ]
     }
   );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/StoryDetails.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var StoryDetails_exports = {};
+__export(StoryDetails_exports, {
+  default: () => StoryDetails
+});
+module.exports = __toCommonJS(StoryDetails_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_StudioStories = __webpack_require__("./resources/js/Pages/StudioStories.js");
+function Progress() {
+  const [p, setP] = (0, import_react.useState)(0);
+  (0, import_react.useEffect)(() => {
+    const on = () => {
+      const el = document.getElementById("sty-article");
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const total = r.height - window.innerHeight * 0.6;
+      setP(Math.max(0, Math.min(1, total > 0 ? -r.top / total : 1)));
+    };
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    return () => {
+      window.removeEventListener("scroll", on);
+      window.removeEventListener("resize", on);
+    };
+  }, []);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sty-progress", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { transform: `scaleX(${p})` } }) });
+}
+function Share({ url, title }) {
+  const [copied, setCopied] = (0, import_react.useState)(false);
+  const u = encodeURIComponent(url);
+  const t = encodeURIComponent(title);
+  const links = [
+    ["WhatsApp", "fa-whatsapp", `https://wa.me/?text=${t}%20${u}`],
+    ["Facebook", "fa-facebook", `https://www.facebook.com/sharer/sharer.php?u=${u}`],
+    ["X", "fa-twitter", `https://twitter.com/intent/tweet?text=${t}&url=${u}`],
+    ["LinkedIn", "fa-linkedin", `https://www.linkedin.com/sharing/share-offsite/?url=${u}`]
+  ];
+  const copy = () => {
+    try {
+      navigator.clipboard.writeText(url).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2e3);
+      });
+    } catch (e) {
+    }
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-share", "aria-label": "Share this story", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Share" }),
+    links.map(([label, icon, href]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href, target: "_blank", rel: "noopener noreferrer", "aria-label": `Share on ${label}`, title: label, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }) }, label)),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: copy, "aria-label": "Copy the link", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${copied ? "fa-check" : "fa-link"}`, "aria-hidden": "true" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", role: "status", children: copied ? "Link copied" : "" })
+  ] });
+}
+function StoryDetails() {
+  const { story: s, related = [], newer, older, shareUrl } = (0, import_inertia_react.usePage)().props;
+  const cat = s.categories && s.categories[0];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_SiteLayout.default, { title: s.title, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Progress, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "tw", children: [
+      s.status !== "published" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-preview", role: "note", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-eye", "aria-hidden": "true" }),
+        " Preview: this story is not published, so only admins can see it. ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/content/stories/${s.id}`, children: "Open it in the editor" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { id: "sty-article", className: "sty-article", "aria-labelledby": "sty-title", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "sty-article__head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { "aria-label": "Breadcrumb", className: "sty-crumbs", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: "Home" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-hidden": "true", children: "/" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/studio-stories", children: "Studio Stories" }),
+            cat && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-hidden": "true", children: "/" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/studio-stories?category=${encodeURIComponent(cat.slug)}`, children: cat.name })
+            ] })
+          ] }),
+          cat && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-eyebrow", children: cat.name }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { id: "sty-title", children: s.title }),
+          s.subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-dek", children: s.subtitle }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-article__meta", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudioStories.Byline, { s }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Share, { url: shareUrl, title: s.title })
+          ] })
+        ] }),
+        s.image && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("figure", { className: "sty-cover", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: s.image, alt: "" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sty-prose", dangerouslySetInnerHTML: { __html: s.body } }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("footer", { className: "sty-article__foot", children: [
+          s.tags && s.tags.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-tags sty-tags--lg", children: s.tags.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/studio-stories?tag=${encodeURIComponent(t)}`, children: [
+            "#",
+            t
+          ] }, t)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Share, { url: shareUrl, title: s.title }),
+          s.author && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-author", children: [
+            s.author.photo ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: s.author.photo, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sty-byline__dot", "aria-hidden": "true", children: s.author.name.charAt(0) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-eyebrow", children: "Written by" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-author__name", children: s.author.name }),
+              s.author.role && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-author__role", children: s.author.role })
+            ] })
+          ] }),
+          (newer || older) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { className: "sty-pager", "aria-label": "More stories", children: [
+            older ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: older.url, className: "is-older", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "\u2190 Older story" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: older.title })
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+            newer ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: newer.url, className: "is-newer", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Newer story \u2192" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: newer.title })
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {})
+          ] })
+        ] })
+      ] }),
+      related.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide sty-section", "aria-labelledby": "sty-related", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sty-related", children: "Keep reading" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/studio-stories", className: "sty-link", children: [
+            "All Studio Stories ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sty-grid", children: related.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_StudioStories.StoryTile, { s: r }, r.id)) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "ac-wide sty-section", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-cta", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Turn inspiration into practice" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Put these ideas on paper in a live, guided ArtistikCity course." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "sty-btn sty-btn--light", children: "Explore courses" })
+      ] }) })
+    ] })
+  ] });
 }
 
 
@@ -39553,255 +39725,251 @@ function VerifyCertificate() {
 /***/ }),
 
 /***/ "./resources/js/Pages/StudioStories.js":
-/*!*********************************************!*\
-  !*** ./resources/js/Pages/StudioStories.js ***!
-  \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ StudioStories)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Site/SiteLayout */ "./resources/js/Components/Site/SiteLayout.js");
-/* harmony import */ var _Components_Site_StoryCard__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Site/StoryCard */ "./resources/js/Components/Site/StoryCard.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _toArray(r) { return _arrayWithHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableRest(); }
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-
-
-
-function StudioStories() {
-  var _usePage$props = (0,_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.usePage)().props,
-    _usePage$props$storie = _usePage$props.stories,
-    stories = _usePage$props$storie === void 0 ? [] : _usePage$props$storie,
-    _usePage$props$blogUr = _usePage$props.blogUrl,
-    blogUrl = _usePage$props$blogUr === void 0 ? 'https://studiovaishaliarts.com/blog/' : _usePage$props$blogUr;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
-    _useState2 = _slicedToArray(_useState, 2),
-    q = _useState2[0],
-    setQ = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
-    _useState4 = _slicedToArray(_useState3, 2),
-    cat = _useState4[0],
-    setCat = _useState4[1];
-  var categories = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
-    return _toConsumableArray(new Set(stories.map(function (s) {
-      return s.category;
-    }).filter(Boolean)));
-  }, [stories]);
-  var list = stories.filter(function (s) {
-    return (!cat || s.category === cat) && (!q || "".concat(s.title, " ").concat(s.excerpt || '').toLowerCase().includes(q.toLowerCase()));
-  });
-  var _list = _toArray(list),
-    featured = _list[0],
-    rest = _arrayLikeToArray(_list).slice(1);
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(_Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: "Studio Stories",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      className: "ac-wide",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
-        className: "dm-crumbs",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            href: route('welcome'),
-            children: "Home"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-          children: "Studio Stories"
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("header", {
-        className: "dm-journal-hero",
-        style: {
-          paddingTop: 8
-        },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-          className: "ac-eyebrow",
-          children: "The ArtistikCity journal"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h1", {
-          children: "Studio Stories"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-          children: "Notes from the easel: creative blocks, the artist's mindset, techniques and the joy of making art every day. Written at Studio Vaishali Arts."
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "dm-filterbar",
-        style: {
-          paddingTop: 0
-        },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "dm-search",
-          style: {
-            display: 'block',
-            maxWidth: 320,
-            flex: '0 1 320px'
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-            className: "fa fa-search"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("input", {
-            type: "search",
-            value: q,
-            onChange: function onChange(e) {
-              return setQ(e.target.value);
-            },
-            placeholder: "Search stories",
-            "aria-label": "Search stories"
-          })]
-        }), categories.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-          className: "dm-cats",
-          style: {
-            border: 0
-          },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("ul", {
-            style: {
-              padding: 0
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
-                type: "button",
-                className: !cat ? 'is-active' : '',
-                onClick: function onClick() {
-                  return setCat('');
-                },
-                children: "All"
-              })
-            }), categories.map(function (c) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("li", {
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
-                  type: "button",
-                  className: cat === c ? 'is-active' : '',
-                  onClick: function onClick() {
-                    return setCat(c);
-                  },
-                  children: c
-                })
-              }, c);
-            })]
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-          className: "dm-count",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-            href: blogUrl,
-            target: "_blank",
-            rel: "noopener",
-            className: "dm-btn dm-btn--line",
-            children: ["Visit Studio Vaishali Arts ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-              className: "fa fa-external-link"
-            })]
-          })
-        })]
-      }), featured ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("article", {
-          className: "dm-feature",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-            className: "dm-feature__img",
-            href: featured.url,
-            target: "_blank",
-            rel: "noopener",
-            children: featured.image && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("img", {
-              src: featured.image,
-              alt: featured.title
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-              className: "dm-story__meta",
-              children: ["Latest story", featured.date ? " \xB7 ".concat((0,_Components_Site_StoryCard__WEBPACK_IMPORTED_MODULE_3__.storyDate)(featured.date)) : '']
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-                href: featured.url,
-                target: "_blank",
-                rel: "noopener",
-                children: featured.title
-              })
-            }), featured.excerpt && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-              children: featured.excerpt
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("a", {
-              href: featured.url,
-              target: "_blank",
-              rel: "noopener",
-              className: "dm-btn dm-btn--ink",
-              children: ["Read the story ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("i", {
-                className: "fa fa-external-link"
-              })]
-            })]
-          })]
-        }), rest.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("section", {
-          className: "dm-section",
-          style: {
-            paddingTop: 40
-          },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-            className: "dm-grid",
-            style: {
-              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))'
-            },
-            children: rest.map(function (s) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Site_StoryCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
-                story: s
-              }, s.url);
-            })
-          })
-        })]
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-        className: "ac-empty",
-        style: {
-          margin: '24px 0 64px'
-        },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
-          children: "No stories found"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-          children: "Try a different search, or read everything on the studio blog."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-          href: blogUrl,
-          target: "_blank",
-          rel: "noopener",
-          className: "dm-btn dm-btn--ink",
-          children: "Open the studio blog"
-        })]
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("section", {
-      className: "dm-section",
-      style: {
-        paddingTop: 0
-      },
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-        className: "ac-wide",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "dm-join",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-            className: "dm-join__txt",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
-              children: "Turn inspiration into practice"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-              children: "Loved a story? Put those ideas on paper in a live, guided ArtistikCity course."
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: route('courses') + '?type=all',
-              className: "dm-btn dm-btn--brand dm-btn--lg",
-              children: "Explore courses"
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-            className: "dm-join__img",
-            style: {
-              backgroundImage: "url(".concat(stories[1] && stories[1].image || '/assets/images/home-banner.png', ")")
-            }
-          })]
-        })
-      })
-    })]
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var StudioStories_exports = {};
+__export(StudioStories_exports, {
+  Byline: () => Byline,
+  StoryTile: () => StoryTile,
+  default: () => StudioStories
+});
+module.exports = __toCommonJS(StudioStories_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_StoryCard = __webpack_require__("./resources/js/Components/Site/StoryCard.js");
+const PAGE = 9;
+function readQuery() {
+  try {
+    const u = new URLSearchParams(window.location.search);
+    return { category: u.get("category") || "", tag: u.get("tag") || "", q: u.get("q") || "" };
+  } catch (e) {
+    return { category: "", tag: "", q: "" };
+  }
 }
+function Byline({ s, light = false }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: `sty-byline ${light ? "is-light" : ""}`, children: [
+    s.author && s.author.photo ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: s.author.photo, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sty-byline__dot", "aria-hidden": "true", children: (s.author && s.author.name || "A").charAt(0) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: s.author ? s.author.name : "ArtistikCity" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-hidden": "true", children: "\xB7" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", { dateTime: String(s.date || "").replace(" ", "T"), children: (0, import_StoryCard.storyDate)(s.date) }),
+    Number(s.readMinutes) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-hidden": "true", children: "\xB7" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        s.readMinutes,
+        " min read"
+      ] })
+    ] })
+  ] });
+}
+function StoryTile({ s, onTag }) {
+  const cat = s.categories && s.categories[0];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "sty-tile", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: s.url, className: "sty-tile__img", tabIndex: -1, "aria-hidden": "true", children: s.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: s.image, alt: "", loading: "lazy" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sty-tile__noimg", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-pencil", "aria-hidden": "true" }) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-tile__body", children: [
+      cat && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-eyebrow", children: cat.name }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: s.url, children: s.title }) }),
+      s.subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-tile__dek", children: s.subtitle }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Byline, { s }),
+      onTag && s.tags && s.tags.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-tags", children: s.tags.slice(0, 3).map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: () => onTag(t), children: [
+        "#",
+        t
+      ] }, t)) })
+    ] })
+  ] });
+}
+function StudioBlog() {
+  const [data, setData] = (0, import_react.useState)(null);
+  (0, import_react.useEffect)(() => {
+    import_axios.default.get("/api/studio-stories/studio-blog?limit=3").then((r) => setData(r.data)).catch(() => setData({ stories: [] }));
+  }, []);
+  if (!data || !(data.stories || []).length) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide sty-section", "aria-labelledby": "sty-blog", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-eyebrow", children: "From the studio blog" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sty-blog", children: "More from Studio Vaishali Arts" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: data.blogUrl, target: "_blank", rel: "noopener noreferrer", className: "sty-link", children: [
+        "Visit the studio blog ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link", "aria-hidden": "true" })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sty-grid", children: data.stories.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "sty-tile", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: s.url, target: "_blank", rel: "noopener noreferrer", className: "sty-tile__img", tabIndex: -1, "aria-hidden": "true", children: s.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: s.image, alt: "", loading: "lazy", onError: (e) => {
+        e.currentTarget.style.display = "none";
+      } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sty-tile__noimg", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-pencil", "aria-hidden": "true" }) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-tile__body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-eyebrow", children: s.category || "Studio Vaishali Arts" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: s.url, target: "_blank", rel: "noopener noreferrer", children: [
+          s.title,
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link sty-ext", "aria-hidden": "true" })
+        ] }) }),
+        s.excerpt && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-tile__dek", children: s.excerpt }),
+        s.date && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-byline", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: (0, import_StoryCard.storyDate)(s.date) }) })
+      ] })
+    ] }, s.url)) })
+  ] });
+}
+function StudioStories() {
+  const { stories = [], categories = [] } = (0, import_inertia_react.usePage)().props;
+  const initial = (0, import_react.useMemo)(readQuery, []);
+  const [category, setCategory] = (0, import_react.useState)(initial.category);
+  const [tag, setTag] = (0, import_react.useState)(initial.tag);
+  const [q, setQ] = (0, import_react.useState)(initial.q);
+  const [shown, setShown] = (0, import_react.useState)(PAGE);
+  (0, import_react.useEffect)(() => {
+    try {
+      const u = new URL(window.location.href);
+      [["category", category], ["tag", tag], ["q", q.trim()]].forEach(([k, v]) => v ? u.searchParams.set(k, v) : u.searchParams.delete(k));
+      window.history.replaceState(window.history.state, "", u.pathname + u.search);
+    } catch (e) {
+    }
+    setShown(PAGE);
+  }, [category, tag, q]);
+  const filtering = Boolean(category || tag || q.trim());
+  const hero = stories.find((s) => s.featured) || stories[0];
+  const list = (0, import_react.useMemo)(() => {
+    const needle = q.trim().toLowerCase();
+    return stories.filter((s) => {
+      if (!filtering && hero && s.id === hero.id) return false;
+      if (category && !(s.categories || []).some((c) => c.slug === category)) return false;
+      if (tag && !(s.tags || []).some((t) => t.toLowerCase() === tag.toLowerCase())) return false;
+      if (needle && !`${s.title} ${s.subtitle} ${(s.tags || []).join(" ")} ${s.author ? s.author.name : ""}`.toLowerCase().includes(needle)) return false;
+      return true;
+    });
+  }, [stories, category, tag, q, filtering, hero]);
+  const catName = (categories.find((c) => c.slug === category) || {}).name;
+  const clear = () => {
+    setCategory("");
+    setTag("");
+    setQ("");
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: "Studio Stories", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "tw", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "relative overflow-hidden bg-ink text-white", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 opacity-40", style: { background: "radial-gradient(circle at 85% 20%, #9c0d48 0, transparent 45%), radial-gradient(circle at 10% 90%, #3b5bdb 0, transparent 40%)" }, "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide relative py-16 sm:py-20 sty-hero", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { "aria-label": "Breadcrumb", className: "text-sm text-gray-400", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", className: "hover:text-white", children: "Home" }),
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mx-2", "aria-hidden": "true", children: "/" }),
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-white", children: "Studio Stories" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 font-mono text-xs tracking-widest uppercase text-pink-300", children: "The ArtistikCity journal" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { className: "mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-none text-white", children: [
+            "Studio",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-brand", children: "Stories." })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 max-w-xl text-xl text-gray-300", children: "Notes from the easel: techniques, materials, the artist's mindset and the stories behind the work, written by our artists and teachers." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mt-6 text-sm text-gray-400", children: [
+            stories.length,
+            " ",
+            stories.length === 1 ? "story" : "stories",
+            categories.length ? ` \xB7 ${categories.length} ${categories.length === 1 ? "topic" : "topics"}` : ""
+          ] })
+        ] }),
+        hero && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: hero.url, className: "sty-feature", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sty-feature__img", children: hero.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: hero.image, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-pencil", "aria-hidden": "true" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "sty-feature__body", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "sty-feature__eyebrow", children: [
+              hero.featured ? "Featured story" : "Latest story",
+              hero.categories && hero.categories[0] ? ` \xB7 ${hero.categories[0].name}` : ""
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sty-feature__title", children: hero.title }),
+            hero.subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sty-feature__dek", children: hero.subtitle }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Byline, { s: hero, light: true })
+          ] })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sty-bar", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide sty-bar__in", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-cats", role: "tablist", "aria-label": "Topics", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", role: "tab", "aria-selected": !category, className: !category ? "is-on" : "", onClick: () => setCategory(""), children: "All stories" }),
+        categories.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "tab", "aria-selected": category === c.slug, className: category === c.slug ? "is-on" : "", onClick: () => setCategory(c.slug), children: [
+          c.name,
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: c.stories })
+        ] }, c.slug))
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "sty-search", htmlFor: "sty-q", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: "Search stories" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "sty-q", type: "search", value: q, onChange: (e) => setQ(e.target.value), placeholder: "Search stories" })
+      ] })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ac-wide sty-section", "aria-labelledby": "sty-all", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-head", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sty-all", children: catName || (tag ? `#${tag}` : q.trim() ? "Search results" : "All stories") }),
+        filtering && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "sty-active", "aria-live": "polite", children: [
+          list.length,
+          " ",
+          list.length === 1 ? "story" : "stories",
+          tag && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: () => setTag(""), "aria-label": `Remove tag ${tag}`, children: [
+            "#",
+            tag,
+            " \xD7"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "sty-link", onClick: clear, children: "Show all stories" })
+        ] })
+      ] }),
+      list.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-empty", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sty-empty__title", children: stories.length === 0 ? "The first stories are on their way" : "No stories match" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: stories.length === 0 ? "Our artists are writing them now. Meanwhile, find a course that gets you painting." : "Try another topic or a shorter search." }),
+        stories.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "sty-btn", children: "Browse courses" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "sty-btn", onClick: clear, children: "Show all stories" })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sty-grid", children: list.slice(0, shown).map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StoryTile, { s, onTag: setTag }, s.id)) }),
+        list.length > shown && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sty-more", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "sty-btn sty-btn--line", onClick: () => setShown((n) => n + PAGE), children: [
+          "Load more stories (",
+          list.length - shown,
+          " more)"
+        ] }) })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StudioBlog, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "ac-wide sty-section", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sty-cta", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Turn inspiration into practice" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Loved a story? Put those ideas on paper in a live, guided ArtistikCity course." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", className: "sty-btn sty-btn--light", children: "Explore courses" })
+    ] }) })
+  ] }) });
+}
+
 
 /***/ }),
 
@@ -114014,6 +114182,8 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./StoryDetails": "./resources/js/Pages/StoryDetails.js",
+	"./StoryDetails.js": "./resources/js/Pages/StoryDetails.js",
 	"./Studio/SellListing": "./resources/js/Pages/Studio/SellListing.js",
 	"./Studio/SellListing.js": "./resources/js/Pages/Studio/SellListing.js",
 	"./Studio/Sell": "./resources/js/Pages/Studio/Sell.js",

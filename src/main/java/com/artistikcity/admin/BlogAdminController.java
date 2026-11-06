@@ -129,7 +129,7 @@ public class BlogAdminController {
                 .map(r -> {
                     r.put("image_url", r.str("image", "").isBlank() ? null : "/storage/uploads/blog/" + r.str("image"));
                     r.put("workflow", workflowName(r.lng("status", 0)));
-                    r.put("public_url", "/blog/post/" + r.str("slug"));
+                    r.put("public_url", "/studio-stories/" + r.str("slug"));
                     return r;
                 })
                 .page();
@@ -228,7 +228,7 @@ public class BlogAdminController {
                 .map(r -> r.str("name")).toList());
         v.put("created_at", post.get("created_at"));
         v.put("updated_at", post.get("updated_at"));
-        v.put("public_url", "/blog/post/" + post.str("slug"));
+        v.put("public_url", "/studio-stories/" + post.str("slug"));
         return v;
     }
 

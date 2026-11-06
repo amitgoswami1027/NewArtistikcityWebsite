@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import StoryCard from '@/Components/Site/StoryCard';
 
-/** Latest Studio Stories (from studiovaishaliarts.com) shown as a strip on other pages. */
+/** Latest Studio Stories (published in Admin > Content > Studio Stories, topped up from the studio blog) as a strip on other pages. */
 export default function StudioStoriesStrip({ limit = 4, title = 'Fresh from Studio Stories' }) {
     const [stories, setStories] = useState([]);
     useEffect(() => {
@@ -15,7 +15,7 @@ export default function StudioStoriesStrip({ limit = 4, title = 'Fresh from Stud
                 <div className="dm-head">
                     <div>
                         <h2>{title}</h2>
-                        <p>Ideas, inspiration and honest notes on the artist's life from Studio Vaishali Arts.</p>
+                        <p>Techniques, materials and honest notes on the artist's life, from the ArtistikCity journal.</p>
                     </div>
                     <a href={route('studio.stories')}>Explore all stories</a>
                 </div>
