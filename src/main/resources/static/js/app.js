@@ -3823,141 +3823,157 @@ if (document.getElementById('breadcrumb')) {
 /***/ }),
 
 /***/ "./resources/js/Components/Commission/CommissionLayout.js":
-/*!****************************************************************!*\
-  !*** ./resources/js/Components/Commission/CommissionLayout.js ***!
-  \****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   CheckoutShell: () => (/* binding */ CheckoutShell),
-/* harmony export */   "default": () => (/* binding */ CommissionLayout)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var _Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Site/SiteLayout */ "./resources/js/Components/Site/SiteLayout.js");
-/* harmony import */ var _Components_Commission_CommissionStore__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Commission/CommissionStore */ "./resources/js/Components/Commission/CommissionStore.js");
-/* harmony import */ var _Components_Commission_Stepper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Commission/Stepper */ "./resources/js/Components/Commission/Stepper.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-
-/** Renders a wizard step inside the site's header/footer shell, with the progress stepper. */
-
-function CommissionLayout(_ref) {
-  var title = _ref.title,
-    subtitle = _ref.subtitle,
-    step = _ref.step,
-    children = _ref.children;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Site_SiteLayout__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    title: "".concat(title, " \xB7 Artist Commission Portal"),
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(_Components_Commission_CommissionStore__WEBPACK_IMPORTED_MODULE_3__.CommissionProvider, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "ac-wide",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("ul", {
-          className: "dm-crumbs",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("li", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-              href: "/",
-              children: "Home"
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("li", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-              href: "/commission/step-1",
-              children: "Commission art"
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("li", {
-            children: title
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-          className: "dm-listhead",
-          style: {
-            paddingTop: 8
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-            className: "ac-eyebrow",
-            children: ["Artist Commission Portal \xB7 Step ", step, " of 6"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h1", {
-            children: title
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            children: "A hand-painted original made from your photo by an ArtistikCity artist. Six short steps, and you can change anything before you pay."
-          })]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-        className: "tw",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-          className: "ac-wide",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-            className: "border-b border-gray-200 pb-6",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Commission_Stepper__WEBPACK_IMPORTED_MODULE_4__["default"], {
-              current: step
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-            className: "py-10",
-            children: children
-          })]
-        })
-      })]
-    })
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var CommissionLayout_exports = {};
+__export(CommissionLayout_exports, {
+  CheckoutShell: () => CheckoutShell,
+  CommissionHero: () => CommissionHero,
+  default: () => CommissionLayout
+});
+module.exports = __toCommonJS(CommissionLayout_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_CommissionStore = __webpack_require__("./resources/js/Components/Commission/CommissionStore.js");
+var import_Stepper = __toESM(__webpack_require__("./resources/js/Components/Commission/Stepper.js"));
+var import_ThemeArt = __toESM(__webpack_require__("./resources/js/Components/Commission/ThemeArt.js"));
+var import_CommissionStore2 = __webpack_require__("./resources/js/Components/Commission/CommissionStore.js");
+const reduceMotion = () => {
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (e) {
+    return false;
+  }
+};
+function CommissionHero() {
+  const start = (e) => {
+    e.preventDefault();
+    const el = document.getElementById("commission-start");
+    if (el) el.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "relative overflow-hidden bg-ink text-white cm-hero", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 opacity-40", style: { background: "radial-gradient(circle at 85% 20%, #9c0d48 0, transparent 45%), radial-gradient(circle at 10% 90%, #3b5bdb 0, transparent 40%)" }, "aria-hidden": "true" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide relative py-20 sm:py-28 cm-hero__grid", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { "aria-label": "Breadcrumb", className: "text-sm text-gray-400", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", className: "hover:text-white", children: "Home" }),
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mx-2", "aria-hidden": "true", children: "/" }),
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-white", children: "Commission art" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 font-mono text-xs tracking-widest uppercase text-pink-300", children: "The ArtistikCity Artist Commission Portal" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { className: "mt-4 text-5xl sm:text-7xl font-black tracking-tight leading-none text-white", children: [
+          "Your photo.",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+          "Hand-painted.",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-brand", children: "Made for your wall." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-6 max-w-2xl text-xl text-gray-300", children: "Send us a photo you love and an ArtistikCity artist paints it by hand, in the style you choose. Preview it on your own photo, pick the size and frame, and change anything before you pay. Six short steps." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mt-8 flex flex-wrap gap-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/commission/step-1#commission-start", onClick: start, className: "inline-flex items-center h-12 px-7 rounded-full bg-brand text-white font-bold hover:bg-brand-dark", children: [
+            "Start your commission ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-down ml-2", "aria-hidden": "true" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "inline-flex items-center h-12 px-7 rounded-full border border-white border-opacity-40 text-white font-bold hover:bg-white hover:text-ink", children: "Browse ready-made originals" })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "cm-hero__styles", "aria-label": "Painting styles you can choose", children: import_CommissionStore2.THEMES.map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: `cm-hero__frame is-${i}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cm-hero__canvas", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ThemeArt.default, { theme: t.id }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "cm-hero__label", children: t.title })
+      ] }, t.id)) })
+    ] })
+  ] });
+}
+function CommissionLayout({ title, subtitle, step, children, hero = false }) {
+  if (hero) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: `${title} \xB7 Artist Commission Portal`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_CommissionStore.CommissionProvider, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tw", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CommissionHero, {}) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tw", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pt-10 cm-start", id: "commission-start", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "font-mono text-xs tracking-widest uppercase text-brand", children: [
+            "Step ",
+            step,
+            " of 6"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "mt-2 text-4xl font-black tracking-tight text-ink", children: title }),
+          subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-lg text-gray-600", children: subtitle })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "border-b border-gray-200 pb-6 mt-4", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Stepper.default, { current: step }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "py-10", children })
+      ] }) })
+    ] }) });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: `${title} \xB7 Artist Commission Portal`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_CommissionStore.CommissionProvider, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "dm-crumbs", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: "Home" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/commission/step-1", children: "Commission art" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: title })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-listhead", style: { paddingTop: 8 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ac-eyebrow", children: [
+          "Artist Commission Portal \xB7 Step ",
+          step,
+          " of 6"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: title }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "A hand-painted original made from your photo by an ArtistikCity artist. Six short steps, and you can change anything before you pay." })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tw", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "border-b border-gray-200 pb-6", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Stepper.default, { current: step }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "py-10", children })
+    ] }) })
+  ] }) });
+}
+function CheckoutShell({ title, children }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: `${title} \xB7 ArtistikCity` }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CommissionStore.CommissionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "tw min-h-screen", style: { background: "#f6f6f6" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", { className: "bg-white border-b border-gray-200", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide h-16 flex items-center justify-between", style: { height: 68 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", "aria-label": "ArtistikCity home", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/logo.png", alt: "ArtistikCity", style: { height: 36, width: "auto" } }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "inline-flex items-center gap-2 text-sm font-semibold text-gray-600", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock text-green-600", "aria-hidden": "true" }),
+          " Secure checkout"
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", { className: "ac-wide", style: { paddingTop: 32, paddingBottom: 72 }, children })
+    ] }) })
+  ] });
 }
 
-/** Distraction-free shell for the checkout: logo + secure badge only, no site navigation. */
-function CheckoutShell(_ref2) {
-  var title = _ref2.title,
-    children = _ref2.children;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-    className: "ac",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.Head, {
-      title: "".concat(title, " \xB7 ArtistikCity")
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_Components_Commission_CommissionStore__WEBPACK_IMPORTED_MODULE_3__.CommissionProvider, {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "tw min-h-screen",
-        style: {
-          background: "#f6f6f6"
-        },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("header", {
-          className: "bg-white border-b border-gray-200",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "ac-wide h-16 flex items-center justify-between",
-            style: {
-              height: 68
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
-              href: "/",
-              "aria-label": "ArtistikCity home",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("img", {
-                src: "/assets/images/logo.png",
-                alt: "ArtistikCity",
-                style: {
-                  height: 36,
-                  width: "auto"
-                }
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-              className: "inline-flex items-center gap-2 text-sm font-semibold text-gray-600",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("i", {
-                className: "fa fa-lock text-green-600",
-                "aria-hidden": "true"
-              }), " Secure checkout"]
-            })]
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("main", {
-          className: "ac-wide",
-          style: {
-            paddingTop: 32,
-            paddingBottom: 72
-          },
-          children: children
-        })]
-      })
-    })]
-  });
-}
 
 /***/ }),
 
@@ -30155,105 +30171,104 @@ function Preview() {
 /***/ }),
 
 /***/ "./resources/js/Pages/Commission/Step1Theme.js":
-/*!*****************************************************!*\
-  !*** ./resources/js/Pages/Commission/Step1Theme.js ***!
-  \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Step1Theme)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var _Components_Commission_CommissionLayout__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/Components/Commission/CommissionLayout */ "./resources/js/Components/Commission/CommissionLayout.js");
-/* harmony import */ var _Components_Commission_WizardNav__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Components/Commission/WizardNav */ "./resources/js/Components/Commission/WizardNav.js");
-/* harmony import */ var _Components_Commission_ThemeArt__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Commission/ThemeArt */ "./resources/js/Components/Commission/ThemeArt.js");
-/* harmony import */ var _Components_Commission_CommissionStore__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/Components/Commission/CommissionStore */ "./resources/js/Components/Commission/CommissionStore.js");
-/* harmony import */ var _Components_Commission_useStepGuard__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/Components/Commission/useStepGuard */ "./resources/js/Components/Commission/useStepGuard.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-
-
-
-
-
-
-
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Step1Theme_exports = {};
+__export(Step1Theme_exports, {
+  default: () => Step1Theme
+});
+module.exports = __toCommonJS(Step1Theme_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_CommissionLayout = __toESM(__webpack_require__("./resources/js/Components/Commission/CommissionLayout.js"));
+var import_WizardNav = __toESM(__webpack_require__("./resources/js/Components/Commission/WizardNav.js"));
+var import_ThemeArt = __toESM(__webpack_require__("./resources/js/Components/Commission/ThemeArt.js"));
+var import_CommissionStore = __webpack_require__("./resources/js/Components/Commission/CommissionStore.js");
+var import_useStepGuard = __webpack_require__("./resources/js/Components/Commission/useStepGuard.js");
 function ThemeStep() {
-  var _useCommission = (0,_Components_Commission_CommissionStore__WEBPACK_IMPORTED_MODULE_4__.useCommission)(),
-    state = _useCommission.state,
-    update = _useCommission.update;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("form", {
-    onSubmit: function onSubmit(e) {
-      e.preventDefault();
-      if (state.theme) (0,_Components_Commission_useStepGuard__WEBPACK_IMPORTED_MODULE_5__.go)('/commission/step-2');
-    },
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("fieldset", {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("legend", {
-        className: "text-2xl font-extrabold tracking-tight text-ink",
-        children: "Choose the style of your painting"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
-        className: "mt-2 text-lg text-gray-600",
-        children: "Pick the look you love. You can preview it on your own photo in step 3."
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-        className: "mt-6 grid grid-cols-1 md:grid-cols-2 gap-6",
-        children: _Components_Commission_CommissionStore__WEBPACK_IMPORTED_MODULE_4__.THEMES.map(function (t) {
-          var checked = state.theme === t.id;
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("label", {
-            className: "group relative block rounded-2xl border-2 bg-white overflow-hidden cursor-pointer transition-shadow focus-within:ring-2 focus-within:ring-offset-2 ".concat(checked ? 'border-brand shadow-lg' : 'border-gray-200 hover:border-gray-400 hover:shadow-md'),
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
-              className: "h-44 sm:h-52 overflow-hidden bg-gray-100",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_Components_Commission_ThemeArt__WEBPACK_IMPORTED_MODULE_3__["default"], {
-                theme: t.id,
-                className: "transform transition-transform duration-500 group-hover:scale-105"
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-              className: "flex items-start gap-4 p-5",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
-                type: "radio",
-                name: "theme",
-                value: t.id,
-                checked: checked,
-                onChange: function onChange() {
-                  return update({
-                    theme: t.id
-                  });
-                },
-                className: "mt-1 h-5 w-5 text-brand border-gray-300 focus:ring-brand"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("span", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                  className: "block text-lg font-extrabold text-ink",
-                  children: t.title
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-                  className: "block mt-1 text-sm text-gray-600",
-                  children: t.blurb
-                })]
-              })]
-            }), checked && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
-              className: "absolute top-3 right-3 rounded-full bg-brand text-white text-xs font-bold px-3 py-1",
-              children: "Selected"
-            })]
-          }, t.id);
-        })
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_Components_Commission_WizardNav__WEBPACK_IMPORTED_MODULE_2__["default"], {
-      onNext: function onNext() {
-        return (0,_Components_Commission_useStepGuard__WEBPACK_IMPORTED_MODULE_5__.go)('/commission/step-2');
-      },
-      nextDisabled: !state.theme,
-      nextLabel: 'Next: Choose Delivery & Size ➔',
-      hint: !state.theme ? 'Select a theme to continue.' : null
-    })]
-  });
+  const { state, update } = (0, import_CommissionStore.useCommission)();
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: (e) => {
+    e.preventDefault();
+    if (state.theme) (0, import_useStepGuard.go)("/commission/step-2");
+  }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "text-2xl font-extrabold tracking-tight text-ink", children: "Choose the style of your painting" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mt-2 text-lg text-gray-600", children: "Pick the look you love. You can preview it on your own photo in step 3." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mt-6 grid grid-cols-1 md:grid-cols-2 gap-6", children: import_CommissionStore.THEMES.map((t) => {
+        const checked = state.theme === t.id;
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "label",
+          {
+            className: `group relative block rounded-2xl border-2 bg-white overflow-hidden cursor-pointer transition-shadow focus-within:ring-2 focus-within:ring-offset-2 ${checked ? "border-brand shadow-lg" : "border-gray-200 hover:border-gray-400 hover:shadow-md"}`,
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-44 sm:h-52 overflow-hidden bg-gray-100", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ThemeArt.default, { theme: t.id, className: "transform transition-transform duration-500 group-hover:scale-105" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-start gap-4 p-5", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                  "input",
+                  {
+                    type: "radio",
+                    name: "theme",
+                    value: t.id,
+                    checked,
+                    onChange: () => update({ theme: t.id }),
+                    className: "mt-1 h-5 w-5 text-brand border-gray-300 focus:ring-brand"
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block text-lg font-extrabold text-ink", children: t.title }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "block mt-1 text-sm text-gray-600", children: t.blurb })
+                ] })
+              ] }),
+              checked && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "absolute top-3 right-3 rounded-full bg-brand text-white text-xs font-bold px-3 py-1", children: "Selected" })
+            ]
+          },
+          t.id
+        );
+      }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_WizardNav.default,
+      {
+        onNext: () => (0, import_useStepGuard.go)("/commission/step-2"),
+        nextDisabled: !state.theme,
+        nextLabel: "Next: Choose Delivery & Size \u2794",
+        hint: !state.theme ? "Select a theme to continue." : null
+      }
+    )
+  ] });
 }
 function Step1Theme() {
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_Components_Commission_CommissionLayout__WEBPACK_IMPORTED_MODULE_1__["default"], {
-    title: "Choose your theme",
-    subtitle: "Tell us the style you love. A real artist paints your commission by hand from your photo.",
-    step: 1,
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(ThemeStep, {})
-  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CommissionLayout.default, { hero: true, title: "Choose your theme", subtitle: "Tell us the style you love. A real artist paints your commission by hand from your photo.", step: 1, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ThemeStep, {}) });
 }
+
 
 /***/ }),
 

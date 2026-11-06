@@ -44,5 +44,5 @@ function ThemeStep() {
 }
 
 export default function Step1Theme() {
-    return <CommissionLayout title="Choose your theme" subtitle="Tell us the style you love. A real artist paints your commission by hand from your photo." step={1}><ThemeStep /></CommissionLayout>;
+    return <CommissionLayout hero title="Choose your theme" subtitle="Tell us the style you love. A real artist paints your commission by hand from your photo." step={1}><ThemeStep /></CommissionLayout>;
 }
