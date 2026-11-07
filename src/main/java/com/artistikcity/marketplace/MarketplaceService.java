@@ -145,6 +145,13 @@ public class MarketplaceService {
                 "select r.id, r.painting_id, r.session_or_user_id, p.title, p.slug from cart_reservations r join paintings p on p.id = r.painting_id"
                         + " where r.session_or_user_id in (" + inList(myKeys) + ") and r.expires_at > ? and r.painting_id <> ?", args.toArray());
         if (!mine.isEmpty()) {
+            for (Map<String, Object> h : mine) {
+                // a hold that comes from an accepted offer is a promise to that buyer: it never moves to another piece
+                if (offerHold(((Number) h.get("painting_id")).longValue(), myKeys)) {
+                    throw new MarketplaceException(409, "OFFER_HOLD", "Your accepted offer holds “" + h.get("title") + "” for you. Pay for it or withdraw the offer (Your offers) before reserving another original.",
+                            Map.of("heldSlug", h.get("slug"), "heldTitle", h.get("title")));
+                }
+            }
             if (!switchHold) {
                 Map<String, Object> h = mine.get(0);
                 throw new MarketplaceException(409, "HOLD_LIMIT", "You're already holding “" + h.get("title") + "”. Finish that checkout or release it to reserve this piece.",
@@ -176,9 +183,24 @@ public class MarketplaceService {
                 ts(LocalDateTime.now()), paintingId, holder);
     }
 
-    /** The visitor gives the piece back. Returns false when they weren't holding it. */
+    /** True when one of these holders has an accepted offer on the painting that is still inside its payment window. */
+    public boolean offerHold(long paintingId, List<String> myKeys) {
+        for (String k : myKeys) {
+            if (!k.startsWith("U:")) continue;
+            Long n = jdbc.queryForObject("select count(*) from painting_offers where painting_id = ? and user_id = ? and status = 'ACCEPTED' and pay_by > ?",
+                    Long.class, paintingId, Long.parseLong(k.substring(2)), ts(LocalDateTime.now()));
+            if (n != null && n > 0) return true;
+        }
+        return false;
+    }
+
+    /**
+     * The visitor gives the piece back. Returns false when they weren't holding it. A hold from an accepted offer is kept
+     * (withdrawing the offer in Your offers gives it back).
+     */
     public boolean release(long paintingId, List<String> myKeys) {
         if (myKeys.isEmpty()) return false;
+        if (offerHold(paintingId, myKeys)) return false;
         Boolean done = tx.execute(s -> {
             List<Object> args = new java.util.ArrayList<>();
             args.add(paintingId);

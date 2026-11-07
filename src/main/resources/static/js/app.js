@@ -5671,7 +5671,43 @@ __export(ArtCard_exports, {
 module.exports = __toCommonJS(ArtCard_exports);
 var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
 var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_CartStore = __webpack_require__("./resources/js/Components/Shop/CartStore.js");
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
 var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
+function QuickAdd({ p }) {
+  const cart = (0, import_CartStore.useCart)();
+  const [state, setState] = (0, import_react.useState)(null);
+  const add = () => {
+    setState({ busy: true });
+    cart.add({ paintingId: p.id, format: "ORIGINAL", frame: "NONE", qty: 1 }).then(() => setState({ done: true })).catch((e) => {
+      const d = e.response && e.response.data;
+      if (d && d.code === "SIGN_IN" && d.redirect) {
+        window.location.assign(d.redirect);
+        return;
+      }
+      cart.clearError();
+      setState({ error: d && d.code === "HOLD_LIMIT" ? "You\u2019re holding another original. Open it to switch." : (0, import_shop.errorText)(e) });
+    });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-card__quick", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "button",
+      {
+        type: "button",
+        className: "mk-quickadd",
+        onClick: add,
+        disabled: state && state.busy,
+        "data-testid": "card-add",
+        "aria-label": `Add \u201C${p.title}\u201D to your cart`,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${state && state.done ? "fa-check" : "fa-shopping-bag"}`, "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: state && state.done ? "In your cart" : "Add to cart" })
+        ]
+      }
+    ),
+    state && state.error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mk-quickadd__err", role: "alert", children: state.error })
+  ] });
+}
 function ArtCard({ p, serverNow }) {
   const held = p.stock_status === "RESERVED";
   const sold = p.stock_status === "SOLD";
@@ -5680,70 +5716,73 @@ function ArtCard({ p, serverNow }) {
   const h = Number(p.height_inches) || 3;
   const imgW = 800;
   const imgH = Math.round(imgW * h / w);
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("article", { className: `mk-card ${sold ? "is-sold" : ""}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/marketplace/${p.slug}`, className: "mk-card__link", "aria-label": `${p.title} by ${p.artist_name}, ${sold ? "sold" : (0, import_shared.inr)(p.final_price)}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-card__media", children: [
-      p.image_url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-        "img",
-        {
-          src: p.image_url,
-          alt: `${p.title} by ${p.artist_name}`,
-          loading: "lazy",
-          decoding: "async",
-          width: imgW,
-          height: imgH,
-          className: "mk-card__img"
-        }
-      ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mk-card__noimg", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-card__tags", children: [
-        sold && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mk-tag mk-tag--ink", children: "Sold" }),
-        held && left > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mk-tag mk-tag--hold", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
-          " On hold \xB7 ",
-          (0, import_shared.mmss)(left)
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: `mk-card ${sold ? "is-sold" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/marketplace/${p.slug}`, className: "mk-card__link", "aria-label": `${p.title} by ${p.artist_name}, ${sold ? "sold" : (0, import_shared.inr)(p.final_price)}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-card__media", children: [
+        p.image_url ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "img",
+          {
+            src: p.image_url,
+            alt: `${p.title} by ${p.artist_name}`,
+            loading: "lazy",
+            decoding: "async",
+            width: imgW,
+            height: imgH,
+            className: "mk-card__img"
+          }
+        ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mk-card__noimg", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-card__tags", children: [
+          sold && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mk-tag mk-tag--ink", children: "Sold" }),
+          held && left > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mk-tag mk-tag--hold", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+            " On hold \xB7 ",
+            (0, import_shared.mmss)(left)
+          ] }),
+          !sold && !held && (0, import_shared.hasDiscount)(p) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mk-tag mk-tag--brand", children: [
+            "-",
+            (0, import_shared.pct)(p)
+          ] }),
+          p.source === "STUDENT" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mk-tag mk-tag--student", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-graduation-cap", "aria-hidden": "true" }),
+            " Student painting"
+          ] })
         ] }),
-        !sold && !held && (0, import_shared.hasDiscount)(p) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mk-tag mk-tag--brand", children: [
-          "-",
-          (0, import_shared.pct)(p)
-        ] }),
-        p.source === "STUDENT" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mk-tag mk-tag--student", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-graduation-cap", "aria-hidden": "true" }),
-          " Student painting"
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-overlay", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-overlay__eyebrow", children: [
+            p.medium,
+            " on ",
+            String(p.surface || "").toLowerCase()
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-overlay__dims", children: [
+            (0, import_shared.dims)(p),
+            " \xB7 ",
+            (0, import_shared.dimsCm)(p),
+            p.is_framed ? " \xB7 framed" : ""
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mk-overlay__trust", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.TrustBadges, { p, compact: true }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mk-overlay__cta", children: [
+            sold ? "See the piece" : "View artwork",
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+          ] })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-overlay", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-overlay__eyebrow", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-card__body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mk-card__title", children: p.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-card__artist", children: [
+          p.artist_name,
+          p.year_created ? ` \xB7 ${p.year_created}` : ""
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-card__meta", children: [
           p.medium,
-          " on ",
-          String(p.surface || "").toLowerCase()
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-overlay__dims", children: [
-          (0, import_shared.dims)(p),
           " \xB7 ",
-          (0, import_shared.dimsCm)(p),
-          p.is_framed ? " \xB7 framed" : ""
+          (0, import_shared.dims)(p)
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mk-overlay__trust", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.TrustBadges, { p, compact: true }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "mk-overlay__cta", children: [
-          sold ? "See the piece" : "View artwork",
-          " ",
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
-        ] })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mk-card__price", children: sold ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mk-card__sold", children: "Sold" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.Price, { p }) })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mk-card__body", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "mk-card__title", children: p.title }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-card__artist", children: [
-        p.artist_name,
-        p.year_created ? ` \xB7 ${p.year_created}` : ""
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "mk-card__meta", children: [
-        p.medium,
-        " \xB7 ",
-        (0, import_shared.dims)(p)
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mk-card__price", children: sold ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mk-card__sold", children: "Sold" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_shared.Price, { p }) })
-    ] })
-  ] }) });
+    !sold && !held && p.stock_status === "AVAILABLE" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(QuickAdd, { p })
+  ] });
 }
 
 
@@ -7104,274 +7143,162 @@ function FullScreen(_ref2) {
 /***/ }),
 
 /***/ "./resources/js/Components/Marketplace/shared.js":
-/*!*******************************************************!*\
-  !*** ./resources/js/Components/Marketplace/shared.js ***!
-  \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   HoldBanner: () => (/* binding */ HoldBanner),
-/* harmony export */   MEDIUMS: () => (/* binding */ MEDIUMS),
-/* harmony export */   Price: () => (/* binding */ Price),
-/* harmony export */   STATUS: () => (/* binding */ STATUS),
-/* harmony export */   SUBJECTS: () => (/* binding */ SUBJECTS),
-/* harmony export */   SURFACES: () => (/* binding */ SURFACES),
-/* harmony export */   Spinner: () => (/* binding */ Spinner),
-/* harmony export */   StatusChip: () => (/* binding */ StatusChip),
-/* harmony export */   TrustBadges: () => (/* binding */ TrustBadges),
-/* harmony export */   dims: () => (/* binding */ dims),
-/* harmony export */   dimsCm: () => (/* binding */ dimsCm),
-/* harmony export */   errorText: () => (/* binding */ errorText),
-/* harmony export */   finalPrice: () => (/* binding */ finalPrice),
-/* harmony export */   hasDiscount: () => (/* binding */ hasDiscount),
-/* harmony export */   inr: () => (/* binding */ inr),
-/* harmony export */   mmss: () => (/* binding */ mmss),
-/* harmony export */   num: () => (/* binding */ num),
-/* harmony export */   pct: () => (/* binding */ pct),
-/* harmony export */   usd: () => (/* binding */ usd),
-/* harmony export */   useCountdown: () => (/* binding */ useCountdown)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "../../febuild/node_modules/react/index.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "../../febuild/node_modules/react/jsx-runtime.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-/* ------------------------------------------------------------------ formatting */
-
-var inr = function inr(n) {
-  return '₹' + Number(n || 0).toLocaleString('en-IN', {
-    maximumFractionDigits: 0
-  });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
-var usd = function usd(n) {
-  return '$' + Number(n || 0).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
 };
-var num = function num(n) {
-  var d = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-  var v = Number(n);
-  if (!isFinite(v)) return '';
-  return Number.isInteger(v) ? String(v) : v.toFixed(d).replace(/\.0+$/, '');
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var shared_exports = {};
+__export(shared_exports, {
+  HoldBanner: () => HoldBanner,
+  MEDIUMS: () => MEDIUMS,
+  Price: () => Price,
+  STATUS: () => STATUS,
+  SUBJECTS: () => SUBJECTS,
+  SURFACES: () => SURFACES,
+  Spinner: () => Spinner,
+  StatusChip: () => StatusChip,
+  TrustBadges: () => TrustBadges,
+  dims: () => dims,
+  dimsCm: () => dimsCm,
+  errorText: () => errorText,
+  finalPrice: () => finalPrice,
+  hasDiscount: () => hasDiscount,
+  inr: () => inr,
+  mmss: () => mmss,
+  num: () => num,
+  pct: () => pct,
+  usd: () => usd,
+  useCountdown: () => useCountdown
+});
+module.exports = __toCommonJS(shared_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+const inr = (n) => "\u20B9" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+const usd = (n) => "$" + Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = (n, d = 1) => {
+  const v = Number(n);
+  if (!isFinite(v)) return "";
+  return Number.isInteger(v) ? String(v) : v.toFixed(d).replace(/\.0+$/, "");
 };
-var dims = function dims(p) {
-  return "".concat(num(p.height_inches), " \xD7 ").concat(num(p.width_inches), " in");
-};
-var dimsCm = function dimsCm(p) {
-  return "".concat(num(p.height_cm), " \xD7 ").concat(num(p.width_cm), " cm");
-};
-var errorText = function errorText(e) {
-  var fallback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Something went wrong. Please try again.';
-  return e && e.response && e.response.data && e.response.data.message || fallback;
-};
-var hasDiscount = function hasDiscount(p) {
-  return Number(p.discount_percentage) > 0;
-};
-var pct = function pct(p) {
-  return "".concat(num(p.discount_percentage, 0), "%");
-};
-
-/** The one client-side mirror of ListingInput.finalPrice (the server recalculates; this is for live preview only). */
-var finalPrice = function finalPrice(base, discount) {
-  var b = Number(base) || 0;
-  var d = Math.min(90, Math.max(0, Number(discount) || 0));
+const dims = (p) => `${num(p.height_inches)} \xD7 ${num(p.width_inches)} in`;
+const dimsCm = (p) => `${num(p.height_cm)} \xD7 ${num(p.width_cm)} cm`;
+const errorText = (e, fallback = "Something went wrong. Please try again.") => e && e.response && e.response.data && e.response.data.message || fallback;
+const hasDiscount = (p) => Number(p.discount_percentage) > 0;
+const pct = (p) => `${num(p.discount_percentage, 0)}%`;
+const finalPrice = (base, discount) => {
+  const b = Number(base) || 0;
+  const d = Math.min(90, Math.max(0, Number(discount) || 0));
   return Math.round(b * (100 - d)) / 100;
 };
-var STATUS = {
-  AVAILABLE: {
-    label: 'Available',
-    chip: 'bg-green-50 text-green-800 border-green-200',
-    dot: 'bg-green-500'
-  },
-  RESERVED: {
-    label: 'On hold',
-    chip: 'bg-yellow-50 text-yellow-800 border-yellow-200',
-    dot: 'bg-yellow-500'
-  },
-  SOLD: {
-    label: 'Sold',
-    chip: 'bg-gray-900 text-white border-gray-900',
-    dot: 'bg-gray-900'
-  },
-  PENDING_REVIEW: {
-    label: 'In review',
-    chip: 'bg-blue-50 text-blue-800 border-blue-200',
-    dot: 'bg-blue-500'
-  },
-  DRAFT: {
-    label: 'Draft',
-    chip: 'bg-gray-100 text-gray-700 border-gray-200',
-    dot: 'bg-gray-400'
-  },
-  ARCHIVED: {
-    label: 'Archived',
-    chip: 'bg-gray-100 text-gray-500 border-gray-200',
-    dot: 'bg-gray-300'
-  }
+const STATUS = {
+  AVAILABLE: { label: "Available", chip: "bg-green-50 text-green-800 border-green-200", dot: "bg-green-500" },
+  RESERVED: { label: "On hold", chip: "bg-yellow-50 text-yellow-800 border-yellow-200", dot: "bg-yellow-500" },
+  SOLD: { label: "Sold", chip: "bg-gray-900 text-white border-gray-900", dot: "bg-gray-900" },
+  PENDING_REVIEW: { label: "In review", chip: "bg-blue-50 text-blue-800 border-blue-200", dot: "bg-blue-500" },
+  DRAFT: { label: "Draft", chip: "bg-gray-100 text-gray-700 border-gray-200", dot: "bg-gray-400" },
+  ARCHIVED: { label: "Archived", chip: "bg-gray-100 text-gray-500 border-gray-200", dot: "bg-gray-300" }
 };
-function StatusChip(_ref) {
-  var status = _ref.status,
-    _ref$className = _ref.className,
-    className = _ref$className === void 0 ? '' : _ref$className;
-  var s = STATUS[status] || STATUS.DRAFT;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("span", {
-    className: "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold ".concat(s.chip, " ").concat(className),
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
-      className: "w-1.5 h-1.5 rounded-full ".concat(s.dot),
-      "aria-hidden": "true"
-    }), s.label]
-  });
+function StatusChip({ status, className = "" }) {
+  const s = STATUS[status] || STATUS.DRAFT;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold ${s.chip} ${className}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${s.dot}`, "aria-hidden": "true" }),
+    s.label
+  ] });
 }
-
-/* ------------------------------------------------------------------ countdown */
-
-/**
- * Seconds left until `expiresAt` (epoch ms), corrected for the difference between the browser clock
- * and the server clock (`serverNow` sent with the page), ticking every second.
- */
 function useCountdown(expiresAt, serverNow) {
-  var skew = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(serverNow ? serverNow - Date.now() : 0);
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+  const skew = (0, import_react.useRef)(serverNow ? serverNow - Date.now() : 0);
+  (0, import_react.useEffect)(() => {
     if (serverNow) skew.current = serverNow - Date.now();
   }, [serverNow]);
-  var calc = function calc() {
-    return expiresAt ? Math.max(0, Math.round((expiresAt - (Date.now() + skew.current)) / 1000)) : 0;
-  };
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(calc),
-    _useState2 = _slicedToArray(_useState, 2),
-    left = _useState2[0],
-    setLeft = _useState2[1];
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+  const calc = () => expiresAt ? Math.max(0, Math.round((expiresAt - (Date.now() + skew.current)) / 1e3)) : 0;
+  const [left, setLeft] = (0, import_react.useState)(calc);
+  (0, import_react.useEffect)(() => {
     setLeft(calc());
-    if (!expiresAt) return undefined;
-    var t = setInterval(function () {
-      return setLeft(calc());
-    }, 1000);
-    return function () {
-      return clearInterval(t);
-    };
+    if (!expiresAt) return void 0;
+    const t = setInterval(() => setLeft(calc()), 1e3);
+    return () => clearInterval(t);
   }, [expiresAt]);
   return left;
 }
-var mmss = function mmss(s) {
-  return "".concat(String(Math.floor(s / 60)).padStart(2, '0'), ":").concat(String(s % 60).padStart(2, '0'));
-};
-
-/* ------------------------------------------------------------------ pricing */
-
-function Price(_ref2) {
-  var p = _ref2.p,
-    _ref2$size = _ref2.size,
-    size = _ref2$size === void 0 ? 'md' : _ref2$size,
-    _ref2$className = _ref2.className,
-    className = _ref2$className === void 0 ? '' : _ref2$className;
-  var big = size === 'lg';
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-    className: "flex flex-wrap items-baseline gap-x-3 gap-y-1 ".concat(className),
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
-      className: "font-black tracking-tight text-ink ".concat(big ? 'text-4xl' : 'text-xl'),
-      children: inr(p.final_price)
-    }), hasDiscount(p) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
-        className: "text-gray-400 line-through ".concat(big ? 'text-xl' : 'text-sm'),
-        children: inr(p.base_price)
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("span", {
-        className: "rounded-full bg-brand text-white font-bold ".concat(big ? 'px-3 py-1 text-sm' : 'px-2 py-0.5 text-xs'),
-        children: ["-", pct(p), " off"]
-      })]
-    })]
-  });
+const mmss = (s) => s >= 3600 ? `${Math.floor(s / 3600)} h ${String(Math.floor(s % 3600 / 60)).padStart(2, "0")} min` : `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+function Price({ p, size = "md", className = "" }) {
+  const big = size === "lg";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `flex flex-wrap items-baseline gap-x-3 gap-y-1 ${className}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `font-black tracking-tight text-ink ${big ? "text-4xl" : "text-xl"}`, children: inr(p.final_price) }),
+    hasDiscount(p) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `text-gray-400 line-through ${big ? "text-xl" : "text-sm"}`, children: inr(p.base_price) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `rounded-full bg-brand text-white font-bold ${big ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-xs"}`, children: [
+        "-",
+        pct(p),
+        " off"
+      ] })
+    ] })
+  ] });
 }
-function TrustBadges(_ref3) {
-  var p = _ref3.p,
-    _ref3$compact = _ref3.compact,
-    compact = _ref3$compact === void 0 ? false : _ref3$compact;
-  var items = [['fa-diamond', '1-of-1 original'], p.has_certificate && ['fa-certificate', compact ? 'COA included' : 'Certificate of authenticity'], p.is_signed && ['fa-pencil', 'Signed by the artist']].filter(Boolean);
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
-    className: "flex flex-wrap gap-2",
-    children: items.map(function (_ref4) {
-      var _ref5 = _slicedToArray(_ref4, 2),
-        icon = _ref5[0],
-        label = _ref5[1];
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("li", {
-        className: "inline-flex items-center gap-1.5 rounded-full bg-white bg-opacity-90 border border-gray-200 px-2.5 py-1 text-xs font-bold text-ink",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("i", {
-          className: "fa ".concat(icon, " text-brand"),
-          "aria-hidden": "true"
-        }), label]
-      }, label);
-    })
-  });
+function TrustBadges({ p, compact = false }) {
+  const items = [
+    ["fa-diamond", "1-of-1 original"],
+    p.has_certificate && ["fa-certificate", compact ? "COA included" : "Certificate of authenticity"],
+    p.is_signed && ["fa-pencil", "Signed by the artist"]
+  ].filter(Boolean);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "flex flex-wrap gap-2", children: items.map(([icon, label]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "inline-flex items-center gap-1.5 rounded-full bg-white bg-opacity-90 border border-gray-200 px-2.5 py-1 text-xs font-bold text-ink", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon} text-brand`, "aria-hidden": "true" }),
+    label
+  ] }, label)) });
 }
-
-/* ------------------------------------------------------------------ "held for you" banner */
-
-/** Site-wide reminder of the visitor's active 15-minute hold (shown on marketplace pages). */
-function HoldBanner(_ref6) {
-  var _ref6$holds = _ref6.holds,
-    holds = _ref6$holds === void 0 ? [] : _ref6$holds,
-    serverNow = _ref6.serverNow,
-    exceptSlug = _ref6.exceptSlug;
-  var h = holds.find(function (x) {
-    return x.slug !== exceptSlug;
-  });
-  var left = useCountdown(h ? h.expiresAt : null, serverNow);
+function HoldBanner({ holds = [], serverNow, exceptSlug }) {
+  const h = holds.find((x) => x.slug !== exceptSlug);
+  const left = useCountdown(h ? h.expiresAt : null, serverNow);
   if (!h || left <= 0) return null;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-    className: "fixed bottom-4 inset-x-4 z-40 flex justify-center pointer-events-none",
-    role: "status",
-    "aria-live": "polite",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "pointer-events-auto flex items-center gap-4 rounded-2xl bg-ink text-white shadow-2xl pl-3 pr-4 py-3 max-w-xl w-full",
-      children: [h.imageUrl && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("img", {
-        src: h.imageUrl,
-        alt: "",
-        className: "w-12 h-12 rounded-lg object-cover flex-none"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        className: "flex-1 min-w-0",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("p", {
-          className: "text-sm font-bold truncate",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("i", {
-            className: "fa fa-lock mr-1.5 text-pink-300",
-            "aria-hidden": "true"
-          }), "Held for you: ", h.title]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("p", {
-          className: "text-xs text-gray-300",
-          children: ["Released in ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
-            className: "font-mono font-bold text-white",
-            children: mmss(left)
-          })]
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
-        href: "/marketplace/".concat(h.slug, "/checkout"),
-        className: "flex-none inline-flex items-center h-10 px-4 rounded-full bg-brand text-white text-sm font-bold hover:bg-brand-dark",
-        children: "Checkout"
-      })]
-    })
-  });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fixed bottom-4 inset-x-4 z-40 flex justify-center pointer-events-none", role: "status", "aria-live": "polite", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pointer-events-auto flex items-center gap-4 rounded-2xl bg-ink text-white shadow-2xl pl-3 pr-4 py-3 max-w-xl w-full", children: [
+    h.imageUrl && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: h.imageUrl, alt: "", className: "w-12 h-12 rounded-lg object-cover flex-none" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex-1 min-w-0", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "text-sm font-bold truncate", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock mr-1.5 text-pink-300", "aria-hidden": "true" }),
+        "Held for you: ",
+        h.title
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "text-xs text-gray-300", children: [
+        "Released in ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "font-mono font-bold text-white", children: mmss(left) })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${h.slug}/checkout`, className: "flex-none inline-flex items-center h-10 px-4 rounded-full bg-brand text-white text-sm font-bold hover:bg-brand-dark", children: "Checkout" })
+  ] }) });
 }
-
-/* ------------------------------------------------------------------ misc */
-
-function Spinner(_ref7) {
-  var _ref7$className = _ref7.className,
-    className = _ref7$className === void 0 ? '' : _ref7$className;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("i", {
-    className: "fa fa-circle-o-notch fa-spin ".concat(className),
-    "aria-hidden": "true"
-  });
+function Spinner({ className = "" }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa fa-circle-o-notch fa-spin ${className}`, "aria-hidden": "true" });
 }
-var MEDIUMS = ['Oil', 'Acrylic', 'Watercolour', 'Gouache', 'Graphite', 'Charcoal', 'Soft pastel', 'Oil pastel', 'Ink', 'Coloured pencil', 'Mixed media'];
-var SURFACES = ['Stretched cotton canvas', 'Gallery-wrapped cotton canvas', 'Linen canvas', 'Canvas board', 'Cold-press 300gsm paper', 'Archival 300gsm acid-free paper', 'Smooth bristol board', 'Toned drawing paper', 'Wood panel'];
-var SUBJECTS = ['Landscape', 'Portrait', 'Wildlife', 'Still life', 'Botanical', 'Abstract', 'Urban', 'Figurative', 'Seascape'];
+const MEDIUMS = ["Oil", "Acrylic", "Watercolour", "Gouache", "Graphite", "Charcoal", "Soft pastel", "Oil pastel", "Ink", "Coloured pencil", "Mixed media"];
+const SURFACES = ["Stretched cotton canvas", "Gallery-wrapped cotton canvas", "Linen canvas", "Canvas board", "Cold-press 300gsm paper", "Archival 300gsm acid-free paper", "Smooth bristol board", "Toned drawing paper", "Wood panel"];
+const SUBJECTS = ["Landscape", "Portrait", "Wildlife", "Still life", "Botanical", "Abstract", "Urban", "Figurative", "Seascape"];
+
 
 /***/ }),
 
@@ -7932,6 +7859,7 @@ __export(SiteHeader_exports, {
 module.exports = __toCommonJS(SiteHeader_exports);
 var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
 var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
 var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_Constants = __webpack_require__("./resources/js/Components/Constants.js");
@@ -8065,6 +7993,7 @@ function SiteHeader({ showCategories = false, activeMedium = null }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: loginUrl(), children: "Log in" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("join"), className: "dm-btn dm-btn--brand", style: { marginLeft: 6 }, children: "Join for free" })
       ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-cart", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.CartButton, {}) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "ac-burger", "aria-label": "Menu", onClick: () => setDrawer(!drawer), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${drawer ? "fa-times" : "fa-bars"}` }) })
     ] }) }),
     showCategories && mediums.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "dm-cats", "aria-label": "Categories", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-wide", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { children: [
@@ -9659,6 +9588,7 @@ var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/
 var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
 var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
 var import_ShopSections = __webpack_require__("./resources/js/Components/Admin/ShopSections.js");
+var import_OfferCard = __toESM(__webpack_require__("./resources/js/Components/Shop/OfferCard.js"));
 const ORDER_LABEL = {
   PAID: ["Paid \xB7 to pack", "bg-brand-soft text-brand-dark border-pink-200"],
   PACKED: ["Packed", "bg-blue-50 text-blue-800 border-blue-200"],
@@ -9910,6 +9840,7 @@ function Marketplace() {
     publisher && ["holds", "Live holds", holds.length],
     ["orders", canFulfil ? "Orders" : "My sales", cartToDo + legacyToDo],
     ["messages", "Messages", unread],
+    ["offers", "Offers", shop.offersOpen || 0],
     shopCan.prices && ["prices", "Prices", null],
     shopCan.prices && ["coupons", "Coupons", null]
   ].filter(Boolean);
@@ -10146,7 +10077,8 @@ function Marketplace() {
       ] })
     ] }),
     tab === "messages" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.Messages, { threads, setThreads, initial: openThread, toast }),
-    tab === "prices" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.Prices, { prices, setPrices, can: shopCan, toast }),
+    tab === "prices" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.Prices, { prices, setPrices, can: shopCan, toast, customSize: shop.customSize }),
+    tab === "offers" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.OffersAdmin, { toast, OfferCard: import_OfferCard.default }) }),
     tab === "coupons" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.Coupons, { coupons, setCoupons, listings: shopListings, can: shopCan, toast }),
     printsFor && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
       import_ShopSections.ListingDrawer,
@@ -12412,6 +12344,14 @@ function accountNav(nav) {
       match: /^\/user\/(orders|order-history)/
     },
     {
+      href: "/user/offers",
+      label: "Your offers",
+      icon: "fa-handshake-o",
+      count: n.offers,
+      title: "Your offers",
+      subtitle: "Offers you made on original artworks, and the artists\u2019 answers."
+    },
+    {
       href: "/user/wishlist",
       label: "Wish list",
       icon: "fa-heart-o",
@@ -12451,7 +12391,7 @@ function accountNav(nav) {
     }
   ];
 }
-const ACCOUNT_PATHS = /^\/user\/(my-account|my-address|change-password|order-history|orders|notifications|linked-accounts|language|wishlist|help)(\/|$)/;
+const ACCOUNT_PATHS = /^\/user\/(my-account|my-address|change-password|order-history|orders|offers|notifications|linked-accounts|language|wishlist|help)(\/|$)/;
 function activeAccountItem(path, nav) {
   const items = accountNav(nav);
   return items.find((i) => i.match ? i.match.test(path) : path.startsWith(i.href)) || items[0];
@@ -19215,6 +19155,8 @@ var shop_exports = {};
 __export(shop_exports, {
   FORMAT_INFO: () => FORMAT_INFO,
   FRAME_INFO: () => FRAME_INFO,
+  customSide: () => customSide,
+  customSize: () => customSize,
   errorText: () => errorText,
   formatOf: () => formatOf,
   frameCost: () => frameCost,
@@ -19223,6 +19165,9 @@ __export(shop_exports, {
   normalise: () => normalise,
   num: () => num,
   priceOf: () => priceOf,
+  printSize: () => printSize,
+  roundPrice: () => roundPrice,
+  sizeOf: () => sizeOf,
   variantLine: () => variantLine
 });
 module.exports = __toCommonJS(shop_exports);
@@ -19246,12 +19191,57 @@ const FRAME_INFO = {
   WHITE_FLOAT: { name: "White canvas float", swatch: "pz-sw--white" }
 };
 const formatOf = (offer, format) => (offer && offer.formats ? offer.formats.find((f) => f.format === format) : null) || null;
+const CUSTOM = /^C(\d{1,3})$/;
+const customSide = (code) => {
+  const m = CUSTOM.exec(String(code || ""));
+  return m ? Number(m[1]) : null;
+};
+const halfInch = (v) => Math.max(1, Math.round(v * 2) / 2);
+const oneDecimal = (v) => Math.round(v * 10) / 10;
+function printSize(painting, longSide) {
+  const h = Number(painting.height_inches) || 1;
+  const w = Number(painting.width_inches) || 1;
+  if (h >= w) return { width: oneDecimal(halfInch(longSide * w / h)), height: oneDecimal(longSide) };
+  return { width: oneDecimal(longSide), height: oneDecimal(halfInch(longSide * h / w)) };
+}
+const roundPrice = (v) => Math.max(99, Math.ceil(v / 100 - 1e-9) * 100 - 1);
+function customSize(painting, f, longSide) {
+  const pts = (f.sizes || []).filter((s) => s.width && s.height).map((s) => [Number(s.width) * Number(s.height), Number(s.price), Number(s.extra || 0)]).sort((a, b) => a[0] - b[0]);
+  if (!pts.length) return null;
+  const dimsOf = printSize(painting, longSide);
+  const area = dimsOf.width * dimsOf.height;
+  let price;
+  let extra;
+  if (pts.length === 1) {
+    price = pts[0][1] * area / pts[0][0];
+    extra = pts[0][2] * area / pts[0][0];
+  } else {
+    let i = 0;
+    while (i < pts.length - 2 && area > pts[i + 1][0]) i += 1;
+    const a = pts[i];
+    const b = pts[i + 1];
+    const t = b[0] === a[0] ? 0 : (area - a[0]) / (b[0] - a[0]);
+    price = Math.max(a[1] + t * (b[1] - a[1]), pts[0][1] * 0.6);
+    extra = Math.max(a[2] + t * (b[2] - a[2]), 0);
+  }
+  return { code: `C${longSide}`, label: "Custom size", width: dimsOf.width, height: dimsOf.height, longSide, price: roundPrice(price), extra: Math.round(extra / 100) * 100, custom: true };
+}
+function sizeOf(offer, sel, painting) {
+  const f = formatOf(offer, sel.format);
+  if (!f) return null;
+  if (sel.format === "ORIGINAL" || sel.format === "DIGITAL") return f.sizes[0] || null;
+  const side = customSide(sel.size);
+  if (side && f.custom && painting) return customSize(painting, f, side);
+  return f.sizes.find((s) => s.code === sel.size) || null;
+}
 function normalise(offer, sel) {
   const f = formatOf(offer, sel.format);
   if (!f) return sel;
   const out = __spreadValues({}, sel);
+  const side = customSide(sel.size);
+  const customOk = side && f.custom && side >= f.custom.min && side <= f.custom.max;
   if (sel.format === "ORIGINAL") out.size = "";
-  else if (!f.sizes.some((s) => s.code === sel.size)) out.size = f.sizes.length ? f.sizes[Math.min(1, f.sizes.length - 1)].code : "";
+  else if (!customOk && !f.sizes.some((s) => s.code === sel.size)) out.size = f.sizes.length ? f.sizes[Math.min(1, f.sizes.length - 1)].code : "";
   if (sel.format === "CANVAS") out.finish = sel.finish === "ROLLED" && (!sel.frame || sel.frame === "NONE") ? "ROLLED" : "STRETCHED";
   else if (sel.format === "POSTER") out.finish = sel.finish === "GLOSSY" ? "GLOSSY" : "MATTE";
   else out.finish = "";
@@ -19260,10 +19250,10 @@ function normalise(offer, sel) {
   out.qty = Math.max(1, Math.min(Number(sel.qty) || 1, f.maxQty || 1));
   return out;
 }
-function priceOf(offer, sel) {
+function priceOf(offer, sel, painting) {
   const f = formatOf(offer, sel.format);
   if (!f) return null;
-  const size = sel.format === "ORIGINAL" ? f.sizes[0] : f.sizes.find((s) => s.code === sel.size) || (sel.format === "DIGITAL" ? f.sizes[0] : null);
+  const size = sizeOf(offer, sel, painting);
   if (!size) return null;
   let unit = Number(size.price);
   if (sel.format === "CANVAS" && sel.finish !== "ROLLED") unit += Number(size.extra || 0);
@@ -19275,14 +19265,14 @@ function priceOf(offer, sel) {
   unit += framePrice;
   return { unit, total: unit * (sel.qty || 1), width: size.width, height: size.height, framePrice, size };
 }
-function frameCost(offer, sel, frame) {
-  const p = priceOf(offer, __spreadProps(__spreadValues({}, sel), { frame, finish: frame !== "NONE" && sel.format === "CANVAS" ? "STRETCHED" : sel.finish }));
-  const base = priceOf(offer, __spreadProps(__spreadValues({}, sel), { frame: "NONE" }));
+function frameCost(offer, sel, frame, painting) {
+  const p = priceOf(offer, __spreadProps(__spreadValues({}, sel), { frame, finish: frame !== "NONE" && sel.format === "CANVAS" ? "STRETCHED" : sel.finish }), painting);
+  const base = priceOf(offer, __spreadProps(__spreadValues({}, sel), { frame: "NONE" }), painting);
   return p && base ? p.unit - base.unit : 0;
 }
 function variantLine(sel, price) {
   const parts = [FORMAT_INFO[sel.format] ? FORMAT_INFO[sel.format].name : "Artwork"];
-  if (price && price.width) parts.push(`${num(price.width)} \xD7 ${num(price.height)} in`);
+  if (price && price.width) parts.push(`${num(price.width)} \xD7 ${num(price.height)} in${price.size && price.size.custom ? " (custom)" : ""}`);
   if (sel.format === "CANVAS") parts.push(sel.finish === "ROLLED" ? "rolled" : "stretched");
   if (sel.format === "POSTER") parts.push((sel.finish || "MATTE").toLowerCase());
   if (sel.frame && sel.frame !== "NONE") parts.push(FRAME_INFO[sel.frame].name.toLowerCase() + " frame");
@@ -19355,6 +19345,7 @@ var CartStore_exports = {};
 __export(CartStore_exports, {
   CartProvider: () => CartProvider,
   seedCart: () => seedCart,
+  setCartScope: () => setCartScope,
   useCart: () => useCart
 });
 module.exports = __toCommonJS(CartStore_exports);
@@ -19363,7 +19354,8 @@ var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react
 var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
-const store = { data: null, isOpen: false, busy: false, error: null, serverNow: Date.now() };
+const store = { data: null, isOpen: false, busy: false, error: null, serverNow: Date.now(), scope: null };
+const sc = (sep = "?") => store.scope === "checkout" ? `${sep}checkout=1` : "";
 const listeners = /* @__PURE__ */ new Set();
 let loading = null;
 function set(patch) {
@@ -19376,7 +19368,7 @@ function accept(d) {
 }
 function refresh(country) {
   if (loading) return loading;
-  loading = import_axios.default.get("/api/v1/cart" + (country ? `?country=${encodeURIComponent(country)}` : "")).then((r) => accept(r.data)).catch((e) => {
+  loading = import_axios.default.get("/api/v1/cart" + (country ? `?country=${encodeURIComponent(country)}${sc("&")}` : sc())).then((r) => accept(r.data)).catch((e) => {
     set({ error: (0, import_shop.errorText)(e, "We couldn\u2019t load your cart.") });
     return null;
   }).finally(() => {
@@ -19399,7 +19391,7 @@ const actions = {
   close: () => set({ isOpen: false }),
   refresh,
   clearError: () => set({ error: null }),
-  add: (item, { openDrawer = true } = {}) => run(import_axios.default.post("/api/v1/cart/items", item)).then((d) => {
+  add: (item, { openDrawer = true } = {}) => run(import_axios.default.post(`/api/v1/cart/items${sc()}`, item)).then((d) => {
     if (openDrawer) set({ isOpen: true });
     return d;
   }),
@@ -19408,14 +19400,15 @@ const actions = {
   setQty: (id, qty) => {
     const before = store.data;
     if (before && before.lines) set({ data: __spreadProps(__spreadValues({}, before), { lines: before.lines.map((l) => l.id === id ? __spreadProps(__spreadValues({}, l), { qty }) : l) }) });
-    return run(import_axios.default.patch(`/api/v1/cart/items/${id}`, { qty })).catch((e) => {
+    return run(import_axios.default.patch(`/api/v1/cart/items/${id}${sc()}`, { qty })).catch((e) => {
       if (before) set({ data: before });
       throw e;
     });
   },
-  remove: (id) => run(import_axios.default.delete(`/api/v1/cart/items/${id}`)),
-  applyCoupon: (code, country) => run(import_axios.default.post("/api/v1/cart/coupon", { code, country })),
-  removeCoupon: () => run(import_axios.default.delete("/api/v1/cart/coupon"))
+  remove: (id) => run(import_axios.default.delete(`/api/v1/cart/items/${id}${sc()}`)),
+  saveForLater: (id) => run(import_axios.default.post(`/api/v1/cart/items/${id}/save`)),
+  applyCoupon: (code, country) => run(import_axios.default.post(`/api/v1/cart/coupon${sc()}`, { code, country })),
+  removeCoupon: () => run(import_axios.default.delete(`/api/v1/cart/coupon${sc()}`))
 };
 function seedCart(data) {
   if (data && data.lines) Object.assign(store, { data, serverNow: data.serverNow || store.serverNow, error: null });
@@ -19440,8 +19433,12 @@ function useCart() {
     count: store.data ? store.data.count : shared && shared.count || 0
   });
 }
-function CartProvider({ children, initial = null }) {
+function setCartScope(scope) {
+  if (store.scope !== scope) Object.assign(store, { scope, data: null });
+}
+function CartProvider({ children, initial = null, scope = null }) {
   const [seeded] = (0, import_react.useState)(() => {
+    store.scope = scope;
     if (initial) seedCart(initial);
     return true;
   });
@@ -19516,7 +19513,7 @@ function Qty({ value, max, onChange, disabled, label = "Quantity" }) {
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => onChange(value + 1), disabled: disabled || value >= max, "aria-label": "One more", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-plus", "aria-hidden": "true" }) })
   ] });
 }
-function CartLine({ line, serverNow, compact = false, onQty, onRemove, onReserve, busy }) {
+function CartLine({ line, serverNow, compact = false, onQty, onRemove, onReserve, onSave, busy }) {
   const bad = line.status !== "ok";
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: `pz-line ${bad ? "is-bad" : ""}`, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${line.slug}`, className: "pz-line__img", tabIndex: -1, "aria-hidden": "true", children: line.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: line.image, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}) }),
@@ -19527,6 +19524,11 @@ function CartLine({ line, serverNow, compact = false, onQty, onRemove, onReserve
         line.artist
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-line__variant", children: line.label }),
+      line.agreed && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-line__agreed", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-handshake-o", "aria-hidden": "true" }),
+        " Your accepted offer \xB7 listed at ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("s", { children: (0, import_shop.inr)(line.listPrice) })
+      ] }),
       line.format === "ORIGINAL" && line.status === "ok" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HoldTicker, { expiresAt: line.holdExpiresAt, serverNow }),
       bad && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-line__warn", role: "alert", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-circle", "aria-hidden": "true" }),
@@ -19535,6 +19537,7 @@ function CartLine({ line, serverNow, compact = false, onQty, onRemove, onReserve
       !compact && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-line__actions", children: [
         line.maxQty > 1 && !bad && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Qty, { value: line.qty, max: line.maxQty, onChange: (q) => onQty(line, q), disabled: busy, label: `Quantity of ${line.title}` }),
         line.status === "hold_expired" && onReserve && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-link", onClick: () => onReserve(line), disabled: busy, children: "Reserve again" }),
+        onSave && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-link", onClick: () => onSave(line), disabled: busy, "data-testid": "line-save", children: "Save for later" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-link pz-link--muted", onClick: () => onRemove(line), disabled: busy, children: "Remove" })
       ] }),
       compact && line.qty > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-line__variant", children: [
@@ -19661,7 +19664,7 @@ function CartDrawer() {
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
         "a",
         {
-          href: "/purchase/checkout",
+          href: "/purchase/checkout?all=1",
           className: `pz-btn pz-btn--brand pz-btn--block ${data.totals.blocked ? "is-disabled" : ""}`,
           "aria-disabled": data.totals.blocked ? "true" : void 0,
           onClick: (e) => {
@@ -19677,12 +19680,19 @@ function CartDrawer() {
           ]
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ghost pz-btn--block", onClick: cart.close, children: "Keep browsing" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-drawer__links", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/cart", className: "pz-btn pz-btn--line", "data-testid": "drawer-view-cart", children: "View cart" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ghost", onClick: cart.close, children: "Keep browsing" })
+      ] })
     ] })
   ] }) });
   return typeof document !== "undefined" ? (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac", children: node }), document.body) : node;
 }
 function CartButtonInner() {
+  (0, import_react.useState)(() => {
+    (0, import_CartStore.setCartScope)(null);
+    return true;
+  });
   const cart = (0, import_CartStore.useCart)();
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-cartbtn", onClick: cart.open, "aria-label": `Cart, ${cart.count} item${cart.count === 1 ? "" : "s"}`, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag", "aria-hidden": "true" }),
@@ -20637,7 +20647,10 @@ var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios
 var import_PurchaseLayout = __toESM(__webpack_require__("./resources/js/Components/Shop/PurchaseLayout.js"));
 var import_ArtPreview = __toESM(__webpack_require__("./resources/js/Components/Shop/ArtPreview.js"));
 var import_BuyPanel = __webpack_require__("./resources/js/Components/Shop/BuyPanel.js");
+var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
+var import_CartStore = __webpack_require__("./resources/js/Components/Shop/CartStore.js");
 var import_ArtistHub = __webpack_require__("./resources/js/Components/Shop/ArtistHub.js");
+var import_OfferDialog = __toESM(__webpack_require__("./resources/js/Components/Shop/OfferDialog.js"));
 var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
 const FRAME_NOTES = {
   NONE: "Hangs as it comes",
@@ -20645,21 +20658,182 @@ const FRAME_NOTES = {
   OAK: "Solid natural oak",
   WHITE_FLOAT: "Floats in a white box"
 };
+const PARTS = [
+  { id: "size", letter: "A", label: "Size" },
+  { id: "frame", letter: "B", label: "Frame" },
+  { id: "wall", letter: "C", label: "See it on your wall" }
+];
+const cm = (inches) => Math.round(Number(inches) * 2.54);
+function partFromHash() {
+  try {
+    const h = window.location.hash.replace("#", "");
+    const i = PARTS.findIndex((p) => p.id === h);
+    return i >= 0 ? i : 0;
+  } catch (e) {
+    return 0;
+  }
+}
+function CustomSize({ painting, f, sel, onPick }) {
+  const side = (0, import_shop.customSide)(sel.size);
+  const [unit, setUnit] = (0, import_react.useState)(() => {
+    try {
+      return window.localStorage.getItem("artistikcity.unit") === "cm" ? "cm" : "in";
+    } catch (e) {
+      return "in";
+    }
+  });
+  const value = side || Math.round((f.custom.min + f.custom.max) / 3);
+  const [typed, setTyped] = (0, import_react.useState)(null);
+  const shown = typed !== null ? typed : String(unit === "cm" ? cm(value) : value);
+  const setUnitKeep = (u) => {
+    setUnit(u);
+    setTyped(null);
+    try {
+      window.localStorage.setItem("artistikcity.unit", u);
+    } catch (e) {
+    }
+  };
+  const commit = (raw) => {
+    const n = Number(raw);
+    if (!isFinite(n) || n <= 0) {
+      setTyped(null);
+      return;
+    }
+    const inches = Math.round(unit === "cm" ? n / 2.54 : n);
+    onPick(`C${Math.max(f.custom.min, Math.min(f.custom.max, inches))}`);
+    setTyped(null);
+  };
+  const s = (0, import_shop.customSize)(painting, f, value);
+  const lo = unit === "cm" ? cm(f.custom.min) : f.custom.min;
+  const hi = unit === "cm" ? cm(f.custom.max) : f.custom.max;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-custom", "data-testid": "custom-size", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-custom__row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "ap-custom-range", className: "ap-custom__label", children: "Long side" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ap-unit", role: "group", "aria-label": "Units", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", "aria-pressed": unit === "in", className: unit === "in" ? "is-on" : "", onClick: () => setUnitKeep("in"), children: "in" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", "aria-pressed": unit === "cm", className: unit === "cm" ? "is-on" : "", onClick: () => setUnitKeep("cm"), children: "cm" })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-custom__row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        {
+          id: "ap-custom-range",
+          type: "range",
+          min: f.custom.min,
+          max: f.custom.max,
+          step: "1",
+          value,
+          onChange: (e) => onPick(`C${e.target.value}`),
+          "aria-valuetext": `${value} inches`,
+          "data-testid": "custom-range"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ap-custom__num", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "input",
+          {
+            type: "number",
+            inputMode: "numeric",
+            min: lo,
+            max: hi,
+            value: shown,
+            "aria-label": `Long side in ${unit === "cm" ? "centimetres" : "inches"}`,
+            onChange: (e) => setTyped(e.target.value),
+            onBlur: (e) => commit(e.target.value),
+            onKeyDown: (e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commit(e.currentTarget.value);
+              }
+            },
+            "data-testid": "custom-input"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: unit })
+      ] })
+    ] }),
+    s && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ap-custom__out", "aria-live": "polite", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+        (0, import_shop.num)(s.width),
+        " \xD7 ",
+        (0, import_shop.num)(s.height),
+        " in"
+      ] }),
+      " (",
+      cm(s.width),
+      " \xD7 ",
+      cm(s.height),
+      " cm) \xB7 ",
+      (0, import_shop.inr)(s.price + (f.format === "CANVAS" && sel.finish !== "ROLLED" ? s.extra : 0))
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ap-fine", children: [
+      "Any long side from ",
+      lo,
+      " to ",
+      hi,
+      " ",
+      unit,
+      "; the other side keeps the artwork's proportions."
+    ] })
+  ] });
+}
 function Step2Room() {
   const { painting: p, offer, draft, hold, serverNow, contact, conversation: conv0, customer, rooms = [], roomsEnabled = true } = (0, import_inertia_react.usePage)().props;
   const conversation = (0, import_ArtistHub.useConversation)(p.id, conv0);
+  const cart = (0, import_CartStore.useCart)();
   const [sel, setSel] = (0, import_react.useState)(() => (0, import_shop.normalise)(offer, __spreadValues({}, draft)));
+  const [part, setPart] = (0, import_react.useState)(partFromHash);
   const [busy, setBusy] = (0, import_react.useState)(false);
   const [err, setErr] = (0, import_react.useState)(null);
+  const [note, setNote] = (0, import_react.useState)(null);
   const [talk, setTalk] = (0, import_react.useState)(false);
+  const [offerOpen, setOfferOpen] = (0, import_react.useState)(false);
+  const [terms, reloadTerms] = (0, import_OfferDialog.useOfferTerms)(p.id, sel.format === "ORIGINAL");
+  const panel = (0, import_react.useRef)(null);
   const f = (0, import_shop.formatOf)(offer, sel.format);
-  const price = (0, import_react.useMemo)(() => (0, import_shop.priceOf)(offer, sel), [offer, sel]);
-  const update = (patch) => setSel((s) => (0, import_shop.normalise)(offer, __spreadValues(__spreadValues({}, s), patch)));
+  const price = (0, import_react.useMemo)(() => (0, import_shop.priceOf)(offer, sel, p), [offer, sel, p]);
+  const update = (patch) => {
+    setNote(null);
+    setSel((s) => (0, import_shop.normalise)(offer, __spreadValues(__spreadValues({}, s), patch)));
+  };
   const surface = sel.format === "POSTER" || sel.format === "ORIGINAL" && !/canvas|panel|linen/i.test(p.surface || "") ? "paper" : "canvas";
+  const custom = (0, import_shop.customSide)(sel.size) !== null;
+  const saved = (0, import_react.useRef)(JSON.stringify(sel));
+  (0, import_react.useEffect)(() => {
+    const now = JSON.stringify(sel);
+    if (now === saved.current) return void 0;
+    const t = setTimeout(() => {
+      import_axios.default.post("/api/v1/purchase/draft", { paintingId: p.id, format: sel.format, size: sel.size, finish: sel.finish, frame: sel.frame, qty: sel.qty }).then(() => {
+        saved.current = now;
+      }).catch(() => {
+      });
+    }, 500);
+    return () => clearTimeout(t);
+  }, [sel]);
+  (0, import_react.useEffect)(() => {
+    const onPop = () => setPart(partFromHash());
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  const go = (i) => {
+    const n = Math.max(0, Math.min(PARTS.length - 1, i));
+    setPart(n);
+    try {
+      window.history.pushState(window.history.state, "", `${window.location.pathname}${window.location.search}#${PARTS[n].id}`);
+    } catch (e) {
+    }
+    setTimeout(() => {
+      const h = panel.current && panel.current.querySelector(".ap-part h3");
+      if (h) h.focus({ preventScroll: true });
+      if (panel.current && window.innerWidth < 900) panel.current.scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 30);
+  };
+  const save = () => import_axios.default.post("/api/v1/purchase/draft", { paintingId: p.id, format: sel.format, size: sel.size, finish: sel.finish, frame: sel.frame, qty: sel.qty });
   const buy = () => {
     setBusy(true);
     setErr(null);
-    import_axios.default.post("/api/v1/purchase/draft", { paintingId: p.id, format: sel.format, size: sel.size, finish: sel.finish, frame: sel.frame, qty: sel.qty }).then(() => import_inertia.Inertia.visit("/purchase/buy-now")).catch((e) => {
+    save().then(() => import_inertia.Inertia.visit("/purchase/buy-now")).catch((e) => {
       const d = e.response && e.response.data;
       if (d && d.code === "SIGN_IN" && d.redirect) {
         window.location.assign(d.redirect);
@@ -20669,6 +20843,20 @@ function Step2Room() {
       setErr((0, import_shop.errorText)(e));
     });
   };
+  const addToCart = () => {
+    setBusy(true);
+    setErr(null);
+    setNote(null);
+    cart.add({ paintingId: p.id, format: sel.format, size: sel.size, finish: sel.finish, frame: sel.frame, qty: sel.qty }).then(() => setNote(sel.format === "ORIGINAL" ? "In your cart. The original stays held for you." : "Added to your cart.")).catch((e) => {
+      const d = e.response && e.response.data;
+      if (d && d.code === "SIGN_IN" && d.redirect) {
+        window.location.assign(d.redirect);
+        return;
+      }
+      cart.clearError();
+      setErr((0, import_shop.errorText)(e));
+    }).finally(() => setBusy(false));
+  };
   if (!f || !price) return null;
   const facts = [
     sel.format === "ORIGINAL" && p.is_signed && "Signed by the artist",
@@ -20676,21 +20864,24 @@ function Step2Room() {
     sel.format === "ORIGINAL" ? "The one and only original" : sel.format === "CANVAS" && offer.edition && offer.edition.size ? `Numbered edition of ${offer.edition.size}` : null,
     "Insured, tracked delivery"
   ].filter(Boolean);
+  const shownRooms = roomsEnabled ? rooms : [];
+  const current = PARTS[part];
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_PurchaseLayout.default, { painting: p, step: 2, title: "Preview and frame", hold, serverNow, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-page", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-page__stage", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
         import_ArtPreview.default,
         {
-          rooms: roomsEnabled ? rooms : [],
+          rooms: shownRooms,
           image: p.image_url,
           title: p.title,
           widthIn: price.width,
           heightIn: price.height,
           frame: sel.frame,
-          surface
+          surface,
+          showRoom: current.id === "wall"
         }
       ) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "ap-page__panel", "aria-label": "Your choice", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "ap-page__panel", "aria-label": "Your choice", ref: panel, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "ap-head", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: p.title }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
@@ -20708,53 +20899,185 @@ function Step2Room() {
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { "data-testid": "room-price", children: (0, import_shop.inr)(price.total) }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: (0, import_shop.variantLine)(sel, price) })
         ] }),
-        sel.format === "ORIGINAL" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-opt", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ap-opt__label", children: "Size" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ap-static", children: [
-            (0, import_shop.num)(price.width),
-            " \xD7 ",
-            (0, import_shop.num)(price.height),
-            " in, the original's real size"
-          ] })
-        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "ap-opt", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "ap-opt__label", children: "Size" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-sizes", children: f.sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", "aria-pressed": sel.size === s.code, className: `ap-size ${sel.size === s.code ? "is-on" : ""}`, onClick: () => update({ size: s.code }), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-size__shape", "aria-hidden": "true", style: { aspectRatio: `${s.width} / ${s.height}` } }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-              (0, import_shop.num)(s.width),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "ap-parts", "aria-label": "Steps on this page", children: PARTS.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: `${i === part ? "is-on" : ""} ${i < part ? "is-done" : ""}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: () => go(i), "aria-current": i === part ? "step" : void 0, "data-part": x.id, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-parts__dot", "aria-hidden": "true", children: i < part ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check" }) : x.letter }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-parts__label", children: x.label })
+        ] }) }, x.id)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ap-part", "aria-labelledby": "ap-part-title", "data-part": current.id, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { id: "ap-part-title", tabIndex: -1, children: [
+            current.letter,
+            ". ",
+            current.label
+          ] }),
+          current.id === "size" && (sel.format === "ORIGINAL" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-opt", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ap-static", children: [
+              "Original size: ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+                (0, import_shop.num)(price.width),
+                " \xD7 ",
+                (0, import_shop.num)(price.height),
+                " in"
+              ] }),
+              " (",
+              cm(price.width),
               " \xD7 ",
-              (0, import_shop.num)(s.height),
-              "\u2033"
+              cm(price.height),
+              " cm)."
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ap-fine", children: "An original can't be resized. Want it bigger or smaller? A canvas or poster print can be made in any size." })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "ap-opt", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "ap-opt__label", children: "Size" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-sizes", children: [
+                f.sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", "aria-pressed": sel.size === s.code, className: `ap-size ${sel.size === s.code ? "is-on" : ""}`, onClick: () => update({ size: s.code }), children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-size__shape", "aria-hidden": "true", style: { aspectRatio: `${s.width} / ${s.height}` } }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                    (0, import_shop.num)(s.width),
+                    " \xD7 ",
+                    (0, import_shop.num)(s.height),
+                    "\u2033"
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                    cm(s.width),
+                    " \xD7 ",
+                    cm(s.height),
+                    " cm \xB7 ",
+                    (0, import_shop.inr)(Number(s.price) + (sel.format === "CANVAS" && sel.finish !== "ROLLED" ? Number(s.extra || 0) : 0))
+                  ] })
+                ] }, s.code)),
+                f.custom && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                  "button",
+                  {
+                    type: "button",
+                    "aria-pressed": custom,
+                    className: `ap-size ap-size--custom ${custom ? "is-on" : ""}`,
+                    "data-testid": "size-custom",
+                    onClick: () => {
+                      if (!custom) update({ size: `C${Math.round(Number(price.width) >= Number(price.height) ? price.width : price.height)}` });
+                    },
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-size__shape ap-size__shape--custom", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrows-alt" }) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Custom size" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                        f.custom.min,
+                        "\u2013",
+                        f.custom.max,
+                        " in"
+                      ] })
+                    ]
+                  }
+                )
+              ] })
+            ] }),
+            custom && f.custom && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomSize, { painting: p, f, sel, onPick: (code) => update({ size: code }) }),
+            f.finishes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "ap-opt", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "ap-opt__label", children: sel.format === "CANVAS" ? "Finish" : "Paper" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-seg", role: "radiogroup", children: f.finishes.map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: sel.finish === x.code ? "is-on" : "", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "finish", value: x.code, checked: sel.finish === x.code, onChange: () => update({ finish: x.code }) }),
+                x.label
+              ] }, x.code)) })
+            ] }),
+            f.maxQty > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-opt ap-opt--row", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-opt__label", children: "Quantity" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.Qty, { value: sel.qty, max: f.maxQty, onChange: (q) => update({ qty: q }) })
             ] })
-          ] }, s.code)) })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "ap-opt", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "ap-opt__label", children: "Frame" }),
-          f.frames.length <= 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ap-static", children: p.is_framed ? "This original arrives framed, ready to hang." : "Framing is not offered for this format." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-frames", children: f.frames.map((code) => {
-            const extra = code === "NONE" ? 0 : (0, import_shop.frameCost)(offer, sel, code);
-            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `ap-frame ${sel.frame === code ? "is-on" : ""}`, "data-frame": code, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "frame", value: code, checked: sel.frame === code, onChange: () => update({ frame: code }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `ap-frame__sw ap-frame__sw--${code.toLowerCase()}`, "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}) }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ap-frame__text", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: import_shop.FRAME_INFO[code].name }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
-                  FRAME_NOTES[code],
-                  import_ArtPreview.FRAMES[code] && import_ArtPreview.FRAMES[code].t ? `, ${(0, import_shop.num)(import_ArtPreview.FRAMES[code].t)}\u2033` : ""
+          ] })),
+          current.id === "frame" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "ap-opt", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "sr-only", children: "Frame" }),
+            f.frames.length <= 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ap-static", children: p.is_framed ? "This original arrives framed, ready to hang." : "Framing is not offered for this format." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-frames", children: f.frames.map((code) => {
+              const extra = code === "NONE" ? 0 : (0, import_shop.frameCost)(offer, sel, code, p);
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `ap-frame ${sel.frame === code ? "is-on" : ""}`, "data-frame": code, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "frame", value: code, checked: sel.frame === code, onChange: () => update({ frame: code }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `ap-frame__sw ap-frame__sw--${code.toLowerCase()}`, "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "ap-frame__text", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: import_shop.FRAME_INFO[code].name }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                    FRAME_NOTES[code],
+                    import_ArtPreview.FRAMES[code] && import_ArtPreview.FRAMES[code].t ? `, ${(0, import_shop.num)(import_ArtPreview.FRAMES[code].t)}\u2033` : ""
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-frame__price", children: code === "NONE" ? "Included" : `+${(0, import_shop.inr)(extra)}` })
+              ] }, code);
+            }) })
+          ] }),
+          current.id === "wall" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-opt", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ap-static", children: shownRooms.length ? `Swipe the picture or use its arrows to see your choice in ${shownRooms.length === 1 ? "the room" : `each of the ${shownRooms.length} rooms`}, drawn to scale where the wall is measured.` : "The picture shows your choice at its real proportions, with its size marked." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "ap-summary", "data-testid": "wall-summary", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Format" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: import_shop.FORMAT_INFO[sel.format].name })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Size" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+                  (0, import_shop.num)(price.width),
+                  " \xD7 ",
+                  (0, import_shop.num)(price.height),
+                  " in",
+                  custom ? " (custom)" : "",
+                  " \xB7 ",
+                  cm(price.width),
+                  " \xD7 ",
+                  cm(price.height),
+                  " cm"
                 ] })
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-frame__price", children: code === "NONE" ? "Included" : `+${(0, import_shop.inr)(extra)}` })
-            ] }, code);
-          }) })
+              sel.finish && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: sel.format === "CANVAS" ? "Finish" : "Paper" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (f.finishes.find((x) => x.code === sel.finish) || {}).label })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Frame" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: import_shop.FRAME_INFO[sel.frame] ? import_shop.FRAME_INFO[sel.frame].name : "No frame" })
+              ] }),
+              sel.qty > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Quantity" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: sel.qty })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "is-total", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Price" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_shop.inr)(price.total) })
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-partnav", children: [
+            part > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: () => go(part - 1), "data-testid": "part-back", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-left", "aria-hidden": "true" }),
+              " Back"
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+            part < PARTS.length - 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--ink", onClick: () => go(part + 1), "data-testid": "part-next", children: [
+              "Next: ",
+              PARTS[part + 1].label,
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+            ] })
+          ] })
         ] }),
         err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err }),
+        note && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-added", role: "status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+          " ",
+          note,
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/cart", children: "View cart" })
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-buy", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "ap-buy__btn", onClick: buy, disabled: busy, "data-testid": "room-continue", children: [
             busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Buy now" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_shop.inr)(price.total) })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Next: delivery address and secure payment." })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "ap-buy__cart", onClick: addToCart, disabled: busy, "data-testid": "room-add", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag", "aria-hidden": "true" }),
+            " Add to cart"
+          ] }),
+          sel.format === "ORIGINAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_OfferDialog.OfferButton, { terms, onOpen: () => setOfferOpen(true) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: part < PARTS.length - 1 ? "Already decided? Buy now goes straight to delivery and payment." : "Next: delivery address and secure payment." })
         ] }),
+        offerOpen && terms && terms.open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_OfferDialog.default, { painting: p, terms, onClose: () => {
+          setOfferOpen(false);
+          reloadTerms();
+        }, onSent: () => reloadTerms() }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "ap-facts", children: facts.map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
           x
@@ -20766,12 +21089,16 @@ function Step2Room() {
         ] }) })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-mobilebar", "aria-hidden": "true", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-mobilebar", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_shop.inr)(price.total) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: import_shop.FRAME_INFO[sel.frame] ? import_shop.FRAME_INFO[sel.frame].name : "" })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          current.letter,
+          ". ",
+          current.label
+        ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", tabIndex: -1, onClick: buy, disabled: busy, children: "Buy now" })
+      part < PARTS.length - 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => go(part + 1), children: "Next" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: buy, disabled: busy, children: "Buy now" })
     ] })
   ] });
 }
@@ -21170,7 +21497,7 @@ function check(k, f, { ship, domestic }) {
 const CONTACT = ["name", "email", "country", "phone"];
 const DELIVERY = ["line1", "line2", "city", "state", "postal"];
 function CheckoutBody() {
-  const { customer, gateways = {}, payment, inrPerUsd } = (0, import_inertia_react.usePage)().props;
+  const { customer, gateways = {}, payment, inrPerUsd, only } = (0, import_inertia_react.usePage)().props;
   const cart = (0, import_CartStore.useCart)();
   const data = cart.data;
   const [f, setF] = (0, import_react.useState)({
@@ -21353,6 +21680,16 @@ function CheckoutBody() {
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "pz-checkout__form", onSubmit: pay, noValidate: true, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Payment" }),
+      only && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-note", "data-testid": "checkout-only", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-info-circle", "aria-hidden": "true" }),
+        " You're buying just this artwork.",
+        " ",
+        only.otherCount,
+        " other ",
+        only.otherCount === 1 ? "item stays" : "items stay",
+        " in your cart for later. ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/purchase/checkout?all=1", children: "Check out everything instead" })
+      ] }),
       notice && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: `pz-note ${notice.type === "error" ? "is-error" : ""}`, role: "alert", children: notice.text }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, { n: 1, id: "contact", title: "Contact", open: open === "contact", done: done.contact, summary: contactSummary, onEdit: () => setOpen("contact"), children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-grid2", children: [
@@ -21486,7 +21823,7 @@ function PurchaseCheckout() {
   const { cart, serverNow } = (0, import_inertia_react.usePage)().props;
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: "Checkout \xB7 ArtistikCity" }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartStore.CartProvider, { initial: __spreadProps(__spreadValues({}, cart), { serverNow }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz pz--shell", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartStore.CartProvider, { initial: __spreadProps(__spreadValues({}, cart), { serverNow }), scope: "checkout", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz pz--shell", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", { className: "pz-shellhead", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", "aria-label": "Back to the marketplace", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: "/assets/images/logo.png", alt: "ArtistikCity" }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
@@ -22606,6 +22943,8 @@ var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia/dist/index.js");
 var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
+var import_CartStore = __webpack_require__("./resources/js/Components/Shop/CartStore.js");
+var import_OfferDialog = __toESM(__webpack_require__("./resources/js/Components/Shop/OfferDialog.js"));
 var import_ArtistHub = __webpack_require__("./resources/js/Components/Shop/ArtistHub.js");
 var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
 var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
@@ -22655,7 +22994,17 @@ function startSelection(offer, draft, originalOk) {
   });
 }
 function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, conversation, customer }) {
+  const cart = (0, import_CartStore.useCart)();
   const [busy, setBusy] = (0, import_react.useState)(false);
+  const [added, setAdded] = (0, import_react.useState)(null);
+  const [offerOpen, setOfferOpen] = (0, import_react.useState)(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("offer") === "1";
+    } catch (e) {
+      return false;
+    }
+  });
+  const [terms, reloadTerms] = (0, import_OfferDialog.useOfferTerms)(p.id, !preview);
   const [err, setErr] = (0, import_react.useState)(null);
   const [conflict, setConflict] = (0, import_react.useState)(null);
   const mineLeft = (0, import_shared.useCountdown)(hold && hold.mine ? hold.expiresAt : null, serverNow);
@@ -22664,7 +23013,7 @@ function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, co
   const heldByOther = p.stock_status === "RESERVED" && !mine && otherLeft > 0;
   const sold = p.stock_status === "SOLD";
   const f = (0, import_shop.formatOf)(offer, sel.format);
-  const price = (0, import_react.useMemo)(() => (0, import_shop.priceOf)(offer, sel), [offer, sel]);
+  const price = (0, import_react.useMemo)(() => (0, import_shop.priceOf)(offer, sel, p), [offer, sel, p]);
   const update = (patch) => setSel((s) => (0, import_shop.normalise)(offer, __spreadValues(__spreadValues({}, s), patch)));
   const originalBlocked = (fo) => fo.format === "ORIGINAL" && (sold || heldByOther || !!preview);
   const choose = (format) => {
@@ -22689,6 +23038,26 @@ function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, co
         setErr(d.message);
         setTimeout(() => window.location.reload(), 2200);
       } else setErr((0, import_shop.errorText)(e));
+    });
+  };
+  const addToCart = (switchHold = false) => {
+    setBusy(true);
+    setErr(null);
+    setConflict(null);
+    setAdded(null);
+    cart.add(__spreadProps(__spreadValues({ paintingId: p.id }, sel), { switch: switchHold })).then(() => {
+      setBusy(false);
+      setAdded(sel.format === "ORIGINAL" ? "Added. The original is held for you for 15 minutes." : "Added to your cart.");
+    }).catch((e) => {
+      const d = e.response && e.response.data;
+      if (d && d.code === "SIGN_IN" && d.redirect) {
+        window.location.assign(d.redirect);
+        return;
+      }
+      setBusy(false);
+      cart.clearError();
+      if (d && d.code === "HOLD_LIMIT") setConflict(__spreadProps(__spreadValues({}, d), { cart: true }));
+      else setErr((0, import_shop.errorText)(e));
     });
   };
   const release = () => {
@@ -22726,13 +23095,32 @@ function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, co
     f && f.available && sel.format !== "ORIGINAL" && sel.format !== "DIGITAL" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-buy__opts", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "pz-option", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "pz-legend", children: "Size" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-chips", children: f.sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", "aria-pressed": sel.size === s.code, className: sel.size === s.code ? "is-on" : "", onClick: () => update({ size: s.code }), children: [
-          (0, import_shop.num)(s.width),
-          " \xD7 ",
-          (0, import_shop.num)(s.height),
-          "\u2033 ",
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: (0, import_shop.inr)(s.price) })
-        ] }, s.code)) })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-chips", children: [
+          f.sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", "aria-pressed": sel.size === s.code, className: sel.size === s.code ? "is-on" : "", onClick: () => update({ size: s.code }), children: [
+            (0, import_shop.num)(s.width),
+            " \xD7 ",
+            (0, import_shop.num)(s.height),
+            "\u2033 ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: (0, import_shop.inr)(s.price) })
+          ] }, s.code)),
+          price && price.size && price.size.custom && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", "aria-pressed": "true", className: "is-on", children: [
+            (0, import_shop.num)(price.width),
+            " \xD7 ",
+            (0, import_shop.num)(price.height),
+            "\u2033 ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+              "custom \xB7 ",
+              (0, import_shop.inr)(price.size.price)
+            ] })
+          ] })
+        ] }),
+        f.custom && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine", children: [
+          "Need another size? Choose any size from ",
+          f.custom.min,
+          " to ",
+          f.custom.max,
+          " in on the next step."
+        ] })
       ] }),
       f.finishes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "pz-option", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { className: "pz-legend", children: sel.format === "CANVAS" ? "Finish" : "Paper" }),
@@ -22779,11 +23167,32 @@ function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, co
       ] }),
       sel.format === "ORIGINAL" && Number(p.discount_percentage) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("s", { className: "pz-muted", children: (0, import_shop.inr)(p.base_price) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand pz-btn--lg pz-btn--block", "data-testid": "buy-continue", onClick: () => go(false), disabled: busy || !canGo, children: [
-      busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
-      " ",
-      "Buy now"
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-buy__ctas", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand pz-btn--lg pz-btn--block", "data-testid": "buy-continue", onClick: () => go(false), disabled: busy || !canGo, children: [
+        busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+        " ",
+        "Buy now"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--ink pz-btn--lg pz-btn--block", "data-testid": "add-to-cart", onClick: () => addToCart(false), disabled: busy || !canGo, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag", "aria-hidden": "true" }),
+        " Add to cart"
+      ] })
     ] }),
+    added && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-added", role: "status", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check", "aria-hidden": "true" }),
+      " ",
+      added,
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/cart", children: "View cart" })
+    ] }),
+    sel.format === "ORIGINAL" && !sold && !preview && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_OfferDialog.OfferButton, { terms, onOpen: () => {
+      if (customer) setOfferOpen(true);
+      else window.location.assign(`/login?return_to=${encodeURIComponent(`/marketplace/${p.slug}?offer=1#buy`)}&intent=buy`);
+    } }),
+    offerOpen && terms && terms.open && !terms.mine && customer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_OfferDialog.default, { painting: p, terms, onClose: () => {
+      setOfferOpen(false);
+      reloadTerms();
+    }, onSent: () => reloadTerms() }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine pz-center", children: !customer ? "Log in or join to buy: your choice is kept and you come straight back." : sel.format === "ORIGINAL" && !mine ? "Buying holds the original for you for 15 minutes. No payment yet." : sel.format === "DIGITAL" ? "Download link by e-mail right after payment." : "Next: choose a frame and see it on a wall, then pay." }),
     err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-error", role: "alert", children: err }),
     conflict && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-conflict", role: "alertdialog", "aria-label": "You're already holding an original", children: [
@@ -22796,7 +23205,7 @@ function BuyPanel({ p, offer, sel, setSel, hold, serverNow, preview, contact, co
         " You can hold one original at a time. Switch your hold to this piece?"
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ink", onClick: () => go(true), children: "Switch to this piece" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ink", onClick: () => conflict.cart ? addToCart(true) : go(true), children: "Switch to this piece" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: () => setConflict(null), children: "Keep my other piece" })
       ] })
     ] }),
@@ -22862,6 +23271,7 @@ __export(ShopSections_exports, {
   ListingDrawer: () => ListingDrawer,
   Listings: () => Listings,
   Messages: () => Messages,
+  OffersAdmin: () => OffersAdmin,
   OrderDrawer: () => OrderDrawer,
   Orders: () => Orders,
   Prices: () => Prices
@@ -23178,7 +23588,42 @@ function Messages({ threads, setThreads, initial, toast }) {
     )
   ] });
 }
-function Prices({ prices, setPrices, can, toast }) {
+function CustomSizes({ initial, can, toast }) {
+  const [f, setF] = (0, import_react.useState)(initial || { enabled: true, min: 8, max: 60 });
+  const [saved, setSaved] = (0, import_react.useState)(initial || { enabled: true, min: 8, max: 60 });
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const dirty = JSON.stringify(f) !== JSON.stringify(saved);
+  const save = () => {
+    setBusy(true);
+    setErrors({});
+    import_axios.default.put("/admin/console/api/shop/custom-size", { enabled: !!f.enabled, min: Number(f.min), max: Number(f.max) }).then((r) => {
+      setF(r.data.customSize);
+      setSaved(r.data.customSize);
+      toast(r.data.message);
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Custom print sizes", subtitle: "Buyers pick any long side in this range on the preview step; the price follows the print's area along the sizes listed below, rounded up to \u20B9x99.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-row adm-row--wrap", "data-testid": "custom-size-admin", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: !!f.enabled, disabled: !can.prices, onChange: (v) => setF(__spreadProps(__spreadValues({}, f), { enabled: v })), label: f.enabled ? "Offered on canvas and poster prints" : "Off: preset sizes only" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-inline-field", children: [
+      "Shortest long side",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input adm-input--sm", type: "number", min: "4", max: "96", value: f.min, disabled: !can.prices || !f.enabled, onChange: (e) => setF(__spreadProps(__spreadValues({}, f), { min: e.target.value })), "aria-label": "Shortest long side in inches" }),
+      " in",
+      errors.min && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-field__error", children: errors.min })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-inline-field", children: [
+      "Longest long side",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input adm-input--sm", type: "number", min: "4", max: "96", value: f.max, disabled: !can.prices || !f.enabled, onChange: (e) => setF(__spreadProps(__spreadValues({}, f), { max: e.target.value })), "aria-label": "Longest long side in inches" }),
+      " in",
+      errors.max && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-field__error", children: errors.max })
+    ] }),
+    can.prices && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy, disabled: !dirty, onClick: save, children: "Save custom sizes" })
+  ] }) });
+}
+function Prices({ prices, setPrices, can, toast, customSize }) {
   const [rows, setRows] = (0, import_react.useState)(prices);
   const [errors, setErrors] = (0, import_react.useState)({});
   const [busy, setBusy] = (0, import_react.useState)(false);
@@ -23198,6 +23643,7 @@ function Prices({ prices, setPrices, can, toast }) {
   };
   const kinds = Object.keys(KIND);
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomSizes, { initial: customSize, can, toast }),
     kinds.map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: KIND[k], flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table__scroll", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Name" }),
@@ -23462,6 +23908,127 @@ function Listings({ listings, setListings, can, toast }) {
       const again = ls.find((x) => x.id === edit.id);
       if (again) setEdit(again);
     } })
+  ] });
+}
+const OFFER_TONE = { OPEN: "pink", COUNTERED: "yellow", ACCEPTED: "blue", PAID: "green", DECLINED: "grey", WITHDRAWN: "grey", EXPIRED: "grey", CLOSED: "grey" };
+function OffersAdmin({ toast, OfferCard }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [filter, setFilter] = (0, import_react.useState)("live");
+  const [rules, setRules] = (0, import_react.useState)(null);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const load = () => import_axios.default.get("/admin/console/api/offers").then((r) => {
+    setData(r.data);
+    setRules(r.data.settings);
+  }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  (0, import_react.useEffect)(() => {
+    load();
+  }, []);
+  if (!data || !rules) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading offers\u2026" }) });
+  const live = data.offers.filter((o) => ["OPEN", "COUNTERED", "ACCEPTED"].includes(o.status));
+  const shown = filter === "live" ? live : data.offers;
+  const replace = (o) => setData((d) => __spreadProps(__spreadValues({}, d), { offers: d.offers.map((x) => x.id === o.id ? o : x) }));
+  const saveRules = () => {
+    setBusy(true);
+    setErrors({});
+    import_axios.default.put("/admin/console/api/offers/settings", rules).then((r) => {
+      toast(r.data.message);
+      setRules(r.data.settings);
+      setData((d) => __spreadProps(__spreadValues({}, d), { settings: r.data.settings }));
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const setPainting = (p, patch) => {
+    import_axios.default.put(`/admin/console/api/offers/paintings/${p.id}`, { enabled: "enabled" in patch ? patch.enabled : p.enabled, minPct: "minPct" in patch ? patch.minPct : p.minPct }).then((r) => {
+      toast(r.data.message);
+      setData((d) => __spreadProps(__spreadValues({}, d), { paintings: d.paintings.map((x) => x.id === p.id ? __spreadValues(__spreadValues({}, x), r.data) : x) }));
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const num = (k, label, suffix, min, max) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-inline-field", children: [
+    label,
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "input",
+      {
+        className: "adm-input adm-input--sm",
+        type: "number",
+        min,
+        max,
+        value: rules[k],
+        disabled: !data.canSettings,
+        onChange: (e) => setRules(__spreadProps(__spreadValues({}, rules), { [k]: e.target.value === "" ? "" : Number(e.target.value) })),
+        "aria-label": label
+      }
+    ),
+    " ",
+    suffix,
+    errors[k] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-field__error", children: errors[k] })
+  ] });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "offers-admin", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Offer rules", subtitle: "Collectors can suggest a price for an original; the artist (or the studio) accepts, counters or declines. Accepting holds the piece for the buyer at that price.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-row adm-row--wrap", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: !!rules.enabled, disabled: !data.canSettings, onChange: (v) => setRules(__spreadProps(__spreadValues({}, rules), { enabled: v })), label: rules.enabled ? "Offers on" : "Offers paused" }),
+      num("minPct", "Lowest offer", "% of the price", 10, 99),
+      num("expiryHours", "Time to answer", "hours", 1, 336),
+      num("payHours", "Time to pay after acceptance", "hours", 1, 168),
+      num("maxRounds", "Rounds", "at most", 1, 10),
+      num("dailyLimit", "Offers per buyer", "per 24 h", 1, 50),
+      data.canSettings ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy, onClick: saveRules, children: "Save rules" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "Only a super admin can change the rules." })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: `Offers${live.length ? ` \xB7 ${live.length} in progress` : ""}`, actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: filter, onChange: setFilter, options: [{ value: "live", label: "In progress" }, { value: "all", label: "All" }] }), children: shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-handshake-o", title: filter === "live" ? "No offers in progress" : "No offers yet", children: "Offers appear here as collectors make them." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "of-list", children: shown.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OfferCard, { offer: o, role: "STAFF", endpoint: "/admin/console/api/offers", onChange: replace, serverNow: data.serverNow }, o.id)) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Which paintings take offers", subtitle: "Default: studio originals take offers; student paintings only when the student switches it on. Leave the lowest offer empty for the site rule.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table__scroll", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Painting" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Price" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Offers" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Lowest offer" })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: data.paintings.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Painting", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${p.slug}`, target: "_blank", rel: "noopener noreferrer", children: p.title }),
+          p.student && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "blue", children: "Student" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "Price", children: inr(p.price) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { "data-label": "Offers", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "select",
+          {
+            className: "adm-input adm-input--sm",
+            value: p.enabled === null || p.enabled === void 0 ? "default" : p.enabled ? "on" : "off",
+            onChange: (e) => setPainting(p, { enabled: e.target.value === "default" ? null : e.target.value === "on" }),
+            "aria-label": `Offers for ${p.title}`,
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: "default", children: [
+                "Default (",
+                p.student ? "off" : "on",
+                ")"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "on", children: "On" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "off", children: "Off" })
+            ]
+          }
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { "data-label": "Lowest offer", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              className: "adm-input adm-input--sm",
+              type: "number",
+              min: "10",
+              max: "99",
+              placeholder: String(rules.minPct),
+              defaultValue: p.minPct || "",
+              onBlur: (e) => {
+                const v = e.target.value;
+                if (String(v) !== String(p.minPct || "")) setPainting(p, { minPct: v === "" ? null : Number(v) });
+              },
+              "aria-label": `Lowest offer for ${p.title}, percent`
+            }
+          ),
+          " % \xB7 ",
+          p.effective ? `from ${inr(p.minAmount)}` : "off"
+        ] })
+      ] }, p.id)) })
+    ] }) }) }) })
   ] });
 }
 
@@ -26060,7 +26627,9 @@ function PurchaseIntentBanner({ intent, mode = "login" }) {
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
@@ -26078,6 +26647,7 @@ var __spreadValues = (a, b) => {
     }
   return a;
 };
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -26104,11 +26674,14 @@ __export(ArtPreview_exports, {
   ArtworkView: () => ArtworkView,
   FRAMES: () => FRAMES,
   FramedArt: () => FramedArt,
+  PERSON_IN: () => PERSON_IN,
   RoomView: () => RoomView,
   ViewPicker: () => ViewPicker,
   default: () => ArtPreview,
   framedSize: () => framedSize,
+  personBox: () => personBox,
   placeInRoom: () => placeInRoom,
+  reducedMotion: () => reducedMotion,
   usePreload: () => usePreload
 });
 module.exports = __toCommonJS(ArtPreview_exports);
@@ -26213,7 +26786,23 @@ function placeInRoom(room, outerWIn, outerHIn, stageW) {
   };
   return { pw, ph, box: { x: cx - wpx / 2, y: cy - hpx / 2, w: wpx, h: hpx }, crop, zoom, toScale, tooBig };
 }
-function RoomView({ room, image, title, widthIn, heightIn, frame, surface }) {
+const PERSON_IN = 67;
+function personBox(s, outerWIn) {
+  const ppi = s.box.w / outerWIn;
+  const h = PERSON_IN * ppi;
+  const w = h * 0.3;
+  const feet = s.box.y + s.box.h / 2 + 57 * ppi;
+  let x = s.box.x + s.box.w + 14 * ppi;
+  if (x + w > s.pw) x = s.box.x - 14 * ppi - w;
+  return { x: Math.max(0, Math.min(s.pw - w, x)), y: feet - h, w, h };
+}
+function Person() {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: "0 0 30 100", preserveAspectRatio: "none", "aria-hidden": "true", focusable: "false", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", { cx: "15", cy: "7", r: "6" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M8 16 h14 q4 0 4 4 v30 q0 3 -3 3 h-1 v44 q0 3 -3 3 h-2 q-3 0 -3 -3 v-38 h-2 v38 q0 3 -3 3 h-2 q-3 0 -3 -3 v-44 h-1 q-3 0 -3 -3 v-30 q0 -4 4 -4 z" })
+  ] });
+}
+function RoomView({ room, image, title, widthIn, heightIn, frame, surface, showPerson = false }) {
   const [ref, stageW] = useWidth();
   const [loaded, setLoaded] = (0, import_react.useState)(false);
   const { w, h } = framedSize(widthIn, heightIn, frame);
@@ -26234,7 +26823,11 @@ function RoomView({ room, image, title, widthIn, heightIn, frame, surface }) {
       children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-scene", style: { width: `${s.zoom * 100}%`, height: `${s.zoom * 100}%`, transform: `translate(${-(s.crop.x / s.pw) * 100}%, ${-(s.crop.y / s.ph) * 100}%)` }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { className: "ap-scene__photo", src: room.photo, alt: `${room.label}${room.note ? `, ${room.note.toLowerCase()}` : ""}`, draggable: "false", onLoad: () => setLoaded(true) }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-place", style: { left: pct(s.box.x, s.pw), top: pct(s.box.y, s.ph), width: pct(s.box.w, s.pw), height: pct(s.box.h, s.ph) }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FramedArt, { image, title, widthIn, heightIn, frame, surface, lift: 0.8 }) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-place", style: { left: pct(s.box.x, s.pw), top: pct(s.box.y, s.ph), width: pct(s.box.w, s.pw), height: pct(s.box.h, s.ph) }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FramedArt, { image, title, widthIn, heightIn, frame, surface, lift: 0.8 }) }),
+          showPerson && s.toScale && (() => {
+            const b = personBox(s, w);
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-person", "data-testid": "room-person", style: { left: pct(b.x, s.pw), top: pct(b.y, s.ph), width: pct(b.w, s.pw), height: pct(b.h, s.ph) }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Person, {}) });
+          })()
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ap-scale", "data-testid": "room-scale", children: s.toScale ? `To scale \xB7 ${(0, import_shop.num)(widthIn)} \xD7 ${(0, import_shop.num)(heightIn)} in` : s.tooBig ? "Larger than this wall: shown smaller" : `${(0, import_shop.num)(widthIn)} \xD7 ${(0, import_shop.num)(heightIn)} in` })
       ]
@@ -26244,6 +26837,19 @@ function RoomView({ room, image, title, widthIn, heightIn, frame, surface }) {
 function ViewPicker({ rooms, value, onChange, image }) {
   const list = [{ id: "art", label: "Artwork", thumb: image, isArt: true }, ...rooms.map((r) => ({ id: String(r.id), label: r.label, thumb: r.photo }))];
   const refs = (0, import_react.useRef)([]);
+  const strip = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    const i = list.findIndex((v) => v.id === value);
+    const el = refs.current[i];
+    const box = strip.current;
+    if (!el || !box || box.scrollWidth <= box.clientWidth) return;
+    const left = el.offsetLeft - (box.clientWidth - el.offsetWidth) / 2;
+    try {
+      box.scrollTo({ left, behavior: reducedMotion() ? "auto" : "smooth" });
+    } catch (e) {
+      box.scrollLeft = left;
+    }
+  }, [value]);
   const onKey = (e, i) => {
     const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     if (!d) return;
@@ -26253,7 +26859,7 @@ function ViewPicker({ rooms, value, onChange, image }) {
     if (refs.current[n]) refs.current[n].focus();
   };
   if (rooms.length === 0) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `ap-views ${list.length > 5 ? "is-many" : ""}`, role: "radiogroup", "aria-label": "Preview", children: list.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `ap-views ${list.length > 5 ? "is-many" : ""}`, role: "radiogroup", "aria-label": "Backgrounds", ref: strip, children: list.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
     "button",
     {
       ref: (el) => {
@@ -26275,9 +26881,17 @@ function ViewPicker({ rooms, value, onChange, image }) {
     v.id
   )) });
 }
-function usePreload(rooms) {
+function reducedMotion() {
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (e) {
+    return false;
+  }
+}
+function usePreload(rooms, index = 0) {
   (0, import_react.useEffect)(() => {
-    const keep = rooms.map((r) => {
+    const near = rooms.filter((r, i) => Math.abs(i + 1 - index) <= 1 || index === 0 && i === rooms.length - 1);
+    const keep = near.map((r) => {
       const i = new Image();
       i.src = r.photo;
       return i;
@@ -26285,10 +26899,10 @@ function usePreload(rooms) {
     return () => {
       keep.length = 0;
     };
-  }, [rooms]);
+  }, [rooms, index]);
 }
-function ArtPreview({ rooms = [], image, title, widthIn, heightIn, frame = "NONE", surface = "canvas", storageKey = "artistikcity.view" }) {
-  usePreload(rooms);
+function ArtPreview({ rooms = [], image, title, widthIn, heightIn, frame = "NONE", surface = "canvas", storageKey = "artistikcity.view", showRoom = false }) {
+  const views = (0, import_react.useMemo)(() => ["art", ...rooms.map((r) => String(r.id))], [rooms]);
   const [view, setView] = (0, import_react.useState)(() => {
     try {
       const v = window.sessionStorage.getItem(storageKey);
@@ -26297,18 +26911,104 @@ function ArtPreview({ rooms = [], image, title, widthIn, heightIn, frame = "NONE
       return "art";
     }
   });
-  const pick = (v) => {
+  const [dir, setDir] = (0, import_react.useState)(0);
+  const [person, setPerson] = (0, import_react.useState)(() => {
+    try {
+      return window.localStorage.getItem("artistikcity.person") === "1";
+    } catch (e) {
+      return false;
+    }
+  });
+  const index = Math.max(0, views.indexOf(view));
+  usePreload(rooms, index);
+  const pick = (v, d = 0) => {
+    setDir(d || (views.indexOf(v) > index ? 1 : -1));
     setView(v);
     try {
       window.sessionStorage.setItem(storageKey, v);
     } catch (e) {
     }
   };
+  const step = (d) => {
+    if (views.length > 1) pick(views[(index + d + views.length) % views.length], d);
+  };
+  (0, import_react.useEffect)(() => {
+    if (showRoom && view === "art" && rooms.length > 0) pick(String(rooms[0].id), 1);
+  }, [showRoom]);
+  const togglePerson = (on) => {
+    setPerson(on);
+    try {
+      window.localStorage.setItem("artistikcity.person", on ? "1" : "0");
+    } catch (e) {
+    }
+  };
+  const touch = (0, import_react.useRef)(null);
+  const onTouchStart = (e) => {
+    const t = e.touches[0];
+    touch.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e) => {
+    const s0 = touch.current;
+    touch.current = null;
+    if (!s0) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - s0.x;
+    const dy = t.clientY - s0.y;
+    if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+  };
+  const onKey = (e) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      step(1);
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      step(-1);
+    }
+  };
   const room = rooms.find((r) => String(r.id) === view);
+  const label = room ? room.label : "Artwork on a plain wall";
+  const measured = !!(room && room.areaWidthIn);
   const common = { image, title, widthIn, heightIn, frame, surface };
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap", children: [
-    room ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomView, __spreadValues({ room }, common)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArtworkView, __spreadValues({}, common)),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ViewPicker, { rooms, value: room ? view : "art", onChange: pick, image })
+  const many = views.length > 1;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap", role: "group", "aria-roledescription": "carousel", "aria-label": "Preview backgrounds", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "div",
+      {
+        className: `ap-carousel ${dir > 0 ? "is-next" : dir < 0 ? "is-prev" : ""}`,
+        tabIndex: many ? 0 : void 0,
+        onKeyDown: many ? onKey : void 0,
+        onTouchStart: many ? onTouchStart : void 0,
+        onTouchEnd: many ? onTouchEnd : void 0,
+        "aria-label": many ? "Use the left and right arrow keys to change the background" : void 0,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ap-slide", children: room ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomView, __spreadProps(__spreadValues({ room }, common), { showPerson: person })) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArtworkView, __spreadValues({}, common)) }, view),
+          many && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "ap-nav ap-nav--prev", onClick: () => step(-1), "aria-label": "Previous background", "data-testid": "bg-prev", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-chevron-left", "aria-hidden": "true" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "ap-nav ap-nav--next", onClick: () => step(1), "aria-label": "Next background", "data-testid": "bg-next", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-chevron-right", "aria-hidden": "true" }) })
+          ] })
+        ]
+      }
+    ),
+    many && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ap-bar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ap-count", "aria-live": "polite", "data-testid": "bg-count", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+          index + 1,
+          " of ",
+          views.length
+        ] }),
+        " \xB7 ",
+        label
+      ] }),
+      measured && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "ap-personsw", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: person, onChange: (e) => togglePerson(e.target.checked), "data-testid": "person-toggle" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          "Person for scale ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "(5 ft 7 in)" })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ViewPicker, { rooms, value: room ? view : "art", onChange: (v) => pick(v), image })
   ] });
 }
 
@@ -28371,6 +29071,8 @@ var import_inertia = __webpack_require__("../../febuild/node_modules/@inertiajs/
 var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
 var import_StudioLayout = __toESM(__webpack_require__("./resources/js/Components/Studio/StudioLayout.js"));
 var import_Journey = __webpack_require__("./resources/js/Components/Studio/Journey.js");
+var import_OfferCard = __toESM(__webpack_require__("./resources/js/Components/Shop/OfferCard.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
 const LISTING_STATUS = {
   DRAFT: { label: "Draft", tone: "grey", icon: "fa-pencil", text: "Private. Submit it when you are ready." },
   CHANGES: { label: "Changes requested", tone: "amber", icon: "fa-exclamation-circle", text: "Our team asked for a change before it can go live." },
@@ -28435,7 +29137,8 @@ function Listings({ listings, onToast }) {
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "From our team:" }),
           " ",
           l.review_notes
-        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-listing__hint", children: s.text })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-listing__hint", children: s.text }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OfferSwitch, { l, onToast })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-listing__actions", children: [
         editable && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/dashboard/sell/listings/${l.id}`, className: "sl-btn sl-btn--line", children: l.changes_requested ? "Make changes" : "Edit" }),
@@ -28448,6 +29151,46 @@ function Listings({ listings, onToast }) {
       ] })
     ] }, l.id);
   }) });
+}
+function OfferSwitch({ l, onToast }) {
+  const [on, setOn] = (0, import_react.useState)(!!Number(l.offers_enabled));
+  const [pct, setPct] = (0, import_react.useState)(l.offer_min_pct || "");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const save = (enabled, minPct) => {
+    setBusy(true);
+    import_axios.default.post(`/api/studio/sell/listings/${l.id}/offers`, { enabled, minPct: minPct === "" ? null : Number(minPct) }).then((r) => {
+      setOn(!!r.data.enabled);
+      onToast(r.data.message);
+    }).catch((e) => onToast((0, import_shop.errorText)(e), true)).finally(() => setBusy(false));
+  };
+  if (!["AVAILABLE", "RESERVED", "PENDING_REVIEW", "DRAFT"].includes(l.stock_status)) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-offersw", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "sl-switch", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: on, disabled: busy, onChange: (e) => {
+        setOn(e.target.checked);
+        save(e.target.checked, pct);
+      }, "data-testid": `offers-toggle-${l.id}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Accept offers" })
+    ] }),
+    on && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "sl-offersw__pct", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "from" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "number", min: "10", max: "99", placeholder: "70", value: pct, onChange: (e) => setPct(e.target.value), onBlur: () => save(true, pct), "aria-label": "Lowest offer, percent of the price" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "% of the price" })
+    ] })
+  ] });
+}
+function Offers({ onToast }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  (0, import_react.useEffect)(() => {
+    import_axios.default.get("/api/studio/sell/offers").then((r) => setData(r.data)).catch(() => setData({ offers: [] }));
+  }, []);
+  if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-empty", children: "Loading offers\u2026" });
+  const replace = (o) => setData((d) => __spreadProps(__spreadValues({}, d), { offers: d.offers.map((x) => x.id === o.id ? o : x) }));
+  if (!data.offers.length) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "sl-empty", children: "No offers yet. Switch on \u201CAccept offers\u201D on a live listing to let collectors suggest a price." });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "of-list", children: data.offers.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_OfferCard.default, { offer: o, role: "SELLER", endpoint: "/api/studio/sell/offers", onChange: (x) => {
+    replace(x);
+    onToast(null);
+  }, serverNow: data.serverNow }, o.id)) });
 }
 function Earnings({ e, terms }) {
   const n = (v) => Number(v || 0);
@@ -28566,7 +29309,7 @@ function PayoutForm({ payout, canStore, onToast }) {
 function Sell() {
   const { certified, certifiedCourses = [], ready = [], locked = [], listings = [], earnings = {}, payout, canStorePayout, terms = {}, restriction, flash } = (0, import_inertia_react.usePage)().props;
   const [toast, setToast] = (0, import_react.useState)(flash && flash.message ? { text: flash.message } : null);
-  const say = (text, error = false) => setToast({ text, error });
+  const say = (text, error = false) => setToast(text ? { text, error } : null);
   (0, import_react.useEffect)(() => {
     try {
       const m = window.sessionStorage.getItem("ac.sell.flash");
@@ -28657,6 +29400,13 @@ function Sell() {
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Drafts, listings in review, and what is live or sold." })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Listings, { listings, onToast: say })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-section", id: "offers", "aria-labelledby": "sl-offers", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-head", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "sl-offers", children: "Offers" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Prices collectors suggested for your paintings. Accept, counter or decline within the time shown." })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Offers, { onToast: say })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "sl-two", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "sl-section", "aria-labelledby": "sl-earnings", children: [
@@ -29403,6 +30153,725 @@ function SiteAccess() {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SaveBar, { dirty, busy, onSave: save, saveLabel: "Save site access", children: dirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", onClick: discard, children: "Discard" }) })
     ] }),
     toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Shop/OfferDialog.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var OfferDialog_exports = {};
+__export(OfferDialog_exports, {
+  OfferButton: () => OfferButton,
+  default: () => OfferDialog,
+  useOfferTerms: () => useOfferTerms
+});
+module.exports = __toCommonJS(OfferDialog_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_react_dom = __webpack_require__("../../febuild/node_modules/react-dom/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+function useOfferTerms(paintingId, enabled = true) {
+  const [terms, setTerms] = (0, import_react.useState)(null);
+  const load = () => import_axios.default.get(`/api/v1/offers/painting/${paintingId}`).then((r) => setTerms(r.data)).catch(() => setTerms(null));
+  (0, import_react.useEffect)(() => {
+    if (enabled && paintingId) load();
+  }, [paintingId, enabled]);
+  return [terms, load];
+}
+const STATUS_TEXT = {
+  OPEN: "waiting for the artist",
+  COUNTERED: "the artist made a counter-offer",
+  ACCEPTED: "accepted: pay to make it yours"
+};
+function OfferButton({ terms, onOpen, className = "" }) {
+  if (!terms) return null;
+  if (terms.mine) {
+    const m = terms.mine;
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/user/offers", className: `pz-offer-mine ${className}`, "data-testid": "offer-mine", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-handshake-o", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        "Your offer ",
+        (0, import_shop.inr)(m.status === "ACCEPTED" ? m.agreed : m.amount),
+        " \xB7 ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: STATUS_TEXT[m.status] || m.status.toLowerCase() })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-right", "aria-hidden": "true" })
+    ] });
+  }
+  if (!terms.open || terms.own) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: `pz-btn pz-btn--line pz-btn--block ${className}`, onClick: onOpen, "data-testid": "offer-open", "aria-haspopup": "dialog", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-handshake-o", "aria-hidden": "true" }),
+    " Make an offer"
+  ] });
+}
+function OfferDialog({ painting, terms, onClose, onSent }) {
+  const [amount, setAmount] = (0, import_react.useState)(() => String(Math.round((Number(terms.minAmount) + Number(terms.price)) / 2 / 100) * 100));
+  const [message, setMessage] = (0, import_react.useState)("");
+  const [agree, setAgree] = (0, import_react.useState)(false);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [done, setDone] = (0, import_react.useState)(null);
+  const box = (0, import_react.useRef)(null);
+  const first = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.classList.add("pz-noscroll");
+    const t = setTimeout(() => {
+      if (first.current) first.current.focus();
+    }, 30);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.classList.remove("pz-noscroll");
+      clearTimeout(t);
+    };
+  }, []);
+  const value = Number(String(amount).replace(/[^\d]/g, ""));
+  const pct = terms.price ? Math.round(value / Number(terms.price) * 100) : 0;
+  const local = !value ? "Enter the amount you would like to pay." : value < Number(terms.minAmount) ? `The artist considers offers from ${(0, import_shop.inr)(terms.minAmount)}.` : value >= Number(terms.price) ? "That is the full price: use Buy now instead." : null;
+  const send = (e) => {
+    e.preventDefault();
+    const errs = {};
+    if (local) errs.amount = local;
+    if (!agree) errs.agree = "Tick the box to confirm.";
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
+    setBusy(true);
+    import_axios.default.post("/api/v1/offers", { paintingId: painting.id, amount: value, message, agree }).then((r) => {
+      setDone(r.data.message);
+      if (onSent) onSent(r.data.offer);
+    }).catch((err) => {
+      const d = err.response && err.response.data;
+      if (d && d.code === "SIGN_IN" && d.redirect) {
+        window.location.assign(d.redirect);
+        return;
+      }
+      const field = d && d.field || d && d.errors && Object.keys(d.errors)[0] || "amount";
+      setErrors({ [field]: (0, import_shop.errorText)(err) });
+    }).finally(() => setBusy(false));
+  };
+  const node = /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-overlay pz-overlay--center", onMouseDown: (e) => {
+    if (e.target === e.currentTarget) onClose();
+  }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "offer-title", ref: box, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "pz-modal__head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "offer-title", children: done ? "Offer sent" : "Make an offer" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-iconbtn", onClick: onClose, "aria-label": "Close", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-times", "aria-hidden": "true" }) })
+    ] }),
+    done ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-modal__body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-offer-done", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-check-circle", "aria-hidden": "true" }),
+        " ",
+        done
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine", children: [
+        "The artist has ",
+        terms.expiryHours,
+        " hours to accept, counter or decline. You can follow it, or withdraw it, in Your offers."
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-modal__actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/user/offers", className: "pz-btn pz-btn--ink", children: "See your offers" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: onClose, children: "Keep browsing" })
+      ] })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "pz-modal__body", onSubmit: send, noValidate: true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-offer-art", children: [
+        painting.image_url && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: painting.image_url, alt: "" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: painting.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            "Original by ",
+            painting.artist_name,
+            " \xB7 listed at ",
+            (0, import_shop.inr)(terms.price)
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "pz-field", htmlFor: "offer-amount", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-field__label", children: "Your offer" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-money", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-hidden": "true", children: "\u20B9" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              id: "offer-amount",
+              ref: first,
+              inputMode: "numeric",
+              autoComplete: "off",
+              value: amount,
+              onChange: (e) => {
+                setAmount(e.target.value.replace(/[^\d]/g, "").slice(0, 9));
+                setErrors((x) => __spreadProps(__spreadValues({}, x), { amount: null }));
+              },
+              "aria-invalid": errors.amount ? "true" : void 0,
+              "aria-describedby": "offer-amount-help",
+              "data-testid": "offer-amount"
+            }
+          ),
+          value > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+            pct,
+            "% of the price"
+          ] })
+        ] }),
+        errors.amount ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-field__err", id: "offer-amount-help", role: "alert", children: errors.amount }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-field__help", id: "offer-amount-help", children: [
+          "Offers from ",
+          (0, import_shop.inr)(terms.minAmount),
+          " (",
+          terms.minPct,
+          "% of the price). Whole rupees."
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "pz-field", htmlFor: "offer-message", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-field__label", children: [
+          "Message to the artist ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "(optional)" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "textarea",
+          {
+            id: "offer-message",
+            rows: 3,
+            maxLength: 500,
+            value: message,
+            onChange: (e) => setMessage(e.target.value),
+            placeholder: "Why this piece speaks to you, where it will hang\u2026"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-field__help", children: [
+          500 - message.length,
+          " characters left"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `pz-check ${errors.agree ? "has-error" : ""}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: agree, onChange: (e) => {
+          setAgree(e.target.checked);
+          setErrors((x) => __spreadProps(__spreadValues({}, x), { agree: null }));
+        }, "data-testid": "offer-agree" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          "If my offer is accepted, I'll pay within ",
+          terms.payHours,
+          " hours. The piece is held only for me during that time."
+        ] })
+      ] }),
+      errors.agree && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-field__err", role: "alert", children: errors.agree }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-modal__actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "submit", className: "pz-btn pz-btn--brand", disabled: busy, "data-testid": "offer-send", children: [
+          busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paper-plane", "aria-hidden": "true" }),
+          " Send offer",
+          value > 0 ? ` \xB7 ${(0, import_shop.inr)(value)}` : ""
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: onClose, children: "Cancel" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-fine", children: [
+        "No payment now. The artist answers within ",
+        terms.expiryHours,
+        " hours; we'll e-mail you."
+      ] })
+    ] })
+  ] }) });
+  return typeof document !== "undefined" ? (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac", children: node }), document.body) : node;
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Shop/OfferCard.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var OfferCard_exports = {};
+__export(OfferCard_exports, {
+  OFFER_STATUS: () => OFFER_STATUS,
+  default: () => OfferCard
+});
+module.exports = __toCommonJS(OfferCard_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+var import_shared = __webpack_require__("./resources/js/Components/Marketplace/shared.js");
+const OFFER_STATUS = {
+  OPEN: { label: "Waiting for the artist", sellerLabel: "New offer", tone: "is-blue" },
+  COUNTERED: { label: "Counter-offer", sellerLabel: "Countered: waiting for the buyer", tone: "is-amber" },
+  ACCEPTED: { label: "Accepted: pay to make it yours", sellerLabel: "Accepted: waiting for payment", tone: "is-green" },
+  PAID: { label: "Paid", tone: "is-green" },
+  DECLINED: { label: "Declined", tone: "is-grey" },
+  WITHDRAWN: { label: "Withdrawn", tone: "is-grey" },
+  EXPIRED: { label: "Expired", tone: "is-grey" },
+  CLOSED: { label: "Closed", tone: "is-grey" }
+};
+const EVENT = {
+  OFFER: "offered",
+  COUNTER: "countered with",
+  ACCEPT: "accepted",
+  DECLINE: "declined",
+  WITHDRAW: "withdrew",
+  EXPIRE: "expired",
+  CLOSE: "closed",
+  CANCEL: "cancelled the agreed price",
+  PAID: "paid"
+};
+function Timer({ until, serverNow, prefix }) {
+  const left = (0, import_shared.useCountdown)(until, serverNow);
+  if (!until || left <= 0) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: `of-timer ${left < 3600 * 6 ? "is-urgent" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-clock-o", "aria-hidden": "true" }),
+    " ",
+    prefix,
+    " ",
+    (0, import_shared.mmss)(left)
+  ] });
+}
+function OfferCard({ offer: o, role, endpoint, onChange, serverNow }) {
+  const [mode, setMode] = (0, import_react.useState)(null);
+  const [amount, setAmount] = (0, import_react.useState)("");
+  const [note, setNote] = (0, import_react.useState)("");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [err, setErr] = (0, import_react.useState)(null);
+  const [msg, setMsg] = (0, import_react.useState)(null);
+  const st = OFFER_STATUS[o.status] || { label: o.status, tone: "is-grey" };
+  const buyer = role === "BUYER";
+  const can = o.can || [];
+  const post = (action, extra = {}) => {
+    setBusy(true);
+    setErr(null);
+    setMsg(null);
+    return import_axios.default.post(`${endpoint}/${o.id}`, __spreadValues({ action }, extra)).then((r) => {
+      setMode(null);
+      setAmount("");
+      setNote("");
+      setMsg(r.data.message);
+      if (onChange) onChange(r.data.offer);
+    }).catch((e) => setErr((0, import_shop.errorText)(e))).finally(() => setBusy(false));
+  };
+  const pay = () => {
+    setBusy(true);
+    setErr(null);
+    import_axios.default.post(`/api/v1/offers/${o.id}/pay`).then((r) => window.location.assign(r.data.redirect)).catch((e) => {
+      setBusy(false);
+      setErr((0, import_shop.errorText)(e));
+    });
+  };
+  const submitAmount = (e) => {
+    e.preventDefault();
+    const v = Number(String(amount).replace(/[^\d]/g, ""));
+    if (!v) {
+      setErr("Enter an amount.");
+      return;
+    }
+    post(mode, { amount: v, note });
+  };
+  const latest = o.status === "ACCEPTED" || o.status === "PAID" ? o.agreed : o.status === "COUNTERED" ? o.counter : o.amount;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: `of-card ${o.unread ? "is-unread" : ""}`, "data-testid": "offer-card", "data-status": o.status, "data-offer-id": o.id, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "of-card__head", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${o.slug}`, className: "of-card__img", tabIndex: -1, "aria-hidden": "true", children: o.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: o.image, alt: "", loading: "lazy" }) : null }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "of-card__main", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "of-card__title", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/marketplace/${o.slug}`, children: o.title }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "of-card__sub", children: [
+          buyer ? `by ${o.artist}` : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            "from ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: o.buyer }),
+            o.buyerEmail ? ` \xB7 ${o.buyerEmail}` : ""
+          ] }),
+          o.student ? " \xB7 student painting" : "",
+          " \xB7 listed at ",
+          (0, import_shop.inr)(o.listPrice)
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "of-card__status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `of-badge ${st.tone}`, children: !buyer && st.sellerLabel || st.label }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { className: "of-card__amount", children: (0, import_shop.inr)(latest) }),
+          o.status === "OPEN" || o.status === "COUNTERED" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Timer, { until: o.expiresAt, serverNow, prefix: "answer within" }) : null,
+          o.status === "ACCEPTED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Timer, { until: o.payBy, serverNow, prefix: buyer ? "pay within" : "buyer pays within" }),
+          o.closedReason && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "of-card__why", children: o.closedReason })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "of-thread", "aria-label": "History", children: (o.events || []).map((e, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: `of-ev of-ev--${String(e.actor).toLowerCase()}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "of-ev__who", children: e.actor === "BUYER" ? buyer ? "You" : o.buyer : e.actor === "SYSTEM" ? "ArtistikCity" : !buyer && e.actor === role ? "You" : e.who || "The artist" }),
+      " ",
+      EVENT[e.kind] || String(e.kind).toLowerCase(),
+      e.amount ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_shop.inr)(e.amount) })
+      ] }) : "",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", { children: new Date(e.at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) }),
+      e.note && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("q", { children: e.note })
+    ] }, i)) }),
+    (msg || err) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: `of-msg ${err ? "is-error" : ""}`, role: err ? "alert" : "status", children: err || msg }),
+    mode === "counter" || mode === "reoffer" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "of-form", onSubmit: submitAmount, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: mode === "counter" ? "Your counter-offer" : "Your new offer" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-money", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-hidden": "true", children: "\u20B9" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { inputMode: "numeric", value: amount, onChange: (e) => setAmount(e.target.value.replace(/[^\d]/g, "").slice(0, 9)), "aria-label": "Amount in rupees", "data-testid": "offer-form-amount", autoFocus: true })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: mode === "counter" ? `More than ${(0, import_shop.inr)(o.amount)}, less than ${(0, import_shop.inr)(o.currentPrice || o.listPrice)}.` : `More than ${(0, import_shop.inr)(o.amount)}, less than ${(0, import_shop.inr)(o.counter)}.` })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          "Note ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "(optional)" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { value: note, maxLength: 500, onChange: (e) => setNote(e.target.value) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "of-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "pz-btn pz-btn--ink", disabled: busy, "data-testid": "offer-form-send", children: mode === "counter" ? "Send counter-offer" : "Send new offer" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: () => setMode(null), children: "Cancel" })
+      ] })
+    ] }) : mode === "decline" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "of-form", onSubmit: (e) => {
+      e.preventDefault();
+      post("decline", { note });
+    }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          "Reason ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+            "(optional, shared with the ",
+            buyer ? "artist" : "buyer",
+            ")"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { value: note, maxLength: 500, onChange: (e) => setNote(e.target.value), autoFocus: true })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "of-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "pz-btn pz-btn--ink", disabled: busy, "data-testid": "offer-form-decline", children: "Decline" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: () => setMode(null), children: "Cancel" })
+      ] })
+    ] }) : can.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "of-actions", children: [
+      can.includes("pay") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand", onClick: pay, disabled: busy, "data-testid": "offer-pay", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+        " Pay ",
+        (0, import_shop.inr)(o.agreed)
+      ] }),
+      can.includes("accept") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "pz-btn pz-btn--brand", onClick: () => post("accept"), disabled: busy, "data-testid": "offer-accept", children: [
+        "Accept ",
+        (0, import_shop.inr)(buyer ? o.counter : o.amount)
+      ] }),
+      can.includes("counter") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: () => setMode("counter"), disabled: busy, "data-testid": "offer-counter", children: "Counter" }),
+      can.includes("reoffer") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--line", onClick: () => setMode("reoffer"), disabled: busy, "data-testid": "offer-reoffer", children: "Offer again" }),
+      can.includes("decline") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ghost", onClick: () => setMode("decline"), disabled: busy, "data-testid": "offer-decline", children: "Decline" }),
+      can.includes("withdraw") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ghost", onClick: () => post("withdraw"), disabled: busy, "data-testid": "offer-withdraw", children: buyer ? "Withdraw offer" : "Withdraw counter-offer" }),
+      can.includes("cancel") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-btn pz-btn--ghost", onClick: () => post("cancel"), disabled: busy, "data-testid": "offer-cancel", children: "Cancel agreed price" }),
+      buyer && o.status === "COUNTERED" && !can.includes("reoffer") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pz-fine", children: "That was the last round: accept or decline." })
+    ] }),
+    o.status === "PAID" && o.orderId && buyer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/purchase/orders/${o.orderId}`, children: [
+      "See order ",
+      o.orderId
+    ] }) })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Shop/Cart.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Cart_exports = {};
+__export(Cart_exports, {
+  default: () => Cart
+});
+module.exports = __toCommonJS(Cart_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_CartDrawer = __webpack_require__("./resources/js/Components/Shop/CartDrawer.js");
+var import_CartStore = __webpack_require__("./resources/js/Components/Shop/CartStore.js");
+var import_shop = __webpack_require__("./resources/js/Components/Shop/shop.js");
+function Cart() {
+  const { cart: initial, signedIn } = (0, import_inertia_react.usePage)().props;
+  const [seeded] = (0, import_react.useState)(() => {
+    (0, import_CartStore.seedCart)(initial);
+    return true;
+  });
+  const cart = (0, import_CartStore.useCart)();
+  const [code, setCode] = (0, import_react.useState)("");
+  const [notice, setNotice] = (0, import_react.useState)(null);
+  const data = seeded && cart.data || initial;
+  const lines = data ? data.lines : [];
+  const t = data && data.totals;
+  const reserve = (l) => cart.add({ paintingId: l.paintingId, format: "ORIGINAL", frame: l.frame, qty: 1 }, { openDrawer: false }).then(() => setNotice("It\u2019s held for you again for 15 minutes.")).catch((e) => setNotice((0, import_shop.errorText)(e)));
+  const save = (l) => signedIn ? cart.saveForLater(l.id).then(() => setNotice(`\u201C${l.title}\u201D is saved in your wish list.`)).catch(() => {
+  }) : window.location.assign(`/login?return_to=${encodeURIComponent("/cart")}`);
+  const applyCoupon = (e) => {
+    e.preventDefault();
+    if (!code.trim()) return;
+    cart.applyCoupon(code.trim()).then(() => {
+      setCode("");
+      setNotice("Code applied.");
+    }).catch(() => {
+    });
+  };
+  const count = lines.reduce((n, l) => n + l.qty, 0);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: "Your cart", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz pz-cartpage", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "dm-crumbs", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: "Home" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", children: "Marketplace" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Your cart" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", { className: "pz-head", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { children: [
+      "Your cart",
+      count > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "pz-head__count", children: [
+        " \xB7 ",
+        count,
+        " ",
+        count === 1 ? "item" : "items"
+      ] }) : ""
+    ] }) }),
+    lines.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-empty pz-empty--page", "data-testid": "cart-empty", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pz-empty__art", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shopping-bag" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Your cart is empty" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Originals, numbered canvases, posters and downloads you add will wait for you here." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "pz-btn pz-btn--ink", children: "Browse the marketplace" })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-cartgrid", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { "aria-label": "Items in your cart", children: [
+        (cart.error || notice) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: `pz-note ${cart.error ? "is-error" : ""}`, role: "status", children: cart.error || notice }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "pz-lines pz-lines--page", "aria-busy": cart.busy ? "true" : "false", "data-testid": "cart-lines", children: lines.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_CartDrawer.CartLine,
+          {
+            line: l,
+            serverNow: cart.serverNow || data && data.serverNow,
+            busy: cart.busy,
+            onQty: (line, q) => cart.setQty(line.id, q).catch(() => {
+            }),
+            onRemove: (line) => cart.remove(line.id).catch(() => {
+            }),
+            onReserve: reserve,
+            onSave: save
+          },
+          l.id
+        )) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine", children: "An original is held for you for 15 minutes once it's in your cart; after that anyone can buy it. Prices are checked again at checkout." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "pz-cartsum", "aria-label": "Order summary", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "Summary" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "pz-coupon", onSubmit: applyCoupon, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "cart-coupon", className: "sr-only", children: "Coupon code" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "cart-coupon", value: code, onChange: (e) => setCode(e.target.value.toUpperCase()), placeholder: "Coupon code", autoComplete: "off" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "pz-btn pz-btn--line", disabled: cart.busy || !code.trim(), children: "Apply" })
+        ] }),
+        t && t.coupon && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "pz-note", children: [
+          "Code ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.coupon.code }),
+          t.coupon.error ? `: ${t.coupon.error}` : " applied.",
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "pz-link pz-link--muted", onClick: () => cart.removeCoupon().catch(() => {
+          }), children: "Remove" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_CartDrawer.Totals, { totals: t }),
+        t && t.hasPrints && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-fine", children: "Shipping shown for delivery in India; worldwide rates apply at checkout." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "a",
+          {
+            href: "/purchase/checkout?all=1",
+            className: `pz-btn pz-btn--brand pz-btn--lg pz-btn--block ${t && t.blocked ? "is-disabled" : ""}`,
+            "data-testid": "cart-checkout",
+            "aria-disabled": t && t.blocked ? "true" : void 0,
+            onClick: (e) => {
+              if (t && t.blocked) {
+                e.preventDefault();
+                setNotice("Remove or fix the items marked in red first.");
+              }
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+              " Checkout \xB7 ",
+              (0, import_shop.inr)(t ? t.total : 0)
+            ]
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "pz-btn pz-btn--ghost pz-btn--block", children: "Keep browsing" })
+      ] })
+    ] })
+  ] }) }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Account/Offers.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Offers_exports = {};
+__export(Offers_exports, {
+  default: () => Offers
+});
+module.exports = __toCommonJS(Offers_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_Authenticated = __toESM(__webpack_require__("./resources/js/Layouts/Authenticated.js"));
+var import_OfferCard = __toESM(__webpack_require__("./resources/js/Components/Shop/OfferCard.js"));
+function Offers() {
+  const props = (0, import_inertia_react.usePage)().props;
+  const [offers, setOffers] = (0, import_react.useState)(props.offers || []);
+  const replace = (o) => setOffers((list) => list.map((x) => x.id === o.id ? o : x));
+  const live = offers.filter((o) => ["OPEN", "COUNTERED", "ACCEPTED"].includes(o.status));
+  const past = offers.filter((o) => !["OPEN", "COUNTERED", "ACCEPTED"].includes(o.status));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_Authenticated.default, { auth: props.auth, errors: props.errors, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_inertia_react.Head, { title: "Your offers" }),
+    offers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "wl-empty", "data-testid": "offers-empty", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-handshake-o", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: "No offers yet" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "On an original you love, choose \u201CMake an offer\u201D to suggest your price. The artist can accept, counter or decline." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/marketplace", className: "dm-btn dm-btn--ink", children: "Browse originals" })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "of-list", children: [
+      live.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { "aria-labelledby": "of-live", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "of-live", className: "of-h", children: "In progress" }),
+        live.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_OfferCard.default, { offer: o, role: "BUYER", endpoint: "/api/v1/offers", onChange: replace, serverNow: props.serverNow }, o.id))
+      ] }),
+      past.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { "aria-labelledby": "of-past", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "of-past", className: "of-h", children: "Earlier offers" }),
+        past.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_OfferCard.default, { offer: o, role: "BUYER", endpoint: "/api/v1/offers", onChange: replace, serverNow: props.serverNow }, o.id))
+      ] })
+    ] })
   ] });
 }
 
@@ -114433,6 +115902,10 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Account/Offers": "./resources/js/Pages/Account/Offers.js",
+	"./Account/Offers.js": "./resources/js/Pages/Account/Offers.js",
+	"./Shop/Cart": "./resources/js/Pages/Shop/Cart.js",
+	"./Shop/Cart.js": "./resources/js/Pages/Shop/Cart.js",
 	"./Admin/Setup/SiteAccess": "./resources/js/Pages/Admin/Setup/SiteAccess.js",
 	"./Admin/Setup/SiteAccess.js": "./resources/js/Pages/Admin/Setup/SiteAccess.js",
 	"./StoryDetails": "./resources/js/Pages/StoryDetails.js",

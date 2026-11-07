@@ -134,6 +134,8 @@ public class Routes {
         get("user.order.history", "user/order-history");
         get("user.wishlist", "user/wishlist");
         get("user.orders", "user/orders");
+        get("user.offers", "user/offers");
+        get("cart", "cart");
         post("wishlist.save", "wishlist");
         get("user.certificate.download", "user/certificate/download");
         get("user.certificate.share", "user/certificate/share");

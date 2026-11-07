@@ -9,6 +9,8 @@ import { num } from '@/Components/Shop/shop';
  *   RoomView     the piece in one of the room photos managed in Admin > Room preview, to scale when the room has a
  *                measured hanging area (area_width_in), otherwise fitted into the area.
  *   ViewPicker   "Artwork" + one tile per room; adapts to however many rooms the admin has (0 rooms = no picker).
+ *   ArtPreview   the carousel: previous / next arrows on the picture, swipe on touch screens, arrow keys, "2 of 7", the
+ *                thumbnail strip kept centred on the current view, and (in rooms measured to scale) a person for scale.
  *
  * A room photo is enlarged at most a little past its own pixels (no soft, smeared backdrops): the camera only moves closer while
  * the photo still has detail to show.
@@ -128,8 +130,29 @@ export function placeInRoom(room, outerWIn, outerHIn, stageW) {
     return { pw, ph, box: { x: cx - wpx / 2, y: cy - hpx / 2, w: wpx, h: hpx }, crop, zoom, toScale, tooBig };
 }
 
+/** A 5 ft 7 in person standing beside the piece (art hung with its centre 57 in above the floor), in photo pixels. */
+export const PERSON_IN = 67;
+export function personBox(s, outerWIn) {
+    const ppi = s.box.w / outerWIn;
+    const h = PERSON_IN * ppi;
+    const w = h * 0.3;
+    const feet = s.box.y + s.box.h / 2 + 57 * ppi;
+    let x = s.box.x + s.box.w + 14 * ppi;
+    if (x + w > s.pw) x = s.box.x - 14 * ppi - w;
+    return { x: Math.max(0, Math.min(s.pw - w, x)), y: feet - h, w, h };
+}
+
+function Person() {
+    return (
+        <svg viewBox="0 0 30 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <circle cx="15" cy="7" r="6" />
+            <path d="M8 16 h14 q4 0 4 4 v30 q0 3 -3 3 h-1 v44 q0 3 -3 3 h-2 q-3 0 -3 -3 v-38 h-2 v38 q0 3 -3 3 h-2 q-3 0 -3 -3 v-44 h-1 q-3 0 -3 -3 v-30 q0 -4 4 -4 z" />
+        </svg>
+    );
+}
+
 /** The piece hung in an admin-managed room photo. */
-export function RoomView({ room, image, title, widthIn, heightIn, frame, surface }) {
+export function RoomView({ room, image, title, widthIn, heightIn, frame, surface, showPerson = false }) {
     const [ref, stageW] = useWidth();
     const [loaded, setLoaded] = useState(false);
     const { w, h } = framedSize(widthIn, heightIn, frame);
@@ -144,6 +167,10 @@ export function RoomView({ room, image, title, widthIn, heightIn, frame, surface
                 <div className="ap-place" style={{ left: pct(s.box.x, s.pw), top: pct(s.box.y, s.ph), width: pct(s.box.w, s.pw), height: pct(s.box.h, s.ph) }}>
                     <FramedArt image={image} title={title} widthIn={widthIn} heightIn={heightIn} frame={frame} surface={surface} lift={0.8} />
                 </div>
+                {showPerson && s.toScale && (() => {
+                    const b = personBox(s, w);
+                    return <div className="ap-person" data-testid="room-person" style={{ left: pct(b.x, s.pw), top: pct(b.y, s.ph), width: pct(b.w, s.pw), height: pct(b.h, s.ph) }}><Person /></div>;
+                })()}
             </div>
             <span className="ap-scale" data-testid="room-scale">
                 {s.toScale ? `To scale · ${num(widthIn)} × ${num(heightIn)} in` : s.tooBig ? 'Larger than this wall: shown smaller' : `${num(widthIn)} × ${num(heightIn)} in`}
@@ -152,10 +179,20 @@ export function RoomView({ room, image, title, widthIn, heightIn, frame, surface
     );
 }
 
-/** "Artwork" and the rooms, one click each. Arrow keys move between them. */
+/** "Artwork" and the rooms, one click each. Arrow keys move between them; the strip keeps the current one centred. */
 export function ViewPicker({ rooms, value, onChange, image }) {
     const list = [{ id: 'art', label: 'Artwork', thumb: image, isArt: true }, ...rooms.map((r) => ({ id: String(r.id), label: r.label, thumb: r.photo }))];
     const refs = useRef([]);
+    const strip = useRef(null);
+    useEffect(() => {
+        const i = list.findIndex((v) => v.id === value);
+        const el = refs.current[i];
+        const box = strip.current;
+        if (!el || !box || box.scrollWidth <= box.clientWidth) return;
+        // scroll only the strip sideways (scrollIntoView would also move the page)
+        const left = el.offsetLeft - (box.clientWidth - el.offsetWidth) / 2;
+        try { box.scrollTo({ left, behavior: reducedMotion() ? 'auto' : 'smooth' }); } catch (e) { box.scrollLeft = left; }
+    }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
     const onKey = (e, i) => {
         const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
         if (!d) return;
@@ -166,7 +203,7 @@ export function ViewPicker({ rooms, value, onChange, image }) {
     };
     if (rooms.length === 0) return null;
     return (
-        <div className={`ap-views ${list.length > 5 ? 'is-many' : ''}`} role="radiogroup" aria-label="Preview">
+        <div className={`ap-views ${list.length > 5 ? 'is-many' : ''}`} role="radiogroup" aria-label="Backgrounds" ref={strip}>
             {list.map((v, i) => (
                 <button key={v.id} ref={(el) => { refs.current[i] = el; }} type="button" role="radio" aria-checked={value === v.id}
                         tabIndex={value === v.id ? 0 : -1} className={`ap-view ${value === v.id ? 'is-on' : ''} ${v.isArt ? 'ap-view--art' : ''}`}
@@ -179,30 +216,99 @@ export function ViewPicker({ rooms, value, onChange, image }) {
     );
 }
 
-/** Warm the cache so switching rooms is instant. */
-export function usePreload(rooms) {
-    useEffect(() => {
-        const keep = rooms.map((r) => { const i = new Image(); i.src = r.photo; return i; });
-        return () => { keep.length = 0; };
-    }, [rooms]);
+export function reducedMotion() {
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
 }
 
-/** Stage + picker together, remembering the last view for the visit. */
-export default function ArtPreview({ rooms = [], image, title, widthIn, heightIn, frame = 'NONE', surface = 'canvas', storageKey = 'artistikcity.view' }) {
-    usePreload(rooms);
+/** Warm the cache for the rooms next to the current one, so the next swipe is instant. */
+export function usePreload(rooms, index = 0) {
+    useEffect(() => {
+        const near = rooms.filter((r, i) => Math.abs(i + 1 - index) <= 1 || (index === 0 && i === rooms.length - 1));
+        const keep = near.map((r) => { const i = new Image(); i.src = r.photo; return i; });
+        return () => { keep.length = 0; };
+    }, [rooms, index]);
+}
+
+/**
+ * The preview carousel: the stage (artwork on a lit wall, or one of the rooms), previous / next arrows on it, swipe on touch
+ * screens, arrow keys when it has focus, "2 of 7 · Living room" (announced to screen readers), the thumbnail strip, and a
+ * "person for scale" switch in rooms measured to scale. The last view is remembered for the visit.
+ */
+export default function ArtPreview({ rooms = [], image, title, widthIn, heightIn, frame = 'NONE', surface = 'canvas', storageKey = 'artistikcity.view', showRoom = false }) {
+    const views = useMemo(() => ['art', ...rooms.map((r) => String(r.id))], [rooms]);
     const [view, setView] = useState(() => {
         try {
             const v = window.sessionStorage.getItem(storageKey);
             return v && (v === 'art' || rooms.some((r) => String(r.id) === v)) ? v : 'art';
         } catch (e) { return 'art'; }
     });
-    const pick = (v) => { setView(v); try { window.sessionStorage.setItem(storageKey, v); } catch (e) { /* private mode */ } };
+    const [dir, setDir] = useState(0);
+    const [person, setPerson] = useState(() => { try { return window.localStorage.getItem('artistikcity.person') === '1'; } catch (e) { return false; } });
+    const index = Math.max(0, views.indexOf(view));
+    usePreload(rooms, index);
+    const pick = (v, d = 0) => {
+        setDir(d || (views.indexOf(v) > index ? 1 : -1));
+        setView(v);
+        try { window.sessionStorage.setItem(storageKey, v); } catch (e) { /* private mode */ }
+    };
+    const step = (d) => { if (views.length > 1) pick(views[(index + d + views.length) % views.length], d); };
+    // "See it on your wall" (step 2, part C): move from the plain wall to the first room, once per arrival
+    useEffect(() => {
+        if (showRoom && view === 'art' && rooms.length > 0) pick(String(rooms[0].id), 1);
+    }, [showRoom]); // eslint-disable-line react-hooks/exhaustive-deps
+    const togglePerson = (on) => { setPerson(on); try { window.localStorage.setItem('artistikcity.person', on ? '1' : '0'); } catch (e) { /* private mode */ } };
+
+    // swipe: a mostly horizontal drag of 40 px or more
+    const touch = useRef(null);
+    const onTouchStart = (e) => { const t = e.touches[0]; touch.current = { x: t.clientX, y: t.clientY }; };
+    const onTouchEnd = (e) => {
+        const s0 = touch.current;
+        touch.current = null;
+        if (!s0) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - s0.x;
+        const dy = t.clientY - s0.y;
+        if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+    };
+    const onKey = (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+    };
+
     const room = rooms.find((r) => String(r.id) === view);
+    const label = room ? room.label : 'Artwork on a plain wall';
+    const measured = !!(room && room.areaWidthIn);
     const common = { image, title, widthIn, heightIn, frame, surface };
+    const many = views.length > 1;
     return (
-        <div className="ap">
-            {room ? <RoomView room={room} {...common} /> : <ArtworkView {...common} />}
-            <ViewPicker rooms={rooms} value={room ? view : 'art'} onChange={pick} image={image} />
+        <div className="ap" role="group" aria-roledescription="carousel" aria-label="Preview backgrounds">
+            <div className={`ap-carousel ${dir > 0 ? 'is-next' : dir < 0 ? 'is-prev' : ''}`} tabIndex={many ? 0 : undefined} onKeyDown={many ? onKey : undefined}
+                 onTouchStart={many ? onTouchStart : undefined} onTouchEnd={many ? onTouchEnd : undefined}
+                 aria-label={many ? 'Use the left and right arrow keys to change the background' : undefined}>
+                <div className="ap-slide" key={view}>
+                    {room ? <RoomView room={room} {...common} showPerson={person} /> : <ArtworkView {...common} />}
+                </div>
+                {many && (
+                    <>
+                        <button type="button" className="ap-nav ap-nav--prev" onClick={() => step(-1)} aria-label="Previous background" data-testid="bg-prev">
+                            <i className="fa fa-chevron-left" aria-hidden="true"></i></button>
+                        <button type="button" className="ap-nav ap-nav--next" onClick={() => step(1)} aria-label="Next background" data-testid="bg-next">
+                            <i className="fa fa-chevron-right" aria-hidden="true"></i></button>
+                    </>
+                )}
+            </div>
+            {many && (
+                <div className="ap-bar">
+                    <p className="ap-count" aria-live="polite" data-testid="bg-count"><b>{index + 1} of {views.length}</b> · {label}</p>
+                    {measured && (
+                        <label className="ap-personsw">
+                            <input type="checkbox" checked={person} onChange={(e) => togglePerson(e.target.checked)} data-testid="person-toggle" />
+                            <span>Person for scale <small>(5 ft 7 in)</small></span>
+                        </label>
+                    )}
+                </div>
+            )}
+            <ViewPicker rooms={rooms} value={room ? view : 'art'} onChange={(v) => pick(v)} image={image} />
         </div>
     );
 }

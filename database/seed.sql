@@ -536,3 +536,24 @@ INSERT INTO newsletters (email, source, unsubscribed_at, created_at, updated_at)
 ('kunal.d@example.com', 'footer', NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY)),
 ('emma.lindqvist@example.se', 'checkout', NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR)),
 ('farhan.siddiqui@example.com', 'footer', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 40 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY));
+
+-- ---- offers on originals: one in each state (Diya waiting, Farhan countered, Ishita declined, Aarav expired) --------------
+UPDATE paintings SET offers_enabled = 1 WHERE id = 11;
+INSERT INTO painting_offers (painting_id, user_id, buyer_name, buyer_email, list_price_inr, amount_inr, counter_inr, agreed_inr, status, round_no, message,
+    expires_at, pay_by, closed_reason, buyer_unread, seller_unread, created_at, updated_at) VALUES
+(2, 2, 'Diya Patel', 'diya@example.com', 58500, 47000, NULL, NULL, 'OPEN', 1, 'This would be the centrepiece of our new living room. Would you consider ₹47,000?',
+ DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 48 HOUR), NULL, NULL, 0, 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)),
+(11, 4, 'Farhan Siddiqui', 'farhan.siddiqui@example.com', 4200, 3200, 3800, NULL, 'COUNTERED', 1, 'Lovely piece. I collect Pune cityscapes.',
+ DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 60 HOUR), NULL, NULL, 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 HOUR), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 12 HOUR)),
+(3, 3, 'Ishita Bose', 'ishita.bose@example.com', 42000, 25000, NULL, NULL, 'DECLINED', 1, NULL,
+ NULL, NULL, NULL, 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 DAY)),
+(6, 1, 'Aarav Sharma', 'student@artistikcity.com', 9025, 7000, NULL, NULL, 'EXPIRED', 1, NULL,
+ NULL, NULL, NULL, 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY));
+INSERT INTO painting_offer_events (offer_id, actor, actor_name, kind, amount_inr, note, created_at) VALUES
+(1, 'BUYER', 'Diya Patel', 'OFFER', 47000, 'This would be the centrepiece of our new living room. Would you consider ₹47,000?', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)),
+(2, 'BUYER', 'Farhan Siddiqui', 'OFFER', 3200, 'Lovely piece. I collect Pune cityscapes.', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 HOUR)),
+(2, 'SELLER', 'Tanvi Kulkarni', 'COUNTER', 3800, 'Thank you! It took me three evenings on site; I can do ₹3,800.', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 12 HOUR)),
+(3, 'BUYER', 'Ishita Bose', 'OFFER', 25000, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 DAY)),
+(3, 'STAFF', 'Site Admin', 'DECLINE', NULL, 'Thank you for the offer. This piece is one of Vaishali''s favourites, so it stays at its price.', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 DAY)),
+(4, 'BUYER', 'Aarav Sharma', 'OFFER', 7000, NULL, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY)),
+(4, 'SYSTEM', NULL, 'EXPIRE', NULL, 'No answer in time.', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY));

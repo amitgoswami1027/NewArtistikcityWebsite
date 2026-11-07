@@ -10,6 +10,8 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP VIEW IF EXISTS courses_workshops;
+DROP TABLE IF EXISTS painting_offer_events;
+DROP TABLE IF EXISTS painting_offers;
 DROP TABLE IF EXISTS artist_thread_messages;
 DROP TABLE IF EXISTS artist_threads;
 DROP TABLE IF EXISTS shop_order_items;
@@ -1275,6 +1277,8 @@ CREATE TABLE paintings (
     editions_sold       INT            NOT NULL DEFAULT 0,
     hires_path          VARCHAR(255)  NULL,
     hires_name          VARCHAR(255)  NULL,
+    offers_enabled      TINYINT(1)    NULL,
+    offer_min_pct       INT           NULL,
     artist_whatsapp     VARCHAR(30)   NULL,
     artist_instagram    VARCHAR(120)  NULL,
     artist_email        VARCHAR(190)  NULL,
@@ -1385,6 +1389,49 @@ INSERT INTO shop_price_options (kind, code, label, long_side_in, price_inr, extr
 ('FRAME', 'WHITE_FLOAT', 'White canvas float frame', NULL, 30, 0, 3, 1, CURRENT_TIMESTAMP),
 ('SHIPPING', 'PRINTS_INDIA', 'Prints shipping within India (per order)', NULL, 149, 0, 1, 1, CURRENT_TIMESTAMP),
 ('SHIPPING', 'PRINTS_INTL', 'Prints shipping worldwide (per order)', NULL, 1999, 0, 2, 1, CURRENT_TIMESTAMP);
+
+-- "Make an offer" on originals (shop/OfferService). One open offer per buyer and painting; accepting one holds the piece for
+-- the buyer at the agreed price until pay_by (cart_reservations), the others close.
+CREATE TABLE painting_offers (
+    id             BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    painting_id    BIGINT         NOT NULL,
+    user_id        BIGINT         NOT NULL,
+    buyer_name     VARCHAR(190)   NOT NULL,
+    buyer_email    VARCHAR(190)   NOT NULL,
+    list_price_inr DECIMAL(12, 2) NOT NULL,
+    amount_inr     DECIMAL(12, 2) NOT NULL,
+    counter_inr    DECIMAL(12, 2) NULL,
+    agreed_inr     DECIMAL(12, 2) NULL,
+    status         VARCHAR(20)    NOT NULL CHECK (status IN ('OPEN', 'COUNTERED', 'ACCEPTED', 'DECLINED', 'WITHDRAWN', 'EXPIRED', 'CLOSED', 'PAID')),
+    round_no       INT            NOT NULL DEFAULT 1,
+    message        VARCHAR(500)   NULL,
+    expires_at     DATETIME       NULL,
+    pay_by         DATETIME       NULL,
+    reminded_at    DATETIME       NULL,
+    closed_reason  VARCHAR(255)   NULL,
+    order_id       VARCHAR(40)    NULL,
+    buyer_unread   TINYINT(1)     NOT NULL DEFAULT 0,
+    seller_unread  TINYINT(1)     NOT NULL DEFAULT 1,
+    created_at     DATETIME       NOT NULL,
+    updated_at     DATETIME       NOT NULL,
+    CONSTRAINT painting_offers_painting_id_foreign FOREIGN KEY (painting_id) REFERENCES paintings (id) ON DELETE CASCADE,
+    CONSTRAINT painting_offers_user_id_foreign FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+CREATE INDEX painting_offers_painting_status_index ON painting_offers (painting_id, status);
+CREATE INDEX painting_offers_user_status_index ON painting_offers (user_id, status);
+
+CREATE TABLE painting_offer_events (
+    id          BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    offer_id    BIGINT         NOT NULL,
+    actor       VARCHAR(10)    NOT NULL CHECK (actor IN ('BUYER', 'SELLER', 'STAFF', 'SYSTEM')),
+    actor_name  VARCHAR(190)   NULL,
+    kind        VARCHAR(20)    NOT NULL,
+    amount_inr  DECIMAL(12, 2) NULL,
+    note        VARCHAR(500)   NULL,
+    created_at  DATETIME       NOT NULL,
+    CONSTRAINT painting_offer_events_offer_id_foreign FOREIGN KEY (offer_id) REFERENCES painting_offers (id) ON DELETE CASCADE
+);
+CREATE INDEX painting_offer_events_offer_index ON painting_offer_events (offer_id);
 
 CREATE TABLE shop_carts (
     id          BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,

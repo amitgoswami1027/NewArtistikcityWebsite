@@ -68,6 +68,15 @@ public class CartController {
         if (!Csrf.matches(request)) return expired();
         Map<String, Object> b = body(request);
         if (!(b.get("paintingId") instanceof Number n)) return error(HttpStatus.BAD_REQUEST, "Missing artwork.");
+        ShopPricing.Selection sel0 = ShopPricing.Selection.of(b.get("format"), b.get("size"), b.get("finish"), b.get("frame"), b.get("qty"));
+        if ("ORIGINAL".equals(sel0.format()) && auth.userId(request) == null) {
+            // an original in a cart is held for its owner, and only an account can hold an original
+            Map<String, Object> p = repo.painting(n.longValue());
+            String back = p == null ? "/marketplace" : "/marketplace/" + p.get("slug") + "#buy";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(json.encode(Map.of(
+                    "code", "SIGN_IN", "message", "Log in or join to add an original to your cart: it's then held for you for 15 minutes.",
+                    "redirect", com.artistikcity.web.PurchaseIntent.signIn(back))));
+        }
         try {
             cart.add(request, n.longValue(), ShopPricing.Selection.of(b.get("format"), b.get("size"), b.get("finish"), b.get("frame"), b.get("qty")),
                     Boolean.TRUE.equals(b.get("switch")));
@@ -89,6 +98,28 @@ public class CartController {
         }
         return ok(view(request, null));
     }
+
+    /** "Save for later": the line moves to the wish list (signed-in collectors). */
+    @PostMapping("/api/v1/cart/items/{id}/save")
+    public ResponseEntity<String> saveForLater(HttpServletRequest request, @PathVariable("id") long id) {
+        if (!Csrf.matches(request)) return expired();
+        Long userId = auth.userId(request);
+        if (userId == null) return error(HttpStatus.UNAUTHORIZED, "Log in to save artworks to your wish list.");
+        Long cartId = cart.cartId(request, false);
+        Map<String, Object> item = cartId == null ? null : repo.item(cartId, id);
+        if (item == null) return error(HttpStatus.NOT_FOUND, "That item is no longer in your cart.");
+        long paintingId = ((Number) item.get("painting_id")).longValue();
+        if (wishlist.exists(com.artistikcity.web.user.WishlistService.PAINTING, paintingId)) {
+            wishlist.set(userId, com.artistikcity.web.user.WishlistService.PAINTING, paintingId, true);
+        }
+        cart.remove(request, id);
+        Map<String, Object> v = view(request, null);
+        v.put("message", "Saved to your wish list.");
+        return ok(v);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.web.user.WishlistService wishlist;
 
     @DeleteMapping("/api/v1/cart/items/{id}")
     public ResponseEntity<String> remove(HttpServletRequest request, @PathVariable("id") long id) {
@@ -119,7 +150,9 @@ public class CartController {
     }
 
     private Map<String, Object> view(HttpServletRequest request, String country) {
-        Map<String, Object> m = cart.json(cart.price(request, country, null, null));
+        // ?checkout=1: the checkout page's view (only the Buy now line while one is being bought)
+        boolean checkout = "1".equals(request.getParameter("checkout"));
+        Map<String, Object> m = cart.json(checkout ? cart.priceForCheckout(request, country) : cart.price(request, country, null, null));
         m.put("serverNow", System.currentTimeMillis());
         return m;
     }

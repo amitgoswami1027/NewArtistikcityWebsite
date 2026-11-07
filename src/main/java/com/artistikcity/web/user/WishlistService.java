@@ -83,6 +83,17 @@ public class WishlistService {
         } catch (RuntimeException e) {
             m.put("notices", 0);
         }
+        try {
+            // Your offers: answers waiting for the buyer, and offers waiting for a student seller
+            m.put("offers", db.count("select count(*) from painting_offers where user_id = ? and (status in ('COUNTERED', 'ACCEPTED') or buyer_unread = 1)", userId));
+            m.put("offersTotal", db.count("select count(*) from painting_offers where user_id = ?", userId));
+            m.put("sellOffers", db.count("select count(*) from painting_offers o join paintings p on p.id = o.painting_id"
+                    + " where p.source = 'STUDENT' and p.artist_user_id = ? and o.status = 'OPEN'", userId));
+        } catch (RuntimeException e) {
+            m.put("offers", 0);
+            m.put("offersTotal", 0);
+            m.put("sellOffers", 0);
+        }
         return m;
     }
 

@@ -210,7 +210,37 @@ export function Messages({ threads, setThreads, initial, toast }) {
 
 /* ---------------------------------------------------------------- prices */
 
-export function Prices({ prices, setPrices, can, toast }) {
+/** Custom print sizes: on/off and the shortest / longest long side (whole inches). Priced from the presets by area. */
+function CustomSizes({ initial, can, toast }) {
+    const [f, setF] = useState(initial || { enabled: true, min: 8, max: 60 });
+    const [saved, setSaved] = useState(initial || { enabled: true, min: 8, max: 60 });
+    const [errors, setErrors] = useState({});
+    const [busy, setBusy] = useState(false);
+    const dirty = JSON.stringify(f) !== JSON.stringify(saved);
+    const save = () => {
+        setBusy(true); setErrors({});
+        axios.put('/admin/console/api/shop/custom-size', { enabled: !!f.enabled, min: Number(f.min), max: Number(f.max) })
+            .then((r) => { setF(r.data.customSize); setSaved(r.data.customSize); toast(r.data.message); })
+            .catch((e) => { setErrors((e.response && e.response.data && e.response.data.errors) || {}); toast(errorText(e), 'error'); })
+            .finally(() => setBusy(false));
+    };
+    return (
+        <Card title="Custom print sizes" subtitle="Buyers pick any long side in this range on the preview step; the price follows the print's area along the sizes listed below, rounded up to ₹x99." >
+            <div className="adm-row adm-row--wrap" data-testid="custom-size-admin">
+                <Toggle checked={!!f.enabled} disabled={!can.prices} onChange={(v) => setF({ ...f, enabled: v })} label={f.enabled ? 'Offered on canvas and poster prints' : 'Off: preset sizes only'} />
+                <label className="adm-inline-field">Shortest long side
+                    <input className="adm-input adm-input--sm" type="number" min="4" max="96" value={f.min} disabled={!can.prices || !f.enabled} onChange={(e) => setF({ ...f, min: e.target.value })} aria-label="Shortest long side in inches" /> in
+                    {errors.min && <span className="adm-field__error">{errors.min}</span>}</label>
+                <label className="adm-inline-field">Longest long side
+                    <input className="adm-input adm-input--sm" type="number" min="4" max="96" value={f.max} disabled={!can.prices || !f.enabled} onChange={(e) => setF({ ...f, max: e.target.value })} aria-label="Longest long side in inches" /> in
+                    {errors.max && <span className="adm-field__error">{errors.max}</span>}</label>
+                {can.prices && <Button variant="brand" busy={busy} disabled={!dirty} onClick={save}>Save custom sizes</Button>}
+            </div>
+        </Card>
+    );
+}
+
+export function Prices({ prices, setPrices, can, toast, customSize }) {
     const [rows, setRows] = useState(prices);
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
@@ -226,6 +256,7 @@ export function Prices({ prices, setPrices, can, toast }) {
     const kinds = Object.keys(KIND);
     return (
         <div className="adm-stack">
+            <CustomSizes initial={customSize} can={can} toast={toast} />
             {kinds.map((k) => (
                 <Card key={k} title={KIND[k]} flush>
                     <div className="adm-table"><div className="adm-table__scroll"><table>
@@ -414,5 +445,92 @@ export function Listings({ listings, setListings, can, toast }) {
             </table></div></div>
             {edit && <ListingDrawer l={edit} toast={toast} onClose={() => setEdit(null)} onSaved={(ls) => { setListings(ls); const again = ls.find((x) => x.id === edit.id); if (again) setEdit(again); }} />}
         </Card>
+    );
+}
+
+/* ---------------------------------------------------------------- offers */
+
+const OFFER_TONE = { OPEN: 'pink', COUNTERED: 'yellow', ACCEPTED: 'blue', PAID: 'green', DECLINED: 'grey', WITHDRAWN: 'grey', EXPIRED: 'grey', CLOSED: 'grey' };
+
+/**
+ * Admin > Marketplace > Offers: the rules (super admin), every offer with its conversation and the seller's answers,
+ * and which paintings take offers (per-painting switch and lowest offer).
+ */
+export function OffersAdmin({ toast, OfferCard }) {
+    const [data, setData] = useState(null);
+    const [filter, setFilter] = useState('live');
+    const [rules, setRules] = useState(null);
+    const [errors, setErrors] = useState({});
+    const [busy, setBusy] = useState(false);
+    const load = () => axios.get('/admin/console/api/offers').then((r) => { setData(r.data); setRules(r.data.settings); }).catch((e) => toast(errorText(e), 'error'));
+    useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!data || !rules) return <Card><p className="adm-muted">Loading offers…</p></Card>;
+    const live = data.offers.filter((o) => ['OPEN', 'COUNTERED', 'ACCEPTED'].includes(o.status));
+    const shown = filter === 'live' ? live : data.offers;
+    const replace = (o) => setData((d) => ({ ...d, offers: d.offers.map((x) => (x.id === o.id ? o : x)) }));
+    const saveRules = () => {
+        setBusy(true); setErrors({});
+        axios.put('/admin/console/api/offers/settings', rules)
+            .then((r) => { toast(r.data.message); setRules(r.data.settings); setData((d) => ({ ...d, settings: r.data.settings })); })
+            .catch((e) => { setErrors((e.response && e.response.data && e.response.data.errors) || {}); toast(errorText(e), 'error'); })
+            .finally(() => setBusy(false));
+    };
+    const setPainting = (p, patch) => {
+        axios.put(`/admin/console/api/offers/paintings/${p.id}`, { enabled: 'enabled' in patch ? patch.enabled : p.enabled, minPct: 'minPct' in patch ? patch.minPct : p.minPct })
+            .then((r) => { toast(r.data.message); setData((d) => ({ ...d, paintings: d.paintings.map((x) => (x.id === p.id ? { ...x, ...r.data } : x)) })); })
+            .catch((e) => toast(errorText(e), 'error'));
+    };
+    const num = (k, label, suffix, min, max) => (
+        <label className="adm-inline-field">{label}
+            <input className="adm-input adm-input--sm" type="number" min={min} max={max} value={rules[k]} disabled={!data.canSettings}
+                   onChange={(e) => setRules({ ...rules, [k]: e.target.value === '' ? '' : Number(e.target.value) })} aria-label={label} /> {suffix}
+            {errors[k] && <span className="adm-field__error">{errors[k]}</span>}</label>
+    );
+    return (
+        <div className="adm-stack" data-testid="offers-admin">
+            <Card title="Offer rules" subtitle="Collectors can suggest a price for an original; the artist (or the studio) accepts, counters or declines. Accepting holds the piece for the buyer at that price.">
+                <div className="adm-row adm-row--wrap">
+                    <Toggle checked={!!rules.enabled} disabled={!data.canSettings} onChange={(v) => setRules({ ...rules, enabled: v })} label={rules.enabled ? 'Offers on' : 'Offers paused'} />
+                    {num('minPct', 'Lowest offer', '% of the price', 10, 99)}
+                    {num('expiryHours', 'Time to answer', 'hours', 1, 336)}
+                    {num('payHours', 'Time to pay after acceptance', 'hours', 1, 168)}
+                    {num('maxRounds', 'Rounds', 'at most', 1, 10)}
+                    {num('dailyLimit', 'Offers per buyer', 'per 24 h', 1, 50)}
+                    {data.canSettings ? <Button variant="brand" busy={busy} onClick={saveRules}>Save rules</Button> : <span className="adm-muted">Only a super admin can change the rules.</span>}
+                </div>
+            </Card>
+
+            <Card title={`Offers${live.length ? ` · ${live.length} in progress` : ''}`} actions={<Segments value={filter} onChange={setFilter} options={[{ value: 'live', label: 'In progress' }, { value: 'all', label: 'All' }]} />}>
+                {shown.length === 0 ? <EmptyState icon="fa-handshake-o" title={filter === "live" ? "No offers in progress" : "No offers yet"}>Offers appear here as collectors make them.</EmptyState>
+                    : <div className="of-list">{shown.map((o) => <OfferCard key={o.id} offer={o} role="STAFF" endpoint="/admin/console/api/offers" onChange={replace} serverNow={data.serverNow} />)}</div>}
+            </Card>
+
+            <Card title="Which paintings take offers" subtitle="Default: studio originals take offers; student paintings only when the student switches it on. Leave the lowest offer empty for the site rule." flush>
+                <div className="adm-table"><div className="adm-table__scroll"><table>
+                    <thead><tr><th>Painting</th><th>Price</th><th>Offers</th><th>Lowest offer</th></tr></thead>
+                    <tbody>
+                        {data.paintings.map((p) => (
+                            <tr key={p.id}>
+                                <td data-label="Painting"><a href={`/marketplace/${p.slug}`} target="_blank" rel="noopener noreferrer">{p.title}</a>{p.student && <Badge tone="blue">Student</Badge>}</td>
+                                <td data-label="Price">{inr(p.price)}</td>
+                                <td data-label="Offers">
+                                    <select className="adm-input adm-input--sm" value={p.enabled === null || p.enabled === undefined ? 'default' : p.enabled ? 'on' : 'off'}
+                                            onChange={(e) => setPainting(p, { enabled: e.target.value === 'default' ? null : e.target.value === 'on' })} aria-label={`Offers for ${p.title}`}>
+                                        <option value="default">Default ({p.student ? 'off' : 'on'})</option>
+                                        <option value="on">On</option>
+                                        <option value="off">Off</option>
+                                    </select>
+                                </td>
+                                <td data-label="Lowest offer">
+                                    <input className="adm-input adm-input--sm" type="number" min="10" max="99" placeholder={String(rules.minPct)} defaultValue={p.minPct || ''}
+                                           onBlur={(e) => { const v = e.target.value; if (String(v) !== String(p.minPct || '')) setPainting(p, { minPct: v === '' ? null : Number(v) }); }}
+                                           aria-label={`Lowest offer for ${p.title}, percent`} /> % · {p.effective ? `from ${inr(p.minAmount)}` : 'off'}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table></div></div>
+            </Card>
+        </div>
     );
 }

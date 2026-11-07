@@ -148,8 +148,8 @@ public class PurchaseController {
     }
 
     /**
-     * "Continue to payment": the chosen piece (the draft) becomes the only thing being bought. There is no cart: each
-     * purchase is one artwork, so whatever was in the basket before is replaced.
+     * "Buy now": the chosen piece (the draft) goes into the cart and the checkout pays for that line only; the rest of the
+     * cart stays for later ({@link CartService#buyNow}).
      */
     @GetMapping("/purchase/buy-now")
     public ResponseEntity<String> buyNow(HttpServletRequest request) {
@@ -158,8 +158,13 @@ public class PurchaseController {
         if (auth.userId(request) == null) return redirect.to(request, com.artistikcity.web.PurchaseIntent.signIn("/purchase/buy-now"));
         ResponseEntity<String> held = holdAfterSignIn(request, draft);
         if (held != null) return held;
-        cart.replaceWith(request, ((Number) draft.get("paintingId")).longValue(), ShopPricing.Selection.of(draft.get("format"), draft.get("size"),
-                draft.get("finish"), draft.get("frame"), draft.get("qty")));
+        try {
+            cart.buyNow(request, ((Number) draft.get("paintingId")).longValue(), ShopPricing.Selection.of(draft.get("format"), draft.get("size"),
+                    draft.get("finish"), draft.get("frame"), draft.get("qty")));
+        } catch (MarketplaceException e) {
+            log.info("Buy now refused for {}: {}", draft.get("slug"), e.getMessage());
+            return redirect.to(request, "/marketplace/" + draft.get("slug") + "?unavailable=" + e.body().get("code") + "#buy");
+        }
         return redirect.to(request, "/purchase/checkout");
     }
 
@@ -217,15 +222,21 @@ public class PurchaseController {
     }
 
     @GetMapping("/purchase/checkout")
-    public ResponseEntity<String> checkout(HttpServletRequest request, @RequestParam(value = "payment", required = false) String payment) {
-        if (auth.userId(request) == null) return redirect.to(request, com.artistikcity.web.PurchaseIntent.signIn("/purchase/checkout"));
-        CartService.Priced priced = cart.price(request, "India", null, null);
+    public ResponseEntity<String> checkout(HttpServletRequest request, @RequestParam(value = "payment", required = false) String payment,
+                                           @RequestParam(value = "all", required = false) String all) {
+        if (auth.userId(request) == null) return redirect.to(request, com.artistikcity.web.PurchaseIntent.signIn("/purchase/checkout" + (all != null ? "?all=1" : "")));
+        if (all != null) cart.checkoutAll(request);
+        CartService.Priced priced = cart.priceForCheckout(request, "India");
         if (priced.lines().stream().noneMatch(l -> l.itemId() != null)) {
             Map<String, Object> draft = draft(request);
             return redirect.to(request, draft == null ? "/marketplace" : "/marketplace/" + draft.get("slug") + "#buy");
         }
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("cart", cart.json(priced));
+        // Buy now pays for one line; say what stays in the cart
+        Long only = cart.onlyLine(request);
+        long inCart = cart.price(request, "India", null, null).lines().stream().filter(l -> l.itemId() != null).count();
+        props.put("only", only != null && inCart > 1 ? Map.of("otherCount", inCart - 1) : null);
         Row user = auth.user(request);
         props.put("customer", user == null ? null : Map.of("name", user.str("name", ""), "email", user.str("email", ""), "phone", user.str("phone", "")));
         props.put("gateways", Map.of("razorpay", payments.razorpayConfigured(), "paypal", payments.paypalConfigured(), "testMode", payments.testMode(),
@@ -368,7 +379,7 @@ public class PurchaseController {
             f.put(k, v.length() > 250 ? v.substring(0, 250) : v);
         }
         if (f.get("country").isEmpty()) f.put("country", "RAZORPAY".equals(gateway) ? "India" : "");
-        CartService.Priced priced = cart.price(request, f.get("country"), null, null);
+        CartService.Priced priced = cart.priceForCheckout(request, f.get("country"));
         List<CartService.PricedLine> lines = priced.lines().stream().filter(l -> l.itemId() != null).toList();
         if (lines.isEmpty()) return error(HttpStatus.CONFLICT, "Your cart is empty.");
         if (lines.stream().anyMatch(l -> !l.ok())) {
@@ -505,6 +516,11 @@ public class PurchaseController {
     public void afterSale(HttpServletRequest request, String orderId, ShopOrderService.Outcome out) {
         if (out != ShopOrderService.Outcome.PAID && out != ShopOrderService.Outcome.PARTIAL && out != ShopOrderService.Outcome.REFUND_REQUIRED) return;
         try {
+            offerService.syncSold();          // an accepted offer that was just paid becomes PAID; other offers on the piece close
+        } catch (RuntimeException e) {
+            log.warn("Could not update offers after order {}", orderId, e);
+        }
+        try {
             Map<String, Object> o = orders.order(orderId);
             List<Map<String, Object>> items = orders.items(orderId);
             String base = siteUrl(request);
@@ -620,6 +636,9 @@ public class PurchaseController {
 
     @org.springframework.beans.factory.annotation.Autowired
     private com.artistikcity.support.Db testDb;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private OfferService offerService;
 
     /** A simulated (test) order: kept out of revenue, the ledger, payouts and the reconciler. */
     private void jdbcMarkTest(String table, String orderId) {

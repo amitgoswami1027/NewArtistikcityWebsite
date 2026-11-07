@@ -48,13 +48,67 @@ public class ShopRepository {
     // ================================================================ price list
 
     public List<ShopPricing.Option> options() {
-        return jdbc.queryForList("select * from shop_price_options order by kind, sort_order, id").stream().map(r -> new ShopPricing.Option(
+        List<ShopPricing.Option> out = new java.util.ArrayList<>(jdbc.queryForList("select * from shop_price_options order by kind, sort_order, id").stream().map(r -> new ShopPricing.Option(
                 String.valueOf(r.get("kind")), String.valueOf(r.get("code")), String.valueOf(r.get("label")), dec(r.get("long_side_in")),
-                dec(r.get("price_inr")), dec(r.get("extra_inr")), ((Number) r.get("sort_order")).intValue(), bool(r.get("is_active")))).toList();
+                dec(r.get("price_inr")), dec(r.get("extra_inr")), ((Number) r.get("sort_order")).intValue(), bool(r.get("is_active")))).toList());
+        // custom print sizes live in settings (tag "shop"); they reach ShopPricing as two CUSTOM rows, MIN and MAX long side
+        ShopPricing.Custom c = customSize();
+        out.add(new ShopPricing.Option("CUSTOM", "MIN", "Custom size, shortest long side", c.min(), BigDecimal.ZERO, BigDecimal.ZERO, 0, c.enabled()));
+        out.add(new ShopPricing.Option("CUSTOM", "MAX", "Custom size, longest long side", c.max(), BigDecimal.ZERO, BigDecimal.ZERO, 1, c.enabled()));
+        return out;
+    }
+
+    /** Custom print sizes: on by default, long side 8 to 60 in (Admin > Sales > Marketplace > Prices). */
+    public ShopPricing.Custom customSize() {
+        Map<String, String> v = new java.util.HashMap<>();
+        for (Map<String, Object> r : jdbc.queryForList("select meta_key, meta_value from settings where meta_tag = 'shop' and meta_key like 'custom\\_%'")) {
+            v.put(String.valueOf(r.get("meta_key")), r.get("meta_value") == null ? "" : String.valueOf(r.get("meta_value")).trim());
+        }
+        return new ShopPricing.Custom(!"0".equals(v.getOrDefault("custom_enabled", "1")),
+                intOr(v.get("custom_min_in"), ShopPricing.Custom.DEFAULT_MIN), intOr(v.get("custom_max_in"), ShopPricing.Custom.DEFAULT_MAX));
+    }
+
+    private static BigDecimal intOr(String s, int def) {
+        try {
+            return BigDecimal.valueOf(Integer.parseInt(s));
+        } catch (RuntimeException e) {
+            return BigDecimal.valueOf(def);
+        }
+    }
+
+    public void saveCustomSize(boolean enabled, int min, int max) {
+        for (String[] kv : new String[][]{{"custom_enabled", enabled ? "1" : "0"}, {"custom_min_in", String.valueOf(min)}, {"custom_max_in", String.valueOf(max)}}) {
+            Timestamp now = now();
+            if (jdbc.update("update settings set meta_value = ?, updated_at = ? where meta_tag = 'shop' and meta_key = ?", kv[1], now, kv[0]) == 0) {
+                jdbc.update("insert into settings (meta_tag, meta_key, meta_value, created_at, updated_at) values ('shop', ?, ?, ?, ?)", kv[0], kv[1], now, now);
+            }
+        }
     }
 
     public List<Map<String, Object>> optionRows() {
         return jdbc.queryForList("select id, kind, code, label, long_side_in, price_inr, extra_inr, sort_order, is_active from shop_price_options order by kind, sort_order, id");
+    }
+
+    /**
+     * The price agreed in an accepted offer that is still inside its payment window (the cart charges it instead of the
+     * listed price), or null.
+     */
+    public BigDecimal agreedPrice(long paintingId, Long userId) {
+        if (userId == null) return null;
+        List<Map<String, Object>> r = jdbc.queryForList("select agreed_inr from painting_offers where painting_id = ? and user_id = ? and status = 'ACCEPTED'"
+                + " and pay_by > ? order by id desc limit 1", paintingId, userId, now());
+        return r.isEmpty() ? null : dec(r.get(0).get("agreed_inr"));
+    }
+
+    /** True when the buyer's hold on this painting comes from an accepted offer (it must not be given back by cart moves). */
+    public boolean offerHold(long paintingId, List<String> keys) {
+        for (String k : keys) {
+            if (!k.startsWith("U:")) continue;
+            Long n = jdbc.queryForObject("select count(*) from painting_offers where painting_id = ? and user_id = ? and status = 'ACCEPTED' and pay_by > ?",
+                    Long.class, paintingId, Long.parseLong(k.substring(2)), now());
+            if (n != null && n > 0) return true;
+        }
+        return false;
     }
 
     // ================================================================ listings

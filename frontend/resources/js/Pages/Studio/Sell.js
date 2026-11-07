@@ -4,6 +4,8 @@ import { Inertia } from '@inertiajs/inertia';
 import axios from 'axios';
 import StudioLayout from '@/Components/Studio/StudioLayout';
 import { inr, shortDate } from '@/Components/Studio/Journey';
+import OfferCard from '@/Components/Shop/OfferCard';
+import { errorText } from '@/Components/Shop/shop';
 
 /*
  * My studio > Sell your art (/dashboard/sell), step 7 of the journey. Certified students list the approved work from
@@ -74,6 +76,7 @@ function Listings({ listings, onToast }) {
                             {l.changes_requested ? (
                                 <p className="sl-note"><i className="fa fa-comment-o" aria-hidden="true"></i> <b>From our team:</b> {l.review_notes}</p>
                             ) : <p className="sl-listing__hint">{s.text}</p>}
+                            <OfferSwitch l={l} onToast={onToast} />
                         </div>
                         <div className="sl-listing__actions">
                             {editable && <a href={`/dashboard/sell/listings/${l.id}`} className="sl-btn sl-btn--line">{l.changes_requested ? 'Make changes' : 'Edit'}</a>}
@@ -85,6 +88,49 @@ function Listings({ listings, onToast }) {
             })}
         </ul>
     );
+}
+
+/* ---------------------------------------------------------- offers */
+
+/** "Accept offers" on one live listing, with the lowest offer (percent of the price; empty = the site default). */
+function OfferSwitch({ l, onToast }) {
+    const [on, setOn] = useState(!!Number(l.offers_enabled));
+    const [pct, setPct] = useState(l.offer_min_pct || '');
+    const [busy, setBusy] = useState(false);
+    const save = (enabled, minPct) => {
+        setBusy(true);
+        axios.post(`/api/studio/sell/listings/${l.id}/offers`, { enabled, minPct: minPct === '' ? null : Number(minPct) })
+            .then((r) => { setOn(!!r.data.enabled); onToast(r.data.message); })
+            .catch((e) => onToast(errorText(e), true))
+            .finally(() => setBusy(false));
+    };
+    if (!['AVAILABLE', 'RESERVED', 'PENDING_REVIEW', 'DRAFT'].includes(l.stock_status)) return null;
+    return (
+        <div className="sl-offersw">
+            <label className="sl-switch">
+                <input type="checkbox" checked={on} disabled={busy} onChange={(e) => { setOn(e.target.checked); save(e.target.checked, pct); }} data-testid={`offers-toggle-${l.id}`} />
+                <span>Accept offers</span>
+            </label>
+            {on && (
+                <label className="sl-offersw__pct">
+                    <span>from</span>
+                    <input type="number" min="10" max="99" placeholder="70" value={pct} onChange={(e) => setPct(e.target.value)} onBlur={() => save(true, pct)} aria-label="Lowest offer, percent of the price" />
+                    <span>% of the price</span>
+                </label>
+            )}
+        </div>
+    );
+}
+
+function Offers({ onToast }) {
+    const [data, setData] = useState(null);
+    useEffect(() => {
+        axios.get('/api/studio/sell/offers').then((r) => setData(r.data)).catch(() => setData({ offers: [] }));
+    }, []);
+    if (!data) return <p className="sl-empty">Loading offers…</p>;
+    const replace = (o) => setData((d) => ({ ...d, offers: d.offers.map((x) => (x.id === o.id ? o : x)) }));
+    if (!data.offers.length) return <p className="sl-empty">No offers yet. Switch on “Accept offers” on a live listing to let collectors suggest a price.</p>;
+    return <div className="of-list">{data.offers.map((o) => <OfferCard key={o.id} offer={o} role="SELLER" endpoint="/api/studio/sell/offers" onChange={(x) => { replace(x); onToast(null); }} serverNow={data.serverNow} />)}</div>;
 }
 
 /* ---------------------------------------------------------- earnings */
@@ -189,7 +235,7 @@ function PayoutForm({ payout, canStore, onToast }) {
 export default function Sell() {
     const { certified, certifiedCourses = [], ready = [], locked = [], listings = [], earnings = {}, payout, canStorePayout, terms = {}, restriction, flash } = usePage().props;
     const [toast, setToast] = useState(flash && flash.message ? { text: flash.message } : null);
-    const say = (text, error = false) => setToast({ text, error });
+    const say = (text, error = false) => setToast(text ? { text, error } : null);
     // the message from the listing form after it saved
     useEffect(() => {
         try {
@@ -253,6 +299,11 @@ export default function Sell() {
             <section className="sl-section" aria-labelledby="sl-listings">
                 <div className="sl-head"><h2 id="sl-listings">Your listings</h2><p>Drafts, listings in review, and what is live or sold.</p></div>
                 <Listings listings={listings} onToast={say} />
+            </section>
+
+            <section className="sl-section" id="offers" aria-labelledby="sl-offers">
+                <div className="sl-head"><h2 id="sl-offers">Offers</h2><p>Prices collectors suggested for your paintings. Accept, counter or decline within the time shown.</p></div>
+                <Offers onToast={say} />
             </section>
 
             <div className="sl-two">

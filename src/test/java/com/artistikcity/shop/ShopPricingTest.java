@@ -169,4 +169,84 @@ class ShopPricingTest {
         assertEquals("some.artist", ArtistHubService.handle("@some.artist"));
         assertNull(ArtistHubService.handle("not a handle!"));
     }
+
+    // ================================================================ custom sizes
+
+    private static final List<ShopPricing.Option> WITH_CUSTOM = new java.util.ArrayList<>(List.of(
+            new ShopPricing.Option("CANVAS", "S", "Small", d("12"), d("2499"), d("600"), 1, true),
+            new ShopPricing.Option("CANVAS", "M", "Medium", d("24"), d("4999"), d("1100"), 2, true),
+            new ShopPricing.Option("CANVAS", "L", "Large", d("36"), d("8999"), d("1600"), 3, true),
+            new ShopPricing.Option("CANVAS", "XL", "Statement", d("48"), d("13999"), d("2200"), 4, true),
+            new ShopPricing.Option("POSTER", "S", "Small", d("12"), d("799"), d("0"), 1, true),
+            new ShopPricing.Option("POSTER", "M", "Medium", d("18"), d("1199"), d("0"), 2, true),
+            new ShopPricing.Option("POSTER", "L", "Large", d("24"), d("1699"), d("0"), 3, true),
+            new ShopPricing.Option("POSTER", "XL", "Extra large", d("36"), d("2699"), d("0"), 4, true),
+            new ShopPricing.Option("FRAME", "OAK", "Natural oak frame", null, d("28"), d("0"), 2, true),
+            new ShopPricing.Option("CUSTOM", "MIN", "min", d("8"), d("0"), d("0"), 0, true),
+            new ShopPricing.Option("CUSTOM", "MAX", "max", d("60"), d("0"), d("0"), 1, true)));
+
+    private static ShopPricing.Art square() {
+        return new ShopPricing.Art(2, "Mill", "A", "Canvas", "AVAILABLE", d("58500"), d("24"), d("24"), false, Set.of("CANVAS", "POSTER"), false, 50, 0);
+    }
+
+    @Test
+    void customCodesAreParsed() {
+        assertEquals(30, ShopPricing.customLongSide("C30"));
+        assertNull(ShopPricing.customLongSide("M"));
+        assertNull(ShopPricing.customLongSide("C"));
+        assertNull(ShopPricing.customLongSide("C1234"));
+        ShopPricing.Custom c = ShopPricing.custom(WITH_CUSTOM);
+        assertTrue(c.enabled());
+        assertEquals(8, c.min().intValue());
+        assertEquals(60, c.max().intValue());
+        assertFalse(ShopPricing.custom(OPTIONS).enabled(), "no CUSTOM rows = no custom sizes");
+    }
+
+    @Test
+    void aCustomSizeAtAPresetCostsThePreset() {
+        for (String[] p : new String[][]{{"CANVAS", "24", "6099"}, {"CANVAS", "36", "10599"}, {"POSTER", "18", "1199"}, {"POSTER", "36", "2699"}}) {
+            ShopPricing.Quote q = ShopPricing.quote(square(), WITH_CUSTOM, sel(p[0], "C" + p[1], "CANVAS".equals(p[0]) ? "STRETCHED" : "MATTE", "NONE", 1));
+            assertTrue(q.ok(), q.error());
+            assertEquals(d(p[2]).setScale(2), q.unitPrice(), p[0] + " " + p[1]);
+            assertTrue(q.label().contains("(custom)"));
+        }
+    }
+
+    @Test
+    void customPricesFollowTheAreaBetweenPresetsAndEndIn99() {
+        // poster 30 in on a square piece: area 900 between L (576 sq in, 1699) and XL (1296, 2699) -> 1699 + 324/720 * 1000 = 2149 -> 2199
+        ShopPricing.Quote q = ShopPricing.quote(square(), WITH_CUSTOM, sel("POSTER", "C30", "MATTE", "NONE", 1));
+        assertEquals(d("2199.00"), q.unitPrice());
+        assertEquals("30", q.widthIn().toPlainString());
+        // canvas 30 in: 4999 + 324/720 * 4000 = 6799 (already x99); stretching 1100 + 0.45 * 500 = 1325 -> 1300
+        ShopPricing.Quote c = ShopPricing.quote(square(), WITH_CUSTOM, sel("CANVAS", "C30", "STRETCHED", "NONE", 1));
+        assertEquals(d("8099.00"), c.unitPrice());
+        // past the largest preset the line continues; below the smallest it never drops under 60% of the smallest
+        ShopPricing.Quote big = ShopPricing.quote(square(), WITH_CUSTOM, sel("POSTER", "C60", "MATTE", "NONE", 1));
+        assertTrue(big.unitPrice().compareTo(d("2699")) > 0);
+        ShopPricing.Quote small = ShopPricing.quote(square(), WITH_CUSTOM, sel("POSTER", "C8", "MATTE", "NONE", 1));
+        assertTrue(small.unitPrice().compareTo(d("479.4")) >= 0 && small.unitPrice().compareTo(d("799")) < 0, small.unitPrice().toPlainString());
+        for (int side = 8; side <= 60; side++) {
+            ShopPricing.Quote x = ShopPricing.quote(square(), WITH_CUSTOM, sel("POSTER", "C" + side, "MATTE", "NONE", 1));
+            assertEquals(99, x.unitPrice().intValue() % 100, "side " + side);
+        }
+    }
+
+    @Test
+    void customSizesOutsideTheLimitsOrSwitchedOffAreRefused() {
+        assertFalse(ShopPricing.quote(square(), WITH_CUSTOM, sel("POSTER", "C7", "MATTE", "NONE", 1)).ok());
+        assertFalse(ShopPricing.quote(square(), WITH_CUSTOM, sel("POSTER", "C61", "MATTE", "NONE", 1)).ok());
+        List<ShopPricing.Option> off = WITH_CUSTOM.stream().map(o -> "CUSTOM".equals(o.kind())
+                ? new ShopPricing.Option(o.kind(), o.code(), o.label(), o.longSide(), o.price(), o.extra(), o.sort(), false) : o).toList();
+        assertFalse(ShopPricing.quote(square(), off, sel("POSTER", "C30", "MATTE", "NONE", 1)).ok());
+        assertTrue(ShopPricing.quote(square(), off, sel("POSTER", "L", "MATTE", "NONE", 1)).ok(), "presets still work");
+        // a frame on a custom canvas is priced on the custom size's perimeter
+        ShopPricing.Quote f = ShopPricing.quote(square(), WITH_CUSTOM, sel("CANVAS", "C30", "STRETCHED", "OAK", 1));
+        assertEquals(d("3360"), f.framePrice());
+        // the offer the pages get carries the range for prints only
+        Map<String, Object> offer = ShopPricing.offer(square(), WITH_CUSTOM, true, null);
+        @SuppressWarnings("unchecked") List<Map<String, Object>> formats = (List<Map<String, Object>>) offer.get("formats");
+        assertEquals(Map.of("min", 8, "max", 60), formats.stream().filter(x -> "CANVAS".equals(x.get("format"))).findFirst().orElseThrow().get("custom"));
+        assertNull(formats.stream().filter(x -> "ORIGINAL".equals(x.get("format"))).findFirst().orElseThrow().get("custom"));
+    }
 }

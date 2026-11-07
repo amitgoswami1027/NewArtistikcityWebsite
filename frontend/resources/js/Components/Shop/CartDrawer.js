@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useCart } from '@/Components/Shop/CartStore';
+import { useCart, setCartScope } from '@/Components/Shop/CartStore';
 import { inr, errorText } from '@/Components/Shop/shop';
 import { useCountdown, mmss } from '@/Components/Marketplace/shared';
 
@@ -26,7 +26,7 @@ export function Qty({ value, max, onChange, disabled, label = 'Quantity' }) {
 }
 
 /** One cart line (drawer and checkout summary share it). */
-export function CartLine({ line, serverNow, compact = false, onQty, onRemove, onReserve, busy }) {
+export function CartLine({ line, serverNow, compact = false, onQty, onRemove, onReserve, onSave, busy }) {
     const bad = line.status !== 'ok';
     return (
         <li className={`pz-line ${bad ? 'is-bad' : ''}`}>
@@ -37,12 +37,14 @@ export function CartLine({ line, serverNow, compact = false, onQty, onRemove, on
                 <a href={`/marketplace/${line.slug}`} className="pz-line__title">{line.title}</a>
                 <p className="pz-line__by">by {line.artist}</p>
                 <p className="pz-line__variant">{line.label}</p>
+                {line.agreed && <p className="pz-line__agreed"><i className="fa fa-handshake-o" aria-hidden="true"></i> Your accepted offer · listed at <s>{inr(line.listPrice)}</s></p>}
                 {line.format === 'ORIGINAL' && line.status === 'ok' && <HoldTicker expiresAt={line.holdExpiresAt} serverNow={serverNow} />}
                 {bad && <p className="pz-line__warn" role="alert"><i className="fa fa-exclamation-circle" aria-hidden="true"></i>{line.message}</p>}
                 {!compact && (
                     <div className="pz-line__actions">
                         {line.maxQty > 1 && !bad && <Qty value={line.qty} max={line.maxQty} onChange={(q) => onQty(line, q)} disabled={busy} label={`Quantity of ${line.title}`} />}
                         {line.status === 'hold_expired' && onReserve && <button type="button" className="pz-link" onClick={() => onReserve(line)} disabled={busy}>Reserve again</button>}
+                        {onSave && <button type="button" className="pz-link" onClick={() => onSave(line)} disabled={busy} data-testid="line-save">Save for later</button>}
                         <button type="button" className="pz-link pz-link--muted" onClick={() => onRemove(line)} disabled={busy}>Remove</button>
                     </div>
                 )}
@@ -125,11 +127,14 @@ export default function CartDrawer() {
                         {data.totals.coupon && data.totals.coupon.error && <p className="pz-note">Code {data.totals.coupon.code}: {data.totals.coupon.error}</p>}
                         <Totals totals={data.totals} />
                         {data.totals.hasPrints && <p className="pz-fine">Shipping shown for delivery in India; worldwide rates apply at checkout.</p>}
-                        <a href="/purchase/checkout" className={`pz-btn pz-btn--brand pz-btn--block ${data.totals.blocked ? 'is-disabled' : ''}`} aria-disabled={data.totals.blocked ? 'true' : undefined}
+                        <a href="/purchase/checkout?all=1" className={`pz-btn pz-btn--brand pz-btn--block ${data.totals.blocked ? 'is-disabled' : ''}`} aria-disabled={data.totals.blocked ? 'true' : undefined}
                            onClick={(e) => { if (data.totals.blocked) { e.preventDefault(); setNotice('Remove or fix the items marked in red first.'); } }}>
                             <i className="fa fa-lock" aria-hidden="true"></i> Checkout · {inr(data.totals.total)}
                         </a>
-                        <button type="button" className="pz-btn pz-btn--ghost pz-btn--block" onClick={cart.close}>Keep browsing</button>
+                        <div className="pz-drawer__links">
+                            <a href="/cart" className="pz-btn pz-btn--line" data-testid="drawer-view-cart">View cart</a>
+                            <button type="button" className="pz-btn pz-btn--ghost" onClick={cart.close}>Keep browsing</button>
+                        </div>
                     </footer>
                 )}
             </aside>
@@ -140,6 +145,7 @@ export default function CartDrawer() {
 }
 
 function CartButtonInner() {
+    useState(() => { setCartScope(null); return true; });
     const cart = useCart();
     return (
         <button type="button" className="pz-cartbtn" onClick={cart.open} aria-label={`Cart, ${cart.count} item${cart.count === 1 ? '' : 's'}`}>

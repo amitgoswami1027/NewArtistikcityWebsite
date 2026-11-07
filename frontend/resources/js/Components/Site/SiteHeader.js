@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { CartButton } from '@/Components/Shop/CartDrawer';
 import { usePage, InertiaLink } from '@inertiajs/inertia-react';
 import axios from 'axios';
 import { API_URL } from '@/Components/Constants';
@@ -139,6 +140,8 @@ export default function SiteHeader({ showCategories = false, activeMedium = null
                             </>
                         )}
                     </nav>
+
+                    <span className="dm-cart"><CartButton /></span>
 
                     <button type="button" className="ac-burger" aria-label="Menu" onClick={() => setDrawer(!drawer)}>
                         <i className={`fa ${drawer ? 'fa-times' : 'fa-bars'}`}></i>

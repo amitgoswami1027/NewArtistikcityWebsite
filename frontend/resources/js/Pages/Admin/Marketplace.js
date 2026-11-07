@@ -4,7 +4,8 @@ import axios from 'axios';
 import AdminLayout, { PageHeader, useToast, errorText } from '@/Components/Admin/AdminLayout';
 import { StatusChip, inr, usd, dims, useCountdown, mmss, num } from '@/Components/Marketplace/shared';
 import { Badge } from '@/Components/Admin/kit';
-import { Orders as CartOrders, Messages, Prices, Coupons, ListingDrawer } from '@/Components/Admin/ShopSections';
+import { Orders as CartOrders, Messages, Prices, Coupons, ListingDrawer, OffersAdmin } from '@/Components/Admin/ShopSections';
+import OfferCard from '@/Components/Shop/OfferCard';
 
 /*
  * Marketplace console: everything sold in the marketplace in one place. Paintings (listings, review, holds, and each
@@ -147,6 +148,7 @@ export default function Marketplace() {
         publisher && ['holds', 'Live holds', holds.length],
         ['orders', canFulfil ? 'Orders' : 'My sales', cartToDo + legacyToDo],
         ['messages', 'Messages', unread],
+        ['offers', 'Offers', shop.offersOpen || 0],
         shopCan.prices && ['prices', 'Prices', null],
         shopCan.prices && ['coupons', 'Coupons', null],
     ].filter(Boolean);
@@ -311,7 +313,8 @@ export default function Marketplace() {
             )}
 
             {tab === 'messages' && <Messages threads={threads} setThreads={setThreads} initial={openThread} toast={toast} />}
-            {tab === 'prices' && <Prices prices={prices} setPrices={setPrices} can={shopCan} toast={toast} />}
+            {tab === 'prices' && <Prices prices={prices} setPrices={setPrices} can={shopCan} toast={toast} customSize={shop.customSize} />}
+            {tab === 'offers' && <div className="ac"><OffersAdmin toast={toast} OfferCard={OfferCard} /></div>}
             {tab === 'coupons' && <Coupons coupons={coupons} setCoupons={setCoupons} listings={shopListings} can={shopCan} toast={toast} />}
             {printsFor && <ListingDrawer l={printsFor} toast={toast} onClose={() => setPrintsFor(null)}
                                          onSaved={(ls) => { setShopListings(ls); const again = ls.find((x) => x.id === printsFor.id); if (again) setPrintsFor(again); }} />}

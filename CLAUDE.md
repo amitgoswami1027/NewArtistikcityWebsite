@@ -39,11 +39,11 @@ cd frontend && npm install && npm run dev                 # or: npm run prod / n
 
 Unit tests cover the auth crypto (`src/test/java/com/artistikcity/auth`: tokens, password policy, JWT/JWKS, WebAuthn), the
 rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/VideoUploadCheckTest`), S3 request signing against
-AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing (`shop/ShopPricingTest`) and
+AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing incl. custom sizes (`shop/ShopPricingTest`) and
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc), the configuration panel's encryption and allow-list
 (`config/panel/ConfigPanelTest`), SNS SMS requests (`auth/sms/SnsSmsSenderTest`) and the Studio Stories / site layout checks
 (`admin/StudioAndLayoutTest`), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
-`tests/system/test_selling.py` covers Sell your art end to end. `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
+`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers (dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
 new admin API, secret masking, validation and commit of panel values, site settings and the Studio Stories workflow. Browser tests for the purchase flow live in `tests/e2e`.
 The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
 the rest get 409 or REFUND_REQUIRED) and `seats/SeatRaceIT` (20 students, 5 seats: exactly 5 get one) run only with
@@ -216,7 +216,9 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   framer's dimension lines); the room photos come from `room_scenes`, managed in Admin > System parameters > Room Preview Setup (`/admin/setup/room-preview`, `rooms/RoomAdminController`,
   capability `marketplace.publish`): upload a photo (>= 1000 px wide), drag the hanging area (percent of the photo), optionally give its real
   width in inches (then paintings are drawn to scale), order / hide rooms, or switch the room step off (`settings` room_preview.enabled).
-  The page adapts to 0..12 rooms. The artwork page's "On a wall" tab uses the same component. `RoomStage.js` / `rooms.js` are no longer used.
+  The page adapts to 0..12 rooms. Step 2 is split into three parts with Back / Next buttons, A. Size (presets + custom size), B. Frame,
+  C. See it on your wall (summary; switches the picture to the first room), kept in the address hash (`#size|frame|wall`). The picture is a
+  carousel (`ArtPreview`): arrows, swipe, arrow keys, "2 of 6", thumbnails, and a "person for scale" switch in rooms measured in inches. The artwork page's "On a wall" tab uses the same component. `RoomStage.js` / `rooms.js` are no longer used.
 - **AWS** (docs/AWS-DEPLOY.md): CloudFront → EC2 (Docker) + RDS + S3, `infra/*.yml` (CloudFormation), `.github/workflows/deploy.yml`,
   `deploy/ec2-deploy.sh` (deploy/rollback/status, runs from inside the image) and `deploy/db-migrate.sh` (schema on an empty
   DB, else pending migrations - same rules as the launcher). `http/CloudFrontFilter` (`TRUST_CLOUDFRONT`) takes the visitor IP and
@@ -241,9 +243,30 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   `Components/Shop/shop.js` only mirrors it for live UI). Four screens: the artwork page (buy box `Components/Shop/BuyPanel`: format, size,
   price, "Talk to the artist") → `/purchase/step-2` preview and frame (`Components/Shop/ArtPreview`, rooms from Admin > System parameters > Room Preview Setup) → `/purchase/checkout` (accordion contact/delivery/
   payment, sticky summary) → `/purchase/orders/{id}`. `/purchase/step-1` and `/purchase/preview` only redirect. The choice is the session draft
-  `purchase.draft`. There is no cart in the UI: "Buy now" saves the draft and `/purchase/buy-now` makes it the only line of the
-  basket (`CartService.replaceWith`; `shop_carts` per owner key `U:<id>`, JSON API `/api/v1/cart/**` kept for the checkout's pricing and
-  coupons, client store `Components/Shop/CartStore`). An original in the cart is a 15-minute hold (one at a time). Orders: `shop_orders` / `shop_order_items`, finalised by
+  `purchase.draft`. **Cart and Buy now** sit side by side (artwork page,
+  step 2, the "Add to cart" button on marketplace cards): `shop_carts` per owner key `U:<id>` (max 50 lines, 409 `CART_FULL`), JSON API
+  `/api/v1/cart/**` (`POST .../items/{id}/save` = save for later), client store `Components/Shop/CartStore`, header `CartButton` + drawer
+  (`Components/Shop/CartDrawer`) and the page `/cart` (`Pages/Shop/Cart`, `OfferController`). "Buy now" saves the draft and `/purchase/buy-now`
+  (`CartService.buyNow`) adds it to the cart and stores that line id in the session key `purchase.only`: checkout then pays for that line only
+  (prop `only {otherCount}`, `/api/v1/cart?checkout=1` prices the same way); `/purchase/checkout?all=1` (the cart's and drawer's Checkout)
+  clears it. A guest adding an original gets 401 `SIGN_IN`. An original in the cart is a 15-minute hold (one at a time).
+  **Custom print sizes:** canvas and poster prints take any long side in a range (default 8–60 in, settings tag `shop`: `custom_enabled`,
+  `custom_min_in`, `custom_max_in`, hard limits 4–96; Admin > Sales > Marketplace > Prices, `PUT /admin/console/api/shop/custom-size`). Size code
+  `C<n>`; `ShopPricing.customPrice` interpolates the price by print area between the preset sizes and rounds up to the next ₹x99 (stretching
+  to the nearest ₹100); labelled "(custom)". **Make an offer** (originals only, `shop/OfferService` + `OfferController`, tables `painting_offers`,
+  `painting_offer_events`, migration `2026-11-07_cart_offers.sql`): studio originals take offers by default, student paintings only when the
+  student ticks "Accept offers" (`paintings.offers_enabled` NULL = default, `offer_min_pct` NULL = site rule); staff override per painting in
+  Admin > Marketplace > Offers. Rules in settings tag `offers` (on, lowest offer 70 %, answer within 72 h, pay within 48 h, 3 rounds, 5 offers
+  per buyer per 24 h). Statuses OPEN → COUNTERED → ACCEPTED → PAID, or DECLINED / WITHDRAWN / EXPIRED / CLOSED; one live offer per buyer and
+  painting. Accepting (serializable transaction locking the painting and its offers) closes the other offers and holds the piece for the buyer
+  (`cart_reservations` key `U:<buyer>` until `pay_by`; `MarketplaceService` keeps that hold, `OFFER_HOLD`); the buyer pays the agreed price
+  (`ShopRepository.agreedPrice`) through the normal checkout with every gateway. `OfferService.sweep` (every minute) expires unanswered offers,
+  releases unpaid holds and closes offers on sold pieces; every step e-mails the other side (`emails/offer.mustache`) and shows on
+  `/user/offers` (`Pages/Account/Offers`, nav count `offers`), My studio > Sell your art (`sellOffers`) and the admin tab. APIs: buyer
+  `GET /api/v1/offers/painting/{id}`, `POST /api/v1/offers` (needs `agree`), `POST /api/v1/offers/{id}` {action accept|reoffer|decline|withdraw},
+  `POST /api/v1/offers/{id}/pay`; student `GET /api/studio/sell/offers`, `POST /api/studio/sell/offers/{id}`, `POST /api/studio/sell/listings/{id}/offers`;
+  staff `GET|POST /admin/console/api/offers[/{id}]` (capability `marketplace`, teachers see their own pieces), `PUT .../offers/settings`
+  (`marketplace.edit`, audited), `PUT .../offers/paintings/{id}`. UI: `Components/Shop/OfferDialog` (button + dialog) and `OfferCard`. Orders: `shop_orders` / `shop_order_items`, finalised by
   `ShopOrderService.finalizeSale` (idempotent; lines that can't be supplied become REFUND_REQUIRED with `refund_due_inr`); the marketplace
   webhook also resolves shop orders. Downloads stream from private storage (`Storage.putPrivate/openPrivate`, never /storage/**) at
   `/shop/download/{token}`. Admin: one console, Sales > Marketplace (`/admin/dashboard/marketplace`: paintings, review, holds, orders, messages, prices, coupons;

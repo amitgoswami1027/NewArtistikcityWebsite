@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useCart } from '@/Components/Shop/CartStore';
+import { errorText } from '@/Components/Shop/shop';
 import { Price, TrustBadges, dims, dimsCm, hasDiscount, pct, useCountdown, mmss, inr } from '@/Components/Marketplace/shared';
 
 /**
@@ -6,6 +8,33 @@ import { Price, TrustBadges, dims, dimsCm, hasDiscount, pct, useCountdown, mmss,
  * artwork is fitted inside it, never cropped. The image is the address saved with the listing (an S3 / CDN URL, or
  * /storage/... on this site) and loads lazily, with its real proportions given up front so nothing jumps.
  */
+/** "Add to cart" on a card: the original, as it comes (frame and prints are chosen on the artwork page). */
+function QuickAdd({ p }) {
+    const cart = useCart();
+    const [state, setState] = useState(null);
+    const add = () => {
+        setState({ busy: true });
+        cart.add({ paintingId: p.id, format: 'ORIGINAL', frame: 'NONE', qty: 1 })
+            .then(() => setState({ done: true }))
+            .catch((e) => {
+                const d = e.response && e.response.data;
+                if (d && d.code === 'SIGN_IN' && d.redirect) { window.location.assign(d.redirect); return; }
+                cart.clearError();
+                setState({ error: d && d.code === 'HOLD_LIMIT' ? 'You’re holding another original. Open it to switch.' : errorText(e) });
+            });
+    };
+    return (
+        <div className="mk-card__quick">
+            <button type="button" className="mk-quickadd" onClick={add} disabled={state && state.busy} data-testid="card-add"
+                    aria-label={`Add “${p.title}” to your cart`}>
+                <i className={`fa ${state && state.done ? 'fa-check' : 'fa-shopping-bag'}`} aria-hidden="true"></i>
+                <span>{state && state.done ? 'In your cart' : 'Add to cart'}</span>
+            </button>
+            {state && state.error && <p className="mk-quickadd__err" role="alert">{state.error}</p>}
+        </div>
+    );
+}
+
 export default function ArtCard({ p, serverNow }) {
     const held = p.stock_status === 'RESERVED';
     const sold = p.stock_status === 'SOLD';
@@ -51,6 +80,7 @@ export default function ArtCard({ p, serverNow }) {
                     </div>
                 </div>
             </a>
+            {!sold && !held && p.stock_status === 'AVAILABLE' && <QuickAdd p={p} />}
         </article>
     );
 }

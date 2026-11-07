@@ -310,6 +310,7 @@ public class StudentSellController {
     private List<Map<String, Object>> listings(long userId) {
         List<Map<String, Object>> rows = jdbc.queryForList("select p.id, p.slug, p.title, p.stock_status, p.final_price, p.base_price, p.medium, p.surface,"
                 + " p.height_inches, p.width_inches, p.review_notes, p.reviewed_at, p.published_at, p.sold_at, p.updated_at, p.version, p.submission_id,"
+                + " coalesce(p.offers_enabled, 0) as offers_enabled, p.offer_min_pct,"
                 + " " + MarketplaceRepository.PRIMARY_IMAGE_SQL + " as image_url"
                 + " from paintings p where p.source = 'STUDENT' and p.artist_user_id = ? order by p.updated_at desc, p.id desc", userId);
         BigDecimal share = artistShare();

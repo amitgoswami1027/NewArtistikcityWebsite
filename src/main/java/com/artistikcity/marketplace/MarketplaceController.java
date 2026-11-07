@@ -190,7 +190,7 @@ public class MarketplaceController {
         // the cart checkout replaced this single-original page: put the held original in the cart and go there
         if (!"single".equals(request.getParameter("mode"))) {
             try {
-                cart.replaceWith(request, id, com.artistikcity.shop.ShopPricing.Selection.of("ORIGINAL", "", "", "NONE", 1));
+                cart.buyNow(request, id, com.artistikcity.shop.ShopPricing.Selection.of("ORIGINAL", "", "", "NONE", 1));
                 return redirect.to(request, "/purchase/checkout");
             } catch (MarketplaceException e) {
                 log.info("Could not move hold on {} into the cart: {}", id, e.getMessage());

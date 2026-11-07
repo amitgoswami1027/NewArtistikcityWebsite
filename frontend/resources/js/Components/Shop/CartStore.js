@@ -18,7 +18,9 @@ import { errorText } from '@/Components/Shop/shop';
  *   cart.open() / cart.close(); cart.count; cart.data (lines + totals)
  */
 
-const store = { data: null, isOpen: false, busy: false, error: null, serverNow: Date.now() };
+const store = { data: null, isOpen: false, busy: false, error: null, serverNow: Date.now(), scope: null };
+// the checkout page asks for its own view of the cart (only the Buy now line while one is being bought)
+const sc = (sep = '?') => (store.scope === 'checkout' ? `${sep}checkout=1` : '');
 const listeners = new Set();
 let loading = null;
 
@@ -34,7 +36,7 @@ function accept(d) {
 
 function refresh(country) {
     if (loading) return loading;
-    loading = axios.get('/api/v1/cart' + (country ? `?country=${encodeURIComponent(country)}` : ''))
+    loading = axios.get('/api/v1/cart' + (country ? `?country=${encodeURIComponent(country)}${sc('&')}` : sc()))
         .then((r) => accept(r.data))
         .catch((e) => { set({ error: errorText(e, 'We couldn’t load your cart.') }); return null; })
         .finally(() => { loading = null; });
@@ -53,17 +55,18 @@ const actions = {
     close: () => set({ isOpen: false }),
     refresh,
     clearError: () => set({ error: null }),
-    add: (item, { openDrawer = true } = {}) => run(axios.post('/api/v1/cart/items', item)).then((d) => { if (openDrawer) set({ isOpen: true }); return d; }),
+    add: (item, { openDrawer = true } = {}) => run(axios.post(`/api/v1/cart/items${sc()}`, item)).then((d) => { if (openDrawer) set({ isOpen: true }); return d; }),
     // optimistic: the new quantity shows at once; if the server refuses (e.g. not enough editions left) the line goes
     // back to what it was and the reason is shown
     setQty: (id, qty) => {
         const before = store.data;
         if (before && before.lines) set({ data: { ...before, lines: before.lines.map((l) => (l.id === id ? { ...l, qty } : l)) } });
-        return run(axios.patch(`/api/v1/cart/items/${id}`, { qty })).catch((e) => { if (before) set({ data: before }); throw e; });
+        return run(axios.patch(`/api/v1/cart/items/${id}${sc()}`, { qty })).catch((e) => { if (before) set({ data: before }); throw e; });
     },
-    remove: (id) => run(axios.delete(`/api/v1/cart/items/${id}`)),
-    applyCoupon: (code, country) => run(axios.post('/api/v1/cart/coupon', { code, country })),
-    removeCoupon: () => run(axios.delete('/api/v1/cart/coupon')),
+    remove: (id) => run(axios.delete(`/api/v1/cart/items/${id}${sc()}`)),
+    saveForLater: (id) => run(axios.post(`/api/v1/cart/items/${id}/save`)),
+    applyCoupon: (code, country) => run(axios.post(`/api/v1/cart/coupon${sc()}`, { code, country })),
+    removeCoupon: () => run(axios.delete(`/api/v1/cart/coupon${sc()}`)),
 };
 
 /**
@@ -94,8 +97,13 @@ export function useCart() {
     };
 }
 
+/** Pages with the site header use the whole cart (the checkout sets its own scope). */
+export function setCartScope(scope) {
+    if (store.scope !== scope) Object.assign(store, { scope, data: null });
+}
+
 /** Kept for pages that pass the cart they were rendered with. */
-export function CartProvider({ children, initial = null }) {
-    const [seeded] = useState(() => { if (initial) seedCart(initial); return true; });
+export function CartProvider({ children, initial = null, scope = null }) {
+    const [seeded] = useState(() => { store.scope = scope; if (initial) seedCart(initial); return true; });
     return seeded ? <>{children}</> : null;
 }

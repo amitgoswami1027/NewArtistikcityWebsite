@@ -61,7 +61,10 @@ export function useCountdown(expiresAt, serverNow) {
     return left;
 }
 
-export const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+// mm:ss for the 15-minute holds; an hour or more (an accepted offer's payment window) reads "47 h 05 min"
+export const mmss = (s) => (s >= 3600
+    ? `${Math.floor(s / 3600)} h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')} min`
+    : `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`);
 
 /* ------------------------------------------------------------------ pricing */
 

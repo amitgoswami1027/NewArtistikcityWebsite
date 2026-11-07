@@ -105,7 +105,35 @@ public class ShopAdminController {
                 "prices", Personas.can(admin, "marketplace.edit"),
                 "listings", Personas.can(admin, "marketplace.edit") || Personas.can(admin, "marketplace.publish")));
         p.put("orderFlow", ShopOrderService.ORDER_FLOW);
+        ShopPricing.Custom c = repo.customSize();
+        p.put("customSize", Map.of("enabled", c.enabled(), "min", c.min().intValue(), "max", c.max().intValue()));
+        p.put("offersOpen", offerService.staffOpen());
         return p;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private OfferService offerService;
+
+    /** JSON {enabled, min, max}: custom print sizes (long side in whole inches). */
+    @PutMapping("/admin/console/api/shop/custom-size")
+    public ResponseEntity<String> customSize(HttpServletRequest request) throws IOException {
+        Row admin = auth.admin(request);
+        if (!Personas.can(admin, "marketplace.edit")) return error(HttpStatus.FORBIDDEN, "Only a super admin can change prices.");
+        Map<String, Object> b = body(request);
+        boolean enabled = !Boolean.FALSE.equals(b.get("enabled"));
+        int min = b.get("min") instanceof Number n ? n.intValue() : -1;
+        int max = b.get("max") instanceof Number n ? n.intValue() : -1;
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (min < ShopPricing.Custom.HARD_MIN || min > ShopPricing.Custom.HARD_MAX) errors.put("min", "Between " + ShopPricing.Custom.HARD_MIN + " and " + ShopPricing.Custom.HARD_MAX + " inches.");
+        if (max < ShopPricing.Custom.HARD_MIN || max > ShopPricing.Custom.HARD_MAX) errors.put("max", "Between " + ShopPricing.Custom.HARD_MIN + " and " + ShopPricing.Custom.HARD_MAX + " inches.");
+        if (errors.isEmpty() && max <= min) errors.put("max", "Make the longest size bigger than the shortest.");
+        if (!errors.isEmpty()) return invalid(errors);
+        ShopPricing.Custom before = repo.customSize();
+        repo.saveCustomSize(enabled, min, max);
+        audit.change(admin, "shop_prices", 0, "custom sizes", "Custom print sizes " + (enabled ? min + "-" + max + " in" : "off"),
+                Map.of("enabled", before.enabled(), "min", before.min(), "max", before.max()), Map.of("enabled", enabled, "min", min, "max", max));
+        return ok(Map.of("customSize", Map.of("enabled", enabled, "min", min, "max", max),
+                "message", enabled ? "Custom sizes saved: any long side from " + min + " to " + max + " in." : "Custom sizes switched off."));
     }
 
     private List<Map<String, Object>> orderList(Long scope) {

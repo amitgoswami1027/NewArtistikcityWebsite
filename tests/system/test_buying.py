@@ -49,12 +49,13 @@ sql(f"delete from orders where course_id = {course_id} and user_id = (select id 
 art_id, art_slug = sql("select id, slug from paintings where stock_status = 'AVAILABLE' order by id limit 1").split('\t')
 adm = admin_login()
 
-# ---------------------------------------------------------------- the header: Courses is one link, no cart
+# ---------------------------------------------------------------- the header: Courses is one link, plus the cart button
 _, props, r = page(requests.Session(), '/')
 check('home page renders', r.status_code == 200)
 js = open('src/main/resources/static/js/app.js', encoding='utf-8').read()
 check('header: Courses is a plain link to the course menu (no dropdown)', 'Courses <i className' not in js and 'dm-explore' not in js.split('Components/Site/SiteHeader.js')[1][:20000])
-check('header: no cart button', '<CartButton' not in js.split('Components/Site/SiteHeader.js')[1][:30000] and 'CartButton,' not in js.split('Components/Site/SiteHeader.js')[1][:30000])
+header_src = js[js.find('"./resources/js/Components/Site/SiteHeader.js":'):][:40000]
+check('header: cart button next to the menu', 'CartButton' in header_src)
 
 # ---------------------------------------------------------------- guests sign in before buying
 g = requests.Session(); g.get(B + '/courses')
@@ -129,7 +130,7 @@ sel2 = {**sel, 'size': fmt['sizes'][-1]['code']}
 post(tara, '/api/v1/purchase/draft', sel2); tara.get(B + '/purchase/buy-now')
 _, props, _ = page(tara, '/purchase/checkout')
 lines = [l for l in props['cart']['lines'] if l.get('id')]
-check('a second Buy now replaces the first (no cart piling up)', len(lines) == 1 and lines[0]['size'] == sel2['size'], [l['size'] for l in lines])
+check('a second Buy now checks out only the new choice', len(lines) == 1 and lines[0]['size'] == sel2['size'], [l['size'] for l in lines])
 
 # ---------------------------------------------------------------- admin marks the account a test buyer
 tara_id = sql("select id from users where email = 'tara@example.com'")

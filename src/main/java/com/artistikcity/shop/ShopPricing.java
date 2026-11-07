@@ -21,6 +21,12 @@ import java.util.Set;
  * </ul>
  * A print keeps the artwork's proportions: its long side is the size's {@code long_side_in}, the short side follows
  * the original's ratio, rounded to the nearest half inch. Frames are priced per inch of outside perimeter.
+ *
+ * <p><b>Custom sizes</b> (canvas and poster): size code {@code C<n>} = a long side of n whole inches, between the limits in
+ * {@link Custom} (Admin > Sales > Marketplace > Prices). The price follows the print's area along the preset sizes of that
+ * format (straight line between the two presets around it, continued past the ends), then goes up to the next ₹x99 like
+ * the presets; a custom size equal to a preset costs exactly the preset's price. {@code Components/Shop/shop.js} mirrors
+ * this for the live preview.</p>
  */
 public final class ShopPricing {
 
@@ -34,6 +40,77 @@ public final class ShopPricing {
 
     /** One row of shop_price_options. */
     public record Option(String kind, String code, String label, BigDecimal longSide, BigDecimal price, BigDecimal extra, int sort, boolean active) {
+    }
+
+    /** Custom print sizes: whether they are offered and the shortest / longest long side in inches. */
+    public record Custom(boolean enabled, BigDecimal min, BigDecimal max) {
+        public static final int DEFAULT_MIN = 8;
+        public static final int DEFAULT_MAX = 60;
+        public static final int HARD_MIN = 4;
+        public static final int HARD_MAX = 96;
+    }
+
+    static final java.util.regex.Pattern CUSTOM_CODE = java.util.regex.Pattern.compile("C(\\d{1,3})");
+
+    /** The custom-size limits carried in the option list (two CUSTOM rows); off when they are missing. */
+    public static Custom custom(List<Option> options) {
+        Option min = null;
+        Option max = null;
+        for (Option o : options) {
+            if (!"CUSTOM".equals(o.kind())) continue;
+            if ("MIN".equals(o.code())) min = o;
+            if ("MAX".equals(o.code())) max = o;
+        }
+        if (min == null || max == null || min.longSide() == null || max.longSide() == null) return new Custom(false, BigDecimal.ZERO, BigDecimal.ZERO);
+        return new Custom(min.active() && max.active(), min.longSide(), max.longSide());
+    }
+
+    /** Long side of a custom size code ("C30" -> 30), or null when the code isn't one. */
+    public static Integer customLongSide(String size) {
+        if (size == null) return null;
+        java.util.regex.Matcher m = CUSTOM_CODE.matcher(size);
+        return m.matches() ? Integer.valueOf(m.group(1)) : null;
+    }
+
+    /**
+     * Price and stretching extra for a custom print of {@code longSide} inches, from the format's presets (by print area).
+     * Returns {price, extra}; null when the format has no presets.
+     */
+    static BigDecimal[] customPrice(Art art, List<Option> presets, int longSide) {
+        List<double[]> pts = new ArrayList<>();          // {area, price, extra}
+        for (Option o : presets) {
+            if (o.longSide() == null) continue;
+            BigDecimal[] wh = printSize(art, o.longSide());
+            pts.add(new double[]{wh[0].doubleValue() * wh[1].doubleValue(), o.price().doubleValue(), o.extra() == null ? 0 : o.extra().doubleValue()});
+        }
+        if (pts.isEmpty()) return null;
+        pts.sort((a, b) -> Double.compare(a[0], b[0]));
+        BigDecimal[] wh = printSize(art, BigDecimal.valueOf(longSide));
+        double area = wh[0].doubleValue() * wh[1].doubleValue();
+        double price;
+        double extra;
+        if (pts.size() == 1) {
+            price = pts.get(0)[1] * area / pts.get(0)[0];
+            extra = pts.get(0)[2] * area / pts.get(0)[0];
+        } else {
+            int i = 0;
+            while (i < pts.size() - 2 && area > pts.get(i + 1)[0]) i++;
+            double[] a = pts.get(i);
+            double[] b = pts.get(i + 1);
+            double t = b[0] == a[0] ? 0 : (area - a[0]) / (b[0] - a[0]);
+            price = a[1] + t * (b[1] - a[1]);
+            extra = a[2] + t * (b[2] - a[2]);
+            double smallest = pts.get(0)[1];
+            price = Math.max(price, smallest * 0.6);
+            extra = Math.max(extra, 0);
+        }
+        return new BigDecimal[]{BigDecimal.valueOf(roundPrice(price)), BigDecimal.valueOf(Math.round(extra / 100.0) * 100)};
+    }
+
+    /** Up to the next ₹x99 (₹1,250 -> ₹1,299; ₹4,999 stays), like the preset prices. */
+    static long roundPrice(double v) {
+        long r = (long) Math.ceil(v / 100.0 - 1e-9) * 100 - 1;
+        return Math.max(99, r);
     }
 
     /** The facts about a listing that pricing needs. */
@@ -126,6 +203,9 @@ public final class ShopPricing {
             m.put("finishes", finishes(f));
             m.put("frames", framesFor(f, art));
             m.put("maxQty", "CANVAS".equals(f) ? Math.min(MAX_QTY, art.editionsLeft()) : "POSTER".equals(f) ? MAX_QTY : 1);
+            Custom c = custom(options);
+            m.put("custom", ("CANVAS".equals(f) || "POSTER".equals(f)) && c.enabled() && !kind(options, f).isEmpty()
+                    ? Map.of("min", c.min().intValue(), "max", c.max().intValue()) : null);
             formats.add(m);
         }
         out.put("formats", formats);
@@ -189,6 +269,19 @@ public final class ShopPricing {
                 if (!art.formats().contains(f) || ("DIGITAL".equals(f) && !art.hasHires())) return fail(sel, "This format isn't offered for this artwork.");
                 if (!List.of("AVAILABLE", "RESERVED", "SOLD").contains(art.status())) return fail(sel, "This artwork isn't on sale right now.");
                 Option o = option(options, f, sel.size());
+                Integer customSide = "DIGITAL".equals(f) ? null : customLongSide(sel.size());
+                boolean isCustom = false;
+                if (customSide != null) {
+                    Custom c = custom(options);
+                    if (!c.enabled()) return fail(sel, "Custom sizes aren't available right now. Choose one of the sizes.");
+                    if (customSide < c.min().intValue() || customSide > c.max().intValue()) {
+                        return fail(sel, "Choose a long side between " + c.min().intValue() + " and " + c.max().intValue() + " inches.");
+                    }
+                    BigDecimal[] pe = customPrice(art, kind(options, f), customSide);
+                    if (pe == null) return fail(sel, "Choose a size.");
+                    o = new Option(f, "C" + customSide, "Custom size", BigDecimal.valueOf(customSide), pe[0], pe[1], 99, true);
+                    isCustom = true;
+                }
                 if (o == null) {
                     List<Option> all = kind(options, f);
                     if ("DIGITAL".equals(f) && all.size() == 1) o = all.get(0);
@@ -210,11 +303,11 @@ public final class ShopPricing {
                         if ("STRETCHED".equals(finish)) unit = unit.add(o.extra());
                         maxQty = Math.min(MAX_QTY, art.editionsLeft());
                         if (maxQty <= 0) return fail(sel, "The canvas edition is sold out.");
-                        label.append("Limited edition canvas · ").append(dims(w, h)).append(" · ").append("STRETCHED".equals(finish) ? "stretched" : "rolled");
+                        label.append("Limited edition canvas · ").append(dims(w, h)).append(isCustom ? " (custom)" : "").append(" · ").append("STRETCHED".equals(finish) ? "stretched" : "rolled");
                     } else {
                         finish = "GLOSSY".equals(sel.finish()) ? "GLOSSY" : "MATTE";
                         maxQty = MAX_QTY;
-                        label.append("Fine art poster · ").append(dims(w, h)).append(" · ").append(finish.toLowerCase(Locale.ROOT));
+                        label.append("Fine art poster · ").append(dims(w, h)).append(isCustom ? " (custom)" : "").append(" · ").append(finish.toLowerCase(Locale.ROOT));
                     }
                 }
             }

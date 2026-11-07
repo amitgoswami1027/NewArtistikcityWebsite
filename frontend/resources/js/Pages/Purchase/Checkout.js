@@ -94,7 +94,7 @@ const CONTACT = ['name', 'email', 'country', 'phone'];
 const DELIVERY = ['line1', 'line2', 'city', 'state', 'postal'];
 
 function CheckoutBody() {
-    const { customer, gateways = {}, payment, inrPerUsd } = usePage().props;
+    const { customer, gateways = {}, payment, inrPerUsd, only } = usePage().props;
     const cart = useCart();
     const data = cart.data;
     const [f, setF] = useState({
@@ -247,6 +247,10 @@ function CheckoutBody() {
             </button>
             <form className="pz-checkout__form" onSubmit={pay} noValidate>
                 <h1>Payment</h1>
+                {only && (
+                    <p className="pz-note" data-testid="checkout-only"><i className="fa fa-info-circle" aria-hidden="true"></i> You're buying just this artwork.
+                        {' '}{only.otherCount} other {only.otherCount === 1 ? 'item stays' : 'items stay'} in your cart for later. <a href="/purchase/checkout?all=1">Check out everything instead</a></p>
+                )}
                 {notice && <p className={`pz-note ${notice.type === 'error' ? 'is-error' : ''}`} role="alert">{notice.text}</p>}
 
                 <Section n={1} id="contact" title="Contact" open={open === 'contact'} done={done.contact} summary={contactSummary} onEdit={() => setOpen('contact')}>
@@ -332,7 +336,7 @@ export default function PurchaseCheckout() {
     return (
         <div className="ac">
             <Head title="Checkout · ArtistikCity" />
-            <CartProvider initial={{ ...cart, serverNow }}>
+            <CartProvider initial={{ ...cart, serverNow }} scope="checkout">
                 <div className="pz pz--shell">
                     <header className="pz-shellhead">
                         <div className="ac-wide">

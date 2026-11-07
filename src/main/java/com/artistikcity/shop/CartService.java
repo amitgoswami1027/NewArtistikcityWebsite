@@ -29,6 +29,9 @@ public class CartService {
 
     private static final Logger log = LoggerFactory.getLogger(CartService.class);
 
+    /** Different lines a cart may hold. */
+    public static final int MAX_LINES = 50;
+
     private final ShopRepository repo;
     private final Auth auth;
     private final MarketplaceService market;
@@ -95,6 +98,12 @@ public class CartService {
         }
         if (!q.ok()) throw new MarketplaceException(422, "INVALID", q.error());
         long cartId = cartId(request, true);
+        if (repo.items(cartId).size() >= MAX_LINES) {
+            boolean same = repo.items(cartId).stream().anyMatch(i -> ((Number) i.get("painting_id")).longValue() == paintingId && q.selection().format().equals(i.get("format"))
+                    && q.selection().size().equals(String.valueOf(i.get("size_code"))) && q.selection().finish().equals(String.valueOf(i.get("finish")))
+                    && q.selection().frame().equals(String.valueOf(i.get("frame"))));
+            if (!same) throw new MarketplaceException(409, "CART_FULL", "Your cart holds up to " + MAX_LINES + " different items. Check out or remove some first.");
+        }
         if ("ORIGINAL".equals(sel.format())) {
             market.reserve(paintingId, Holders.primary(request, auth), Holders.all(request, auth), auth.userId(request), switchHold);
             marketRepo.syncStudentListing(paintingId);
@@ -108,18 +117,57 @@ public class CartService {
         repo.upsertItem(cartId, paintingId, q.selection(), q.maxQty());
     }
 
+    /** Session key: the one cart line "Buy now" is paying for (the rest of the cart stays put). */
+    public static final String ONLY = "purchase.only";
+
     /**
-     * "Buy now": the basket holds exactly this one piece. Other lines go (an original among them gives its hold back),
-     * then the piece is added as chosen.
+     * "Buy now": the piece goes into the cart as chosen (or the existing identical line is reused) and the checkout pays for
+     * that line only; everything else in the cart stays there for later. Returns the line's id.
      */
-    public void replaceWith(HttpServletRequest request, long paintingId, ShopPricing.Selection sel) {
-        Long cartId = cartId(request, true);
-        for (Map<String, Object> i : repo.items(cartId)) {
-            long pid = ((Number) i.get("painting_id")).longValue();
-            repo.deleteItem(cartId, ((Number) i.get("id")).longValue());
-            if ("ORIGINAL".equals(i.get("format")) && pid != paintingId) market.release(pid, Holders.all(request, auth));
-        }
+    public long buyNow(HttpServletRequest request, long paintingId, ShopPricing.Selection sel) {
         add(request, paintingId, sel, false);
+        long cartId = cartId(request, true);
+        ShopPricing.Quote q = ShopPricing.quote(ShopRepository.art(repo.painting(paintingId)), repo.options(), sel);
+        ShopPricing.Selection n = q.ok() ? q.selection() : sel;
+        Long found = null;
+        for (Map<String, Object> i : repo.items(cartId)) {
+            if (((Number) i.get("painting_id")).longValue() == paintingId && n.format().equals(i.get("format")) && n.size().equals(String.valueOf(i.get("size_code")))
+                    && n.finish().equals(String.valueOf(i.get("finish"))) && n.frame().equals(String.valueOf(i.get("frame")))) {
+                found = ((Number) i.get("id")).longValue();
+                // Buy now buys the quantity chosen now, not what an earlier "add to cart" left on the line
+                if (!"ORIGINAL".equals(n.format())) repo.setQuantity(cartId, found, Math.max(1, Math.min(n.qty(), q.ok() ? q.maxQty() : 1)));
+            }
+        }
+        if (found == null) throw new MarketplaceException(409, "CART_CHANGED", "We couldn't add this to your cart. Please try again.");
+        request.getSession(true).setAttribute(ONLY, found);
+        return found;
+    }
+
+    /** Checkout pays for the whole cart again (the cart page's and drawer's "Checkout"). */
+    public void checkoutAll(HttpServletRequest request) {
+        jakarta.servlet.http.HttpSession s = request.getSession(false);
+        if (s != null) s.removeAttribute(ONLY);
+    }
+
+    /** The line Buy now is paying for, while it is still in the cart; null = the whole cart. */
+    public Long onlyLine(HttpServletRequest request) {
+        jakarta.servlet.http.HttpSession s = request.getSession(false);
+        if (s == null || !(s.getAttribute(ONLY) instanceof Long id)) return null;
+        Long cartId = cartId(request, false);
+        return cartId != null && repo.item(cartId, id) != null ? id : null;
+    }
+
+    /** What the checkout charges: the Buy now line on its own, else the whole cart. */
+    public Priced priceForCheckout(HttpServletRequest request, String country) {
+        Priced all = price(request, country, null, null);
+        Long only = onlyLine(request);
+        if (only == null) return all;
+        List<PricedLine> one = all.lines().stream().filter(l -> only.equals(l.itemId())).map(l ->
+                new PricedLine(l.itemId(), l.painting(), l.quote(), l.status(), l.message(), l.holdExpiresAt(), BigDecimal.ZERO)).toList();
+        Long cartId = cartId(request, false);
+        String couponCode = cartId == null ? null : repo.list("select coupon_code from shop_carts where id = ?", cartId).stream().findFirst()
+                .map(r -> r.get("coupon_code") == null ? null : String.valueOf(r.get("coupon_code"))).orElse(null);
+        return total(one, repo.coupon(couponCode), country);
     }
 
     public void setQuantity(HttpServletRequest request, long itemId, int qty) {
@@ -136,7 +184,7 @@ public class CartService {
         repo.setQuantity(cartId, itemId, Math.max(1, Math.min(qty, max)));
     }
 
-    /** Removes a line; removing an original also gives its hold back to the gallery. */
+    /** Removes a line; removing an original also gives its hold back to the gallery (not one from an accepted offer). */
     public void remove(HttpServletRequest request, long itemId) {
         Long cartId = cartId(request, false);
         Map<String, Object> item = cartId == null ? null : repo.item(cartId, itemId);
@@ -222,6 +270,14 @@ public class CartService {
             message = q.error();
         } else if ("ORIGINAL".equals(sel.format())) {
             long id = ((Number) p.get("id")).longValue();
+            // an accepted offer: the agreed price replaces the listed one (frames still cost extra)
+            Long uid = keys.stream().filter(k -> k.startsWith("U:")).map(k -> Long.parseLong(k.substring(2))).findFirst().orElse(null);
+            BigDecimal agreed = repo.agreedPrice(id, uid);
+            if (agreed != null && q.ok()) {
+                BigDecimal unit = agreed.add(q.framePrice()).setScale(2, java.math.RoundingMode.HALF_UP);
+                q = new ShopPricing.Quote(q.selection(), true, null, unit, unit, q.widthIn(), q.heightIn(),
+                        q.label().replaceFirst("^Original painting", "Original painting at your agreed price"), 1, q.framePrice());
+            }
             MarketplaceService.Hold hold = market.activeHold(id, keys);
             if (hold != null) {
                 holdUntil = hold.expiresAtMillis();
@@ -305,6 +361,9 @@ public class CartService {
         m.put("status", l.status());
         m.put("message", l.message());
         m.put("holdExpiresAt", l.holdExpiresAt());
+        m.put("listPrice", p.get("final_price"));
+        m.put("agreed", "ORIGINAL".equals(q.selection().format()) && q.label() != null && q.label().contains("agreed price"));
+        m.put("customSize", ShopPricing.customLongSide(q.selection().size()) != null);
         return m;
     }
 

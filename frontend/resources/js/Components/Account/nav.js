@@ -9,6 +9,8 @@ export function accountNav(nav) {
             subtitle: 'View and update your personal details and how others see you on ArtistikCity.' },
         { href: '/user/orders', label: 'Your orders', icon: 'fa-shopping-bag', count: n.orders, title: 'Your orders',
             subtitle: 'Courses, workshops, original artworks and commissions you have ordered.', match: /^\/user\/(orders|order-history)/ },
+        { href: '/user/offers', label: 'Your offers', icon: 'fa-handshake-o', count: n.offers, title: 'Your offers',
+            subtitle: 'Offers you made on original artworks, and the artists’ answers.' },
         { href: '/user/wishlist', label: 'Wish list', icon: 'fa-heart-o', count: n.wishlist, title: 'Your wish list',
             subtitle: 'Courses, workshops and original artworks you saved for later.' },
         { href: '/user/my-address', label: 'Addresses', icon: 'fa-map-marker', title: 'Addresses',
@@ -22,7 +24,7 @@ export function accountNav(nav) {
     ];
 }
 
-export const ACCOUNT_PATHS = /^\/user\/(my-account|my-address|change-password|order-history|orders|notifications|linked-accounts|language|wishlist|help)(\/|$)/;
+export const ACCOUNT_PATHS = /^\/user\/(my-account|my-address|change-password|order-history|orders|offers|notifications|linked-accounts|language|wishlist|help)(\/|$)/;
 
 export function activeAccountItem(path, nav) {
     const items = accountNav(nav);

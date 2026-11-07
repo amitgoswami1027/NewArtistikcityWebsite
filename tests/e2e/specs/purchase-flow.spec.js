@@ -32,6 +32,7 @@ test.describe('Purchase flow', () => {
         await page.click('.pz-buyopt[data-format=CANVAS]');
         await page.getByTestId('buy-continue').click();
         await page.waitForURL(/\/purchase\/step-2/);
+        await page.click('.ap-parts button[data-part=frame]');   // step 2 is split into A. Size, B. Frame, C. See it on your wall
         await page.click('.ap-frame[data-frame=BLACK_WOOD]');
         await page.getByTestId('room-continue').click();
         await page.waitForURL(/\/purchase\/checkout/);

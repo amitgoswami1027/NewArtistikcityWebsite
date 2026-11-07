@@ -74,10 +74,13 @@ test.describe('Preview and frame', () => {
 
             const price = page.getByTestId('room-price');
             const p0 = await price.textContent();
+            await page.getByTestId('part-next').click();          // A. Size -> B. Frame
+            await expect(page.locator('.ap-part')).toHaveAttribute('data-part', 'frame');
             await page.click('.ap-frame[data-frame=OAK]');
             await expect(page.locator('.ap-stage .ap-art')).toHaveClass(/ap-art--oak/);
             await expect(price).not.toHaveText(p0);
-            const sizes = page.locator('.ap-size');
+            await page.getByTestId('part-back').click();
+            const sizes = page.locator('.ap-size:not(.ap-size--custom)');
             if (await sizes.count() > 1) {
                 const r0 = await page.locator('.ap-stage .ap-place').evaluate((el) => el.clientWidth / el.clientHeight);
                 await sizes.last().click();
@@ -90,12 +93,12 @@ test.describe('Preview and frame', () => {
 
         test('Buy now goes to payment with exactly this choice', async ({ page }) => {
             await openPreview(page);
+            await page.click('.ap-parts button[data-part=frame]');
             await page.click('.ap-frame[data-frame=BLACK_WOOD]');
             await page.getByTestId('room-continue').click();
             await page.waitForURL(/\/purchase\/checkout/);
             await expect(page.locator('.pz-line')).toHaveCount(1);
             await expect(page.locator('.pz-line__variant').first()).toContainText('black wood frame');
-            await expect(page.locator('.dm-header .pz-cartbtn, [aria-label*="cart" i]')).toHaveCount(0);
         });
 
         test('@mobile the preview fits the screen with a Buy now bar', async ({ page, isMobile }) => {
