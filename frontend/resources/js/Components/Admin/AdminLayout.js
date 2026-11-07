@@ -41,6 +41,19 @@ export const NAV = [
         { href: '/admin/payments/refunds', label: 'Refunds', icon: 'fa-undo', cap: 'revenue', badge: 'refunds' },
         { href: '/admin/finance', label: 'Payouts & ledger', icon: 'fa-balance-scale', cap: 'revenue', badge: 'payouts', also: ['/admin/finance/'] },
     ] },
+    // every landing-page screen lives here (pages, builder, pricing, payments, checkout, coupons, orders, analytics, SEO)
+    { group: 'Landing Page Management', icon: 'fa-rocket', collapsible: true, items: [
+        { href: '/admin/landing', label: 'Overview', icon: 'fa-tachometer', cap: 'landing', exact: true },
+        { href: '/admin/landing/pages', label: 'All landing pages', icon: 'fa-files-o', cap: 'landing', also: ['/admin/landing/preview/'] },
+        { href: '/admin/landing/pages/new', label: 'Create landing page', icon: 'fa-plus-circle', cap: 'landing.publish', exact: true },
+        { href: '/admin/landing/templates', label: 'Templates & sections', icon: 'fa-columns', cap: 'landing' },
+        { href: '/admin/landing/payments', label: 'Payments & checkout', icon: 'fa-credit-card', cap: 'landing.payments' },
+        { href: '/admin/landing/coupons', label: 'Coupons & promotions', icon: 'fa-ticket', cap: 'landing.pricing' },
+        { href: '/admin/landing/orders', label: 'Orders & transactions', icon: 'fa-shopping-cart', cap: 'landing.orders' },
+        { href: '/admin/landing/analytics', label: 'Analytics & reports', icon: 'fa-line-chart', cap: 'landing' },
+        { href: '/admin/landing/media', label: 'Media library', icon: 'fa-picture-o', cap: 'landing' },
+        { href: '/admin/landing/settings', label: 'Settings & roles', icon: 'fa-cog', cap: 'landing' },
+    ] },
     { group: 'Community', items: [
         { href: '/admin/dashboard/people', label: 'People & roles', icon: 'fa-users', cap: 'people' },
         { href: '/admin/instructors', label: 'Instructor profiles', icon: 'fa-user', cap: 'people.manage', also: ['/admin/instructors/'] },

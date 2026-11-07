@@ -170,10 +170,12 @@ public class ApiController {
         if (existing != null && existing.get("unsubscribed_at") == null) {
             return ok(Row.of("message", "success"));
         }
+        // where the sign-up came from: the footer, or a landing page's lead box ("landing:<page id>")
+        String source = in.get("source") != null && in.get("source").matches("^landing:[0-9]{1,12}$") ? in.get("source") : "footer";
         if (existing != null) {
-            db.updateById("newsletters", existing.get("id"), Row.of("unsubscribed_at", null, "source", "footer"));
+            db.updateById("newsletters", existing.get("id"), Row.of("unsubscribed_at", null, "source", source));
         } else {
-            db.insert("newsletters", Row.of("email", email, "source", "footer"));
+            db.insert("newsletters", Row.of("email", email, "source", source));
         }
         return ok(Row.of("message", "success"));
     }

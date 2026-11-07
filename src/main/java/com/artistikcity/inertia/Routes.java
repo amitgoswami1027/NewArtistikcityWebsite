@@ -94,6 +94,8 @@ public class Routes {
         post("user.register.post", "user-registration");
         get("courses", "courses");
         get("course.details", "course/{slug}");
+        get("course.landing.enroll", "course/{slug}/enroll");
+        get("course.landing.done", "course/{slug}/enroll/done");
 
         // --------------------------------------------------- cart / checkout
         post("course.add.cart.post", "add-to-cart");
@@ -228,6 +230,12 @@ public class Routes {
         get("admin.refunds", "admin/payments/refunds");
         // System parameters (Admin > System parameters)
         get("admin.setup", "admin/setup");
+        // Landing Page Management (landing/)
+        get("admin.landing", "admin/landing");
+        get("admin.landing.tab", "admin/landing/{tab}");
+        get("admin.landing.new", "admin/landing/pages/new");
+        get("admin.landing.edit", "admin/landing/pages/{id}/{step}");
+        get("admin.landing.preview", "admin/landing/preview/{id}");
         get("admin.setup.config.api", "admin/api/setup/config");
         get("admin.rooms", "admin/setup/room-preview");
         get("admin.setup.site_settings", "admin/setup/site-settings");

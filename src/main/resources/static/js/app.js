@@ -2933,6 +2933,19 @@ const NAV = [
     { href: "/admin/payments/refunds", label: "Refunds", icon: "fa-undo", cap: "revenue", badge: "refunds" },
     { href: "/admin/finance", label: "Payouts & ledger", icon: "fa-balance-scale", cap: "revenue", badge: "payouts", also: ["/admin/finance/"] }
   ] },
+  // every landing-page screen lives here (pages, builder, pricing, payments, checkout, coupons, orders, analytics, SEO)
+  { group: "Landing Page Management", icon: "fa-rocket", collapsible: true, items: [
+    { href: "/admin/landing", label: "Overview", icon: "fa-tachometer", cap: "landing", exact: true },
+    { href: "/admin/landing/pages", label: "All landing pages", icon: "fa-files-o", cap: "landing", also: ["/admin/landing/preview/"] },
+    { href: "/admin/landing/pages/new", label: "Create landing page", icon: "fa-plus-circle", cap: "landing.publish", exact: true },
+    { href: "/admin/landing/templates", label: "Templates & sections", icon: "fa-columns", cap: "landing" },
+    { href: "/admin/landing/payments", label: "Payments & checkout", icon: "fa-credit-card", cap: "landing.payments" },
+    { href: "/admin/landing/coupons", label: "Coupons & promotions", icon: "fa-ticket", cap: "landing.pricing" },
+    { href: "/admin/landing/orders", label: "Orders & transactions", icon: "fa-shopping-cart", cap: "landing.orders" },
+    { href: "/admin/landing/analytics", label: "Analytics & reports", icon: "fa-line-chart", cap: "landing" },
+    { href: "/admin/landing/media", label: "Media library", icon: "fa-picture-o", cap: "landing" },
+    { href: "/admin/landing/settings", label: "Settings & roles", icon: "fa-cog", cap: "landing" }
+  ] },
   { group: "Community", items: [
     { href: "/admin/dashboard/people", label: "People & roles", icon: "fa-users", cap: "people" },
     { href: "/admin/instructors", label: "Instructor profiles", icon: "fa-user", cap: "people.manage", also: ["/admin/instructors/"] },
@@ -30873,6 +30886,3157 @@ function Offers() {
       ] })
     ] })
   ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Admin/Landing/parts.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var parts_exports = {};
+__export(parts_exports, {
+  ImageField: () => ImageField,
+  MediaPicker: () => MediaPicker,
+  PaymentSettings: () => PaymentSettings,
+  STATUS: () => STATUS,
+  SectionContent: () => SectionContent,
+  SeriesChart: () => SeriesChart,
+  TemplateThumb: () => TemplateThumb,
+  has: () => has,
+  inr: () => inr,
+  num: () => num,
+  pct: () => pct
+});
+module.exports = __toCommonJS(parts_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+var import_AdminLayout = __webpack_require__("./resources/js/Components/Admin/AdminLayout.js");
+const STATUS = {
+  DRAFT: { label: "Draft", tone: "grey" },
+  SCHEDULED: { label: "Scheduled", tone: "blue" },
+  PUBLISHED: { label: "Published", tone: "green" },
+  ARCHIVED: { label: "Archived", tone: "amber" }
+};
+const inr = (v) => v === null || v === void 0 || v === "" ? "\u2014" : `\u20B9${Number(v).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+const pct = (v) => `${Number(v || 0).toLocaleString("en-IN", { maximumFractionDigits: 1 })}%`;
+const num = (v) => Number(v || 0).toLocaleString("en-IN");
+const has = (caps, c) => (caps || []).includes(c);
+const PROVIDER_NAME = { razorpay: "Razorpay", paypal: "PayPal", cashfree: "Cashfree", payu: "PayU" };
+const GROUPS = [
+  { key: "india", title: "Indian payment methods" },
+  { key: "networks", title: "Card networks", hint: "Leave all off to accept every network. Switch some on to accept only those." },
+  { key: "international", title: "International" }
+];
+function PaymentSettings({ value, onSave, global = false, canEdit = true, toast }) {
+  const [v, setV] = (0, import_react.useState)(value);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [testing, setTesting] = (0, import_react.useState)(null);
+  const dirty = JSON.stringify(v) !== JSON.stringify(value);
+  (0, import_react.useEffect)(() => {
+    setV(value);
+  }, [value]);
+  const providerOn = (key) => v.providers.some((p) => p.key === key && p.enabled);
+  const supportedNow = (m) => m.supportedBy.some(providerOn);
+  const setProvider = (key, patch) => setV(__spreadProps(__spreadValues({}, v), { providers: v.providers.map((p) => p.key === key ? __spreadValues(__spreadValues({}, p), patch) : p) }));
+  const setMethod = (key, patch) => {
+    let methods = v.methods.map((m) => m.key === key ? __spreadValues(__spreadValues({}, m), patch) : m);
+    const cardOn = methods.some((m) => (m.key === "credit_card" || m.key === "debit_card") && m.enabled);
+    if (!cardOn) methods = methods.map((m) => m.group === "networks" ? __spreadProps(__spreadValues({}, m), { enabled: false }) : m);
+    setV(__spreadProps(__spreadValues({}, v), { methods }));
+  };
+  const move = (key, d) => {
+    const list = [...v.methods];
+    const i = list.findIndex((m) => m.key === key);
+    const j = i + d;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    setV(__spreadProps(__spreadValues({}, v), { methods: list }));
+  };
+  const custom = global || v.mode === "CUSTOM";
+  const save = () => {
+    setBusy(true);
+    setErrors({});
+    const body = {
+      mode: global ? "CUSTOM" : v.mode,
+      defaultProvider: v.defaultProvider,
+      providers: v.providers.map((p) => ({ key: p.key, enabled: p.enabled, priority: p.priority })),
+      methods: v.methods.map((m) => ({ key: m.key, enabled: m.enabled }))
+    };
+    onSave(body).then((next) => {
+      if (next) setV(next);
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const test = (key) => {
+    setTesting(key);
+    import_axios.default.post("/admin/api/landing/payments/test", { provider: key }).then((r) => toast(r.data.message, r.data.ok ? "ok" : "error")).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setTesting(null));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-pay", "data-testid": "payment-settings", children: [
+    !global && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-modes", role: "radiogroup", "aria-label": "Payment settings for this page", children: [
+      ["GLOBAL", "Use the global defaults", "Follows Landing pages \u203A Payments. Changing the defaults changes this page."],
+      ["CUSTOM", "Custom for this page", "Only this page. Other pages never change."]
+    ].map(([k, t, d]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: (0, import_kit.cx)("lpa-mode", v.mode === k && "is-on"), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "paymode", value: k, checked: v.mode === k, disabled: !canEdit, onChange: () => setV(__spreadProps(__spreadValues({}, v), { mode: k })), "data-testid": `paymode-${k}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: d })
+    ] }, k)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "lpa-block", disabled: !custom || !canEdit, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { children: "Payment providers" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+        "Keys stay in System parameters \u203A Configuration Panel (super admin). Here you choose which connected providers this ",
+        global ? "default" : "page",
+        " uses."
+      ] }),
+      errors.providers && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: errors.providers }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-providers", children: v.providers.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("lpa-provider", p.enabled && "is-on", !p.integrated && "is-off"), "data-provider": p.key, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-provider__main", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.Toggle,
+            {
+              checked: p.enabled,
+              disabled: !p.integrated || !custom || !canEdit,
+              onChange: (on) => setProvider(p.key, { enabled: on }),
+              label: `${p.label} \xB7 ${p.currency}`,
+              description: p.note,
+              name: `provider-${p.key}`
+            }
+          ),
+          errors[`providers.${p.key}`] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", children: errors[`providers.${p.key}`] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-provider__side", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: p.connected ? "green" : p.integrated ? "amber" : "grey", dot: true, children: p.status }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lpa-priority", children: [
+            "Priority",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "select",
+              {
+                className: "adm-input adm-input--sm",
+                value: p.priority,
+                disabled: !custom || !canEdit,
+                onChange: (e) => setProvider(p.key, { priority: Number(e.target.value) }),
+                "aria-label": `${p.label} priority`,
+                children: [1, 2, 3, 4].map((n) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: n, children: n }, n))
+              }
+            )
+          ] }),
+          p.integrated && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => test(p.key), busy: testing === p.key, icon: "fa-plug", children: "Test connection" })
+        ] })
+      ] }, p.key)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Default provider", name: "defaultProvider", error: errors.defaultProvider, hint: "Used first when a method is offered by more than one provider.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { id: "f-defaultProvider", className: "adm-input", value: v.defaultProvider || "", onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { defaultProvider: e.target.value })), children: v.providers.filter((p) => p.integrated).map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: p.key, children: p.label }, p.key)) }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { className: "lpa-block", disabled: !custom || !canEdit, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", { children: "Payment methods" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+        "Buyers see a method only when it is ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "switched on" }),
+        " here, a ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "provider switched on above supports it" }),
+        ", and that provider is ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "connected" }),
+        " right now. Use the arrows to set the order buyers see."
+      ] }),
+      errors.methods && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: errors.methods }),
+      GROUPS.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-mgroup", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: g.title }),
+        g.hint && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: g.hint }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-methods", children: v.methods.filter((m) => m.group === g.key).map((m) => {
+          const ok = supportedNow(m);
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: (0, import_kit.cx)("lpa-method", m.enabled && "is-on", !ok && "is-unsupported"), "data-method": m.key, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              import_form.Toggle,
+              {
+                checked: m.enabled && ok,
+                disabled: !ok || !custom || !canEdit,
+                onChange: (on) => setMethod(m.key, { enabled: on }),
+                label: m.label,
+                description: !ok ? `Not supported by the providers switched on (${m.supportedBy.join(", ")} can).` : m.hint,
+                name: `method-${m.key}`
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-method__by", children: m.supportedBy.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: (0, import_kit.cx)("lpa-chip", providerOn(p) && "is-on"), children: PROVIDER_NAME[p] || p }, p)) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-method__state", children: m.live ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: "Shown to buyers" }) : m.enabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "amber", children: "On, not live" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Off" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-method__order", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-iconbtn", onClick: () => move(m.key, -1), "aria-label": `Move ${m.label} up`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-up", "aria-hidden": "true" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-iconbtn", onClick: () => move(m.key, 1), "aria-label": `Move ${m.label} down`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-down", "aria-hidden": "true" }) })
+            ] }),
+            errors[`methods.${m.key}`] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error lpa-method__err", children: errors[`methods.${m.key}`] })
+          ] }, m.key);
+        }) })
+      ] }, g.key))
+    ] }),
+    canEdit && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-savebar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted adm-small", children: dirty ? "Unsaved changes" : "Saved" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy, onClick: save, disabled: !dirty, "data-testid": "payments-save", children: global ? "Save global defaults" : "Save payment settings" })
+    ] })
+  ] });
+}
+function MediaPicker({ open, onClose, onPick, toast }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const file = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (open) import_axios.default.get("/admin/api/landing/media").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  }, [open]);
+  const upload = (f) => {
+    if (!f) return;
+    const fd = new FormData();
+    fd.append("file", f);
+    setBusy(true);
+    import_axios.default.post("/admin/api/landing/media", fd).then((r) => {
+      onPick(r.data.url);
+      onClose();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(false));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Drawer, { open, onClose, title: "Choose an image", subtitle: "Upload once, use on any page. At least 600 px wide; JPG or PNG.", size: "lg", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-upload", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { ref: file, type: "file", accept: "image/jpeg,image/png,image/webp", hidden: true, onChange: (e) => upload(e.target.files[0]) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", icon: "fa-upload", busy, onClick: () => file.current.click(), children: "Upload an image" })
+    ] }),
+    !data ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      data.media.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "lpa-h3", children: "Library" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-media", children: data.media.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: () => {
+        onPick(m.url);
+        onClose();
+      }, "aria-label": `Use ${m.alt || "this image"}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: m.thumb, alt: "", loading: "lazy" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: m.alt || `${m.width}\xD7${m.height}` })
+      ] }) }, m.id)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "lpa-h3", children: "Already on the site" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-media", children: data.site.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", onClick: () => {
+        onPick(m.url);
+        onClose();
+      }, "aria-label": `Use ${m.label}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: m.thumb, alt: "", loading: "lazy" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: m.label })
+      ] }) }, m.url)) })
+    ] })
+  ] });
+}
+function ImageField({ label, value, onChange, hint, error, toast, name }) {
+  const [open, setOpen] = (0, import_react.useState)(false);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Field, { label, name, hint, error, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-imgfield", children: [
+      value ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: value, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-imgfield__empty", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o", "aria-hidden": "true" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-imgfield__actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-picture-o", onClick: () => setOpen(true), children: value ? "Change" : "Choose" }),
+        value && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", onClick: () => onChange(""), children: "Use the course image" })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MediaPicker, { open, onClose: () => setOpen(false), onPick: onChange, toast })
+  ] });
+}
+const TEXT_FIELDS = {
+  eyebrow: { label: "Small label above the title", max: 60 },
+  heading: { label: "Heading", max: 120 },
+  subheading: { label: "Tagline", max: 200 },
+  body: { label: "Text", max: 2e3, rows: 4 },
+  imageAlt: { label: "Image description (alt text)", max: 160 },
+  language: { label: "Language of the classes", max: 60 },
+  video: { label: "Video link", max: 1e3, hint: "YouTube, Vimeo or an uploaded .mp4. Plays only when clicked (no cookies before that)." }
+};
+const ITEM_HELP = {
+  hero: { label: "Trust points", hint: 'Short and true, e.g. "Live classes with the artist".', title: "Point", noText: true },
+  intro: { label: "Highlights", title: "Title", text: "Text" },
+  outcomes: { label: "Outcomes", title: "Outcome", text: "What it means", hint: `Leave empty to use the course's "What you'll learn".` },
+  artist: { label: "Awards, exhibitions and experience", title: "Title", text: "Detail", hint: "Only facts you can stand behind." },
+  gallery: { label: "Artworks", title: "Caption", text: "Story", image: true, hint: "Leave empty to show the course photos and approved student work." },
+  benefits: { label: "Benefits", title: "Benefit", text: "Detail", hint: "Leave empty to build them from the course." },
+  faq: { label: "Questions", title: "Question", text: "Answer", hint: "Leave empty to show the site FAQ." }
+};
+function SectionContent({ section, onChange, lookups, toast, errors = {}, prefix }) {
+  const c = section.content || {};
+  const set = (k, val) => onChange(__spreadProps(__spreadValues({}, section), { content: __spreadProps(__spreadValues({}, c), { [k]: val }) }));
+  const err = (k) => errors[`${prefix}.content.${k}`];
+  const items = c.items || [];
+  const help = ITEM_HELP[section.type];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-content", children: [
+    Object.keys(TEXT_FIELDS).filter((k) => k in c).map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_form.Field,
+      {
+        label: TEXT_FIELDS[k].label,
+        name: `${section.id}-${k}`,
+        hint: TEXT_FIELDS[k].hint || (k === "heading" && section.type === "hero" ? "Leave empty to use the course title." : void 0),
+        error: err(k),
+        max: TEXT_FIELDS[k].max,
+        counter: String(c[k] || "").length,
+        children: TEXT_FIELDS[k].rows ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: `f-${section.id}-${k}`, className: "adm-input", rows: TEXT_FIELDS[k].rows, value: c[k] || "", onChange: (e) => set(k, e.target.value) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-${section.id}-${k}`, className: "adm-input", value: c[k] || "", onChange: (e) => set(k, e.target.value) })
+      },
+      k
+    )),
+    "image" in c && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      ImageField,
+      {
+        label: "Image",
+        value: c.image,
+        onChange: (u) => set("image", u),
+        toast,
+        error: err("image"),
+        name: `${section.id}-image`,
+        hint: "Leave empty to use the course image."
+      }
+    ),
+    "beforeImage" in c && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ImageField, { label: "Before (optional)", value: c.beforeImage, onChange: (u) => set("beforeImage", u), toast, name: `${section.id}-before`, hint: "With an After image, shows a slider." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ImageField, { label: "After (optional)", value: c.afterImage, onChange: (u) => set("afterImage", u), toast, name: `${section.id}-after` })
+    ] }),
+    "source" in c && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Which reviews", name: `${section.id}-source`, hint: "Only approved course reviews and approved testimonials are ever shown.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "adm-input", value: c.source, onChange: (e) => set("source", e.target.value), id: `f-${section.id}-source`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "reviews", children: "Approved reviews of this course" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "testimonials", children: "Selected site testimonials" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "both", children: "Both" })
+    ] }) }),
+    "ids" in c && section.type === "testimonials" && c.source !== "reviews" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Testimonials", name: `${section.id}-ids`, hint: "None ticked = all approved testimonials.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-checks", children: (lookups.testimonials || []).map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        {
+          type: "checkbox",
+          checked: (c.ids || []).includes(t.id),
+          onChange: (e) => set("ids", e.target.checked ? [...c.ids || [], t.id] : (c.ids || []).filter((x) => x !== t.id))
+        }
+      ),
+      " ",
+      t.name,
+      t.title ? ` \xB7 ${t.title}` : ""
+    ] }, t.id)) }) }),
+    "ids" in c && section.type === "artist" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Artists", name: `${section.id}-ids`, hint: "None ticked = the course's instructor. Tick several for a course taught by more than one artist.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-checks", children: (lookups.artists || []).map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        {
+          type: "checkbox",
+          checked: (c.ids || []).includes(a.id),
+          onChange: (e) => set("ids", e.target.checked ? [...c.ids || [], a.id] : (c.ids || []).filter((x) => x !== a.id))
+        }
+      ),
+      " ",
+      a.name
+    ] }, a.id)) }) }),
+    "socials" in c && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Field, { label: "Social links", name: `${section.id}-socials`, hint: "Full https:// links (Instagram, YouTube, Behance\u2026). Up to 6.", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleList, { value: c.socials || [], onChange: (l) => set("socials", l), placeholder: "https://instagram.com/\u2026", max: 6 }),
+      Object.keys(errors).filter((k) => k.startsWith(`${prefix}.content.socials`)).map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", children: errors[k] }, k))
+    ] }),
+    "html" in c && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Content", name: `${section.id}-html`, hint: "Headings, paragraphs, lists, links and images. Scripts and styles are removed when saved.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: `f-${section.id}-html`, className: "adm-input adm-mono", rows: 10, value: c.html || "", onChange: (e) => set("html", e.target.value) }) }),
+    "items" in c && help && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Field, { label: help.label, name: `${section.id}-items`, hint: help.hint, error: err("items"), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-items", children: items.map((it, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "lpa-item", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-item__n", children: i + 1 }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-item__fields", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              className: "adm-input",
+              placeholder: help.title,
+              value: it.title || "",
+              "aria-label": `${help.title} ${i + 1}`,
+              onChange: (e) => set("items", items.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { title: e.target.value }) : x))
+            }
+          ),
+          !help.noText && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "textarea",
+            {
+              className: "adm-input",
+              rows: 2,
+              placeholder: help.text,
+              value: it.text || "",
+              "aria-label": `${help.text} ${i + 1}`,
+              onChange: (e) => set("items", items.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { text: e.target.value }) : x))
+            }
+          ),
+          help.image && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            ImageField,
+            {
+              label: "Image",
+              value: it.image || "",
+              toast,
+              name: `${section.id}-item-${i}`,
+              error: err(`items.${i}.image`),
+              onChange: (u) => set("items", items.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { image: u }) : x))
+            }
+          ),
+          help.image && it.image && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              className: "adm-input",
+              placeholder: "Describe the artwork (alt text)",
+              value: it.alt || "",
+              "aria-label": `Alt text ${i + 1}`,
+              onChange: (e) => set("items", items.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { alt: e.target.value }) : x))
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-item__actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-iconbtn", disabled: i === 0, "aria-label": "Move up", onClick: () => {
+            const n = [...items];
+            [n[i - 1], n[i]] = [n[i], n[i - 1]];
+            set("items", n);
+          }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-up", "aria-hidden": "true" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-iconbtn", disabled: i === items.length - 1, "aria-label": "Move down", onClick: () => {
+            const n = [...items];
+            [n[i + 1], n[i]] = [n[i], n[i + 1]];
+            set("items", n);
+          }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-down", "aria-hidden": "true" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-iconbtn", "aria-label": "Remove", onClick: () => set("items", items.filter((_, j) => j !== i)), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }) })
+        ] })
+      ] }, i)) }),
+      items.length < 24 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", onClick: () => set("items", [...items, { title: "", text: "" }]), children: "Add" })
+    ] }),
+    ["curriculum", "related"].includes(section.type) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: section.type === "curriculum" ? "Modules and lessons come from the course (Admin \u203A Courses), so they are always up to date." : "Other published courses, in the same medium first." }),
+    section.type === "pricing" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Price, offers, inclusions, access and refund policy are set in the Pricing step. Payment options come from the Payments step." })
+  ] });
+}
+function SimpleList({ value, onChange, placeholder, max }) {
+  const [t, setT] = (0, import_react.useState)("");
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-simplelist", children: [
+    value.map((x, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-simplelist__row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", value: x, onChange: (e) => onChange(value.map((y, j) => j === i ? e.target.value : y)), "aria-label": `Link ${i + 1}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-iconbtn", "aria-label": "Remove", onClick: () => onChange(value.filter((_, j) => j !== i)), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }) })
+    ] }, i)),
+    value.length < max && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-simplelist__row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        {
+          className: "adm-input",
+          value: t,
+          placeholder,
+          onChange: (e) => setT(e.target.value),
+          "aria-label": "New link",
+          onKeyDown: (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (t.trim()) {
+                onChange([...value, t.trim()]);
+                setT("");
+              }
+            }
+          }
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => {
+        if (t.trim()) {
+          onChange([...value, t.trim()]);
+          setT("");
+        }
+      }, children: "Add" })
+    ] })
+  ] });
+}
+function TemplateThumb({ t }) {
+  const d = t.design;
+  const dark = t.hero === "immersive";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `lpa-thumb lpa-thumb--${t.hero}`, style: { "--a": d.accent, "--i": d.ink, "--s": d.surface }, "aria-hidden": "true", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-thumb__hero", style: { background: dark ? d.ink : d.surface }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-thumb__text", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { background: dark ? "#fff" : d.ink, width: "70%" } }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { background: dark ? "#fff" : d.ink, width: "50%" } }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "is-thin", style: { background: dark ? "rgba(255,255,255,.5)" : "#9aa3ad", width: "80%" } }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "is-btn", style: { background: d.accent } })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-thumb__art", children: t.hero === "video" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-play", "aria-hidden": "true" }) })
+    ] }),
+    t.sections.slice(1, 5).map((s, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-thumb__row", style: { background: i % 2 ? d.surface : "#fff" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { background: d.ink } }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { children: s.replace("_", " ") })
+    ] }, s))
+  ] });
+}
+function SeriesChart({ series, keyName, label, format = num }) {
+  const w = 640;
+  const h = 160;
+  const values = series.map((s) => Number(s[keyName] || 0));
+  const max = Math.max(1, ...values);
+  const step = series.length > 1 ? w / (series.length - 1) : w;
+  const pts = values.map((v, i) => [i * step, h - v / max * (h - 16) - 4]);
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+  const total = values.reduce((a, b) => a + b, 0);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figure", { className: "lpa-chart", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figcaption", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: label }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: format(total) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", { viewBox: `0 0 ${w} ${h}`, preserveAspectRatio: "none", role: "img", "aria-label": `${label} per day, total ${format(total)}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: `${line} L${w},${h} L0,${h} Z`, className: "lpa-chart__area" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: line, className: "lpa-chart__line" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-chart__axis", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: series[0] && series[0].date }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: series.length > 0 && series[series.length - 1].date })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { className: "sr-only", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("caption", { children: label }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: series.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: s.date }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: format(s[keyName]) })
+      ] }, s.date)) })
+    ] })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Landing/Index.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Index_exports = {};
+__export(Index_exports, {
+  LandingTabs: () => LandingTabs,
+  TABS: () => TABS,
+  default: () => LandingIndex
+});
+module.exports = __toCommonJS(Index_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+var import_parts = __webpack_require__("./resources/js/Components/Admin/Landing/parts.js");
+const TABS = [
+  { key: "overview", label: "Overview", icon: "fa-th-large", cap: "landing" },
+  { key: "pages", label: "All landing pages", icon: "fa-files-o", cap: "landing" },
+  { key: "templates", label: "Templates & sections", icon: "fa-columns", cap: "landing" },
+  { key: "payments", label: "Payments & checkout", icon: "fa-credit-card", cap: "landing.payments" },
+  { key: "coupons", label: "Coupons & promotions", icon: "fa-ticket", cap: "landing.pricing" },
+  { key: "orders", label: "Orders & transactions", icon: "fa-shopping-cart", cap: "landing.orders" },
+  { key: "analytics", label: "Analytics & reports", icon: "fa-line-chart", cap: "landing" },
+  { key: "media", label: "Media library", icon: "fa-picture-o", cap: "landing" },
+  { key: "settings", label: "Settings", icon: "fa-cog", cap: "landing" }
+];
+function LandingTabs({ current, caps }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "lpa-tabs", "aria-label": "Landing Page Management", children: TABS.filter((t) => (0, import_parts.has)(caps, t.cap)).map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: t.key === "overview" ? "/admin/landing" : `/admin/landing/${t.key}`, className: (0, import_kit.cx)(current === t.key && "is-on"), "aria-current": current === t.key ? "page" : void 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${t.icon}`, "aria-hidden": "true" }),
+    t.label
+  ] }, t.key)) });
+}
+const RANGES = [
+  { value: "today", label: "Today" },
+  { value: "yesterday", label: "Yesterday" },
+  { value: "7d", label: "7 days" },
+  { value: "30d", label: "30 days" },
+  { value: "90d", label: "90 days" },
+  { value: "custom", label: "Custom" }
+];
+function useReport(lookups) {
+  const [f, setF] = (0, import_react.useState)({ range: "30d", from: "", to: "", page: "", course: "", artist: "", campaign: "" });
+  const [data, setData] = (0, import_react.useState)(null);
+  const [loading, setLoading] = (0, import_react.useState)(false);
+  (0, import_react.useEffect)(() => {
+    if (f.range === "custom" && (!f.from || !f.to)) return;
+    setLoading(true);
+    import_axios.default.get("/admin/api/landing/overview", { params: f }).then((r) => setData(r.data)).finally(() => setLoading(false));
+  }, [f]);
+  const filters = /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-filters", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: f.range, options: RANGES, onChange: (v) => setF(__spreadProps(__spreadValues({}, f), { range: v })), label: "Date range" }),
+    f.range === "custom" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-dates", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+        "From ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", className: "adm-input adm-input--sm", value: f.from, onChange: (e) => setF(__spreadProps(__spreadValues({}, f), { from: e.target.value })) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+        "To ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", className: "adm-input adm-input--sm", value: f.to, onChange: (e) => setF(__spreadProps(__spreadValues({}, f), { to: e.target.value })) })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Page", value: f.page, onChange: (v) => setF(__spreadProps(__spreadValues({}, f), { page: v })), options: lookups.pages.map((p) => ({ value: p.id, label: p.name })), allLabel: "All pages" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Course", value: f.course, onChange: (v) => setF(__spreadProps(__spreadValues({}, f), { course: v })), options: lookups.courses.map((c) => ({ value: c.id, label: c.title })), allLabel: "All courses" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Artist", value: f.artist, onChange: (v) => setF(__spreadProps(__spreadValues({}, f), { artist: v })), options: lookups.artists.map((a) => ({ value: a.id, label: a.name })), allLabel: "All artists" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Campaign", value: f.campaign, onChange: (v) => setF(__spreadProps(__spreadValues({}, f), { campaign: v })), options: lookups.campaigns.map((c) => ({ value: c.campaign, label: c.campaign })), allLabel: "All campaigns" })
+  ] });
+  return { data, loading, filters };
+}
+function Overview({ lookups, caps }) {
+  const { data, loading, filters } = useReport(lookups);
+  const k = data && data.kpis;
+  const money = data && !data.moneyHidden;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-overview", children: [
+    filters,
+    !data ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stats lpa-stats", "aria-busy": loading, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Landing pages", value: (0, import_parts.num)(Object.values(data.pages).reduce((a, b) => a + b, 0)), icon: "fa-files-o" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Published", value: (0, import_parts.num)(data.pages.PUBLISHED), icon: "fa-globe", tone: "green" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Drafts", value: (0, import_parts.num)(data.pages.DRAFT), icon: "fa-pencil" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Scheduled", value: (0, import_parts.num)(data.pages.SCHEDULED), icon: "fa-clock-o", tone: "blue" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stats lpa-stats", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Page views", value: (0, import_parts.num)(k.views), icon: "fa-eye" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Unique visitors", value: (0, import_parts.num)(k.visitors), icon: "fa-user" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Enrolments", value: (0, import_parts.num)(k.enrollments), icon: "fa-graduation-cap", tone: "green" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Conversion", value: (0, import_parts.pct)(k.conversion), icon: "fa-percent" }),
+        money && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Revenue (INR)", value: (0, import_parts.inr)(k.revenueInr), icon: "fa-inr", tone: "green" }),
+        money && Number(k.revenueUsd) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Revenue (USD)", value: `$${(0, import_parts.num)(k.revenueUsd)}`, icon: "fa-usd" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Successful payments", value: (0, import_parts.num)(k.successful), icon: "fa-check" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Failed payments", value: (0, import_parts.num)(k.failed), icon: "fa-times", tone: k.failed ? "red" : void 0 }),
+        money && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Average order", value: (0, import_parts.inr)(k.aovInr), icon: "fa-shopping-bag" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Trend", subtitle: `${data.range.from} to ${data.range.to}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-charts", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.SeriesChart, { series: data.series, keyName: "visitors", label: "Visitors" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.SeriesChart, { series: data.series, keyName: "enrollments", label: "Enrolments" }),
+        money && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.SeriesChart, { series: data.series, keyName: "revenue", label: "Revenue", format: import_parts.inr })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Best-performing pages", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byPage, columns: [
+          { key: "name", label: "Page", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${r.id}`, children: r.name }) },
+          { key: "visitors", label: "Visitors", align: "right", render: (r) => (0, import_parts.num)(r.visitors) },
+          { key: "enrollments", label: "Enrolled", align: "right" },
+          { key: "conversion", label: "Conv.", align: "right", render: (r) => (0, import_parts.pct)(r.conversion) },
+          ...money ? [{ key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) }] : []
+        ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-files-o", title: "No pages yet" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Best-performing courses", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byCourse, rowKey: "id", columns: [
+          { key: "course", label: "Course" },
+          { key: "artist", label: "Artist" },
+          { key: "enrollments", label: "Enrolled", align: "right" },
+          ...money ? [{ key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) }] : []
+        ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-graduation-cap", title: "No enrolments in this period" }) }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Top campaigns", subtitle: "From UTM tags, coupon campaigns and page campaigns.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byCampaign, rowKey: "campaign", columns: [
+        { key: "campaign", label: "Campaign" },
+        { key: "enrollments", label: "Enrolled", align: "right" },
+        ...money ? [
+          { key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) },
+          { key: "discounts", label: "Discounts given", align: "right", render: (r) => (0, import_parts.inr)(r.discounts) }
+        ] : []
+      ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-bullhorn", title: "No campaign sales in this period" }) }) })
+    ] })
+  ] });
+}
+const METHOD_LABEL = { upi: "UPI", card: "Cards", netbanking: "Net banking", wallet: "Wallets", emi: "EMI", paypal: "PayPal", free: "Free", test: "Test", unknown: "Not recorded" };
+function Analytics({ lookups }) {
+  const { data, loading, filters } = useReport(lookups);
+  const k = data && data.kpis;
+  const money = data && !data.moneyHidden;
+  const funnel = k ? [["Visitors", k.visitors], ["Clicked Enroll", k.ctaClicks], ["Opened checkout", k.checkouts], ["Enrolled", k.enrollments]] : [];
+  const top = funnel.length ? Math.max(1, funnel[0][1]) : 1;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-analytics", children: [
+    filters,
+    !data ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Funnel", subtitle: "Unique visitors at each step (bots and staff are not counted).", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "lpa-funnel", "aria-busy": loading, children: funnel.map(([l, v], i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-funnel__label", children: l }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-funnel__bar", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { width: `${Math.max(2, v / top * 100)}%` } }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: (0, import_parts.num)(v) }),
+        i > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          (0, import_parts.pct)(funnel[i - 1][1] ? v * 100 / funnel[i - 1][1] : 0),
+          " of previous"
+        ] })
+      ] }, l)) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stats lpa-stats", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Checkout started", value: (0, import_parts.num)(k.checkouts), icon: "fa-shopping-cart" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Abandoned checkouts", value: `${(0, import_parts.num)(k.abandoned)} \xB7 ${(0, import_parts.pct)(k.abandonRate)}`, icon: "fa-sign-out", tone: k.abandonRate > 60 ? "amber" : void 0 }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Payment success rate", value: (0, import_parts.pct)(k.paymentSuccessRate), icon: "fa-check-circle", tone: "green" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Pending payments", value: (0, import_parts.num)(k.pending), icon: "fa-hourglass-half" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Refunds", value: `${(0, import_parts.num)(k.refunded)}${money ? ` \xB7 ${(0, import_parts.inr)(k.refundsInr)}` : ""}`, icon: "fa-undo" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment methods", subtitle: "Picked = buyers who chose it at checkout. Conversion = paid \xF7 picked.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byMethod, rowKey: "method", columns: [
+        { key: "method", label: "Method", render: (r) => METHOD_LABEL[r.method] || r.method },
+        { key: "picked", label: "Picked", align: "right" },
+        { key: "started", label: "Payment opened", align: "right" },
+        { key: "paid", label: "Paid", align: "right" },
+        { key: "failed", label: "Failed", align: "right" },
+        { key: "successRate", label: "Success rate", align: "right", render: (r) => (0, import_parts.pct)(r.successRate) },
+        { key: "conversion", label: "Conversion", align: "right", render: (r) => (0, import_parts.pct)(r.conversion) },
+        ...money ? [{ key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) }] : []
+      ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-credit-card", title: "No payments in this period" }) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment providers", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byProvider, rowKey: "provider", columns: [
+          { key: "provider", label: "Provider" },
+          { key: "paid", label: "Paid", align: "right" },
+          { key: "failed", label: "Failed", align: "right" },
+          { key: "pending", label: "Pending", align: "right" },
+          { key: "successRate", label: "Success", align: "right", render: (r) => (0, import_parts.pct)(r.successRate) }
+        ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-plug", title: "No payments yet" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Devices", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byDevice, rowKey: "device", columns: [
+          { key: "device", label: "Device" },
+          { key: "visitors", label: "Visitors", align: "right" },
+          { key: "buyers", label: "Bought", align: "right" },
+          { key: "c", label: "Conversion", align: "right", render: (r) => (0, import_parts.pct)(r.visitors ? r.buyers * 100 / r.visitors : 0) }
+        ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-mobile", title: "No visits yet" }) }) })
+      ] })
+    ] })
+  ] });
+}
+function Pages({ caps, toast }) {
+  const [q, setQ] = (0, import_react.useState)({ q: "", status: "", sort: "updated", dir: "desc", page: 1 });
+  const [data, setData] = (0, import_react.useState)({ rows: [], meta: {}, counts: {} });
+  const [loading, setLoading] = (0, import_react.useState)(true);
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const load = () => {
+    setLoading(true);
+    import_axios.default.get("/admin/api/landing/pages", { params: q }).then((r) => setData(r.data)).finally(() => setLoading(false));
+  };
+  (0, import_react.useEffect)(load, [q]);
+  const act = async (r, action) => {
+    if (action === "delete") {
+      if (!await confirm({ title: `Delete "${r.name}"?`, body: "This cannot be undone. Pages people bought through can only be archived.", confirmLabel: "Delete", danger: true })) return;
+      import_axios.default.delete(`/admin/api/landing/pages/${r.id}`).then((x) => {
+        toast(x.data.message);
+        load();
+      }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+      return;
+    }
+    if (action === "unpublish" && !await confirm({ title: `Unpublish "${r.name}"?`, body: r.takesOverCourse ? "The regular course page comes back at this address." : "The address stops working until you publish again.", confirmLabel: "Unpublish" })) return;
+    import_axios.default.post(`/admin/api/landing/pages/${r.id}/${action}`).then((x) => {
+      toast(x.data.message);
+      if (action === "duplicate") window.location.assign(`/admin/landing/pages/${x.data.id}`);
+      else load();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const pub = (0, import_parts.has)(caps, "landing.publish");
+  const c = data.counts || {};
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { flush: true, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Toolbar, { end: pub && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", href: "/admin/landing/pages/new", variant: "brand", icon: "fa-plus", "data-testid": "lp-create", children: "Create landing page" }), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: q.q, onSearch: (v) => setQ(__spreadProps(__spreadValues({}, q), { q: v, page: 1 })), placeholder: "Search name, address, course, campaign", label: "Search landing pages" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: q.status, onChange: (v) => setQ(__spreadProps(__spreadValues({}, q), { status: v, page: 1 })), label: "Status", options: [
+        { value: "", label: "Active" },
+        { value: "PUBLISHED", label: "Published", count: c.PUBLISHED || 0 },
+        { value: "DRAFT", label: "Drafts", count: c.DRAFT || 0 },
+        { value: "SCHEDULED", label: "Scheduled", count: c.SCHEDULED || 0 },
+        { value: "ARCHIVED", label: "Archived", count: c.ARCHIVED || 0 }
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.DataTable,
+      {
+        loading,
+        rows: data.rows,
+        meta: { sort: q.sort, dir: q.dir },
+        onSort: (sort) => setQ(__spreadProps(__spreadValues({}, q), { sort, dir: q.sort === sort && q.dir === "desc" ? "asc" : "desc" })),
+        caption: "Landing pages",
+        columns: [
+          { key: "name", label: "Landing page", sort: "name", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${r.id}`, className: "adm-cell__text", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.name }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { className: "adm-muted", children: [
+              "/course/",
+              r.slug,
+              r.campaign ? ` \xB7 ${r.campaign}` : ""
+            ] })
+          ] }) },
+          { key: "course", label: "Course \xB7 artist", sort: "course", hide: "md", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            r.course,
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: r.artist })
+          ] }) },
+          { key: "template", label: "Template", hide: "lg" },
+          { key: "status", label: "Status", sort: "status", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: import_parts.STATUS[r.status].tone, dot: true, children: import_parts.STATUS[r.status].label }),
+            r.status === "SCHEDULED" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: (0, import_kit.fmtDate)(r.publish_at, true) })
+            ] })
+          ] }) },
+          { key: "updated_at", label: "Updated", sort: "updated", hide: "md", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            (0, import_kit.fmtDate)(r.updated_at),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { className: "adm-muted", children: [
+              "Created ",
+              (0, import_kit.fmtDate)(r.created_at)
+            ] })
+          ] }) },
+          { key: "published_at", label: "Published", sort: "published", hide: "lg", render: (r) => r.published_at ? (0, import_kit.fmtDate)(r.published_at) : "\u2014" },
+          { key: "views", label: "Views", align: "right", render: (r) => (0, import_parts.num)(r.views) },
+          { key: "enrollments", label: "Enrolled", align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            (0, import_parts.num)(r.enrollments),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: (0, import_parts.pct)(r.conversion) })
+          ] }) },
+          { key: "revenue", label: "Revenue", align: "right", hide: "md", render: (r) => r.revenue === null ? "\u2014" : (0, import_parts.inr)(r.revenue) },
+          { key: "actions", label: "Actions", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `/admin/landing/pages/${r.id}`, icon: "fa-pencil", children: "Edit" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", variant: "ghost", href: `/admin/landing/preview/${r.id}`, target: "_blank", rel: "noopener", icon: "fa-eye", "aria-label": `Preview ${r.name}` }),
+            pub && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageMenu, { r, act })
+          ] }) }
+        ],
+        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-files-o", title: "No landing pages here", action: pub && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", href: "/admin/landing/pages/new", variant: "brand", icon: "fa-plus", children: "Create the first one" }), children: "A landing page sells one course with its own design, price, payment methods and analytics." })
+      }
+    ),
+    data.meta.pages > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-pager", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-pager__info", children: [
+        "Page ",
+        data.meta.page,
+        " of ",
+        data.meta.pages,
+        " \xB7 ",
+        data.meta.total,
+        " pages"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-pager__pages", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", disabled: data.meta.page <= 1, onClick: () => setQ(__spreadProps(__spreadValues({}, q), { page: data.meta.page - 1 })), children: "Previous" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", disabled: data.meta.page >= data.meta.pages, onClick: () => setQ(__spreadProps(__spreadValues({}, q), { page: data.meta.page + 1 })), children: "Next" })
+      ] })
+    ] }),
+    dialog
+  ] });
+}
+function PageMenu({ r, act }) {
+  const [open, setOpen] = (0, import_react.useState)(false);
+  const ref = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (!open) return void 0;
+    const out = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", out);
+    return () => document.removeEventListener("mousedown", out);
+  }, [open]);
+  const items = [
+    r.status !== "PUBLISHED" && r.status !== "ARCHIVED" && ["publish", "Publish now", "fa-globe"],
+    r.status === "PUBLISHED" && ["unpublish", "Unpublish", "fa-eye-slash"],
+    ["duplicate", "Duplicate", "fa-clone"],
+    r.status !== "ARCHIVED" && r.status !== "PUBLISHED" && ["archive", "Archive", "fa-archive"],
+    r.status === "ARCHIVED" && ["restore", "Restore", "fa-undo"],
+    r.status !== "PUBLISHED" && ["delete", "Delete", "fa-trash-o"]
+  ].filter(Boolean);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-menu", ref, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-ellipsis-h", "aria-label": `More actions for ${r.name}`, "aria-expanded": open, onClick: () => setOpen(!open) }),
+    open && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "lpa-menu__list", role: "menu", children: [
+      items.map(([a, l, i]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { role: "none", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", role: "menuitem", className: a === "delete" ? "is-danger" : "", onClick: () => {
+        setOpen(false);
+        act(r, a);
+      }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${i}`, "aria-hidden": "true" }),
+        l
+      ] }) }, a)),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { role: "none", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { role: "menuitem", href: `/admin/landing/pages/${r.id}/publish`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-clock-o", "aria-hidden": "true" }),
+        "Schedule\u2026"
+      ] }) }),
+      r.status === "PUBLISHED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { role: "none", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { role: "menuitem", href: `/course/${r.slug}`, target: "_blank", rel: "noopener", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link", "aria-hidden": "true" }),
+        "Open live page"
+      ] }) })
+    ] })
+  ] });
+}
+function Templates({ catalog, caps }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-templates", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Template library", subtitle: "A template is a starting point: design, hero layout and section order. Pages keep their own copy, so changing pages never changes a template, and switching template never loses text.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-templates", children: catalog.templates.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "lpa-template", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.TemplateThumb, { t }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: t.name }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: t.description }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-small adm-muted", children: [
+        t.sections.length,
+        " sections \xB7 hero: ",
+        t.hero
+      ] }),
+      (0, import_parts.has)(caps, "landing.publish") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `/admin/landing/pages/new?template=${t.key}`, icon: "fa-plus", children: "Use this template" })
+    ] }, t.key)) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Section library", subtitle: "Every page is built from these sections. Each can be switched on or off, reordered, given a layout and a background, and hidden on phones.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: catalog.sections, rowKey: "key", columns: [
+      { key: "label", label: "Section", render: (s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: s.label }) },
+      { key: "description", label: "What it shows" },
+      { key: "layouts", label: "Layouts", render: (s) => s.layouts.join(", ") },
+      { key: "single", label: "Per page", render: (s) => s.single ? "Once" : "Several" }
+    ] }) })
+  ] });
+}
+function Payments({ caps, toast }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const load = () => import_axios.default.get("/admin/api/landing/payments").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  (0, import_react.useEffect)(() => {
+    load();
+  }, []);
+  if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-payments", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment settings of every page", subtitle: "Each page either follows the global defaults below or has its own settings. Open a page to change it.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.pages, columns: [
+      { key: "name", label: "Page", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${r.id}/payments`, children: r.name }) },
+      { key: "status", label: "Status", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: import_parts.STATUS[r.status].tone, children: import_parts.STATUS[r.status].label }) },
+      { key: "mode", label: "Settings", render: (r) => r.mode === "CUSTOM" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "pink", children: "Custom" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Global defaults" }) },
+      { key: "choices", label: "Buyers see", render: (r) => r.choices.length ? r.choices.join(" \xB7 ") : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-danger", children: "Nothing: no way to pay" }) },
+      { key: "edit", label: "", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `/admin/landing/pages/${r.id}/payments`, icon: "fa-pencil", children: "Payment settings" }) }
+    ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-credit-card", title: "No pages yet" }) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Global defaults", subtitle: "Used by pages set to 'Use the global defaults' and as the starting point for new custom settings.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_parts.PaymentSettings,
+      {
+        value: data.defaults,
+        global: true,
+        toast,
+        canEdit: (0, import_parts.has)(caps, "landing.payments"),
+        onSave: (body) => import_axios.default.put("/admin/api/landing/payments/defaults", body).then((r) => {
+          toast(r.data.message);
+          load();
+          return r.data.defaults;
+        })
+      }
+    ) })
+  ] });
+}
+const EMPTY_COUPON = {
+  code: "",
+  description: "",
+  kind: "PERCENT",
+  value: "",
+  campaign: "",
+  allPages: false,
+  pages: [],
+  courses: [],
+  minAmount: "",
+  maxUses: "",
+  perUserLimit: "1",
+  firstTimeOnly: false,
+  startsAt: "",
+  expiresAt: "",
+  active: true
+};
+function Coupons({ lookups, toast }) {
+  const [list, setList] = (0, import_react.useState)(null);
+  const [edit, setEdit] = (0, import_react.useState)(null);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const load = () => import_axios.default.get("/admin/api/landing/coupons").then((r) => setList(r.data.coupons)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  (0, import_react.useEffect)(() => {
+    load();
+  }, []);
+  const open = (c) => {
+    setErrors({});
+    setEdit(c ? {
+      id: c.id,
+      code: c.code,
+      description: c.description || "",
+      kind: c.kind,
+      value: String(c.value),
+      campaign: c.campaign || "",
+      allPages: !!Number(c.all_pages),
+      pages: c.pages,
+      courses: c.courses,
+      minAmount: c.min_amount || "",
+      maxUses: c.max_uses || "",
+      perUserLimit: c.per_user_limit || "",
+      firstTimeOnly: !!Number(c.first_time_only),
+      startsAt: (c.starts_at || "").replace(" ", "T").slice(0, 16),
+      expiresAt: (c.expires_at || "").replace(" ", "T").slice(0, 16),
+      active: !!Number(c.is_active),
+      used: c.used_count
+    } : __spreadValues({}, EMPTY_COUPON));
+  };
+  const save = () => {
+    setBusy(true);
+    const req = edit.id ? import_axios.default.put(`/admin/api/landing/coupons/${edit.id}`, edit) : import_axios.default.post("/admin/api/landing/coupons", edit);
+    req.then((r) => {
+      toast(r.data.message);
+      setList(r.data.coupons);
+      setEdit(null);
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const remove = async (c) => {
+    if (!await confirm({ title: `Remove ${c.code}?`, body: "A code that has been used is switched off instead, so past orders keep their history.", confirmLabel: "Remove", danger: true })) return;
+    import_axios.default.delete(`/admin/api/landing/coupons/${c.id}`).then((r) => {
+      toast(r.data.message);
+      setList(r.data.coupons);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const now = /* @__PURE__ */ new Date();
+  const state = (c) => !Number(c.is_active) ? ["Off", "grey"] : c.expires_at && new Date(c.expires_at.replace(" ", "T")) < now ? ["Expired", "amber"] : c.starts_at && new Date(c.starts_at.replace(" ", "T")) > now ? ["Starts later", "blue"] : c.max_uses && c.used_count >= c.max_uses ? ["Used up", "amber"] : ["Active", "green"];
+  const target = (c) => Number(c.all_pages) ? "All landing pages" : [
+    ...c.pages.map((id) => (lookups.pages.find((p) => p.id === id) || {}).name),
+    ...c.courses.map((id) => `Course: ${(lookups.courses.find((x) => x.id === id) || {}).title}`)
+  ].filter(Boolean).join(", ");
+  const set = (k) => (e) => setEdit(__spreadProps(__spreadValues({}, edit), { [k]: e && e.target ? e.target.type === "checkbox" ? e.target.checked : e.target.value : e }));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { flush: true, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => open(null), "data-testid": "coupon-new", children: "New coupon" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Checked on the server every time: dates, pages / courses, minimum amount, total uses, uses per buyer and first-course-only. A use counts only once the payment is verified." }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { loading: !list, rows: list || [], columns: [
+      { key: "code", label: "Code", render: (c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { className: "adm-mono", children: c.code }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: c.description })
+      ] }) },
+      { key: "value", label: "Discount", render: (c) => c.kind === "PERCENT" ? `${Number(c.value)}%` : (0, import_parts.inr)(c.value) },
+      { key: "target", label: "Applies to", render: target },
+      { key: "campaign", label: "Campaign", hide: "md" },
+      { key: "used", label: "Used", align: "right", render: (c) => `${c.used_count}${c.max_uses ? ` / ${c.max_uses}` : ""}` },
+      { key: "discount_total", label: "Given", align: "right", hide: "md", render: (c) => (0, import_parts.inr)(c.discount_total) },
+      { key: "expires_at", label: "Valid until", hide: "md", render: (c) => c.expires_at ? (0, import_kit.fmtDate)(c.expires_at, true) : "No end" },
+      { key: "state", label: "Status", render: (c) => {
+        const [l, t] = state(c);
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: t, dot: true, children: l });
+      } },
+      { key: "actions", label: "", render: (c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-pencil", onClick: () => open(c), children: "Edit" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", "aria-label": `Remove ${c.code}`, onClick: () => remove(c) })
+      ] }) }
+    ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-ticket", title: "No coupons yet", action: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => open(null), children: "New coupon" }) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Drawer,
+      {
+        open: !!edit,
+        onClose: () => setEdit(null),
+        title: edit && edit.id ? `Edit ${edit.code}` : "New coupon",
+        size: "lg",
+        footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => setEdit(null), children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy, onClick: save, "data-testid": "coupon-save", children: "Save coupon" })
+        ] }),
+        children: edit && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-form", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Code", name: "code", error: errors.code, required: true, hint: "Letters, numbers, - and _. Buyers type it at checkout.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-code", className: "adm-input adm-mono", value: edit.code, onChange: (e) => setEdit(__spreadProps(__spreadValues({}, edit), { code: e.target.value.toUpperCase().replace(/\s/g, "") })), maxLength: 40 }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Description", name: "description", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-description", className: "adm-input", value: edit.description, onChange: set("description"), maxLength: 255 }) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid3", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Type", name: "kind", error: errors.kind, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-kind", className: "adm-input", value: edit.kind, onChange: set("kind"), children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "PERCENT", children: "Percentage" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "FLAT", children: "Fixed amount (\u20B9)" })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: edit.kind === "PERCENT" ? "Discount %" : "Discount \u20B9", name: "value", error: errors.value, required: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-value", className: "adm-input", inputMode: "decimal", value: edit.value, onChange: set("value") }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Campaign", name: "campaign", optional: true, hint: "Groups sales in Analytics.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-campaign", className: "adm-input", value: edit.campaign, onChange: set("campaign"), list: "lp-campaigns" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", { id: "lp-campaigns", children: lookups.campaigns.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: c.campaign }, c.campaign)) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Field, { label: "Where it works", name: "pages", error: errors.pages, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: edit.allPages, onChange: (v) => setEdit(__spreadProps(__spreadValues({}, edit), { allPages: v })), label: "All landing pages", name: "allPages" }),
+            !edit.allPages && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__label", children: "Landing pages" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-checks", children: lookups.pages.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: edit.pages.includes(p.id), onChange: (e) => setEdit(__spreadProps(__spreadValues({}, edit), { pages: e.target.checked ? [...edit.pages, p.id] : edit.pages.filter((x) => x !== p.id) })) }),
+                  " ",
+                  p.name
+                ] }, p.id)) })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__label", children: "Or every page of a course" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-checks", children: lookups.courses.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: edit.courses.includes(c.id), onChange: (e) => setEdit(__spreadProps(__spreadValues({}, edit), { courses: e.target.checked ? [...edit.courses, c.id] : edit.courses.filter((x) => x !== c.id) })) }),
+                  " ",
+                  c.title
+                ] }, c.id)) })
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid3", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Minimum order \u20B9", name: "minAmount", optional: true, error: errors.minAmount, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-minAmount", className: "adm-input", inputMode: "decimal", value: edit.minAmount, onChange: set("minAmount") }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Total uses", name: "maxUses", optional: true, error: errors.maxUses, hint: "Empty = no limit", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-maxUses", className: "adm-input", inputMode: "numeric", value: edit.maxUses, onChange: set("maxUses") }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Uses per buyer", name: "perUserLimit", optional: true, error: errors.perUserLimit, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-perUserLimit", className: "adm-input", inputMode: "numeric", value: edit.perUserLimit, onChange: set("perUserLimit") }) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Starts", name: "startsAt", optional: true, hint: "IST. Empty = now.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-startsAt", type: "datetime-local", className: "adm-input", value: edit.startsAt, onChange: set("startsAt") }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Ends", name: "expiresAt", optional: true, error: errors.expiresAt, hint: "IST. A real end date; buyers see it.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-expiresAt", type: "datetime-local", className: "adm-input", value: edit.expiresAt, onChange: set("expiresAt") }) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: edit.firstTimeOnly, onChange: (v) => setEdit(__spreadProps(__spreadValues({}, edit), { firstTimeOnly: v })), label: "First course only", description: "Only for buyers who have never paid for a course.", name: "firstTimeOnly" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: edit.active, onChange: (v) => setEdit(__spreadProps(__spreadValues({}, edit), { active: v })), label: "Active", name: "active" })
+        ] })
+      }
+    ),
+    dialog
+  ] });
+}
+const OSTATUS = { created: ["Created", "grey"], pending: ["Pending", "amber"], successful: ["Successful", "green"], failed: ["Failed", "red"], refunded: ["Refunded", "blue"], refund_due: ["Refund due", "amber"] };
+function Orders({ lookups, toast }) {
+  const [f, setF] = (0, import_react.useState)({ q: "", page: "", course: "", artist: "", provider: "", method: "", status: "", range: "90d", from: "", to: "", page_no: 1 });
+  const [data, setData] = (0, import_react.useState)(null);
+  const [loading, setLoading] = (0, import_react.useState)(false);
+  const [open, setOpen] = (0, import_react.useState)(null);
+  const [note, setNote] = (0, import_react.useState)("");
+  const [sure, setSure] = (0, import_react.useState)(false);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const load = () => {
+    setLoading(true);
+    import_axios.default.get("/admin/api/landing/orders", { params: f }).then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setLoading(false));
+  };
+  (0, import_react.useEffect)(load, [f]);
+  const show = (r) => {
+    setNote("");
+    setSure(false);
+    import_axios.default.get(`/admin/api/landing/orders/${r.id}`).then((x) => setOpen(x.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const refund = () => {
+    setBusy(true);
+    import_axios.default.post(`/admin/api/landing/orders/${open.id}/refund`, { note }).then((r) => {
+      toast(r.data.message);
+      setOpen(null);
+      load();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(false));
+  };
+  const set = (k) => (v) => setF(__spreadProps(__spreadValues({}, f), { [k]: v, page_no: 1 }));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { flush: true, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-filters lpa-filters--pad", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: f.q, onSearch: set("q"), placeholder: "Order, name, e-mail, transaction, coupon", label: "Search orders" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: f.range, options: RANGES.filter((r) => r.value !== "today" && r.value !== "yesterday"), onChange: set("range"), label: "Date range" }),
+      f.range === "custom" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-dates", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+          "From ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", className: "adm-input adm-input--sm", value: f.from, onChange: (e) => set("from")(e.target.value) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+          "To ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", className: "adm-input adm-input--sm", value: f.to, onChange: (e) => set("to")(e.target.value) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Status", value: f.status, onChange: set("status"), allLabel: "Any status", options: Object.keys(OSTATUS).map((k) => ({ value: k, label: OSTATUS[k][0] })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Page", value: f.page, onChange: set("page"), allLabel: "All pages", options: lookups.pages.map((p) => ({ value: p.id, label: p.name })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Course", value: f.course, onChange: set("course"), allLabel: "All courses", options: lookups.courses.map((c) => ({ value: c.id, label: c.title })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Artist", value: f.artist, onChange: set("artist"), allLabel: "All artists", options: lookups.artists.map((a) => ({ value: a.id, label: a.name })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Provider", value: f.provider, onChange: set("provider"), allLabel: "All providers", options: ["razorpay", "paypal", "test", "free"].map((p) => ({ value: p, label: p })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.FilterSelect, { label: "Method", value: f.method, onChange: set("method"), allLabel: "All methods", options: Object.keys(METHOD_LABEL).filter((k) => k !== "unknown").map((m) => ({ value: m, label: METHOD_LABEL[m] })) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { loading: loading || !data, rows: data ? data.rows : [], onRowClick: show, caption: "Landing page orders", columns: [
+      { key: "order_number", label: "Order", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.order_number }),
+        Number(r.is_test) ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Test" })
+        ] }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: (0, import_kit.fmtDate)(r.created_at, true) })
+      ] }) },
+      { key: "billing_name", label: "Customer", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        r.billing_name,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: r.billing_email })
+      ] }) },
+      { key: "course", label: "Course \xB7 page", hide: "md", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        r.course,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: r.page })
+      ] }) },
+      { key: "artist", label: "Artist", hide: "lg" },
+      { key: "price", label: "Amount", align: "right", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        r.currency === "USD" ? `$${r.price}` : (0, import_parts.inr)(r.price),
+        r.coupon_code && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: r.coupon_code })
+        ] })
+      ] }) },
+      { key: "payment_method", label: "Method \xB7 gateway", hide: "md", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        METHOD_LABEL[r.payment_method] || r.payment_method || "\u2014",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: r.payment_provider || "\u2014" })
+      ] }) },
+      { key: "payment_id", label: "Transaction", hide: "lg", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-mono adm-small", children: r.payment_id || r.gateway_ref || "\u2014" }) },
+      { key: "status", label: "Payment", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: OSTATUS[r.status][1], dot: true, children: OSTATUS[r.status][0] }) },
+      { key: "enrollment", label: "Enrolment", hide: "md" }
+    ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-shopping-cart", title: "No orders match", children: "Orders placed through landing pages appear here." }) }),
+    data && data.meta.pages > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-pager", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-pager__info", children: [
+        "Page ",
+        data.meta.page,
+        " of ",
+        data.meta.pages,
+        " \xB7 ",
+        data.meta.total,
+        " orders"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-pager__pages", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", disabled: data.meta.page <= 1, onClick: () => setF(__spreadProps(__spreadValues({}, f), { page_no: data.meta.page - 1 })), children: "Previous" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", disabled: data.meta.page >= data.meta.pages, onClick: () => setF(__spreadProps(__spreadValues({}, f), { page_no: data.meta.page + 1 })), children: "Next" })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Drawer, { open: !!open, onClose: () => setOpen(null), title: open ? `Order ${open.order_number}` : "", subtitle: open ? `${open.course} \xB7 ${open.page}` : "", size: "lg", children: open && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "order-drawer", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "adm-dl", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Status" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: OSTATUS[open.status][1], dot: true, children: OSTATUS[open.status][0] }),
+          " \xB7 ",
+          open.enrollment
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Amount" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+          open.currency === "USD" ? `$${open.price}` : (0, import_parts.inr)(open.price),
+          open.list_amount && Number(open.list_amount) !== Number(open.price) ? ` (list ${(0, import_parts.inr)(open.list_amount)})` : ""
+        ] }),
+        open.coupon_code && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Coupon" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+            open.coupon_code,
+            " \xB7 \u2212",
+            (0, import_parts.inr)(open.discount_amount)
+          ] })
+        ] }),
+        Number(open.tax_amount) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Tax in amount" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_parts.inr)(open.tax_amount) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Method" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+          METHOD_LABEL[open.payment_method] || open.payment_method || "\u2014",
+          " via ",
+          open.payment_provider || "\u2014"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Transaction" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { className: "adm-mono", children: [
+          open.payment_id || "\u2014",
+          open.gateway_ref ? ` \xB7 gateway order ${open.gateway_ref}` : ""
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Customer" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+          open.billing.name,
+          " \xB7 ",
+          open.billing.email,
+          open.billing.phone ? ` \xB7 ${open.billing.phone}` : ""
+        ] }),
+        (open.utm_source || open.utm_campaign) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Came from" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: [open.utm_source, open.utm_campaign].filter(Boolean).join(" \xB7 ") })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Created" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: (0, import_kit.fmtDate)(open.created_at, true) }),
+        open.refund && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Refund" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+            open.refund.status,
+            " \xB7 ",
+            open.refund.gateway_refund_id || open.refund.reason
+          ] })
+        ] })
+      ] }),
+      open.events.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Checkout steps", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "adm-timeline", children: open.events.map((e, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+        e.event.replace("_", " ").toLowerCase(),
+        " ",
+        e.method ? `\xB7 ${METHOD_LABEL[e.method] || e.method}` : "",
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: (0, import_kit.fmtDate)(e.created_at, true) })
+      ] }, i)) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Successful payments can't be edited. Money only goes back through a refund, which is logged." }),
+      data.canRefund && (open.status === "successful" || open.status === "refund_due") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Refund this order", subtitle: "Sends the full amount back through the gateway now.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Why", name: "note", required: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-note", className: "adm-input", rows: 2, value: note, onChange: (e) => setNote(e.target.value) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "adm-check", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", checked: sure, onChange: (e) => setSure(e.target.checked) }),
+          " I confirm: refund ",
+          open.currency === "USD" ? `$${open.price}` : (0, import_parts.inr)(open.price),
+          " to ",
+          open.billing.name,
+          "."
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "danger", icon: "fa-undo", busy, disabled: !sure || !note.trim(), onClick: refund, "data-testid": "order-refund", children: "Refund" })
+      ] })
+    ] }) })
+  ] });
+}
+function Media({ caps, toast }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const file = (0, import_react.useRef)(null);
+  const load = () => import_axios.default.get("/admin/api/landing/media").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  (0, import_react.useEffect)(() => {
+    load();
+  }, []);
+  const upload = (files) => {
+    const list = Array.from(files || []);
+    if (!list.length) return;
+    setBusy(true);
+    Promise.all(list.map((f) => {
+      const fd = new FormData();
+      fd.append("file", f);
+      return import_axios.default.post("/admin/api/landing/media", fd).then(() => null).catch((e) => `${f.name}: ${(0, import_AdminLayout.errorText)(e)}`);
+    })).then((errs) => {
+      const bad = errs.filter(Boolean);
+      if (bad.length) toast(bad.join(" \xB7 "), "error");
+      else toast(`${list.length} uploaded.`);
+      load();
+    }).finally(() => setBusy(false));
+  };
+  const alt = (m, v) => import_axios.default.put(`/admin/api/landing/media/${m.id}`, { alt: v }).then(() => toast("Saved.")).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  const remove = async (m) => {
+    if (!await confirm({ title: "Remove this image from the library?", body: "Images a page still uses cannot be removed.", confirmLabel: "Remove", danger: true })) return;
+    import_axios.default.delete(`/admin/api/landing/media/${m.id}`).then((r) => {
+      toast(r.data.message);
+      load();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const edit = (0, import_parts.has)(caps, "landing.content");
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Card,
+    {
+      title: "Media library",
+      subtitle: "Artwork, course images, artist photos and banners for landing pages. Pages get resized copies automatically (320 to 1600 px) for fast loading.",
+      actions: edit && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { ref: file, type: "file", multiple: true, accept: "image/jpeg,image/png,image/webp", hidden: true, onChange: (e) => upload(e.target.files) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-upload", busy, onClick: () => file.current.click(), children: "Upload images" })
+      ] }),
+      children: [
+        !data ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          data.media.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-picture-o", title: "No uploads yet", children: "Upload artwork once and use it on any page. Course images and artist portraits below can be used too." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-media lpa-media--lib", children: data.media.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: m.thumb, alt: m.alt || "", loading: "lazy" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { className: "adm-muted", children: [
+              m.width,
+              "\xD7",
+              m.height,
+              " \xB7 ",
+              Math.round((m.bytes || 0) / 1024),
+              " KB"
+            ] }),
+            edit ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input adm-input--sm", defaultValue: m.alt || "", placeholder: "Describe the image (alt text)", "aria-label": "Alt text", onBlur: (e) => {
+              if (e.target.value !== (m.alt || "")) alt(m, e.target.value);
+            } }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: m.alt }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-media__row", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: m.url, target: "_blank", rel: "noopener", className: "adm-small", children: "Open" }),
+              edit && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-linkbtn adm-danger", onClick: () => remove(m), children: "Remove" })
+            ] })
+          ] }, m.id)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "lpa-h3", children: "Already on the site" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-media", children: data.site.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: m.thumb, alt: "", loading: "lazy" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: m.label })
+          ] }, m.url)) })
+        ] }),
+        dialog
+      ]
+    }
+  );
+}
+function Settings({ catalog, caps, toast }) {
+  const [s, setS] = (0, import_react.useState)(null);
+  const [canEdit, setCanEdit] = (0, import_react.useState)(false);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  (0, import_react.useEffect)(() => {
+    import_axios.default.get("/admin/api/landing/settings").then((r) => {
+      setS(r.data.settings);
+      setCanEdit(r.data.canEdit);
+    });
+  }, []);
+  if (!s) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
+  const co = s.checkout || {};
+  const save = () => {
+    setBusy(true);
+    import_axios.default.put("/admin/api/landing/settings", s).then((r) => {
+      toast(r.data.message);
+      setS(r.data.settings);
+      setErrors({});
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Defaults for new pages", subtitle: "Applied when a page is created; every page can change them afterwards.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { disabled: !canEdit, className: "adm-form", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Default template", name: "template", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { id: "f-template", className: "adm-input", value: s.template, onChange: (e) => setS(__spreadProps(__spreadValues({}, s), { template: e.target.value })), children: catalog.templates.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: t.key, children: t.name }, t.key)) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "WhatsApp number for questions", name: "whatsapp", optional: true, error: errors.whatsapp, hint: "Shown as a chat button. With country code.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-whatsapp", className: "adm-input", value: s.whatsapp || "", onChange: (e) => setS(__spreadProps(__spreadValues({}, s), { whatsapp: e.target.value })), placeholder: "+919876543210" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Course access", name: "accessDuration", optional: true, error: errors.accessDuration, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-accessDuration", className: "adm-input", value: s.accessDuration || "", onChange: (e) => setS(__spreadProps(__spreadValues({}, s), { accessDuration: e.target.value })), placeholder: "Recordings for 12 months" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Tax", name: "taxRate", optional: true, error: errors.taxRate, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-taxRate", className: "adm-input adm-input--sm", inputMode: "decimal", value: s.taxRate || "", onChange: (e) => setS(__spreadProps(__spreadValues({}, s), { taxRate: e.target.value })), placeholder: "18" }),
+          " %",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "adm-input adm-input--sm", value: s.taxMode, onChange: (e) => setS(__spreadProps(__spreadValues({}, s), { taxMode: e.target.value })), "aria-label": "Tax mode", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "INCLUDED", children: "included in the price" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "ADDED", children: "added at checkout" })
+          ] })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Refund policy", name: "refundPolicy", optional: true, error: errors.refundPolicy, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-refundPolicy", className: "adm-input", rows: 3, value: s.refundPolicy || "", onChange: (e) => setS(__spreadProps(__spreadValues({}, s), { refundPolicy: e.target.value })) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__label", children: "Checkout" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-grid2", children: [
+        ["requirePhone", "Ask for a phone number"],
+        ["requireAddress", "Ask for a billing address"],
+        ["requireTerms", "Require accepting the terms"],
+        ["requirePrivacy", "Require privacy consent"],
+        ["showCoupon", "Show the coupon field"],
+        ["showSummary", "Show the order summary"]
+      ].map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: !!co[k], onChange: (v) => setS(__spreadProps(__spreadValues({}, s), { checkout: __spreadProps(__spreadValues({}, co), { [k]: v }) })), label: l, name: k }, k)) }),
+      canEdit && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-savebar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy, onClick: save, children: "Save defaults" })
+      ] })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Who can do what", subtitle: "Landing page permissions are checked on the server for every action. Super admins grant them per person under Team access below.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { className: "lpa-roles", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Permission" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Lets someone" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Given to" })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: [
+        ["landing", "Open this section, see pages and analytics", "Super admin, instructors (own courses), moderators, content / marketing / finance grants"],
+        ["landing.content", "Edit content, sections, design, media, SEO and tags", "Super admin, instructors (own courses), moderators, content and marketing grants"],
+        ["landing.publish", "Create, publish, schedule, roll back, archive, delete", "Super admin, publisher grant"],
+        ["landing.pricing", "Prices, offers and coupons", "Super admin, marketing grant"],
+        ["landing.payments", "Payment providers, methods and checkout", "Super admin"],
+        ["landing.orders", "See orders and transactions", "Super admin, finance grant"],
+        ["landing.refunds", "Refund an order through the gateway", "Super admin, finance grant"]
+      ].map(([c, d, w]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: c }),
+          (0, import_parts.has)(caps, c) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: "You" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: d }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: w })
+      ] }, c)) })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TeamAccess, { toast })
+  ] });
+}
+const CAP_LABEL = {
+  landing: "Open the section",
+  "landing.content": "Content",
+  "landing.publish": "Publish",
+  "landing.pricing": "Pricing & coupons",
+  "landing.payments": "Payments & checkout",
+  "landing.orders": "Orders",
+  "landing.refunds": "Refunds"
+};
+const ROLE_LABEL = { content: "Content manager", marketing: "Marketing manager", finance: "Finance / payments", publisher: "Publisher" };
+function TeamAccess({ toast }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [edit, setEdit] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const load = () => import_axios.default.get("/admin/api/landing/team").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  (0, import_react.useEffect)(() => {
+    load();
+  }, []);
+  if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
+  const open = (r) => setEdit({ id: r.id, name: r.name, persona: r.fromPersona, caps: new Set(r.granted) });
+  const flip = (c) => {
+    const n = new Set(edit.caps);
+    if (n.has(c)) n.delete(c);
+    else n.add(c);
+    setEdit(__spreadProps(__spreadValues({}, edit), { caps: n }));
+  };
+  const applyRole = (k) => setEdit(__spreadProps(__spreadValues({}, edit), { caps: new Set(data.roles[k]) }));
+  const save = () => {
+    setBusy(true);
+    import_axios.default.put(`/admin/api/landing/team/${edit.id}`, { capabilities: [...edit.caps] }).then((r) => {
+      toast(r.data.message);
+      setEdit(null);
+      load();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(false));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Team access", subtitle: data.canEdit ? "Give someone landing permissions on top of their persona: pick a ready-made role or tick single permissions. Instructors stay limited to their own courses." : "Who has which landing page permissions. Only a super admin can change them.", flush: true, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.team, columns: [
+      { key: "name", label: "Person", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted adm-small", children: r.email })
+      ] }) },
+      { key: "persona", label: "Persona", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        r.personaLabel,
+        r.ownCoursesOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted adm-small", children: "own courses only" })
+        ] })
+      ] }) },
+      { key: "effective", label: "Landing permissions", render: (r) => r.effective.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "None" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-capchips", children: r.effective.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: (0, import_kit.cx)("lpa-chip", r.granted.includes(c) && !r.fromPersona.includes(c) && "is-on"), title: r.granted.includes(c) && !r.fromPersona.includes(c) ? "Granted personally" : "From the persona", children: CAP_LABEL[c] || c }, c)) }) },
+      { key: "a", label: "", render: (r) => data.canEdit && r.editable ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-key", onClick: () => open(r), "data-testid": `team-edit-${r.id}`, children: "Change" }) : null }
+    ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-users", title: "No staff yet" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Drawer,
+      {
+        open: !!edit,
+        onClose: () => setEdit(null),
+        title: edit ? `Landing permissions: ${edit.name}` : "",
+        subtitle: "Green chips in the list are granted personally; the rest come from the persona.",
+        footer: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => setEdit(null), children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-check", busy, onClick: save, "data-testid": "team-save", children: "Save permissions" })
+        ] }),
+        children: edit && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__label", children: "Ready-made roles" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-actions", children: [
+              Object.keys(data.roles).map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => applyRole(k), children: ROLE_LABEL[k] || k }, k)),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", onClick: () => setEdit(__spreadProps(__spreadValues({}, edit), { caps: /* @__PURE__ */ new Set() })), children: "Remove all" })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-toggles", children: data.grantable.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_form.Toggle,
+            {
+              name: `cap-${c}`,
+              label: CAP_LABEL[c] || c,
+              checked: edit.caps.has(c) || edit.persona.includes(c),
+              disabled: edit.persona.includes(c),
+              description: edit.persona.includes(c) ? "Already given by the persona" : c,
+              onChange: () => flip(c)
+            },
+            c
+          )) })
+        ] })
+      }
+    )
+  ] });
+}
+function LandingIndex() {
+  const { tab, caps, lookups, catalog } = (0, import_inertia_react.usePage)().props;
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const current = TABS.find((t) => t.key === tab) || TABS[0];
+  const allowed = (0, import_parts.has)(caps, current.cap);
+  const SUB = {
+    overview: "Every artist course landing page in one place: create, design, price, take payments, publish and measure.",
+    pages: "Search, filter and manage every landing page.",
+    templates: "Starting points for new pages, and the sections pages are built from.",
+    payments: "Which payment providers and methods each page offers, and the global defaults.",
+    coupons: "Codes for pages, courses and campaigns.",
+    orders: "Orders placed through landing pages, with payment details and refunds.",
+    analytics: "Funnel, payment methods, providers and devices.",
+    media: "Images for landing pages.",
+    settings: "Defaults for new pages and who can do what."
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: `Landing pages \xB7 ${current.label}`, crumbs: [{ label: "Landing pages", href: "/admin/landing" }, { label: current.label }], wide: true, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AdminLayout.PageHeader,
+      {
+        eyebrow: "Landing Page Management",
+        title: current.label,
+        subtitle: SUB[current.key],
+        actions: (0, import_parts.has)(caps, "landing.publish") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", href: "/admin/landing/pages/new", variant: "brand", icon: "fa-plus", children: "Create landing page" })
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LandingTabs, { current: current.key, caps }),
+    !allowed ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-lock", title: "You don't have access to this part", children: "Ask a super admin to grant it in People & roles." }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      current.key === "overview" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Overview, { lookups, caps }),
+      current.key === "pages" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pages, { caps, toast }),
+      current.key === "templates" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Templates, { catalog, caps }),
+      current.key === "payments" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Payments, { caps, toast }),
+      current.key === "coupons" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Coupons, { lookups, toast }),
+      current.key === "orders" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Orders, { lookups, toast }),
+      current.key === "analytics" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Analytics, { lookups }),
+      current.key === "media" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Media, { caps, toast }),
+      current.key === "settings" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, { catalog, caps, toast })
+    ] }),
+    toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Landing/Editor.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Editor_exports = {};
+__export(Editor_exports, {
+  default: () => LandingEditor
+});
+module.exports = __toCommonJS(Editor_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+var import_parts = __webpack_require__("./resources/js/Components/Admin/Landing/parts.js");
+const STEPS = [
+  { key: "basics", label: "Basics", n: 1, cap: "landing.content", hint: "Name, course, address and campaign." },
+  { key: "template", label: "Template", n: 2, cap: "landing.content", hint: "The starting layout and look." },
+  { key: "sections", label: "Sections & content", n: 3, cap: "landing.content", hint: "Order, show or hide, and write each section." },
+  { key: "design", label: "Design", n: 4, cap: "landing.content", hint: "Colours, type and corners." },
+  { key: "pricing", label: "Pricing & offers", n: 5, cap: "landing.pricing", hint: "Price, offers with real end dates, tax, refunds." },
+  { key: "payments", label: "Payment settings", n: 6, cap: "landing.payments", hint: "Providers and methods for this page." },
+  { key: "checkout", label: "Checkout", n: 7, cap: "landing.payments", hint: "Fields, consents and messages." },
+  { key: "seo", label: "SEO & marketing", n: 8, cap: "landing.content", hint: "Search, sharing, tags and WhatsApp." },
+  { key: "publish", label: "Preview & publish", n: 9, cap: "landing", hint: "Check, publish, schedule, versions." }
+];
+const DRAFT_STEPS = ["sections", "design", "seo"];
+const PALETTES = {
+  burgundy: { label: "Burgundy", accent: "#9C0D48", ink: "#14213D", surface: "#FBF8F4" },
+  ink: { label: "Ink & gold", accent: "#C8A15A", ink: "#111318", surface: "#F6F3EE" },
+  terracotta: { label: "Terracotta", accent: "#B4532A", ink: "#2B2118", surface: "#FFF8F1" },
+  sage: { label: "Sage", accent: "#2F6B4F", ink: "#14213D", surface: "#F5F8F4" }
+};
+const BACKGROUNDS = [{ value: "plain", label: "Plain" }, { value: "tint", label: "Tint" }, { value: "dark", label: "Dark" }, { value: "accent", label: "Accent" }];
+const LAYOUT_LABEL = {
+  split: "Split",
+  immersive: "Immersive",
+  editorial: "Editorial",
+  video: "Video",
+  cards: "Cards",
+  list: "List",
+  grid: "Grid",
+  masonry: "Masonry",
+  carousel: "Carousel",
+  accordion: "Accordion",
+  timeline: "Timeline",
+  columns: "Columns",
+  single: "Single",
+  stack: "Stack",
+  banner: "Banner",
+  centered: "Centred",
+  wide: "Wide"
+};
+const label = (l) => LAYOUT_LABEL[l] || l.charAt(0).toUpperCase() + l.slice(1);
+const rid = (type) => `${type.replace(/_/g, "-")}-${Math.random().toString(36).slice(2, 8)}`;
+const stepFromUrl = () => {
+  const m = window.location.pathname.match(/\/admin\/landing\/pages\/\d+\/([a-z]+)/);
+  return m && STEPS.some((s) => s.key === m[1]) ? m[1] : "sections";
+};
+const slugify = (s) => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120);
+const dtLocal = (v) => v ? String(v).replace(" ", "T").slice(0, 16) : "";
+function CreatePage({ lookups, catalog, defaults, toast }) {
+  const [v, setV] = (0, import_react.useState)({ name: "", courseId: "", slug: "", campaign: "", description: "", template: defaults && defaults.template || catalog.templates[0].key });
+  const [slugTouched, setSlugTouched] = (0, import_react.useState)(false);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const course = lookups.courses.find((c) => String(c.id) === String(v.courseId));
+  const set = (k, val) => setV((o) => {
+    const n = __spreadProps(__spreadValues({}, o), { [k]: val });
+    if (k === "courseId" && !slugTouched) {
+      const c = lookups.courses.find((x) => String(x.id) === String(val));
+      n.slug = c ? c.slug : "";
+      if (!o.name && c) n.name = c.title;
+    }
+    return n;
+  });
+  const takesOver = course && v.slug === course.slug;
+  const create = (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setErrors({});
+    import_axios.default.post("/admin/api/landing/pages", v).then((r) => window.location.assign(`/admin/landing/pages/${r.data.id}/sections`)).catch((x) => {
+      setBusy(false);
+      setErrors(x.response && x.response.data && x.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(x), "error");
+    });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: create, className: "adm-stack", noValidate: true, "data-testid": "lp-create", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "1. Basic information", subtitle: "Only staff see the name. The address is what visitors see.", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Course this page sells", name: "courseId", error: errors.courseId, required: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-courseId", className: "adm-input", value: v.courseId, onChange: (e) => set("courseId", e.target.value), "data-testid": "lp-course", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Choose a course\u2026" }),
+          lookups.courses.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: c.id, children: [
+            c.title,
+            c.artist ? ` \xB7 ${c.artist}` : ""
+          ] }, c.id))
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Landing page name", name: "name", error: errors.name, required: true, hint: "For example: Watercolour Landscapes \xB7 Diwali campaign.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-name", className: "adm-input", value: v.name, maxLength: 190, onChange: (e) => set("name", e.target.value), "data-testid": "lp-name" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Field,
+          {
+            label: "Address",
+            name: "slug",
+            error: errors.slug,
+            required: true,
+            hint: takesOver ? "Same address as the course: once published, this page replaces the regular course page." : "A campaign page gets its own address; the course page stays as it is.",
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-slug", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "/course/" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-slug", className: "adm-input", value: v.slug, maxLength: 120, onChange: (e) => {
+                setSlugTouched(true);
+                set("slug", slugify(e.target.value));
+              }, "data-testid": "lp-slug" })
+            ] })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Field, { label: "Campaign", name: "campaign", error: errors.campaign, optional: true, hint: "Groups pages, coupons and orders in reports.", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-campaign", className: "adm-input", list: "lp-campaigns", value: v.campaign, maxLength: 120, onChange: (e) => set("campaign", e.target.value) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", { id: "lp-campaigns", children: (lookups.campaigns || []).map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: c.campaign }, c.campaign)) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Description", name: "description", error: errors.description, optional: true, hint: "A note for the team: who the page is for, where it's promoted.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-description", className: "adm-input", rows: 2, maxLength: 500, value: v.description, onChange: (e) => set("description", e.target.value) }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "2. Template", subtitle: "Every template uses the same sections; you can switch later without losing what you wrote.", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-templates", role: "radiogroup", "aria-label": "Template", children: catalog.templates.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: (0, import_kit.cx)("lpa-template", v.template === t.key && "is-on"), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "template", value: t.key, checked: v.template === t.key, onChange: () => set("template", t.key) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.TemplateThumb, { t }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.description })
+      ] }, t.key)) }),
+      errors.template && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-danger", children: errors.template })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-savebar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "The page starts as a draft filled from the course. Nothing is public until you publish." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", href: "/admin/landing/pages", children: "Cancel" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { type: "submit", variant: "brand", busy, icon: "fa-arrow-right", "data-testid": "lp-create-submit", children: "Create and continue" })
+    ] })
+  ] });
+}
+function Basics({ data, lookups, canEdit, onSaved, toast }) {
+  const p = data.page;
+  const init = { name: p.name || "", courseId: String(p.course_id || ""), slug: p.slug || "", campaign: p.campaign || "", description: p.description || "" };
+  const [v, setV] = (0, import_react.useState)(init);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const dirty = JSON.stringify(v) !== JSON.stringify(init);
+  const course = lookups.courses.find((c) => String(c.id) === String(v.courseId));
+  const save = () => {
+    setBusy(true);
+    setErrors({});
+    import_axios.default.put(`/admin/api/landing/pages/${p.id}/basics`, v).then((r) => {
+      toast(r.data.message);
+      onSaved(r.data.data);
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Basic information", subtitle: "Saved straight away. Changing the address of a live page changes the link people share.", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { disabled: !canEdit, className: "lpa-fieldset", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Landing page name", name: "name", error: errors.name, required: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-name", className: "adm-input", value: v.name, maxLength: 190, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { name: e.target.value })) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Course", name: "courseId", error: errors.courseId, required: true, hint: data.orders > 0 ? "People bought through this page, so the course can no longer change." : void 0, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { id: "f-courseId", className: "adm-input", value: v.courseId, disabled: data.orders > 0, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { courseId: e.target.value })), children: lookups.courses.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: c.id, children: [
+          c.title,
+          c.artist ? ` \xB7 ${c.artist}` : ""
+        ] }, c.id)) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Field,
+          {
+            label: "Address",
+            name: "slug",
+            error: errors.slug,
+            required: true,
+            hint: course && v.slug === course.slug ? "Same as the course: when published, this page replaces the course page." : "Its own address; the course page is unchanged.",
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-slug", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "/course/" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-slug", className: "adm-input", value: v.slug, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { slug: slugify(e.target.value) })) })
+            ] })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Field, { label: "Campaign", name: "campaign", error: errors.campaign, optional: true, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-campaign", className: "adm-input", list: "lp-campaigns2", value: v.campaign, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { campaign: e.target.value })) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", { id: "lp-campaigns2", children: (lookups.campaigns || []).map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: c.campaign }, c.campaign)) })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Description", name: "description", error: errors.description, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-description", className: "adm-input", rows: 2, maxLength: 500, value: v.description, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { description: e.target.value })) }) })
+    ] }),
+    canEdit && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-actions", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", onClick: save, busy, disabled: !dirty, icon: "fa-check", children: "Save basics" }) })
+  ] });
+}
+function Template({ data, catalog, canEdit, onSaved, toast, draftDirty }) {
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const apply = (key) => {
+    setBusy(key);
+    import_axios.default.put(`/admin/api/landing/pages/${data.page.id}/template`, { template: key }).then((r) => {
+      toast(r.data.message);
+      onSaved(r.data.data);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(null));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Template", subtitle: "Switching keeps every text, image and FAQ you wrote; it changes the layout, the look and adds any sections the template needs. It applies to the draft until you publish.", children: [
+    draftDirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "lpa-note is-warn", role: "status", children: "Save your draft first: switching the template reloads the draft from the server." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-templates", children: catalog.templates.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("lpa-template", data.page.template_key === t.key && "is-on"), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.TemplateThumb, { t }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.name }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.description }),
+      data.page.template_key === t.key ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: "In use" }) : canEdit && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: () => apply(t.key), busy: busy === t.key, disabled: !!busy || draftDirty, "data-testid": `lp-template-${t.key}`, children: "Use this template" })
+    ] }, t.key)) })
+  ] });
+}
+function Sections({ cfg, setCfg, catalog, lookups, errors, canEdit, toast }) {
+  const [sel, setSel] = (0, import_react.useState)(cfg.sections[0] ? cfg.sections[0].id : null);
+  const [drag, setDrag] = (0, import_react.useState)(null);
+  const [adding, setAdding] = (0, import_react.useState)("");
+  const types = (0, import_react.useMemo)(() => Object.fromEntries(catalog.sections.map((s) => [s.key, s])), [catalog]);
+  const sections = cfg.sections;
+  const idx = sections.findIndex((s) => s.id === sel);
+  const current = idx >= 0 ? sections[idx] : null;
+  const setSections = (list) => setCfg(__spreadProps(__spreadValues({}, cfg), { sections: list }));
+  const update = (s) => setSections(sections.map((x) => x.id === s.id ? s : x));
+  const move = (from, to) => {
+    if (to < 1 || to >= sections.length || from < 1) return;
+    const list = [...sections];
+    const [x] = list.splice(from, 1);
+    list.splice(to, 0, x);
+    setSections(list);
+  };
+  const remove = (s) => {
+    const list = sections.filter((x) => x.id !== s.id);
+    setSections(list);
+    if (sel === s.id) setSel(list[0] && list[0].id);
+  };
+  const add = () => {
+    if (!adding) return;
+    const base = JSON.parse(JSON.stringify(catalog.defaultSections[adding]));
+    base.id = rid(adding);
+    const at = sections.findIndex((s) => s.type === "footer" || s.type === "final_cta");
+    const list = [...sections];
+    list.splice(at > 0 ? at : list.length, 0, base);
+    setSections(list);
+    setSel(base.id);
+    setAdding("");
+  };
+  const present = new Set(sections.map((s) => s.type));
+  const errFor = (i) => Object.keys(errors).some((k) => k.startsWith(`sections.${i}.`));
+  const cta = cfg.cta || {};
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-builder", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Sections", subtitle: "Drag to reorder (or use the arrows). The hero stays first.", className: "lpa-builder__list", children: [
+      errors.sections && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-danger", role: "alert", children: errors.sections }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "lpa-seclist", "aria-label": "Sections on this page", children: sections.map((s, i) => {
+        const t = types[s.type] || { label: s.type };
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "li",
+          {
+            className: (0, import_kit.cx)("lpa-sec", sel === s.id && "is-on", !s.enabled && "is-off", drag === i && "is-drag", errFor(i) && "has-error"),
+            draggable: canEdit && i > 0,
+            onDragStart: () => setDrag(i),
+            onDragEnd: () => setDrag(null),
+            onDragOver: (e) => {
+              if (drag !== null && i > 0) e.preventDefault();
+            },
+            onDrop: (e) => {
+              e.preventDefault();
+              if (drag !== null) move(drag, i);
+              setDrag(null);
+            },
+            "data-testid": "lp-section",
+            "data-type": s.type,
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-sec__grip", "aria-hidden": "true", children: i > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-bars" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-thumb-tack" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "lpa-sec__name", onClick: () => setSel(s.id), "aria-current": sel === s.id ? "true" : void 0, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.label }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                  s.content && s.content.heading || t.description,
+                  s.hideOnMobile ? " \xB7 hidden on phones" : ""
+                ] })
+              ] }),
+              canEdit && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-sec__tools", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: s.enabled, onChange: (on) => update(__spreadProps(__spreadValues({}, s), { enabled: on })), label: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "sr-only", children: [
+                  "Show ",
+                  t.label
+                ] }), name: `on-${s.id}`, disabled: s.type === "hero" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "lpa-icon", onClick: () => move(i, i - 1), disabled: i < 2, "aria-label": `Move ${t.label} up`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-up", "aria-hidden": "true" }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "lpa-icon", onClick: () => move(i, i + 1), disabled: i === 0 || i === sections.length - 1, "aria-label": `Move ${t.label} down`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-down", "aria-hidden": "true" }) }),
+                s.type !== "hero" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "lpa-icon is-danger", onClick: () => remove(s), "aria-label": `Remove ${t.label}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-trash-o", "aria-hidden": "true" }) })
+              ] })
+            ]
+          },
+          s.id
+        );
+      }) }),
+      canEdit && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-add", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "lp-add", className: "sr-only", children: "Section to add" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "lp-add", className: "adm-input", value: adding, onChange: (e) => setAdding(e.target.value), "data-testid": "lp-add-type", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Add a section\u2026" }),
+          catalog.sections.filter((s) => s.key !== "hero").map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: s.key, disabled: s.single && present.has(s.key), children: [
+            s.label,
+            s.single && present.has(s.key) ? " (already on the page)" : ""
+          ] }, s.key))
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: add, disabled: !adding, icon: "fa-plus", "data-testid": "lp-add", children: "Add" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-cta", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "lpa-h", children: "Buttons" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Enroll button", name: "cta.primary", error: errors["cta.primary"], max: 40, counter: String(cta.primary || "").length, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-cta.primary", className: "adm-input", value: cta.primary || "", disabled: !canEdit, onChange: (e) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { primary: e.target.value }) })) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Second button", name: "cta.secondary", max: 40, counter: String(cta.secondary || "").length, hint: "Scrolls to the curriculum.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-cta.secondary", className: "adm-input", value: cta.secondary || "", disabled: !canEdit, onChange: (e) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { secondary: e.target.value }) })) }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Toggle,
+          {
+            checked: cta.sticky !== false,
+            disabled: !canEdit,
+            onChange: (on) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { sticky: on }) })),
+            name: "cta.sticky",
+            label: "Sticky enrol bar",
+            description: "A slim bar with the price and the Enroll button once the hero scrolls out of view (desktop and phones)."
+          }
+        )
+      ] })
+    ] }),
+    current ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: (types[current.type] || {}).label || current.type, subtitle: (types[current.type] || {}).description, className: "lpa-builder__edit", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { disabled: !canEdit, className: "lpa-fieldset", "data-testid": "lp-section-editor", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-sec-opts", children: [
+        (types[current.type] || { layouts: [] }).layouts.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-label", children: "Layout" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            import_kit.Segments,
+            {
+              value: current.layout,
+              label: "Layout",
+              onChange: (l) => update(__spreadProps(__spreadValues({}, current), { layout: l })),
+              options: types[current.type].layouts.map((l) => ({ value: l, label: label(l) }))
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-label", children: "Background" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: current.background, label: "Background", onChange: (b) => update(__spreadProps(__spreadValues({}, current), { background: b })), options: BACKGROUNDS })
+        ] }),
+        current.type !== "hero" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Toggle,
+          {
+            checked: current.hideOnMobile,
+            onChange: (on) => update(__spreadProps(__spreadValues({}, current), { hideOnMobile: on })),
+            name: "hideOnMobile",
+            label: "Hide on phones",
+            description: "Keeps long sections out of the way on small screens."
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.SectionContent, { section: current, onChange: update, lookups, toast, errors, prefix: `sections.${idx}` })
+    ] }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-columns", title: "Choose a section to edit" }) })
+  ] });
+}
+function Design({ cfg, setCfg, errors, canEdit }) {
+  const d = cfg.design || {};
+  const set = (patch) => setCfg(__spreadProps(__spreadValues({}, cfg), { design: __spreadValues(__spreadValues({}, d), patch) }));
+  const pick = (key) => key === "custom" ? set({ palette: "custom" }) : set({ palette: key, accent: PALETTES[key].accent, ink: PALETTES[key].ink, surface: PALETTES[key].surface });
+  const color = (k, labelText, hint) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: labelText, name: `design.${k}`, error: errors[`design.${k}`], hint, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-color", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "color", value: /^#[0-9a-f]{6}$/i.test(d[k] || "") ? d[k] : "#000000", "aria-label": `${labelText} colour picker`, onChange: (e) => set({ palette: "custom", [k]: e.target.value.toUpperCase() }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-design.${k}`, className: "adm-input", value: d[k] || "", maxLength: 7, onChange: (e) => set({ palette: "custom", [k]: e.target.value }) })
+  ] }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-designgrid", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Colours", subtitle: "Text on the accent colour and on the surface is checked for contrast when the page is drawn.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { disabled: !canEdit, className: "lpa-fieldset", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-palettes", role: "radiogroup", "aria-label": "Palette", children: [
+        Object.entries(PALETTES).map(([k, p]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: (0, import_kit.cx)("lpa-palette", d.palette === k && "is-on"), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "palette", checked: d.palette === k, onChange: () => pick(k) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-palette__sw", "aria-hidden": "true", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { style: { background: p.accent } }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { style: { background: p.ink } }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { style: { background: p.surface } })
+          ] }),
+          p.label
+        ] }, k)),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: (0, import_kit.cx)("lpa-palette", d.palette === "custom" && "is-on"), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "palette", checked: d.palette === "custom", onChange: () => pick("custom") }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-palette__sw", "aria-hidden": "true", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { style: { background: d.accent } }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { style: { background: d.ink } }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { style: { background: d.surface } })
+          ] }),
+          "Custom"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid3", children: [
+        color("accent", "Accent", "Buttons, links, highlights."),
+        color("ink", "Text", "Headings and body text."),
+        color("surface", "Page background")
+      ] })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Type and shape", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { disabled: !canEdit, className: "lpa-fieldset", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-label", children: "Headings" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: d.font, label: "Heading font", onChange: (f) => set({ font: f }), options: [{ value: "jakarta", label: "Plus Jakarta Sans" }, { value: "serif", label: "Editorial serif" }] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-label", children: "Corners" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: d.radius, label: "Corners", onChange: (r) => set({ radius: r }), options: [{ value: "soft", label: "Soft" }, { value: "sharp", label: "Sharp" }] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("lpa-swatch", d.font === "serif" && "is-serif", d.radius === "sharp" && "is-sharp"), style: { background: d.surface, color: d.ink }, "aria-label": "Sample", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { style: { color: d.accent }, children: "Live course" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Watercolour Landscapes" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Paint light, sky and water with confidence." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { style: { background: d.accent }, children: "Enroll now" })
+      ] })
+    ] })
+  ] });
+}
+function Pricing({ data, canEdit, onSaved, toast }) {
+  const toForm = (p) => {
+    var _a, _b, _c, _d, _e, _f;
+    return {
+      listPrice: (_a = p.listPrice) != null ? _a : "",
+      price: (_b = p.price) != null ? _b : "",
+      priceUsd: (_c = p.priceUsd) != null ? _c : "",
+      promoLabel: p.promoLabel || "",
+      promoPrice: (_d = p.promoPrice) != null ? _d : "",
+      promoStartsAt: dtLocal(p.promoStartsAt),
+      promoEndsAt: dtLocal(p.promoEndsAt),
+      earlyPrice: (_e = p.earlyPrice) != null ? _e : "",
+      earlyEndsAt: dtLocal(p.earlyEndsAt),
+      couponsEnabled: p.couponsEnabled !== false,
+      taxMode: p.taxMode || "INCLUDED",
+      taxRate: (_f = p.taxRate) != null ? _f : "0",
+      taxLabel: p.taxLabel || "",
+      accessDuration: p.accessDuration || "",
+      refundPolicy: p.refundPolicy || "",
+      inclusions: p.inclusions ? String(p.inclusions).split("\n").filter(Boolean) : []
+    };
+  };
+  const init = toForm(data.pricing || {});
+  const [v, setV] = (0, import_react.useState)(init);
+  const [quote, setQuote] = (0, import_react.useState)(data.quote);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const dirty = JSON.stringify(v) !== JSON.stringify(init);
+  const cp = data.coursePrice || [];
+  const save = () => {
+    setBusy(true);
+    setErrors({});
+    import_axios.default.put(`/admin/api/landing/pages/${data.page.id}/pricing`, v).then((r) => {
+      toast(r.data.message);
+      setQuote(r.data.quote);
+      onSaved({ pricing: r.data.pricing, quote: r.data.quote });
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const money = (k, l, hint) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: l, name: k, error: errors[k], hint, optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-money", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-hidden": "true", children: k === "priceUsd" ? "$" : "\u20B9" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-${k}`, className: "adm-input", inputMode: "decimal", value: v[k], onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { [k]: e.target.value.replace(/[^\d.]/g, "") })), "data-testid": `lp-${k}` })
+  ] }) });
+  const when = (k, l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: l, name: k, error: errors[k], hint: "India time (IST).", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-${k}`, type: "datetime-local", className: "adm-input", value: v[k], onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { [k]: e.target.value })) }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-pricegrid", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Price", subtitle: `The course's own price is ${(0, import_parts.inr)(cp[0])}${cp[1] ? ` / $${cp[1]}` : ""}. Leave a box empty to use it. Prices are saved for this page only and apply at checkout straight away.`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("fieldset", { disabled: !canEdit, className: "lpa-fieldset", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid3", children: [
+        money("price", "Price on this page", "What buyers pay without an offer."),
+        money("listPrice", "Original price (struck through)", "Only if it is a price you really charged."),
+        money("priceUsd", "Price in US dollars", "For PayPal and international cards.")
+      ] }) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Limited-time offer", subtitle: "Shown with its real end date; the price goes back by itself when it ends. No endless timers.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("fieldset", { disabled: !canEdit, className: "lpa-fieldset", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Offer name", name: "promoLabel", error: errors.promoLabel, optional: true, hint: "For example: Diwali offer.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-promoLabel", className: "adm-input", maxLength: 80, value: v.promoLabel, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { promoLabel: e.target.value })) }) }),
+        money("promoPrice", "Offer price"),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+        when("promoStartsAt", "Starts"),
+        when("promoEndsAt", "Ends")
+      ] }) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Early-bird price", subtitle: "A lower price until a date, usually before the course starts.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("fieldset", { disabled: !canEdit, className: "lpa-fieldset", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid3", children: [
+        money("earlyPrice", "Early-bird price"),
+        when("earlyEndsAt", "Ends")
+      ] }) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Tax, coupons, access and refunds", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { disabled: !canEdit, className: "lpa-fieldset", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Tax", name: "taxMode", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_kit.Segments,
+          {
+            value: v.taxMode,
+            label: "Tax",
+            onChange: (m) => setV(__spreadProps(__spreadValues({}, v), { taxMode: m })),
+            options: [{ value: "INCLUDED", label: "Included in the price" }, { value: "ADDED", label: "Added at checkout" }]
+          }
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Tax rate (%)", name: "taxRate", error: errors.taxRate, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-taxRate", className: "adm-input", inputMode: "decimal", value: v.taxRate, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { taxRate: e.target.value.replace(/[^\d.]/g, "") })) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Tax name", name: "taxLabel", optional: true, hint: "For example: GST.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-taxLabel", className: "adm-input", maxLength: 40, value: v.taxLabel, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { taxLabel: e.target.value })) }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Toggle,
+          {
+            checked: v.couponsEnabled,
+            onChange: (on) => setV(__spreadProps(__spreadValues({}, v), { couponsEnabled: on })),
+            name: "couponsEnabled",
+            label: "Coupons can be used on this page",
+            description: "Codes are managed in Coupons & promotions."
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Access", name: "accessDuration", error: errors.accessDuration, optional: true, hint: "For example: Recordings for 12 months.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-accessDuration", className: "adm-input", maxLength: 120, value: v.accessDuration, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { accessDuration: e.target.value })) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Refund policy", name: "refundPolicy", error: errors.refundPolicy, optional: true, counter: v.refundPolicy.length, max: 1e3, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-refundPolicy", className: "adm-input", rows: 3, value: v.refundPolicy, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { refundPolicy: e.target.value })) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "What's included", name: "inclusions", error: errors.inclusions, optional: true, hint: "Listed next to the price. Leave empty to use the course's own list.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.ListEditor, { value: v.inclusions, onChange: (l) => setV(__spreadProps(__spreadValues({}, v), { inclusions: l })), placeholder: "Add an inclusion", name: "inclusions", max: 20 }) })
+      ] }) })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "lpa-quote", "aria-live": "polite", "data-testid": "lp-quote", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-label", children: "Buyers see now" }),
+      quote && quote.listLabel && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("s", { children: quote.listLabel }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: quote ? quote.totalLabel : "\u2014" }),
+      quote && quote.savingPct && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: quote.savingPct }),
+      quote && quote.offerEndsLabel && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+        "Offer ends ",
+        quote.offerEndsLabel
+      ] }),
+      quote && quote.taxNote && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: quote.taxNote }),
+      quote && quote.usdLabel && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+        "Abroad: ",
+        quote.usdLabel
+      ] }),
+      canEdit && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", onClick: save, busy, disabled: !dirty, icon: "fa-check", "data-testid": "lp-pricing-save", children: "Save pricing" }),
+      dirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: "Unsaved changes: the figure above updates after saving." })
+    ] })
+  ] });
+}
+function Checkout({ data, canEdit, onSaved, toast }) {
+  const init = __spreadProps(__spreadValues({}, data.checkout), {
+    successMessage: data.checkout.successMessage || "",
+    successRedirect: data.checkout.successRedirect || "",
+    failureMessage: data.checkout.failureMessage || "",
+    pendingMessage: data.checkout.pendingMessage || ""
+  });
+  const [v, setV] = (0, import_react.useState)(init);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const dirty = JSON.stringify(v) !== JSON.stringify(init);
+  const save = () => {
+    setBusy(true);
+    setErrors({});
+    import_axios.default.put(`/admin/api/landing/pages/${data.page.id}/checkout`, v).then((r) => {
+      toast(r.data.message);
+      onSaved({ checkout: r.data.checkout });
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const tog = (k, l, d, lock) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: !!v[k], onChange: (on) => setV(__spreadProps(__spreadValues({}, v), { [k]: on })), name: k, label: l, description: d, disabled: !canEdit || lock });
+  const msg = (k, l, hint) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: l, name: k, error: errors[k], hint, optional: true, counter: v[k].length, max: 500, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: `f-${k}`, className: "adm-input", rows: 2, value: v[k], disabled: !canEdit, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { [k]: e.target.value })) }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Details we ask for", subtitle: "Name and e-mail are always required (they make the account and the receipt).", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-toggles", children: [
+      tog("requirePhone", "Phone number", "For class reminders on WhatsApp. Kept on the order, never used to sign in."),
+      tog("requireAddress", "Billing address", "Only if your accountant needs it for invoices."),
+      tog("requireTerms", "Accept the terms", "A required tick box linking to the terms of use."),
+      tog("requirePrivacy", "Privacy consent", "A required tick box linking to the privacy policy."),
+      tog("showCoupon", "Coupon box", data.pricing && data.pricing.couponsEnabled === false ? "Coupons are switched off in Pricing, so the box stays hidden." : "Lets buyers enter a code."),
+      tog("showSummary", "Order summary", "Price, discount, tax and total next to the form.")
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "After paying", subtitle: "Access is only given after the gateway confirms the payment on our server.", children: [
+      msg("successMessage", "Success message", `Leave empty for: "You're enrolled. We've e-mailed your receipt."`),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Then send buyers to", name: "successRedirect", error: errors.successRedirect, optional: true, hint: "A page on this site, e.g. /dashboard. Leave empty to stay on the confirmation.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-successRedirect", className: "adm-input", value: v.successRedirect, disabled: !canEdit, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { successRedirect: e.target.value })) }) }),
+      msg("pendingMessage", "Payment pending", "When the bank hasn't confirmed yet (UPI can take a few minutes)."),
+      msg("failureMessage", "Payment failed", 'Shown with a "Try again" button; nothing was charged.')
+    ] }),
+    canEdit && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-savebar", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", onClick: save, busy, disabled: !dirty, icon: "fa-check", "data-testid": "lp-checkout-save", children: "Save checkout settings" }) })
+  ] });
+}
+function Seo({ cfg, setCfg, data, errors, canEdit }) {
+  const s = cfg.seo || {};
+  const m = cfg.marketing || {};
+  const setS = (patch) => setCfg(__spreadProps(__spreadValues({}, cfg), { seo: __spreadValues(__spreadValues({}, s), patch) }));
+  const setM = (patch) => setCfg(__spreadProps(__spreadValues({}, cfg), { marketing: __spreadValues(__spreadValues({}, m), patch) }));
+  const course = data.course || {};
+  const title = s.title || `${course.title || data.page.name} | ArtistikCity`;
+  const desc = s.description || course.subTitle || course.intro || "";
+  const text = (k, l, max, hint, rows, obj = s, set = setS, pre = "seo") => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: l, name: `${pre}.${k}`, error: errors[`${pre}.${k}`], hint, optional: true, max, counter: max ? String(obj[k] || "").length : void 0, children: rows ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: `f-${pre}.${k}`, className: "adm-input", rows, maxLength: max, value: obj[k] || "", onChange: (e) => set({ [k]: e.target.value }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-${pre}.${k}`, className: "adm-input", maxLength: max, value: obj[k] || "", onChange: (e) => set({ [k]: e.target.value }) }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { disabled: !canEdit, className: "lpa-fieldset adm-stack", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Search", subtitle: "Empty boxes use the course's title and summary.", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-serp", "aria-label": "Search result preview", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          "artistikcity.com \u203A course \u203A ",
+          data.page.slug
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: title.slice(0, 70) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: String(desc).slice(0, 170) })
+      ] }),
+      text("title", "Page title", 70, "Around 50\u201360 characters reads best in search results."),
+      text("description", "Meta description", 170, void 0, 2),
+      text("canonical", "Canonical address", void 0, "Only for a campaign copy that should credit another page, e.g. /course/watercolour-landscapes-for-beginners."),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-toggles", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: s.index !== false, onChange: (on) => setS({ index: on }), name: "seo.index", label: "Show in search engines", description: "Off adds noindex, e.g. for paid-ads-only pages." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: s.sitemap !== false, onChange: (on) => setS({ sitemap: on }), name: "seo.sitemap", label: "List in the sitemap" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Toggle,
+          {
+            checked: s.structuredData !== false,
+            onChange: (on) => setS({ structuredData: on }),
+            name: "seo.structuredData",
+            label: "Course structured data",
+            description: "Tells search engines the course name, provider, price and rating (only real reviews are counted)."
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Sharing", subtitle: "What WhatsApp, Facebook and LinkedIn show when the link is shared.", children: [
+      text("ogTitle", "Share title", 90),
+      text("ogDescription", "Share description", 200, void 0, 2),
+      text("ogImage", "Share image", void 0, "An image address from the media library (1200 \xD7 630 works everywhere). Empty uses the hero image.")
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Marketing tags and support", subtitle: "Tags only load after a visitor accepts cookies. Enrolments and checkout steps are sent as events.", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid3", children: [
+        text("ga4", "Google Analytics 4", void 0, "Measurement id, e.g. G-ABC123XYZ.", 0, m, setM, "marketing"),
+        text("gtm", "Google Tag Manager", void 0, "Container id, e.g. GTM-ABC1234.", 0, m, setM, "marketing"),
+        text("metaPixel", "Meta Pixel", void 0, "Numeric pixel id.", 0, m, setM, "marketing")
+      ] }),
+      text("whatsapp", "WhatsApp support number", void 0, 'With country code, e.g. +919876543210. Adds a "Questions? Chat with us" button.', 0, m, setM, "marketing"),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_form.Toggle,
+        {
+          checked: !!m.leadCapture,
+          onChange: (on) => setM({ leadCapture: on }),
+          name: "marketing.leadCapture",
+          label: "Optional lead capture",
+          description: "A small 'Join the newsletter' box at the end of the page (never a pop-up), with a consent tick. Sign-ups appear in Admin \u203A Newsletter, tagged with this page."
+        }
+      )
+    ] })
+  ] });
+}
+function availableMethods(payments) {
+  return (payments && payments.methods || []).filter((m) => m.live);
+}
+function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
+  const p = data.page;
+  const [note, setNote] = (0, import_react.useState)("");
+  const [when, setWhen] = (0, import_react.useState)(dtLocal(p.publish_at));
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [frame, setFrame] = (0, import_react.useState)("desktop");
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const canPublish = (0, import_parts.has)(caps, "landing.publish");
+  const methods = availableMethods(data.payments);
+  const checks = [
+    { ok: !draftDirty, text: draftDirty ? "You have unsaved changes in the draft." : "Draft saved.", fix: draftDirty ? "Save draft" : null },
+    { ok: methods.length > 0 || data.quote && data.quote.totalLabel === "Free", text: methods.length ? `Buyers can pay with: ${methods.map((m) => m.label).join(", ")}.` : "No payment method is available: buyers could not pay.", step: "payments" },
+    { ok: data.course && data.course.title, text: data.course && data.course.title ? `Sells "${data.course.title}".` : "The course is missing." },
+    { ok: !!(data.config.seo && (data.config.seo.description || data.course && (data.course.subTitle || data.course.intro))), text: "Has a search description.", warn: true, step: "seo" }
+  ];
+  const blocked = checks.some((c) => !c.ok && !c.warn);
+  const act = async (action, body = {}) => {
+    if (action === "unpublish" && !await confirm({ title: "Unpublish this page?", body: data.page.takesOverCourse ? "The regular course page comes back at this address." : "The address stops working until you publish again.", confirmLabel: "Unpublish" })) return;
+    if (action === "archive" && !await confirm({ title: "Archive this page?", body: "It disappears from the lists and its address stops working. Orders and analytics are kept.", confirmLabel: "Archive" })) return;
+    setBusy(action);
+    setErrors({});
+    import_axios.default.post(`/admin/api/landing/pages/${p.id}/${action}`, body).then((r) => {
+      toast(r.data.message);
+      if (action === "duplicate") window.location.assign(`/admin/landing/pages/${r.data.id}/basics`);
+      else onSaved(r.data.data);
+      if (action === "publish") setNote("");
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(null));
+  };
+  const remove = async () => {
+    if (!await confirm({ title: `Delete "${p.name}"?`, body: "This cannot be undone.", confirmLabel: "Delete", danger: true })) return;
+    import_axios.default.delete(`/admin/api/landing/pages/${p.id}`).then(() => window.location.assign("/admin/landing/pages")).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const rollback = async (v) => {
+    if (!await confirm({ title: `Make version ${v.version_no} live again?`, body: "It is published as a new version, so nothing is lost. Your current draft is replaced by it.", confirmLabel: "Restore and publish" })) return;
+    import_axios.default.post(`/admin/api/landing/pages/${p.id}/versions/${v.id}/restore`).then((r) => {
+      toast(r.data.message);
+      onSaved(r.data.data);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const previewSrc = `/admin/landing/preview/${p.id}?t=${encodeURIComponent(p.draft_saved_at || "")}`;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-publishgrid", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Ready to publish?", subtitle: "Publishing makes the saved draft live as a new version. Prices, payments and checkout settings are already live.", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-checklist", "data-testid": "lp-checklist", children: checks.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: c.ok ? "is-ok" : c.warn ? "is-warn" : "is-bad", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${c.ok ? "fa-check-circle" : c.warn ? "fa-exclamation-circle" : "fa-times-circle"}`, "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: c.ok || !c.warn ? c.text : `Suggestion: ${c.text.toLowerCase()}` }),
+          c.fix && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", onClick: saveDraft, children: c.fix }),
+          !c.ok && c.step && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${p.id}/${c.step}`, children: "Fix" })
+        ] }, i)) }),
+        canPublish ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "What changed?", name: "note", optional: true, hint: "Kept with the version, so the team can find it later.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-note", className: "adm-input", maxLength: 255, value: note, onChange: (e) => setNote(e.target.value), placeholder: "e.g. New Diwali offer and gallery" }) }),
+          Object.values(errors).length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "adm-danger", role: "alert", children: Object.values(errors).map((e) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: e }, e)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-actions", children: [
+            p.status !== "ARCHIVED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-globe", onClick: () => act("publish", { note }), busy: busy === "publish", disabled: blocked || !!busy, "data-testid": "lp-publish", children: p.status === "PUBLISHED" ? "Publish changes" : "Publish now" }),
+            p.status === "PUBLISHED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-eye-slash", onClick: () => act("unpublish"), busy: busy === "unpublish", "data-testid": "lp-unpublish", children: "Unpublish" })
+          ] }),
+          p.status !== "PUBLISHED" && p.status !== "ARCHIVED" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-schedule", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Or publish later", name: "publishAt", error: errors.publishAt, hint: "India time (IST). The saved draft at that moment goes live.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-publishAt", type: "datetime-local", className: "adm-input", value: when, onChange: (e) => setWhen(e.target.value), "data-testid": "lp-when" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-clock-o", onClick: () => act("schedule", { publishAt: when }), disabled: !when || blocked || !!busy, busy: busy === "schedule", "data-testid": "lp-schedule", children: "Schedule" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("hr", { className: "lpa-hr" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-actions", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-files-o", onClick: () => act("duplicate"), busy: busy === "duplicate", children: "Duplicate" }),
+            p.status === "ARCHIVED" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-undo", onClick: () => act("restore"), children: "Restore as draft" }) : p.status !== "PUBLISHED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-archive", onClick: () => act("archive"), children: "Archive" }),
+            p.status !== "PUBLISHED" && data.orders === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "danger", icon: "fa-trash-o", onClick: remove, children: "Delete" })
+          ] })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Ask someone with publishing rights to publish your changes." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Preview", subtitle: "The saved draft, drawn exactly like the public page.", actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: frame, label: "Device", onChange: setFrame, options: [{ value: "desktop", label: "Desktop" }, { value: "mobile", label: "Phone" }] }), className: "lpa-previewcard", children: [
+        draftDirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "lpa-note is-warn", children: "Showing the last saved draft. Save to see your latest changes." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: (0, import_kit.cx)("lpa-frame", `is-${frame}`), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", { title: `Preview (${frame})`, src: previewSrc, loading: "lazy", "data-testid": "lp-preview" }, previewSrc + frame) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: previewSrc, target: "_blank", rel: "noopener noreferrer", className: "lpa-ext", children: [
+          "Open the preview in a new tab ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link", "aria-hidden": "true" })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Version history", subtitle: "Every publish is kept. Preview any version, or make it live again.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.versions || [], columns: [
+      { key: "version_no", label: "Version", render: (v) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+        "v",
+        v.version_no,
+        String(v.id) === String(p.published_version_id) && p.status === "PUBLISHED" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: "Live" })
+        ] }) : null
+      ] }) },
+      { key: "created_at", label: "Published", render: (v) => (0, import_kit.fmtDate)(v.created_at, true) },
+      { key: "by", label: "By", render: (v) => v.created_by_name || "\u2014" },
+      { key: "note", label: "Note", render: (v) => v.note || /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) },
+      { key: "a", label: "", render: (v) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-actions is-tight", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `/admin/landing/preview/${p.id}?version=${v.id}`, target: "_blank", rel: "noopener noreferrer", icon: "fa-eye", children: "Preview" }),
+        canPublish && !(String(v.id) === String(p.published_version_id) && p.status === "PUBLISHED") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-undo", onClick: () => rollback(v), "data-testid": "lp-rollback", children: "Make live" })
+      ] }) }
+    ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-history", title: "Not published yet", children: "The first publish creates version 1." }) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Activity", subtitle: "Who changed what on this page (from the audit log).", children: (data.history || []).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Nothing yet." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-activity", children: data.history.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", { children: (0, import_kit.fmtDate)(h.created_at, true) }),
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: h.admin_name || "System" }),
+      " ",
+      h.details
+    ] }, i)) }) }),
+    dialog
+  ] });
+}
+function EditPage({ pageId, caps, lookups, catalog, toast }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [cfg, setCfg] = (0, import_react.useState)(null);
+  const [savedCfg, setSavedCfg] = (0, import_react.useState)(null);
+  const [step, setStep] = (0, import_react.useState)(stepFromUrl());
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [saving, setSaving] = (0, import_react.useState)(false);
+  const [loadError, setLoadError] = (0, import_react.useState)(null);
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const savedAt = (0, import_react.useRef)(null);
+  const take = (d) => {
+    setData(d);
+    setCfg(d.config);
+    setSavedCfg(d.config);
+    savedAt.current = d.page.draft_saved_at;
+  };
+  (0, import_react.useEffect)(() => {
+    import_axios.default.get(`/admin/api/landing/pages/${pageId}`).then((r) => take(r.data)).catch((e) => setLoadError((0, import_AdminLayout.errorText)(e)));
+  }, [pageId]);
+  const draftDirty = !!cfg && JSON.stringify(cfg) !== JSON.stringify(savedCfg);
+  (0, import_react.useEffect)(() => {
+    const warn = (e) => {
+      if (draftDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [draftDirty]);
+  (0, import_react.useEffect)(() => {
+    const pop = () => setStep(stepFromUrl());
+    window.addEventListener("popstate", pop);
+    return () => window.removeEventListener("popstate", pop);
+  }, []);
+  const go = (key) => {
+    setStep(key);
+    window.history.pushState(window.history.state, "", `/admin/landing/pages/${pageId}/${key}`);
+    window.scrollTo(0, 0);
+  };
+  const saveDraft = async (force = false) => {
+    setSaving(true);
+    setErrors({});
+    try {
+      const r = await import_axios.default.put(`/admin/api/landing/pages/${pageId}/draft`, { config: cfg, savedAt: savedAt.current, force });
+      savedAt.current = r.data.savedAt;
+      setCfg(r.data.config);
+      setSavedCfg(r.data.config);
+      setData((d) => __spreadProps(__spreadValues({}, d), { config: r.data.config, hasUnpublishedChanges: r.data.hasUnpublishedChanges, page: __spreadProps(__spreadValues({}, d.page), { draft_saved_at: r.data.savedAt }) }));
+      toast(r.data.message);
+    } catch (e) {
+      if (e.response && e.response.status === 409 && !force) {
+        const ok = await confirm({ title: "Someone else saved this page", body: (0, import_AdminLayout.errorText)(e), confirmLabel: "Save mine anyway", cancelLabel: "Keep editing" });
+        if (ok) {
+          setSaving(false);
+          return saveDraft(true);
+        }
+      } else {
+        setErrors(e.response && e.response.data && e.response.data.errors || {});
+        toast((0, import_AdminLayout.errorText)(e), "error");
+      }
+    } finally {
+      setSaving(false);
+    }
+    return null;
+  };
+  if (loadError) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-exclamation-triangle", title: "Can't open this page", children: loadError }) });
+  if (!data || !cfg) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
+  const p = data.page;
+  const st = import_parts.STATUS[p.status] || import_parts.STATUS.DRAFT;
+  const current = STEPS.find((s) => s.key === step) || STEPS[2];
+  const canEdit = (0, import_parts.has)(caps, current.cap);
+  const isDraftStep = DRAFT_STEPS.includes(step);
+  const errorCount = Object.keys(errors).length;
+  const merge = (patch) => setData((d) => __spreadValues(__spreadValues({}, d), patch));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-editor", "data-testid": "lp-editor", "data-page-id": p.id, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-ehead", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-eyebrow", children: "Landing page" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: p.name }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lpa-ehead__meta", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: st.tone, dot: true, children: st.label }),
+          data.hasUnpublishedChanges && p.status === "PUBLISHED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "amber", children: "Unpublished changes" }),
+          p.status === "SCHEDULED" && p.publish_at && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            "Goes live ",
+            (0, import_kit.fmtDate)(p.publish_at, true)
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+            "/course/",
+            p.slug
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: p.course_title })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-ehead__actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `/admin/landing/preview/${p.id}`, target: "_blank", rel: "noopener noreferrer", icon: "fa-eye", children: "Preview" }),
+        p.status === "PUBLISHED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: p.publicUrl, target: "_blank", rel: "noopener noreferrer", icon: "fa-external-link", children: "View live" }),
+        (0, import_parts.has)(caps, "landing.content") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: draftDirty ? "brand" : "line", size: "sm", icon: "fa-floppy-o", onClick: () => saveDraft(), busy: saving, disabled: !draftDirty, "data-testid": "lp-save-draft", children: draftDirty ? "Save draft" : "Draft saved" })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-ebody", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { className: "lpa-steps", "aria-label": "Steps", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: STEPS.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "a",
+          {
+            href: `/admin/landing/pages/${p.id}/${s.key}`,
+            className: (0, import_kit.cx)(step === s.key && "is-on", !(0, import_parts.has)(caps, s.cap) && "is-locked"),
+            "aria-current": step === s.key ? "step" : void 0,
+            onClick: (e) => {
+              e.preventDefault();
+              go(s.key);
+            },
+            "data-step": s.key,
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-steps__n", children: s.n }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: s.label }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: s.hint })
+              ] }),
+              !(0, import_parts.has)(caps, s.cap) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-label": "View only" }),
+              DRAFT_STEPS.includes(s.key) && draftDirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "lpa-dot", "aria-label": "Unsaved changes" })
+            ]
+          }
+        ) }, s.key)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lpa-steps__note", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-info-circle", "aria-hidden": "true" }),
+          " Steps 3, 4 and 8 change the draft (live after publishing). Pricing, payments and checkout save straight to the page."
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-estep", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-estep__head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { children: [
+            current.n,
+            ". ",
+            current.label
+          ] }),
+          !canEdit && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "View only" })
+        ] }),
+        errorCount > 0 && isDraftStep && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-note is-bad", role: "alert", children: [
+          "The draft wasn't saved: ",
+          errorCount === 1 ? "one field needs" : `${errorCount} fields need`,
+          " a fix (",
+          Object.values(errors)[0],
+          ")."
+        ] }),
+        step === "basics" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Basics, { data, lookups, canEdit, onSaved: take, toast }, p.updated_at),
+        step === "template" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Template, { data, catalog, canEdit, onSaved: take, toast, draftDirty }),
+        step === "sections" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sections, { cfg, setCfg, catalog, lookups, errors, canEdit, toast }),
+        step === "design" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Design, { cfg, setCfg, errors, canEdit }),
+        step === "pricing" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pricing, { data, canEdit, onSaved: merge, toast }),
+        step === "payments" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment settings for this page", subtitle: "Use the global defaults, or choose exactly which providers and methods buyers see on this page. Another page is never affected.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_parts.PaymentSettings,
+          {
+            value: data.payments,
+            toast,
+            canEdit,
+            onSave: (body) => import_axios.default.put(`/admin/api/landing/pages/${p.id}/payments`, body).then((r) => {
+              toast(r.data.message);
+              merge({ payments: r.data.payments });
+              return r.data.payments;
+            })
+          }
+        ) }),
+        step === "checkout" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Checkout, { data, canEdit, onSaved: merge, toast }),
+        step === "seo" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seo, { cfg, setCfg, data, errors, canEdit }),
+        step === "publish" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Publish, { data, caps, draftDirty, saveDraft: () => saveDraft(), onSaved: take, toast }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-stepnav", children: [
+          current.n > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-arrow-left", onClick: () => go(STEPS[current.n - 2].key), children: STEPS[current.n - 2].label }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
+          isDraftStep && (0, import_parts.has)(caps, "landing.content") && draftDirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-floppy-o", onClick: () => saveDraft(), busy: saving, children: "Save draft" }),
+          current.n < STEPS.length && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Button, { variant: isDraftStep && draftDirty ? "line" : "dark", onClick: () => go(STEPS[current.n].key), "data-testid": "lp-next", children: [
+            "Next: ",
+            STEPS[current.n].label,
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+          ] })
+        ] })
+      ] })
+    ] }),
+    dialog
+  ] });
+}
+function LandingEditor() {
+  const { pageId, caps, lookups, catalog, defaults } = (0, import_inertia_react.usePage)().props;
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  const isNew = !pageId;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_AdminLayout.default,
+    {
+      title: isNew ? "Create landing page" : "Edit landing page",
+      wide: true,
+      crumbs: [{ label: "Landing pages", href: "/admin/landing" }, { label: "All landing pages", href: "/admin/landing/pages" }, { label: isNew ? "Create" : "Edit" }],
+      children: [
+        isNew ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AdminLayout.PageHeader, { eyebrow: "Landing Page Management", title: "Create landing page", subtitle: "Choose the course and a template. Everything else is filled from the course and can be changed in the next steps." }),
+          (0, import_parts.has)(caps, "landing.publish") ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreatePage, { lookups, catalog, defaults, toast }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-lock", title: "You can't create pages", children: "Ask a super admin for publishing rights." }) })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EditPage, { pageId, caps, lookups, catalog, toast }),
+        toastNode
+      ]
+    }
+  );
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Landing/Checkout.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Checkout_exports = {};
+__export(Checkout_exports, {
+  default: () => Checkout
+});
+module.exports = __toCommonJS(Checkout_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_api = __webpack_require__("./resources/js/Components/Auth/api.js");
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+const LOGO_TEXT = { upi: "UPI", gpay: "GPay", phonepe: "PhonePe", paytm: "Paytm", visa: "VISA", mastercard: "Mastercard", rupay: "RuPay", paypal: "PayPal" };
+const ICON = { upi: "fa-mobile", card: "fa-credit-card", netbanking: "fa-university", wallet: "fa-google-wallet", emi: "fa-calendar", paypal: "fa-paypal" };
+function loadRazorpay() {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) return resolve(window.Razorpay);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(window.Razorpay);
+    s.onerror = () => reject(new Error("Could not load the payment window. Check your connection and try again."));
+    document.body.appendChild(s);
+  });
+}
+const track = (pageId, event, extra = {}) => {
+  try {
+    import_axios.default.post("/landing/e", __spreadValues({ page: pageId, event }, extra)).catch(() => {
+    });
+  } catch (e) {
+  }
+};
+function Summary({ course, quote, showCoupon, coupon, setCoupon, applyCoupon, couponMsg, busy, open, setOpen }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: `lc-sum ${open ? "is-open" : ""}`, "aria-label": "Order summary", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "button", className: "lc-sum__toggle", onClick: () => setOpen(!open), "aria-expanded": open, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Order summary" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: quote.totalLabel }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa fa-angle-${open ? "up" : "down"}`, "aria-hidden": "true" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-sum__body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-sum__course", children: [
+        course.thumb && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: course.thumb, alt: "", width: "72", height: "72" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "lc-sum__title", children: course.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lc-sum__by", children: [
+            course.kind,
+            course.artist ? ` \xB7 with ${course.artist}` : ""
+          ] }),
+          course.starts && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lc-sum__by", children: [
+            "Starts ",
+            course.starts,
+            course.duration ? ` \xB7 ${course.duration}` : ""
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", { className: "lc-lines", children: [
+        quote.listLabel && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Course price" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("s", { children: quote.listLabel }) })
+        ] }),
+        quote.offerLabel && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "is-good", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: quote.offerLabel }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: quote.saving ? `\u2212${quote.saving}` : "" })
+        ] }),
+        quote.coupon && Number(quote.discount) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "is-good", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dt", { children: [
+            "Coupon ",
+            quote.coupon
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+            "\u2212\u20B9",
+            Number(quote.discount).toLocaleString("en-IN")
+          ] })
+        ] }),
+        quote.taxMode === "ADDED" && Number(quote.tax) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: quote.taxLabel }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [
+            "\u20B9",
+            Number(quote.tax).toLocaleString("en-IN")
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-lines__total", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "Total" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: quote.totalLabel })
+        ] })
+      ] }),
+      quote.taxMode !== "ADDED" && Number(quote.tax) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lc-fine", children: [
+        "Includes ",
+        quote.taxLabel,
+        "."
+      ] }),
+      quote.offerEndsLabel && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lc-fine", children: [
+        "Offer price until ",
+        quote.offerEndsLabel,
+        " (IST)."
+      ] }),
+      showCoupon && quote.couponsEnabled && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "lc-coupon", onSubmit: (e) => {
+        e.preventDefault();
+        applyCoupon();
+      }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "lc-coupon", className: "sr-only", children: "Coupon code" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "input",
+          {
+            id: "lc-coupon",
+            value: coupon,
+            onChange: (e) => setCoupon(e.target.value.toUpperCase().replace(/\s/g, "")),
+            placeholder: "Coupon code",
+            autoComplete: "off",
+            maxLength: 40,
+            "aria-describedby": "lc-coupon-msg",
+            "data-testid": "lc-coupon"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", disabled: busy || !coupon, "data-testid": "lc-coupon-apply", children: "Apply" }),
+        couponMsg && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { id: "lc-coupon-msg", className: `lc-coupon__msg ${couponMsg.ok ? "is-ok" : "is-err"}`, role: couponMsg.ok ? "status" : "alert", children: couponMsg.text })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "lc-trust", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+          " Encrypted payment by our payment partners. We never see your card or UPI PIN."
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-envelope-o", "aria-hidden": "true" }),
+          " Receipt and joining details by e-mail."
+        ] })
+      ] })
+    ] })
+  ] });
+}
+function Result({ result, checkout, page, pollUrl }) {
+  const [r, setR] = (0, import_react.useState)(result);
+  const [tries, setTries] = (0, import_react.useState)(0);
+  (0, import_react.useEffect)(() => {
+    if (r.state !== "pending" && r.state !== "open") return void 0;
+    if (tries > 30) return void 0;
+    const t = setTimeout(() => {
+      import_axios.default.get(pollUrl).then((x) => {
+        setR(x.data);
+        setTries((n) => n + 1);
+      }).catch(() => setTries((n) => n + 1));
+    }, 4e3);
+    return () => clearTimeout(t);
+  }, [r, tries]);
+  const ok = r.state === "success";
+  const next = checkout.successRedirect || r.classroom;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `lc-result is-${r.state}`, "data-testid": "lc-result", "data-state": r.state, role: "status", "aria-live": "polite", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lc-result__icon", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${ok ? "fa-check" : r.state === "failed" ? "fa-times" : r.state === "pending" || r.state === "open" ? "fa-hourglass-half" : "fa-info"}` }) }),
+    ok && !r.duplicate && !r.soldout && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "You're in!" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: checkout.successMessage || "Your payment is confirmed and your seat is booked. We have e-mailed your receipt and joining details." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lc-fine", children: [
+        "Order ",
+        r.number,
+        " \xB7 ",
+        r.amount
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-result__ctas", children: [
+        next && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "lc-btn", href: next, children: checkout.successRedirect ? "Continue" : "Go to your course" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "lc-btn lc-btn--line", href: "/dashboard", children: "Open my studio" })
+      ] })
+    ] }),
+    ok && r.duplicate && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "You were already enrolled" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "This payment will be refunded in full. Nothing else to do." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "lc-btn", href: "/dashboard", children: "Open my studio" })
+    ] }),
+    r.state === "success" && r.soldout && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "The course filled up" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Someone took the last seat while you were paying. Your payment will be refunded in full." })
+    ] }),
+    r.state === "refund" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "A refund is on its way" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+        r.soldout ? "The course filled up while you were paying." : "This payment is being refunded.",
+        " You'll get an e-mail when it's done."
+      ] })
+    ] }),
+    (r.state === "pending" || r.state === "open") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Confirming your payment\u2026" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: checkout.pendingMessage || "Some banks take a minute to confirm. You can keep this page open; we will also e-mail you as soon as it is confirmed." }),
+      tries > 30 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lc-fine", children: [
+        "Still waiting. If money left your account, it will either be confirmed or refunded automatically. Order ",
+        r.number,
+        "."
+      ] })
+    ] }),
+    r.state === "failed" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "The payment didn't go through" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: checkout.failureMessage || "No money was taken. You can try again, perhaps with another payment method." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { className: "lc-btn", href: `/course/${page.slug}/enroll`, children: "Try again" })
+    ] }),
+    r.state === "refunded" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "This order was refunded" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+        "Order ",
+        r.number,
+        "."
+      ] })
+    ] })
+  ] });
+}
+function Checkout() {
+  const { page, course, quote: initialQuote, choices, checkout, simulate, testMode, user, address, enrolled, notice, result } = (0, import_inertia_react.usePage)().props;
+  const [quote, setQuote] = (0, import_react.useState)(initialQuote);
+  const [form, setForm] = (0, import_react.useState)({
+    name: user.name || "",
+    phone: user.phone || "",
+    address: address && address.address || "",
+    city: address && address.city || "",
+    state: address && address.state || "",
+    zipcode: address && address.zipcode || "",
+    country: address && address.country || "India",
+    terms: false,
+    privacy: false
+  });
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [method, setMethod] = (0, import_react.useState)(choices.length ? choices[0].key : null);
+  const [coupon, setCoupon] = (0, import_react.useState)("");
+  const [couponMsg, setCouponMsg] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [message, setMessage] = (0, import_react.useState)(notice === "failed" ? { tone: "error", text: "The payment did not complete. No money was taken; please try again." } : notice === "cancelled" ? { tone: "info", text: "Payment cancelled. No money was taken." } : null);
+  const [test, setTest] = (0, import_react.useState)(null);
+  const [orderId, setOrderId] = (0, import_react.useState)(null);
+  const [sumOpen, setSumOpen] = (0, import_react.useState)(false);
+  const methodRef = (0, import_react.useRef)(null);
+  const set = (k) => (e) => setForm(__spreadProps(__spreadValues({}, form), { [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
+  const pick = (k) => {
+    setMethod(k);
+    track(page.id, "METHOD", { method: k });
+  };
+  const applyCoupon = async () => {
+    setBusy(true);
+    try {
+      const r = await (0, import_api.authPost)(`/landing/checkout/${page.id}/quote`, { coupon });
+      setQuote(r.quote);
+      setCouponMsg(r.couponError ? { ok: false, text: r.couponError } : { ok: true, text: `Code ${coupon} applied.` });
+    } catch (err) {
+      setCouponMsg({ ok: false, text: err.message });
+    }
+    setBusy(false);
+  };
+  const pay = async (e, forceMethod) => {
+    if (e) e.preventDefault();
+    setBusy(true);
+    setMessage(null);
+    setErrors({});
+    let oid = orderId;
+    try {
+      const o = await (0, import_api.authPost)(`/landing/checkout/${page.id}/order`, __spreadProps(__spreadValues({}, form), { coupon: quote.coupon || "" }));
+      oid = o.orderId;
+      setOrderId(oid);
+      setQuote(o.quote);
+    } catch (err) {
+      if (err.data && err.data.enrolled) {
+        window.location.reload();
+        return;
+      }
+      setErrors(err.fieldErrors || {});
+      setMessage({ tone: "error", text: err.message });
+      setBusy(false);
+      const first = Object.keys(err.fieldErrors || {})[0];
+      if (first) {
+        const el = document.getElementById(`lc-${first}`);
+        if (el) el.focus();
+      }
+      return;
+    }
+    const done = (redirect) => {
+      const flags = /duplicate=1/.test(redirect || "") ? "&duplicate=1" : /soldout=1/.test(redirect || "") ? "&soldout=1" : "";
+      window.location.assign(`/course/${page.slug}/enroll/done?order_id=${oid}${flags}`);
+    };
+    try {
+      const r = await (0, import_api.authPost)(`/landing/checkout/${page.id}/pay`, { orderId: oid, method: quote.free ? "free" : forceMethod || method });
+      if (r.gateway === "done") {
+        window.location.assign(r.redirect);
+        return;
+      }
+      if (r.gateway === "paypal") {
+        window.location.assign(r.approveUrl);
+        return;
+      }
+      if (r.gateway === "test") {
+        setTest(__spreadProps(__spreadValues({}, r), { orderId: oid }));
+        setBusy(false);
+        return;
+      }
+      const Razorpay = await loadRazorpay();
+      const rzp = new Razorpay({
+        key: r.key,
+        amount: r.amount,
+        currency: r.currency,
+        order_id: r.razorpayOrderId,
+        name: r.name,
+        description: r.description,
+        prefill: r.prefill || {},
+        theme: { color: "#9c0d48" },
+        config: r.config,
+        handler: async (resp) => {
+          setBusy(true);
+          try {
+            const v = await (0, import_api.authPost)("/checkout/razorpay/verify", __spreadValues({ orderId: oid }, resp));
+            done(v.redirect);
+          } catch (err) {
+            setMessage({ tone: "error", text: err.message });
+            setBusy(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            (0, import_api.authPost)(`/landing/checkout/${page.id}/failed`, { orderId: oid, reason: "closed" }).catch(() => {
+            });
+            setBusy(false);
+            setMessage({ tone: "info", text: "Payment window closed. No money was taken; you can try again any time." });
+          }
+        }
+      });
+      rzp.on("payment.failed", (resp) => {
+        (0, import_api.authPost)(`/landing/checkout/${page.id}/failed`, { orderId: oid, reason: "declined" }).catch(() => {
+        });
+        setMessage({ tone: "error", text: resp && resp.error && resp.error.description || "The payment failed. No money was taken. Please try again or choose another method." });
+      });
+      rzp.open();
+    } catch (err) {
+      if (err.data && err.data.enrolled) {
+        window.location.reload();
+        return;
+      }
+      if (err.data && err.data.repriced && err.data.quote) setQuote(err.data.quote);
+      setMessage({ tone: "error", text: err.message });
+      setBusy(false);
+    }
+  };
+  const completeTest = async () => {
+    setBusy(true);
+    try {
+      const r = await (0, import_api.authPost)("/checkout/test-pay", { orderId: test.orderId });
+      const flags = /duplicate=1/.test(r.redirect || "") ? "&duplicate=1" : /soldout=1/.test(r.redirect || "") ? "&soldout=1" : "";
+      window.location.assign(`/course/${page.slug}/enroll/done?order_id=${test.orderId}${flags}`);
+    } catch (err) {
+      setMessage({ tone: "error", text: err.message });
+      setBusy(false);
+    }
+  };
+  if (result) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: "Your enrolment", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lc lc--result", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Result, { result, checkout, page, pollUrl: `/landing/checkout/order/${result.orderId}/status` }) }) });
+  }
+  const choice = choices.find((c) => c.key === method);
+  const canPay = quote.free || method && choice || simulate;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: `Enrol \xB7 ${course.title}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc", "data-testid": "lc-checkout", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "lc-crumbs", "aria-label": "Breadcrumb", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `/course/${page.slug}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-left", "aria-hidden": "true" }),
+      " Back to the course"
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { className: "lc-h1", children: [
+      "Enrol in ",
+      course.title
+    ] }),
+    enrolled ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-note is-ok", role: "status", children: [
+      "You're already enrolled in this course. ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: enrolled.classroom, children: "Go to your course" })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-grid", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        Summary,
+        {
+          course,
+          quote,
+          showCoupon: checkout.showCoupon,
+          coupon,
+          setCoupon,
+          applyCoupon,
+          couponMsg,
+          busy,
+          open: sumOpen,
+          setOpen: setSumOpen
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "lc-main", onSubmit: pay, noValidate: true, children: [
+        message && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `lc-note is-${message.tone}`, role: message.tone === "error" ? "alert" : "status", children: message.text }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "lc-card", "aria-labelledby": "lc-s1", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { id: "lc-s1", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "1" }),
+            " Your details"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-fields", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-field", htmlFor: "lc-name", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Full name" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "lc-name", value: form.name, onChange: set("name"), autoComplete: "name", "aria-invalid": !!errors.name, "aria-describedby": errors.name ? "lc-name-e" : void 0, required: true }),
+              errors.name && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { id: "lc-name-e", className: "lc-err", children: errors.name })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-field", htmlFor: "lc-email", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "E-mail" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "lc-email", value: user.email, readOnly: true, "aria-readonly": "true" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "lc-hint", children: "Your receipt goes here." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-field", htmlFor: "lc-phone", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                "Phone ",
+                checkout.requirePhone ? "" : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: "(optional)" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                "input",
+                {
+                  id: "lc-phone",
+                  value: form.phone,
+                  onChange: set("phone"),
+                  autoComplete: "tel",
+                  inputMode: "tel",
+                  placeholder: "+91 98765 43210",
+                  "aria-invalid": !!errors.phone,
+                  "aria-describedby": errors.phone ? "lc-phone-e" : void 0,
+                  required: checkout.requirePhone
+                }
+              ),
+              errors.phone && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { id: "lc-phone-e", className: "lc-err", children: errors.phone })
+            ] }),
+            checkout.requireAddress && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-field lc-field--wide", htmlFor: "lc-address", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Address" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "lc-address", value: form.address, onChange: set("address"), autoComplete: "street-address", "aria-invalid": !!errors.address, required: true }),
+                errors.address && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "lc-err", children: errors.address })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-field", htmlFor: "lc-city", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "City" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "lc-city", value: form.city, onChange: set("city"), autoComplete: "address-level2", "aria-invalid": !!errors.city, required: true }),
+                errors.city && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "lc-err", children: errors.city })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-field", htmlFor: "lc-zipcode", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "PIN / postal code" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "lc-zipcode", value: form.zipcode, onChange: set("zipcode"), autoComplete: "postal-code", "aria-invalid": !!errors.zipcode, required: true }),
+                errors.zipcode && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "lc-err", children: errors.zipcode })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-field", htmlFor: "lc-state", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  "State ",
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: "(optional)" })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "lc-state", value: form.state, onChange: set("state"), autoComplete: "address-level1" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-field", htmlFor: "lc-country", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Country" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "lc-country", value: form.country, onChange: set("country"), autoComplete: "country-name" })
+              ] })
+            ] })
+          ] })
+        ] }),
+        !quote.free && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "lc-card", "aria-labelledby": "lc-s2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", { id: "lc-s2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "2" }),
+            " How would you like to pay?"
+          ] }),
+          choices.length === 0 && !simulate && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "lc-note is-error", children: "Online payment isn't available for this course right now. Please contact us and we'll help you enrol." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lc-methods", role: "radiogroup", "aria-label": "Payment method", ref: methodRef, children: choices.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: `lc-method ${method === c.key ? "is-on" : ""}`, "data-method": c.key, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "method", value: c.key, checked: method === c.key, onChange: () => pick(c.key) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${ICON[c.key] || "fa-credit-card"} lc-method__icon`, "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lc-method__text", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: c.label }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: c.hint })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lc-method__end", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lc-logos", "aria-hidden": "true", children: c.logos.slice(0, 4).map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `lc-logo lc-logo--${l}`, children: LOGO_TEXT[l] || l }, l)) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { className: "lc-method__amt", children: c.amount })
+            ] })
+          ] }, c.key)) }),
+          testMode && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lc-fine", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-flask", "aria-hidden": "true" }),
+            " Test mode: no real payment is taken on this server."
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "lc-card lc-card--pay", "aria-label": "Confirm", children: [
+          checkout.requireTerms && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-check", htmlFor: "lc-terms", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "lc-terms", type: "checkbox", checked: form.terms, onChange: set("terms"), "aria-invalid": !!errors.terms, "data-testid": "lc-terms" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              "I accept the ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/terms-conditions", target: "_blank", rel: "noopener", children: "terms of use" }),
+              checkout.requirePrivacy ? "" : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                " and the ",
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/privacy-policy", target: "_blank", rel: "noopener", children: "privacy policy" })
+              ] }),
+              "."
+            ] })
+          ] }),
+          errors.terms && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "lc-err", children: errors.terms }),
+          checkout.requirePrivacy && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "lc-check", htmlFor: "lc-privacy", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "lc-privacy", type: "checkbox", checked: form.privacy, onChange: set("privacy"), "aria-invalid": !!errors.privacy, "data-testid": "lc-privacy" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              "I agree that ArtistikCity uses my details to run this course, as set out in the ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/privacy-policy", target: "_blank", rel: "noopener", children: "privacy policy" }),
+              "."
+            ] })
+          ] }),
+          errors.privacy && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "lc-err", children: errors.privacy }),
+          test ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-test", "data-testid": "lc-test", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Test payment" }),
+              " \xB7 ",
+              test.simulated ? "You are a test buyer: this payment is simulated and marked as a test order." : "No gateway keys on this server: complete a simulated payment."
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-row", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "lc-btn", onClick: completeTest, disabled: busy, "data-testid": "lc-test-complete", children: "Complete test payment" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "lc-btn lc-btn--line", onClick: () => {
+                setTest(null);
+                (0, import_api.authPost)(`/landing/checkout/${page.id}/failed`, { orderId: test.orderId, reason: "declined" }).catch(() => {
+                });
+                setMessage({ tone: "error", text: "The payment failed. No money was taken." });
+              }, children: "Make it fail" })
+            ] })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lc-paybar", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { type: "submit", className: "lc-btn lc-btn--pay", disabled: busy || !canPay, "data-testid": "lc-pay", children: [
+              busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-circle-o-notch fa-spin", "aria-hidden": "true" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
+              quote.free ? " Enrol for free" : ` Pay ${choice ? choice.amount : quote.totalLabel}`
+            ] }),
+            simulate && !quote.free && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "lc-btn lc-btn--line", disabled: busy, onClick: () => pay(null, "test"), "data-testid": "lc-simulate", children: "Simulate payment (test buyer)" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lc-fine lc-center", children: [
+            "You'll confirm the payment on ",
+            choice && choice.currency === "USD" ? "PayPal's" : "the payment partner's",
+            " secure page."
+          ] })
+        ] })
+      ] })
+    ] })
+  ] }) });
 }
 
 
@@ -115902,6 +119066,12 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Landing/Checkout": "./resources/js/Pages/Landing/Checkout.js",
+	"./Landing/Checkout.js": "./resources/js/Pages/Landing/Checkout.js",
+	"./Admin/Landing/Editor": "./resources/js/Pages/Admin/Landing/Editor.js",
+	"./Admin/Landing/Editor.js": "./resources/js/Pages/Admin/Landing/Editor.js",
+	"./Admin/Landing/Index": "./resources/js/Pages/Admin/Landing/Index.js",
+	"./Admin/Landing/Index.js": "./resources/js/Pages/Admin/Landing/Index.js",
 	"./Account/Offers": "./resources/js/Pages/Account/Offers.js",
 	"./Account/Offers.js": "./resources/js/Pages/Account/Offers.js",
 	"./Shop/Cart": "./resources/js/Pages/Shop/Cart.js",

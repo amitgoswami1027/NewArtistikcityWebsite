@@ -70,6 +70,33 @@ public class CheckoutController {
     private static final String ACCESS = "seat.access";
     @org.springframework.beans.factory.annotation.Autowired
     private org.springframework.beans.factory.ObjectProvider<com.artistikcity.ledger.LedgerService> ledger;
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.artistikcity.landing.LandingHooks> landingHooks;
+
+    /**
+     * What the gateway must have charged: a landing-page order carries its own price (fixed by the landing checkout from
+     * the page's pricing and coupon); other course orders use the course price list.
+     */
+    private BigDecimal expectedInr(Row order) {
+        return order.get("landing_page_id") != null ? com.artistikcity.landing.LandingHooks.expected(order) : prices(order.lng("course_id"))[0];
+    }
+
+    private BigDecimal expectedUsd(Row order) {
+        return order.get("landing_page_id") != null ? com.artistikcity.landing.LandingHooks.expected(order) : prices(order.lng("course_id"))[1];
+    }
+
+    /** A paid / failed landing-page order goes back to its own page's confirmation screen. */
+    private String landingResult(Row order, String courseUrl, boolean ok) {
+        if (order.get("landing_page_id") == null) {
+            return courseUrl;
+        }
+        Row page = db.first("select slug from landing_pages where id = ?", order.get("landing_page_id"));
+        if (page == null) {
+            return courseUrl;
+        }
+        return ok ? com.artistikcity.landing.LandingCheckoutController.doneUrl(page, order.lng("id"), courseUrl)
+                : "/course/" + page.str("slug") + "/enroll?payment=failed";
+    }
 
     public CheckoutController(Views views, Inertia inertia, Db db, Json json, Auth auth, CourseService courses,
                               CommissionPayments gateways, Mailer mailer, Redirects redirect, org.springframework.core.env.Environment env,
@@ -240,9 +267,10 @@ public class CheckoutController {
     /** The open (unpaid) order of this student for this course, newest first. */
     private Row pendingOrder(HttpServletRequest request, long uid, long courseId) {
         Object sid = request.getSession(true).getAttribute(ORDER_ID);
-        Row o = sid == null ? null : db.first("select * from orders where id = ? and user_id = ? and course_id = ? and payment_status <> 1", sid, uid, courseId);
+        // landing-page orders carry their own price and coupon: they are only paid through their page's checkout
+        Row o = sid == null ? null : db.first("select * from orders where id = ? and user_id = ? and course_id = ? and payment_status <> 1 and landing_page_id is null", sid, uid, courseId);
         if (o == null) {
-            o = db.first("select * from orders where user_id = ? and course_id = ? and payment_status <> 1 order by id desc limit 1", uid, courseId);
+            o = db.first("select * from orders where user_id = ? and course_id = ? and payment_status <> 1 and landing_page_id is null order by id desc limit 1", uid, courseId);
         }
         return o;
     }
@@ -318,6 +346,9 @@ public class CheckoutController {
         Row order = ownOpenOrder(user, in.lng("orderId"));
         if (order == null) {
             return error(HttpStatus.GONE, "This order is no longer open. Please start the checkout again.");
+        }
+        if (order.get("landing_page_id") != null) {
+            return error(HttpStatus.CONFLICT, "This order belongs to a course page with its own price. Please pay from that page.");
         }
         long courseId = order.lng("course_id");
         if (db.count("select count(*) from orders where user_id = ? and course_id = ? and payment_status = 1", user.get("id"), courseId) > 0) {
@@ -449,7 +480,7 @@ public class CheckoutController {
         if (order == null) {
             return json(HttpStatus.OK, Map.of("ignored", "not a course order"));
         }
-        long expected = prices(order.lng("course_id"))[0].movePointRight(2).longValueExact();
+        long expected = expectedInr(order).movePointRight(2).longValueExact();
         long paid = payment.get("amount") instanceof Number n ? n.longValue() : -1;
         if (expected != paid || !"INR".equalsIgnoreCase(String.valueOf(payment.get("currency")))) {
             log.warn("Course Razorpay amount mismatch for order {}: expected {} got {}", order.get("id"), expected, paid);
@@ -489,21 +520,22 @@ public class CheckoutController {
             return redirect.to(request, "/checkout?payment=failed");
         }
         if (order.lng("payment_status", 0) == 1) {
-            return redirect.to(request, "/payment/success?order_id=" + order.get("id"));
+            return redirect.to(request, landingResult(order, "/payment/success?order_id=" + order.get("id"), true));
         }
         try {
             String[] cap = gateways.paypalCapture(token);
-            BigDecimal expected = prices(order.lng("course_id"))[1];
+            BigDecimal expected = expectedUsd(order);
             boolean ok = "COMPLETED".equals(cap[0]) && "USD".equals(cap[3]) && cap[2] != null && new BigDecimal(cap[2]).compareTo(expected) == 0;
             if (ok) {
-                return redirect.to(request, markPaid(request, user, order.lng("id"), "PayPal", cap[1], Map.of("paypal_order_id", token, "capture_id", cap[1])));
+                String url = markPaid(request, user, order.lng("id"), "PayPal", cap[1], Map.of("paypal_order_id", token, "capture_id", cap[1]));
+                return redirect.to(request, landingResult(order, url, true));
             }
             log.warn("PayPal capture for order {} not accepted: {}", order.get("id"), String.join(",", cap));
         } catch (Exception e) {
             log.error("PayPal capture failed for order {}", order.get("id"), e);
         }
         db.updateById("orders", order.lng("id"), Row.of("payment_status", 2));
-        return redirect.to(request, "/payment/failed?order_id=" + order.get("id"));
+        return redirect.to(request, landingResult(order, "/payment/failed?order_id=" + order.get("id"), false));
     }
 
     /** Marks the order paid exactly once, records the payment and sends the confirmation. Returns the success URL. */
@@ -558,6 +590,13 @@ public class CheckoutController {
             Row order = db.find("orders", orderId);
             logPayment(userId, orderId, order.lng("course_id"), option, paymentId, 1, json.encode(details));
             sendOrderConfirmation(request, orderId, email != null ? email : order.str("billing_email"));
+            if (order.get("landing_page_id") != null && landingHooks != null) {
+                try {
+                    landingHooks.ifAvailable(h -> h.onPaid(orderId));
+                } catch (RuntimeException e) {
+                    log.warn("Landing page follow-up for order {} failed: {}", orderId, e.toString());
+                }
+            }
         } else if (paymentId != null && current.str("payment_id") != null && !paymentId.equals(current.str("payment_id"))
                 && !paymentId.startsWith("free_") && !paymentId.startsWith("test_")) {
             Row copy = new Row(current);

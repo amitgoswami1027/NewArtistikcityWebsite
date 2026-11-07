@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{meta.title}}</title>
+<meta name="description" content="{{meta.description}}">
+<link rel="canonical" href="{{meta.canonical}}">
+{{#meta.noindex}}<meta name="robots" content="noindex, nofollow">{{/meta.noindex}}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ArtistikCity">
+<meta property="og:title" content="{{meta.ogTitle}}">
+<meta property="og:description" content="{{meta.ogDescription}}">
+<meta property="og:url" content="{{meta.canonical}}">
+{{#meta.ogImage}}<meta property="og:image" content="{{meta.ogImage}}"><meta name="twitter:image" content="{{meta.ogImage}}">{{/meta.ogImage}}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="{{ink}}">
+<meta name="csrf-token" content="{{csrf}}">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800{{#fontSerif}}&family=Fraunces:opsz,wght@9..144,500;9..144,600{{/fontSerif}}&display=swap">
+{{#sections}}{{#is_hero}}{{#image}}<link rel="preload" as="image" href="{{src}}"{{#srcset}} imagesrcset="{{srcset}}" imagesizes="{{sizes}}"{{/srcset}} fetchpriority="high">{{/image}}{{/is_hero}}{{/sections}}
+<link rel="stylesheet" href="/css/landing.css?v=1">
+<style>:root{--accent:{{accent}};--accent-dark:{{accentDark}};--on-accent:{{accentInk}};--ink:{{ink}};--surface:{{surface}}}</style>
+{{#meta.jsonLd}}<script type="application/ld+json">{{{meta.jsonLd}}}</script>{{/meta.jsonLd}}
+</head>
+<body class="lp{{#fontSerif}} lp--serif{{/fontSerif}}{{#radiusSharp}} lp--sharp{{/radiusSharp}}{{#preview}} lp--preview{{/preview}}"
+      data-page="{{pageId}}" data-ga4="{{marketing.ga4}}" data-gtm="{{marketing.gtm}}" data-pixel="{{marketing.pixel}}"{{#preview}} data-preview="1"{{/preview}}>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M9.5 16.2 5.3 12l-1.4 1.4 5.6 5.6L20.1 8.4 18.7 7z" fill="currentColor"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2h12.2l-4.6-4.6z" fill="currentColor"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z" fill="currentColor"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3z" fill="currentColor"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 17.3 6.2 3.7-1.6-7 5.4-4.7-7.1-.6L12 2 9.1 8.7 2 9.3l5.4 4.7-1.6 7z" fill="currentColor"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.7 15l-1.3 5 5.1-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20z" fill="currentColor"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z" fill="currentColor"/></symbol>
+</svg>
+<a class="lp-skip" href="#main">Skip to content</a>
+{{#preview}}<div class="lp-previewbar" role="status">Preview of the draft · not public · tracking off</div>{{/preview}}
+
+<header class="lp-top">
+  <div class="lp-wrap lp-top__row">
+    <a class="lp-logo" href="/" aria-label="ArtistikCity home"><img src="/assets/images/logo.png" alt="ArtistikCity" width="134" height="36"></a>
+    <nav class="lp-top__nav" aria-label="Site">
+      <a href="/courses?type=all">Courses</a>
+      <a href="/how-it-works">How it works</a>
+      <a href="/marketplace">Marketplace</a>
+    </nav>
+    <div class="lp-top__end">
+      {{#auth.check}}<a class="lp-top__link" href="/dashboard">My studio</a>{{/auth.check}}
+      {{#auth.guest}}<a class="lp-top__link" href="/login">Log in</a>{{/auth.guest}}
+      <a class="lp-btn lp-btn--sm" href="{{enrollUrl}}" data-cta="header">{{ctaPrimary}}</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+{{#sections}}
+<section id="{{id}}" class="lp-s lp-s--{{layout}} lp-bg--{{bg}}{{#hideOnMobile}} lp-hide-m{{/hideOnMobile}}{{#is_hero}} lp-hero{{/is_hero}}" aria-labelledby="{{id}}-h">
+
+{{#is_hero}}
+  {{#image}}<div class="lp-hero__bg" aria-hidden="true"></div>{{/image}}
+  <div class="lp-wrap lp-hero__grid">
+    <div class="lp-hero__text">
+      {{#eyebrow}}<p class="lp-eyebrow">{{eyebrow}}</p>{{/eyebrow}}
+      <h1 id="{{id}}-h" class="lp-hero__title">{{heading}}</h1>
+      {{#subheading}}<p class="lp-hero__sub">{{subheading}}</p>{{/subheading}}
+      <div class="lp-hero__who">
+        {{#artist}}
+        <div class="lp-artistchip">
+          {{#photo}}<img src="{{photo}}" alt="" width="44" height="44" loading="eager">{{/photo}}
+          <span>A course by <b>{{name}}</b>{{#title}}<small>{{title}}</small>{{/title}}</span>
+        </div>
+        {{/artist}}
+        <div class="lp-hero__proof">
+          {{#rating}}<span class="lp-rating"><svg aria-hidden="true"><use href="#i-star"/></svg><b>{{avg}}</b> from {{count}} verified {{label}}</span>{{/rating}}
+          {{#students}}<span>{{students}} students enrolled</span>{{/students}}
+        </div>
+      </div>
+      <div class="lp-pricebox">
+        {{#price}}
+        <div class="lp-pricebox__row">
+          <span class="lp-price">{{totalLabel}}</span>
+          {{#listLabel}}<s class="lp-price__was"><span class="sr">Was </span>{{listLabel}}</s>{{/listLabel}}
+          {{#savingPct}}<span class="lp-badge">{{savingPct}}</span>{{/savingPct}}
+        </div>
+        {{#offerLabel}}<p class="lp-offer">{{offerLabel}}{{#offerEndsLabel}} · ends {{offerEndsLabel}}{{/offerEndsLabel}}</p>{{/offerLabel}}
+        {{#taxNote}}<p class="lp-fine">{{taxNote}}</p>{{/taxNote}}
+        {{/price}}
+      </div>
+      <div class="lp-ctas">
+        <a class="lp-btn lp-btn--lg" href="{{enrollUrl}}" data-cta="hero">{{ctaPrimary}} <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        {{#ctaSecondary}}{{#exploreId}}<a class="lp-btn lp-btn--ghost lp-btn--lg" href="#{{exploreId}}" data-cta="explore">{{ctaSecondary}}</a>{{/exploreId}}{{/ctaSecondary}}
+      </div>
+      {{#trust.0}}<ul class="lp-trust">{{#trust}}<li><svg aria-hidden="true"><use href="#i-check"/></svg>{{.}}</li>{{/trust}}</ul>{{/trust.0}}
+      {{#facts.0}}
+      <dl class="lp-facts">
+        {{#facts}}<div><dt>{{label}}</dt><dd>{{value}}</dd></div>{{/facts}}
+      </dl>
+      {{/facts.0}}
+    </div>
+    <div class="lp-hero__media">
+      {{#video}}
+      <div class="lp-video" data-video="{{src}}" data-kind="{{kind}}">
+        {{#file}}<video controls preload="none" playsinline{{#poster}} poster="{{poster}}"{{/poster}} src="{{src}}" title="{{title}}"></video>{{/file}}
+        {{^file}}<button type="button" class="lp-video__btn" aria-label="Play {{title}}">{{#poster}}<img src="{{poster}}" alt="" loading="eager" fetchpriority="high">{{/poster}}<span class="lp-video__play"><svg aria-hidden="true"><use href="#i-play"/></svg></span></button>{{/file}}
+      </div>
+      {{/video}}
+      {{^video}}{{#image}}
+      <figure class="lp-frame">
+        <img src="{{src}}"{{#srcset}} srcset="{{srcset}}" sizes="{{sizes}}"{{/srcset}} alt="{{alt}}" fetchpriority="high" decoding="async">
+      </figure>
+      {{/image}}{{/video}}
+    </div>
+  </div>
+{{/is_hero}}
+
+{{#is_intro}}
+  <div class="lp-wrap lp-intro">
+    <div class="lp-intro__lead">
+      <p class="lp-kicker">About the course</p>
+      <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+    </div>
+    <div class="lp-intro__body">
+      {{#body}}<p>{{.}}</p>{{/body}}
+      {{#hasItems}}
+      <ul class="lp-pillars">
+        {{#items}}<li><h3>{{title}}</h3>{{#textParas}}<p>{{.}}</p>{{/textParas}}</li>{{/items}}
+      </ul>
+      {{/hasItems}}
+    </div>
+  </div>
+{{/is_intro}}
+
+{{#is_outcomes}}{{#hasItems}}
+  <div class="lp-wrap">
+    <p class="lp-kicker">Learning outcomes</p>
+    <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+    <ol class="lp-cards lp-cards--{{layout}}">
+      {{#items}}<li class="lp-card">{{#image}}<img src="{{image}}" alt="{{alt}}" loading="lazy" decoding="async">{{/image}}<span class="lp-card__n" aria-hidden="true">{{n}}</span><h3>{{title}}</h3>{{#textParas}}<p>{{.}}</p>{{/textParas}}</li>{{/items}}
+    </ol>
+  </div>
+{{/hasItems}}{{/is_outcomes}}
+
+{{#is_curriculum}}
+  <div class="lp-wrap lp-narrow">
+    <p class="lp-kicker">Curriculum · {{summary}}</p>
+    <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+    <div class="lp-modules">
+      {{#modules}}
+      <details class="lp-module"{{#open}} open{{/open}}>
+        <summary><span class="lp-module__n">{{n}}</span><span class="lp-module__t">{{title}}<small>{{count}}{{#duration}} · {{duration}}{{/duration}}</small></span><svg class="lp-module__i" aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <ol class="lp-lessons">
+          {{#lessons}}<li><b>{{title}}</b>{{#video}}<span class="lp-tag">Video lesson</span>{{/video}}{{#text}}<p>{{text}}</p>{{/text}}</li>{{/lessons}}
+          {{^lessons}}<li><p>Lessons are being added.</p></li>{{/lessons}}
+        </ol>
+      </details>
+      {{/modules}}
+    </div>
+  </div>
+{{/is_curriculum}}
+
+{{#is_artist}}
+  <div class="lp-wrap">
+    <p class="lp-kicker">{{#multiple}}Your artists{{/multiple}}{{^multiple}}Your artist{{/multiple}}</p>
+    <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+    {{#artists}}
+    <article class="lp-artist">
+      <div class="lp-artist__photo">{{#photo}}<img src="{{src}}"{{#srcset}} srcset="{{srcset}}" sizes="{{sizes}}"{{/srcset}} alt="Portrait of {{name}}" loading="lazy" decoding="async">{{/photo}}{{^photo}}<span aria-hidden="true">{{initial}}</span>{{/photo}}</div>
+      <div class="lp-artist__text">
+        <h3>{{name}}</h3>
+        {{#title}}<p class="lp-artist__role">{{title}}</p>{{/title}}
+        {{#bio}}<p>{{.}}</p>{{/bio}}
+      </div>
+    </article>
+    {{/artists}}
+    {{#items.0}}<ul class="lp-honours">{{#items}}<li><b>{{title}}</b>{{#text}} <span>{{text}}</span>{{/text}}</li>{{/items}}</ul>{{/items.0}}
+    {{#socials.0}}<p class="lp-socials">{{#socials}}<a href="{{url}}" rel="noopener" target="_blank">{{label}}</a>{{/socials}}</p>{{/socials.0}}
+    {{#video}}<div class="lp-video lp-video--inline" data-video="{{src}}" data-kind="{{kind}}">{{#file}}<video controls preload="none" playsinline src="{{src}}" title="{{title}}"></video>{{/file}}{{^file}}<button type="button" class="lp-video__btn" aria-label="Play {{title}}">{{#poster}}<img src="{{poster}}" alt="" loading="lazy">{{/poster}}<span class="lp-video__play"><svg aria-hidden="true"><use href="#i-play"/></svg></span></button>{{/file}}</div>{{/video}}
+  </div>
+{{/is_artist}}
+
+{{#is_gallery}}{{#pictures.0}}
+  <div class="lp-wrap">
+    <p class="lp-kicker">Gallery</p>
+    <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+    {{#body}}<p class="lp-lede">{{.}}</p>{{/body}}
+    <ul class="lp-gallery lp-gallery--{{layout}}">
+      {{#pictures}}
+      <li><button type="button" class="lp-gallery__item" data-full="{{full}}" data-caption="{{title}}{{#text}} · {{text}}{{/text}}" aria-label="View larger: {{alt}}">
+        <img src="{{src}}"{{#srcset}} srcset="{{srcset}}" sizes="{{sizes}}"{{/srcset}} alt="{{alt}}" loading="lazy" decoding="async">
+        {{#title}}<span class="lp-gallery__cap">{{title}}</span>{{/title}}
+      </button></li>
+      {{/pictures}}
+    </ul>
+    {{#compare}}
+    <figure class="lp-compare" style="--pos:50%">
+      <img src="{{after}}" alt="After: the finished painting" loading="lazy">
+      <div class="lp-compare__before"><img src="{{before}}" alt="Before: the first wash" loading="lazy"></div>
+      <input type="range" min="0" max="100" value="50" aria-label="Slide to compare before and after">
+      <figcaption><span>Before</span><span>After</span></figcaption>
+    </figure>
+    {{/compare}}
+  </div>
+{{/pictures.0}}{{/is_gallery}}
+
+{{#is_benefits}}
+  <div class="lp-wrap">
+    <p class="lp-kicker">Benefits</p>
+    <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+    <ul class="lp-benefits lp-benefits--{{layout}}">
+      {{#items}}<li><svg aria-hidden="true"><use href="#i-check"/></svg><div><h3>{{title}}</h3>{{#textParas}}<p>{{.}}</p>{{/textParas}}</div></li>{{/items}}
+    </ul>
+  </div>
+{{/is_benefits}}
+
+{{#is_video}}
+  <div class="lp-wrap lp-videosec lp-videosec--{{layout}}">
+    <div>
+      <p class="lp-kicker">Preview</p>
+      <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+      {{#body}}<p>{{.}}</p>{{/body}}
+    </div>
+    {{#video}}<div class="lp-video" data-video="{{src}}" data-kind="{{kind}}">{{#file}}<video controls preload="none" playsinline{{#poster}} poster="{{poster}}"{{/poster}} src="{{src}}" title="{{title}}"></video>{{/file}}{{^file}}<button type="button" class="lp-video__btn" aria-label="Play {{title}}">{{#poster}}<img src="{{poster}}" alt="" loading="lazy">{{/poster}}<span class="lp-video__play"><svg aria-hidden="true"><use href="#i-play"/></svg></span></button>{{/file}}</div>{{/video}}
+  </div>
+{{/is_video}}
+
+{{#is_testimonials}}
+  <div class="lp-wrap">
+    <p class="lp-kicker">Student reviews</p>
+    <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+    <ul class="lp-quotes lp-quotes--{{layout}}">
+      {{#quotes}}
+      <li class="lp-quote">
+        {{#stars}}<p class="lp-stars" aria-label="{{rating}} out of 5 stars">{{stars}}</p>{{/stars}}
+        <blockquote><p>{{text}}</p></blockquote>
+        <p class="lp-quote__who">{{#photo}}<img src="{{photo}}" alt="" width="40" height="40" loading="lazy">{{/photo}}{{^photo}}<span class="lp-quote__init" aria-hidden="true">{{initial}}</span>{{/photo}}<span><b>{{name}}</b>{{#meta}}<small>{{meta}}</small>{{/meta}}</span></p>
+      </li>
+      {{/quotes}}
+    </ul>
+  </div>
+{{/is_testimonials}}
+
+{{#is_pricing}}
+  <div class="lp-wrap lp-pricing lp-pricing--{{layout}}">
+    <div class="lp-pricing__lead">
+      <p class="lp-kicker">Enrolment</p>
+      <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+      {{#body}}<p>{{.}}</p>{{/body}}
+      {{#inclusions.0}}<ul class="lp-inc">{{#inclusions}}<li><svg aria-hidden="true"><use href="#i-check"/></svg>{{.}}</li>{{/inclusions}}</ul>{{/inclusions.0}}
+    </div>
+    <div class="lp-pricecard">
+      {{#price}}
+      {{#offerLabel}}<p class="lp-pricecard__flag">{{offerLabel}}</p>{{/offerLabel}}
+      <p class="lp-pricecard__price"><span class="lp-price">{{totalLabel}}</span>{{#listLabel}} <s class="lp-price__was"><span class="sr">Was </span>{{listLabel}}</s>{{/listLabel}}</p>
+      {{#saving}}<p class="lp-save">You save {{saving}}</p>{{/saving}}
+      {{#offerEndsLabel}}<p class="lp-fine">Offer price until {{offerEndsLabel}} (IST).</p>{{/offerEndsLabel}}
+      {{#taxNote}}<p class="lp-fine">{{taxNote}}</p>{{/taxNote}}
+      {{#usdLabel}}<p class="lp-fine">Paying from outside India? {{usdLabel}} with PayPal.</p>{{/usdLabel}}
+      {{/price}}
+      <a class="lp-btn lp-btn--lg lp-btn--block" href="{{enrollUrl}}" data-cta="pricing"><svg aria-hidden="true"><use href="#i-lock"/></svg> {{ctaPrimary}}</a>
+      {{#couponNote}}<p class="lp-fine lp-center">Have a coupon? Apply it at checkout.</p>{{/couponNote}}
+      {{#access}}<p class="lp-pricecard__row"><b>Access</b><span>{{access}}</span></p>{{/access}}
+      {{#hasPayments}}<p class="lp-pricecard__row lp-pricecard__row--pay"><b>Pay with</b><span>{{#payments}}<span class="lp-paychip">{{label}}</span>{{/payments}}</span></p>{{/hasPayments}}
+      {{#refund.0}}<details class="lp-refund"><summary>Refund policy</summary>{{#refund}}<p>{{.}}</p>{{/refund}}</details>{{/refund.0}}
+    </div>
+  </div>
+{{/is_pricing}}
+
+{{#is_faq}}
+  <div class="lp-wrap lp-narrow">
+    <p class="lp-kicker">FAQ</p>
+    <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+    <div class="lp-faq">
+      {{#items}}<details><summary>{{title}}<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>{{#textParas}}<p>{{.}}</p>{{/textParas}}</details>{{/items}}
+    </div>
+  </div>
+{{/is_faq}}
+
+{{#is_related}}
+  <div class="lp-wrap">
+    <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+    <ul class="lp-related">
+      {{#items}}<li><a href="{{url}}">{{#image}}<img src="{{src}}"{{#srcset}} srcset="{{srcset}}" sizes="{{sizes}}"{{/srcset}} alt="" loading="lazy" decoding="async">{{/image}}<h3>{{title}}</h3>{{#text}}<p>{{text}}</p>{{/text}}</a></li>{{/items}}
+    </ul>
+  </div>
+{{/is_related}}
+
+{{#is_final_cta}}
+  <div class="lp-wrap lp-final lp-final--{{layout}}">
+    <div>
+      <h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>
+      {{#body}}<p>{{.}}</p>{{/body}}
+      <div class="lp-ctas">
+        <a class="lp-btn lp-btn--lg lp-btn--light" href="{{enrollUrl}}" data-cta="final">{{ctaPrimary}} · {{price.totalLabel}}</a>
+      </div>
+    </div>
+    {{#image}}<img class="lp-final__img" src="{{src}}"{{#srcset}} srcset="{{srcset}}" sizes="{{sizes}}"{{/srcset}} alt="" loading="lazy" decoding="async">{{/image}}
+  </div>
+{{/is_final_cta}}
+
+{{#is_custom}}
+  <div class="lp-wrap{{^layout}} lp-narrow{{/layout}} lp-custom lp-custom--{{layout}}">
+    {{#heading}}<h2 id="{{id}}-h" class="lp-h2">{{heading}}</h2>{{/heading}}
+    <div class="lp-prose">{{{html}}}</div>
+  </div>
+{{/is_custom}}
+
+</section>
+{{/sections}}
+{{#marketing.leadCapture}}
+<section class="lp-sec lp-bg--plain lp-lead" aria-labelledby="lp-lead-h">
+  <div class="lp-wrap lp-narrow">
+    <h2 id="lp-lead-h" class="lp-lead__h">Not ready to enrol yet?</h2>
+    <p>Join the ArtistikCity newsletter for new batches, workshops and offers. No spam; unsubscribe with one click.</p>
+    <form class="lp-lead__form" id="lp-lead" novalidate>
+      <div class="lp-lead__row">
+        <label for="lp-lead-email" class="sr">E-mail address</label>
+        <input id="lp-lead-email" type="email" name="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required maxlength="255">
+        <input type="text" name="website" class="lp-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="lp-btn">Subscribe</button>
+      </div>
+      <label class="lp-lead__ok"><input type="checkbox" name="consent" required> I agree to receive the ArtistikCity newsletter by e-mail.</label>
+      <p class="lp-lead__msg" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+{{/marketing.leadCapture}}
+</main>
+
+{{#sticky}}
+<div class="lp-sticky" id="lp-sticky" hidden>
+  <div class="lp-wrap lp-sticky__row">
+    <p class="lp-sticky__t"><b>{{course.title}}</b><span>{{price.totalLabel}}{{#price.listLabel}} <s>{{price.listLabel}}</s>{{/price.listLabel}}</span></p>
+    <a class="lp-btn" href="{{enrollUrl}}" data-cta="sticky">{{ctaPrimary}}</a>
+  </div>
+</div>
+{{/sticky}}
+
+{{#marketing.whatsapp}}<a class="lp-wa" href="{{marketing.whatsapp}}" target="_blank" rel="noopener" data-cta="whatsapp"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Questions? WhatsApp us</span></a>{{/marketing.whatsapp}}
+
+<footer class="lp-foot">
+  <div class="lp-wrap lp-foot__grid">
+    <div>
+      <img src="/assets/images/logo.png" alt="ArtistikCity" width="134" height="36" loading="lazy" class="lp-foot__logo">
+      <p>Online art courses taught live by working artists.</p>
+    </div>
+    <nav aria-label="Support"><h2>Support</h2><a href="/faq">FAQ</a><a href="/contact">Contact us</a><a href="/customer-support">Help centre</a></nav>
+    <nav aria-label="Policies"><h2>Policies</h2><a href="/terms-conditions">Terms of use</a><a href="/privacy-policy">Privacy policy</a></nav>
+    <nav aria-label="Explore"><h2>Explore</h2><a href="/courses?type=all">All courses</a><a href="/marketplace">Art marketplace</a><a href="/studio-stories">Studio Stories</a></nav>
+  </div>
+  <p class="lp-wrap lp-foot__c">© {{year}} ArtistikCity. All rights reserved.</p>
+</footer>
+
+<dialog class="lp-lightbox" id="lp-lightbox" aria-label="Artwork">
+  <button type="button" class="lp-lightbox__x" aria-label="Close"><svg aria-hidden="true"><use href="#i-close"/></svg></button>
+  <img alt="">
+  <p></p>
+</dialog>
+<script src="/js/landing.js?v=1" defer></script>
+</body>
+</html>

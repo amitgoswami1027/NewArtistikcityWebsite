@@ -114,6 +114,48 @@ public class CommissionPayments {
         return out;
     }
 
+    /** GET /v1/payments/{id} - the payment method the buyer actually used (upi, card, netbanking, wallet, emi ...). */
+    public String razorpayPaymentMethod(String paymentId) throws IOException, InterruptedException {
+        HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(razorpayBase() + "/v1/payments/" + paymentId))
+                .timeout(Duration.ofSeconds(20)).header("Authorization", razorpayBasic()).GET().build(), HttpResponse.BodyHandlers.ofString());
+        Object m = checked(r).get("method");
+        return m == null ? null : String.valueOf(m);
+    }
+
+    /** Connection test for Admin > Landing pages > Payments: GET /v1/payments?count=1 with the saved keys. Never returns the keys. */
+    public String razorpayPing() {
+        if (!razorpayConfigured()) return "Razorpay keys are not set (Admin > System parameters > Configuration Panel).";
+        try {
+            HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(razorpayBase() + "/v1/payments?count=1"))
+                    .timeout(Duration.ofSeconds(15)).header("Authorization", razorpayBasic()).GET().build(), HttpResponse.BodyHandlers.ofString());
+            return r.statusCode() == 200 ? null : r.statusCode() == 401 ? "Razorpay refused the keys (401)." : "Razorpay answered " + r.statusCode() + ".";
+        } catch (Exception e) {
+            return "Could not reach Razorpay: " + (e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
+        }
+    }
+
+    /** Connection test for PayPal: asks for an access token. */
+    public String paypalPing() {
+        if (!paypalConfigured()) return "PayPal keys are not set (Admin > System parameters > Configuration Panel).";
+        try {
+            paypalToken();
+            return null;
+        } catch (Exception e) {
+            String m = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
+            return "PayPal refused or could not be reached: " + (m.length() > 160 ? m.substring(0, 160) : m);
+        }
+    }
+
+    /** "live", "test" or null from the key prefix (rzp_live_ / rzp_test_) - shown, never the key itself. */
+    public String razorpayKeyMode() {
+        String k = prop("razorpay.key");
+        return k.startsWith("rzp_live_") ? "live" : k.startsWith("rzp_test_") ? "test" : k.isEmpty() ? null : "unknown";
+    }
+
+    public String paypalMode() {
+        return "live".equalsIgnoreCase(prop("paypal.mode")) ? "live" : "sandbox";
+    }
+
     /** POST /v1/payments/{id}/capture - for a payment that was authorized but never captured. */
     public boolean razorpayCapture(String paymentId, long amountPaise) throws IOException, InterruptedException {
         HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(razorpayBase() + "/v1/payments/" + paymentId + "/capture"))

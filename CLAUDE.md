@@ -39,11 +39,11 @@ cd frontend && npm install && npm run dev                 # or: npm run prod / n
 
 Unit tests cover the auth crypto (`src/test/java/com/artistikcity/auth`: tokens, password policy, JWT/JWKS, WebAuthn), the
 rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/VideoUploadCheckTest`), S3 request signing against
-AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing incl. custom sizes (`shop/ShopPricingTest`) and
+AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing incl. custom sizes (`shop/ShopPricingTest`), landing page pricing and config (`landing/LandingPricingTest`) and
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc), the configuration panel's encryption and allow-list
 (`config/panel/ConfigPanelTest`), SNS SMS requests (`auth/sms/SnsSmsSenderTest`) and the Studio Stories / site layout checks
 (`admin/StudioAndLayoutTest`), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
-`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers (dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
+`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing.py` covers Landing Page Management end to end (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
 new admin API, secret masking, validation and commit of panel values, site settings and the Studio Stories workflow. Browser tests for the purchase flow live in `tests/e2e`.
 The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
 the rest get 409 or REFUND_REQUIRED) and `seats/SeatRaceIT` (20 students, 5 seats: exactly 5 get one) run only with
@@ -63,6 +63,8 @@ print buyer / commission client, 3 Ishita `ishita.bose@example.com` email not ve
 student with live listing `shaniwar-wada-at-dusk`), courses 1-5, course orders in every payment state, shop orders `AC-S-SEED01..05`
 (DELIVERED / SHIPPED / PACKED / PAID / PAYMENT_PENDING), 3 carts, commissions `AC-SEED-C01..04`, artist threads, reviews, wishlists,
 contacts, newsletter. Course 3 has no enrolments on purpose (test_platform caps it at one seat). Diya owns no course (tests buy for her).
+Landing pages: 1 Watercolour (published, replaces `/course/watercolour-landscapes-for-beginners`; UPI, cards, net banking, PayPal),
+2 Acrylic festive campaign (draft, own address; UPI and cards only); coupons WATERCOLOUR10 (page 1), FIRSTCOURSE (first-time), SUMMER25 (inactive).
 Optional demo pack `database/demo/demo-data.sql` (`LOAD-DEMO-DATA.bat` / `-DemoData`; generated, idempotent, ids 100+/1000+):
 teachers `ananya|kabir|meera|rohit|sana@artistikcity.com`, students `ishaan|neha|arjun|sophia|rahul|emily@example.com`,
 courses 101-113, workshops 121-126, orders 1001-1030. Same password. Its images are under `storage/uploads`.
@@ -83,6 +85,8 @@ src/main/java/com/artistikcity/
   admin/        admin console: AdminKit (page props, JSON answers, upload checks), Grid (server-side tables), Audit,
                 Course/Order/Newsletter/Blog/Taxonomy/Content/People/FreeCourse controllers, SiteSettings, NewsletterService
   lifecycle/    student studio, credentials and admin console overview (learn -> submit -> sell)
+  landing/      Landing Page Management: configurable course landing pages, per-page pricing / payments / checkout / coupons,
+                versions, analytics (docs/landing-pages.md)
   marketplace/  1-of-1 original-art marketplace (listings, cart reservations, admin review)
   shop/         prints, room preview, artist hub, cart, shop orders (purchase flow)
   orders/       Your orders: one UnifiedOrder list from every order system (OrderSource beans), certificate of authenticity
@@ -95,8 +99,8 @@ frontend/resources/js/   React source: Pages/, Components/, Layouts/, Interface/
 database/       schema.sql (drops + recreates everything), seed.sql (demo data), migrations/ (dated MySQL scripts), demo/ (optional demo pack)
 deploy/         ec2-deploy.sh, db-migrate.sh (AWS server scripts, shipped inside the image)
 infra/          CloudFormation: certificate.yml (us-east-1), artistikcity.yml (ap-south-1)
-docs/           AWS-DEPLOY.md, awsarchitecture.md, marketplace-shop.md
-tests/e2e/      Playwright browser tests (purchase flow, room preview, Your orders); run against the dev profile
+docs/           AWS-DEPLOY.md, awsarchitecture.md, marketplace-shop.md, landing-pages.md
+tests/e2e/      Playwright browser tests (purchase flow, room preview, Your orders, cart & offers, landing pages); run against the dev profile
 storage/        uploaded files, served at /storage/**  (storage/certificates is git-ignored)
 storage-private/ paid download files (git-ignored, never served directly; S3 key prefix private/)
 ```
@@ -272,6 +276,28 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   `/shop/download/{token}`. Admin: one console, Sales > Marketplace (`/admin/dashboard/marketplace`: paintings, review, holds, orders, messages, prices, coupons;
   `MarketplaceAdminController` + `ShopAdminController`, sections in `Components/Admin/ShopSections`; `/admin/dashboard/shop` only redirects). The old single-original checkout
   page now forwards into the cart checkout. Browser tests: `tests/e2e` (Playwright, against the dev profile).
+- **Landing Page Management** (package `landing/`, Admin sidebar group of the same name, `/admin/landing[/{tab}]`, editor
+  `/admin/landing/pages/{id}/{step}`, pages `Admin/Landing/Index` + `Admin/Landing/Editor`, shared parts `Components/Admin/Landing/parts`;
+  full write-up in docs/landing-pages.md). Everything about a landing page is managed there: pages, templates (`LandingCatalog`),
+  sections, design, pricing & offers, **per-page payment settings**, checkout, coupons, SEO & marketing, orders & refunds, analytics,
+  media, defaults and Team access. Public page: server-rendered (`LandingPublic` → `LandingView` → `templates/landing/page.mustache`,
+  `static/css/landing.css`, `static/js/landing.js`, no React); a PUBLISHED page whose slug equals the course slug replaces
+  `/course/{slug}` (`CoursesController` asks first), unpublishing brings the course page back; campaign pages get their own slug.
+  Checkout `/course/{slug}/enroll` (React `Landing/Checkout`) + JSON `/landing/checkout/{pageId}/quote|order|pay|failed`; a landing
+  purchase is a normal course `orders` row with `landing_page_id`, coupon, amounts, `payment_method|provider`, UTM; completion,
+  webhook and reconciler stay in `CheckoutController` (expected amount = the order's own price, `LandingHooks.onPaid` after every
+  verified payment). Content config is versioned JSON (`draft_config` → publish = `landing_page_versions` row; rollback re-publishes;
+  `LandingConfig.normalize` validates/cleans everything); money settings are tables, live on save, one calculation for page,
+  checkout and gateway (`LandingPricing.quote`; the browser never sends a price; pay re-prices with 409 `repriced`). Payment
+  capability model: provider can (catalogue) × page allows (GLOBAL defaults or CUSTOM) × provider connected; checked on every pay;
+  a page can't be published/scheduled when nobody could pay. Cashfree/PayU are listed but not integrated. Capabilities `landing`,
+  `landing.content|publish|pricing|payments|orders|refunds` (`Personas`; per-person grants in `admins.extra_capabilities`, edited in
+  Settings › Team access by a super admin). Settings live under the private settings tag `landing_pages` (`defaults`, `payments`):
+  never use the public tag `landing` (that one is the home hero and is sent to every page). Events `landing_events` (hashed visitor
+  cookie, no personal data). `/sitemap.xml` (`web/SitemapController`) lists live courses, landing pages that allow it and stories.
+  Optional lead capture = the site newsletter (`POST /api/newsletter`, source `landing:<page id>`), with a consent tick.
+  Migration `2026-11-08_landing_pages.sql`. React 17 doesn't batch state updates inside promises: guard renders on every piece of
+  state a load sets (`if (!data || !cfg)`), not just the first.
 - Blog posts ("Studio Stories") are public only when `status = 1`; drafts 404 for visitors (admins can preview). Status: 0 draft, 1 published,
   2 archived, 3 in review, 4 scheduled (`publish_at`; `BlogAdminController.publishDue` publishes due ones every minute). CMS: Admin > Content >
   Studio Stories (`/admin/content/stories`, `/new`, `/{id}`; page `Admin/Content/StudioStories` = dashboard or editor), JSON API

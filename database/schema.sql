@@ -10,6 +10,18 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP VIEW IF EXISTS courses_workshops;
+DROP TABLE IF EXISTS landing_media;
+DROP TABLE IF EXISTS landing_events;
+DROP TABLE IF EXISTS landing_coupon_redemptions;
+DROP TABLE IF EXISTS landing_coupon_targets;
+DROP TABLE IF EXISTS landing_coupons;
+DROP TABLE IF EXISTS landing_checkout;
+DROP TABLE IF EXISTS landing_payment_methods;
+DROP TABLE IF EXISTS landing_payment_providers;
+DROP TABLE IF EXISTS landing_payment_settings;
+DROP TABLE IF EXISTS landing_pricing;
+DROP TABLE IF EXISTS landing_page_versions;
+DROP TABLE IF EXISTS landing_pages;
 DROP TABLE IF EXISTS painting_offer_events;
 DROP TABLE IF EXISTS painting_offers;
 DROP TABLE IF EXISTS artist_thread_messages;
@@ -278,6 +290,7 @@ CREATE TABLE admins (
     profile_title       VARCHAR(255) NULL,
     profile_description LONGTEXT NULL,
     remember_token      VARCHAR(100) NULL,
+    extra_capabilities  VARCHAR(500) NULL,       -- landing.* capabilities granted on top of the persona (People & roles)
     created_at          DATETIME NULL,
     updated_at          DATETIME NULL,
     CONSTRAINT admins_email_unique UNIQUE (email)
@@ -575,8 +588,21 @@ CREATE TABLE orders (
     payment_details   LONGTEXT NULL,
     issue_certificate TINYINT NOT NULL DEFAULT 0,  -- 0 = not issued, 1 = issued
     certificate_name  VARCHAR(500) NULL,
+    landing_page_id   BIGINT NULL,                 -- the landing page the order came from (Landing Page Management)
+    coupon_code       VARCHAR(40) NULL,
+    list_amount       DECIMAL(12, 2) NULL,
+    discount_amount   DECIMAL(12, 2) NULL,
+    tax_amount        DECIMAL(12, 2) NULL,
+    payment_method    VARCHAR(30) NULL,            -- upi, card, netbanking, wallet, emi, paypal ... as reported by the gateway
+    payment_provider  VARCHAR(20) NULL,
+    utm_source        VARCHAR(80) NULL,
+    utm_medium        VARCHAR(80) NULL,
+    utm_campaign      VARCHAR(120) NULL,
+    landing_visitor   CHAR(32) NULL,
+    billing_phone     VARCHAR(20) NULL,               -- hashed visitor cookie, so the purchase joins the page's funnel
     created_at        DATETIME NULL,
-    updated_at        DATETIME NULL
+    updated_at        DATETIME NULL,
+    INDEX orders_landing_page_index (landing_page_id, payment_status)
 );
 CREATE INDEX orders_gateway_ref_index ON orders (gateway_ref);
 CREATE INDEX orders_user_course_index ON orders (user_id, course_id);
@@ -1663,3 +1689,186 @@ CREATE TABLE student_payout_details (
     created_at   DATETIME     NULL,
     updated_at   DATETIME     NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- Landing Page Management (landing/)
+-- ---------------------------------------------------------------------
+
+CREATE TABLE landing_pages (
+    id                   BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    name                 VARCHAR(190) NOT NULL,
+    slug                 VARCHAR(190) NOT NULL,
+    course_id            BIGINT       NOT NULL,
+    campaign             VARCHAR(120) NULL,
+    description          VARCHAR(500) NULL,
+    template_key         VARCHAR(40)  NOT NULL,
+    status               VARCHAR(12)  NOT NULL CHECK (status IN ('DRAFT', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED')),
+    draft_config         LONGTEXT     NOT NULL,
+    draft_saved_at       DATETIME     NULL,
+    draft_saved_by       BIGINT       NULL,
+    published_version_id BIGINT       NULL,
+    published_at         DATETIME     NULL,
+    publish_at           DATETIME     NULL,
+    archived_at          DATETIME     NULL,
+    created_by           BIGINT       NULL,
+    created_at           DATETIME     NOT NULL,
+    updated_at           DATETIME     NOT NULL,
+    CONSTRAINT landing_pages_slug_unique UNIQUE (slug),
+    INDEX landing_pages_course_index (course_id, status),
+    CONSTRAINT landing_pages_course_id_foreign FOREIGN KEY (course_id) REFERENCES courses (id)
+);
+
+CREATE TABLE landing_page_versions (
+    id              BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    landing_page_id BIGINT       NOT NULL,
+    version_no      INT          NOT NULL,
+    template_key    VARCHAR(40)  NOT NULL,
+    config          LONGTEXT     NOT NULL,
+    note            VARCHAR(255) NULL,
+    created_by      BIGINT       NULL,
+    created_at      DATETIME     NOT NULL,
+    CONSTRAINT landing_page_versions_unique UNIQUE (landing_page_id, version_no),
+    CONSTRAINT landing_page_versions_page_foreign FOREIGN KEY (landing_page_id) REFERENCES landing_pages (id) ON DELETE CASCADE
+);
+
+CREATE TABLE landing_pricing (
+    landing_page_id  BIGINT         NOT NULL PRIMARY KEY,
+    list_price       DECIMAL(12, 2) NULL,
+    price            DECIMAL(12, 2) NULL,
+    price_usd        DECIMAL(12, 2) NULL,
+    promo_label      VARCHAR(80)    NULL,
+    promo_price      DECIMAL(12, 2) NULL,
+    promo_starts_at  DATETIME       NULL,
+    promo_ends_at    DATETIME       NULL,
+    early_price      DECIMAL(12, 2) NULL,
+    early_ends_at    DATETIME       NULL,
+    coupons_enabled  TINYINT(1)     NOT NULL DEFAULT 1,
+    tax_mode         VARCHAR(10)    NOT NULL DEFAULT 'INCLUDED' CHECK (tax_mode IN ('INCLUDED', 'ADDED')),
+    tax_rate         DECIMAL(5, 2)  NOT NULL DEFAULT 0,
+    tax_label        VARCHAR(40)    NULL,
+    access_duration  VARCHAR(120)   NULL,
+    refund_policy    VARCHAR(1000)  NULL,
+    inclusions       LONGTEXT       NULL,
+    updated_by       BIGINT         NULL,
+    updated_at       DATETIME       NOT NULL,
+    CONSTRAINT landing_pricing_page_foreign FOREIGN KEY (landing_page_id) REFERENCES landing_pages (id) ON DELETE CASCADE
+);
+
+CREATE TABLE landing_payment_settings (
+    landing_page_id  BIGINT      NOT NULL PRIMARY KEY,
+    mode             VARCHAR(8)  NOT NULL DEFAULT 'GLOBAL' CHECK (mode IN ('GLOBAL', 'CUSTOM')),
+    default_provider VARCHAR(20) NULL,
+    updated_by       BIGINT      NULL,
+    updated_at       DATETIME    NOT NULL,
+    CONSTRAINT landing_payment_settings_page_foreign FOREIGN KEY (landing_page_id) REFERENCES landing_pages (id) ON DELETE CASCADE
+);
+
+CREATE TABLE landing_payment_providers (
+    id              BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    landing_page_id BIGINT      NOT NULL,
+    provider        VARCHAR(20) NOT NULL,
+    enabled         TINYINT(1)  NOT NULL DEFAULT 1,
+    priority        INT         NOT NULL DEFAULT 1,
+    CONSTRAINT landing_payment_providers_unique UNIQUE (landing_page_id, provider),
+    CONSTRAINT landing_payment_providers_page_foreign FOREIGN KEY (landing_page_id) REFERENCES landing_pages (id) ON DELETE CASCADE
+);
+
+CREATE TABLE landing_payment_methods (
+    id              BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    landing_page_id BIGINT      NOT NULL,
+    method          VARCHAR(30) NOT NULL,
+    enabled         TINYINT(1)  NOT NULL DEFAULT 1,
+    sort_order      INT         NOT NULL DEFAULT 0,
+    CONSTRAINT landing_payment_methods_unique UNIQUE (landing_page_id, method),
+    CONSTRAINT landing_payment_methods_page_foreign FOREIGN KEY (landing_page_id) REFERENCES landing_pages (id) ON DELETE CASCADE
+);
+
+CREATE TABLE landing_checkout (
+    landing_page_id  BIGINT        NOT NULL PRIMARY KEY,
+    require_phone    TINYINT(1)    NOT NULL DEFAULT 1,
+    require_address  TINYINT(1)    NOT NULL DEFAULT 0,
+    require_terms    TINYINT(1)    NOT NULL DEFAULT 1,
+    require_privacy  TINYINT(1)    NOT NULL DEFAULT 0,
+    show_coupon      TINYINT(1)    NOT NULL DEFAULT 1,
+    show_summary     TINYINT(1)    NOT NULL DEFAULT 1,
+    success_message  VARCHAR(500)  NULL,
+    success_redirect VARCHAR(255)  NULL,
+    failure_message  VARCHAR(500)  NULL,
+    pending_message  VARCHAR(500)  NULL,
+    updated_by       BIGINT        NULL,
+    updated_at       DATETIME      NOT NULL,
+    CONSTRAINT landing_checkout_page_foreign FOREIGN KEY (landing_page_id) REFERENCES landing_pages (id) ON DELETE CASCADE
+);
+
+CREATE TABLE landing_coupons (
+    id              BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    code            VARCHAR(40)    NOT NULL,
+    description     VARCHAR(255)   NULL,
+    kind            VARCHAR(10)    NOT NULL CHECK (kind IN ('PERCENT', 'FLAT')),
+    value           DECIMAL(12, 2) NOT NULL CHECK (value > 0),
+    campaign        VARCHAR(120)   NULL,
+    all_pages       TINYINT(1)     NOT NULL DEFAULT 0,
+    min_amount      DECIMAL(12, 2) NULL,
+    max_uses        INT            NULL,
+    per_user_limit  INT            NULL,
+    first_time_only TINYINT(1)     NOT NULL DEFAULT 0,
+    starts_at       DATETIME       NULL,
+    expires_at      DATETIME       NULL,
+    is_active       TINYINT(1)     NOT NULL DEFAULT 1,
+    used_count      INT            NOT NULL DEFAULT 0,
+    created_by      BIGINT         NULL,
+    created_at      DATETIME       NOT NULL,
+    updated_at      DATETIME       NOT NULL,
+    CONSTRAINT landing_coupons_code_unique UNIQUE (code)
+);
+
+-- which pages / courses a coupon applies to (none and all_pages = 0: nowhere)
+CREATE TABLE landing_coupon_targets (
+    coupon_id   BIGINT      NOT NULL,
+    target_type VARCHAR(10) NOT NULL CHECK (target_type IN ('PAGE', 'COURSE')),
+    target_id   BIGINT      NOT NULL,
+    PRIMARY KEY (coupon_id, target_type, target_id),
+    CONSTRAINT landing_coupon_targets_coupon_foreign FOREIGN KEY (coupon_id) REFERENCES landing_coupons (id) ON DELETE CASCADE
+);
+
+CREATE TABLE landing_coupon_redemptions (
+    id         BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    coupon_id  BIGINT         NOT NULL,
+    order_id   BIGINT         NOT NULL,
+    user_id    BIGINT         NOT NULL,
+    discount   DECIMAL(12, 2) NOT NULL,
+    created_at DATETIME       NOT NULL,
+    CONSTRAINT landing_coupon_redemptions_order_unique UNIQUE (order_id),
+    INDEX landing_coupon_redemptions_user_index (coupon_id, user_id),
+    CONSTRAINT landing_coupon_redemptions_coupon_foreign FOREIGN KEY (coupon_id) REFERENCES landing_coupons (id)
+);
+
+-- funnel events (no personal data: visitor is a random cookie id, hashed)
+CREATE TABLE landing_events (
+    id              BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    landing_page_id BIGINT       NOT NULL,
+    event           VARCHAR(20)  NOT NULL,
+    visitor         CHAR(32)     NOT NULL,
+    method          VARCHAR(30)  NULL,
+    provider        VARCHAR(20)  NULL,
+    order_id        BIGINT       NULL,
+    utm_source      VARCHAR(80)  NULL,
+    utm_medium      VARCHAR(80)  NULL,
+    utm_campaign    VARCHAR(120) NULL,
+    device          VARCHAR(10)  NULL,
+    created_at      DATETIME     NOT NULL,
+    INDEX landing_events_page_index (landing_page_id, event, created_at),
+    INDEX landing_events_time_index (created_at)
+);
+
+CREATE TABLE landing_media (
+    id          BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    path        VARCHAR(500)  NOT NULL,
+    url         VARCHAR(1000) NOT NULL,
+    alt         VARCHAR(255)  NULL,
+    width       INT           NULL,
+    height      INT           NULL,
+    bytes       INT           NULL,
+    uploaded_by BIGINT        NULL,
+    created_at  DATETIME      NOT NULL
+);
