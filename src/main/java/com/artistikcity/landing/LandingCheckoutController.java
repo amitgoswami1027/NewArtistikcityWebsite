@@ -403,7 +403,7 @@ public class LandingCheckoutController {
     // ------------------------------------------------------------------------------------------------ helpers
 
     private Row livePage(long pageId) {
-        return db.first("select * from landing_pages where id = ? and status = 'PUBLISHED'", pageId);
+        return db.first("select * from landing_pages where id = ? and status = 'PUBLISHED' and course_id is not null", pageId);
     }
 
     /** Where a paid landing order lands: the page's confirmation screen, keeping the course checkout's flags. */

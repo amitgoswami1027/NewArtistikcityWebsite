@@ -51,10 +51,14 @@ public final class LandingConfig {
             sections.add(section(key, "hero".equals(key) ? t.hero() : LandingCatalog.section(key).layouts().get(0)));
         }
         c.put("sections", sections);
+        boolean site = "SITE".equals(t.kind());
         Map<String, Object> cta = new LinkedHashMap<>();
-        cta.put("primary", "Enroll now");
-        cta.put("secondary", "Explore the course");
-        cta.put("sticky", true);
+        cta.put("primary", site ? "Explore courses" : "Enroll now");
+        cta.put("primaryHref", site ? "/courses?type=all" : "");
+        cta.put("secondary", site ? "" : "Explore the course");
+        cta.put("secondaryHref", "");
+        cta.put("secondaryVideo", false);
+        cta.put("sticky", !site);
         c.put("cta", cta);
         Map<String, Object> seo = new LinkedHashMap<>();
         seo.put("title", "");
@@ -91,6 +95,9 @@ public final class LandingConfig {
 
     private static Map<String, Object> defaults(String type) {
         Map<String, Object> c = new LinkedHashMap<>();
+        if (!"hero".equals(type)) {
+            c.put("kicker", "");        // the small label above the heading; empty = the section's usual label
+        }
         switch (type) {
             case "hero" -> {
                 c.put("eyebrow", "");
@@ -102,6 +109,7 @@ public final class LandingConfig {
                 c.put("video", "");
                 c.put("language", "English, Hindi");
                 c.put("items", List.of(item("Live classes with the artist", ""), item("Certificate of completion", ""), item("Small groups, personal feedback", "")));
+                c.put("images", List.of());
             }
             case "intro" -> {
                 c.put("heading", "Why this course");
@@ -124,6 +132,7 @@ public final class LandingConfig {
             case "gallery" -> {
                 c.put("heading", "Artwork from the course");
                 c.put("body", "");
+                c.put("source", "course");
                 c.put("items", List.of());
                 c.put("beforeImage", "");
                 c.put("afterImage", "");
@@ -155,6 +164,38 @@ public final class LandingConfig {
                 c.put("heading", "Start painting with us");
                 c.put("body", "");
                 c.put("image", "");
+                c.put("items", List.of());      // extra buttons: title = label, link = address
+            }
+            case "cards" -> {
+                c.put("heading", "");
+                c.put("body", "");
+                c.put("source", "custom");
+                c.put("items", List.of());
+            }
+            case "steps" -> {
+                c.put("heading", "How it works");
+                c.put("body", "");
+                c.put("items", List.of());
+            }
+            case "courses" -> {
+                c.put("heading", "Courses and workshops");
+                c.put("body", "");
+                c.put("ids", List.of());
+                c.put("limit", 6);
+            }
+            case "artists" -> {
+                c.put("heading", "Meet our artists");
+                c.put("body", "");
+                c.put("ids", List.of());
+                c.put("limit", 6);
+            }
+            case "commission_form" -> {
+                c.put("heading", "Choose the style of your painting");
+                c.put("body", "");
+            }
+            case "commission_pricing" -> {
+                c.put("heading", "What a commission costs");
+                c.put("body", "");
             }
             case "custom" -> {
                 c.put("heading", "");
@@ -177,6 +218,12 @@ public final class LandingConfig {
     /** Cleans a config sent by the editor. Errors are keyed like "sections.3.content.items.0.image". */
     @SuppressWarnings("unchecked")
     public static Result normalize(Object raw) {
+        return normalize(raw, false);
+    }
+
+    /** site = the page replaces a site page (no course): course-only sections are refused and the main button needs an address. */
+    @SuppressWarnings("unchecked")
+    public static Result normalize(Object raw, boolean site) {
         Map<String, String> errors = new LinkedHashMap<>();
         Map<String, Object> in = raw instanceof Map<?, ?> m ? (Map<String, Object>) m : Map.of();
         Map<String, Object> out = new LinkedHashMap<>();
@@ -195,6 +242,7 @@ public final class LandingConfig {
         }
         design.put("font", oneOf(d.get("font"), List.of("jakarta", "serif"), "jakarta"));
         design.put("radius", oneOf(d.get("radius"), List.of("soft", "sharp"), "soft"));
+        design.put("texture", oneOf(d.get("texture"), List.of("none", "wash", "grain"), "none"));
         out.put("design", design);
 
         List<Object> rawSections = list(in.get("sections"));
@@ -213,6 +261,9 @@ public final class LandingConfig {
                 errors.put(p + ".type", "Unknown section type.");
                 i++;
                 continue;
+            }
+            if (site && LandingCatalog.COURSE_ONLY.contains(type.key())) {
+                errors.put(p + ".type", type.label() + " needs a course, so it can't be on a site page.");
             }
             if (type.single() && !seenSingles.add(type.key())) {
                 errors.put(p + ".type", type.label() + " can only be on a page once.");
@@ -243,11 +294,17 @@ public final class LandingConfig {
 
         Map<String, Object> c = map(in.get("cta"));
         Map<String, Object> cta = new LinkedHashMap<>();
-        cta.put("primary", text(c.get("primary"), 40, "Enroll now"));
-        cta.put("secondary", text(c.get("secondary"), 40, "Explore the course"));
-        cta.put("sticky", bool(c.get("sticky"), true));
+        cta.put("primary", text(c.get("primary"), 40, site ? "" : "Enroll now"));
+        cta.put("primaryHref", link(c.get("primaryHref"), "cta.primaryHref", errors, false));
+        cta.put("secondary", text(c.get("secondary"), 40, site ? "" : "Explore the course"));
+        cta.put("secondaryHref", link(c.get("secondaryHref"), "cta.secondaryHref", errors, false));
+        cta.put("secondaryVideo", bool(c.get("secondaryVideo"), false));
+        cta.put("sticky", bool(c.get("sticky"), !site));
         if (str(cta.get("primary")).isBlank()) {
-            errors.put("cta.primary", "The Enroll button needs a label.");
+            errors.put("cta.primary", site ? "The main button needs a label." : "The Enroll button needs a label.");
+        }
+        if (site && str(cta.get("primaryHref")).isEmpty()) {
+            errors.put("cta.primaryHref", "Where should the main button go? For example /courses?type=all.");
         }
         out.put("cta", cta);
 
@@ -281,7 +338,7 @@ public final class LandingConfig {
         for (String key : def.keySet()) {
             Object v = in.get(key);
             switch (key) {
-                case "eyebrow" -> c.put(key, text(v, 60, ""));
+                case "eyebrow", "kicker" -> c.put(key, text(v, 60, ""));
                 case "heading" -> c.put(key, text(v, 120, ""));
                 case "subheading" -> c.put(key, text(v, 200, ""));
                 case "body" -> c.put(key, text(v, 2000, ""));
@@ -304,7 +361,30 @@ public final class LandingConfig {
                 }
                 case "image", "beforeImage", "afterImage" -> c.put(key, link(v, p + "." + key, errors, true));
                 case "video" -> c.put(key, video(v, p + "." + key, errors));
-                case "source" -> c.put(key, oneOf(v, List.of("reviews", "testimonials", "both"), "reviews"));
+                case "source" -> {
+                    if ("gallery".equals(type)) c.put(key, oneOf(v, List.of("course", "marketplace"), "course"));
+                    else if ("cards".equals(type)) c.put(key, oneOf(v, List.of("custom", "course_for", "course_learn", "course_deliverables"), "custom"));
+                    else c.put(key, oneOf(v, List.of("reviews", "testimonials", "both"), "reviews"));
+                }
+                case "limit" -> {
+                    int n;
+                    try {
+                        n = (int) Double.parseDouble(str(v).isEmpty() ? "6" : str(v));
+                    } catch (NumberFormatException e) {
+                        n = 6;
+                    }
+                    c.put(key, Math.max(1, Math.min(12, n)));
+                }
+                case "images" -> {
+                    List<String> imgs = new ArrayList<>();
+                    int j = 0;
+                    for (Object o : list(v)) {
+                        String l = link(o, p + ".images." + j, errors, true);
+                        if (!l.isEmpty() && imgs.size() < 4) imgs.add(l);
+                        j++;
+                    }
+                    c.put(key, imgs);
+                }
                 case "ids" -> {
                     List<Long> ids = new ArrayList<>();
                     for (Object o : list(v)) {
@@ -343,6 +423,11 @@ public final class LandingConfig {
                         if (!img.isEmpty()) {
                             ni.put("image", img);
                             ni.put("alt", text(it.get("alt"), 160, ""));
+                        }
+                        String href = link(it.get("link"), p + ".items." + j + ".link", errors, false);
+                        if (!href.isEmpty()) {
+                            ni.put("link", href);
+                            ni.put("linkLabel", text(it.get("linkLabel"), 40, ""));
                         }
                         if (!str(ni.get("title")).isBlank() || !str(ni.get("text")).isBlank() || !img.isEmpty()) {
                             items.add(ni);
@@ -395,13 +480,14 @@ public final class LandingConfig {
         return allowed.contains(s) ? s : def;
     }
 
-    /** A site path ("/storage/...", "/course/...") or an https address; images may also be empty. */
+    /** A site path ("/storage/...", "/course/...") or an https address (links may also be "#section-id"); may be empty. */
     static String link(Object o, String path, Map<String, String> errors, boolean image) {
         String s = str(o);
         if (s.isEmpty()) {
             return "";
         }
-        boolean ok = (s.startsWith("/") && !s.startsWith("//") && !s.contains("..")) || s.matches("^https://[^\\s\"'<>]+$");
+        boolean ok = (s.startsWith("/") && !s.startsWith("//") && !s.contains("..")) || s.matches("^https://[^\\s\"'<>]+$")
+                || (!image && s.matches("^#[a-z0-9-]{1,40}$"));     // a section on the same page
         if (!ok || s.length() > 1000) {
             errors.put(path, image ? "Use an image from the media library or an https:// address." : "Use a site path like /course/... or an https:// address.");
             return "";

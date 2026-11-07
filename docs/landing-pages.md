@@ -1,8 +1,17 @@
 # Landing Page Management
 
-Configurable, conversion-focused course landing pages, managed end to end from one section of the admin console
-(**Admin › Landing Page Management**, `/admin/landing`). Package `com.artistikcity.landing`; migration
-`database/migrations/2026-11-08_landing_pages.sql`.
+Configurable, conversion-focused landing pages, managed end to end from one section of the admin console
+(**Admin › Landing Page Management**, `/admin/landing`). Package `com.artistikcity.landing`; migrations
+`database/migrations/2026-11-08_landing_pages.sql` and `2026-11-09_landing_site_pages.sql`.
+
+Two kinds of page:
+
+* **Course pages** (`kind = COURSE`) sell one course at `/course/{slug}` with their own price, payment methods and checkout.
+* **Site pages** (`kind = SITE`) replace one of a fixed list of site pages (`LandingCatalog.SITE_ROUTES`): *How it works*
+  (`/how-it-works`) and *Commission, step 1* (`/commission/step-1`). They have no course, price, payment or checkout;
+  `PagesController` / `CommissionController` ask `LandingPublic.publishedSite(route)` first and show the original page
+  again as soon as the landing page is unpublished. Only one page per address can be live; instructors can't see or
+  make site pages. The list is in code on purpose, so a landing page can never take over login, checkout or admin pages.
 
 ## 1. What it reuses (nothing is duplicated)
 
@@ -31,10 +40,17 @@ Global payment infrastructure        Landing Page Management (per page)         
   (`/img/w{width}/uploads/**`, `LandingImages`), videos only load when clicked, `<details>` accordions, design tokens from the
   page config as CSS variables. `CoursesController` asks `LandingPublic` first, so a published page whose address equals the
   course slug replaces the course page; unpublishing brings the course page back.
-* **Templates and sections** (`LandingCatalog`): 6 templates (Artist Showcase, Premium Masterclass, Creative Workshop,
-  Minimal Editorial, Video-First Course, Conversion-Focused Sales Page) and 14 section types (hero, intro, outcomes,
-  curriculum, artist (several artists allowed), gallery (+ before/after slider, lightbox), benefits, video, testimonials,
-  pricing, FAQ, related courses, final CTA, custom HTML, …), each with layout variants. Adding a template or section =
+* **Templates and sections** (`LandingCatalog`): 9 templates: course pages (Artist Showcase, Premium Masterclass, Creative
+  Workshop, Minimal Editorial, Video-First Course, Conversion-Focused Sales Page, Watercolour Wash) and site pages (Platform
+  Showcase, Commission Studio); 20 section types (hero with a *collage* layout, intro, outcomes, curriculum, artist
+  (several artists allowed), gallery (+ before/after slider, lightbox; course photos or marketplace artworks), benefits,
+  video, testimonials, pricing, FAQ, related courses, final CTA (several buttons), custom HTML, **feature cards**
+  (optionally from the course's own lists), **steps / journey**, **course list** (live catalogue, each linking to its
+  landing page), **artists** (profiles from Admin › Instructors, linking to `/teacher/{slug}`), **commission request**
+  (step 1 of the commission wizard) and **commission prices** ("from" prices computed from `CommissionPricing`)), each
+  with layout variants. Curriculum, pricing and related courses need a course and are refused on site pages. Every
+  section has an optional small label (`kicker`); items can carry a link (site path, https or `#section-id`); design has
+  a `texture` (none, paper grain, watercolour wash). Adding a template or section =
   one entry in `LandingCatalog` + its markup in `page.mustache`; old configs keep working because `LandingConfig.normalize`
   fills missing fields with defaults (`schema` = 1).
 * **Content config** (`landing_pages.draft_config`, JSON) is versioned: Save draft → Publish creates
@@ -45,6 +61,26 @@ Global payment infrastructure        Landing Page Management (per page)         
   checkout and the gateway amount always come from **one** calculation: `LandingCommerce.quote` → `LandingPricing.quote`
   (pure, unit-tested). The browser never sends a price; the pay step re-prices and answers 409 `repriced` when an offer
   ended or a coupon ran out in between.
+
+### Commission request section
+
+Renders the wizard's four styles (same ids, titles and texts as `CommissionStore.THEMES`, checked against
+`CommissionPricing.THEMES` by a unit test), its six-step progress bar and the Next button. `landing.js` writes the choice
+into the wizard's own storage (sessionStorage `artistikcity.commission.v1`, other fields kept) and opens
+`/commission/step-2`; steps 2-4, the photo upload, preview, sign-in and payment at checkout are the existing React pages,
+unchanged. Coming back to step 1 shows the saved choice. No payment or deposit is taken on the landing page.
+
+### Showcase pages (LandingShowcase)
+
+On its first start with the site-page migration applied, the app creates three pages through the module itself
+(`LandingPages.create` → `saveDraft` → `publish`, version note "Showcase content (installed automatically)"):
+*How it works* (Platform Showcase), *Watercolour Landscapes for Beginners* (Watercolour Wash, at the course's address) and
+*Commission artwork* (Commission Studio). It runs once per database (`settings` `landing_pages` / `showcase_v1`, which
+also records each page's outcome), never touches a site address that already has a landing page, and updates an existing
+Watercolour page only when it has no unpublished edits (as a new version, so the earlier one is one click away under
+Versions). A page whose publish is refused (for example no live payment method) stays a draft and the outcome says why.
+Prices, durations, curriculum, reviews, artists, courses and artwork are read from the database when the page is shown.
+Switch it off with `app.landing.showcase=false`.
 
 ## 3. Payment capability model
 
@@ -108,14 +144,17 @@ Admin (JSON, admin session + CSRF): `GET /admin/api/landing/overview`, `GET|POST
 `PUT|DELETE .../coupons/{id}`, `GET /admin/api/landing/orders[/{id}]`, `POST .../orders/{id}/refund`,
 `GET|POST /admin/api/landing/media`, `PUT|DELETE .../media/{id}`, `GET|PUT /admin/api/landing/settings`,
 `GET /admin/api/landing/team`, `PUT /admin/api/landing/team/{adminId}`.
-Public: `GET /course/{slug}`, `GET /course/{slug}/enroll`, `GET /course/{slug}/enroll/done`,
+Create a site page: `POST /admin/api/landing/pages` with `kind: "SITE"`, `siteRoute` (`how-it-works` or
+`commission-step-1`) and a site-page template.
+Public: `GET /course/{slug}`, `GET /how-it-works`, `GET /commission/step-1` (when a site page is live), `GET /course/{slug}/enroll`, `GET /course/{slug}/enroll/done`,
 `POST /landing/checkout/{pageId}/quote|order|pay|failed`, `GET /landing/checkout/order/{orderId}/status`, `POST /landing/e`
 (CTA / method events), `GET /sitemap.xml`.
 
 ## 8. Setup and deployment
 
-1. Apply `database/migrations/2026-11-08_landing_pages.sql` (the launcher and `deploy/db-migrate.sh` do it; safe to run twice;
-   compatible with the previous release).
+1. Apply `database/migrations/2026-11-08_landing_pages.sql` and `2026-11-09_landing_site_pages.sql` (the launcher and
+   `deploy/db-migrate.sh` do it; safe to run twice; compatible with the previous release). On the next start the three
+   showcase pages are created and published (see above).
 2. Gateway keys: Admin › System parameters › Configuration Panel (`razorpay.key|secret|webhook-secret`, `paypal.*`). No new
    environment variables. Razorpay: enable the methods you offer (UPI, EMI, international cards) on the Razorpay account too.
 3. Search engines: submit `https://<your domain>/sitemap.xml` in Google Search Console (robots.txt is static and has no
@@ -123,6 +162,11 @@ Public: `GET /course/{slug}`, `GET /course/{slug}/enroll`, `GET /course/{slug}/e
 4. Open Admin › Landing Page Management, check *Payments & checkout › Global defaults*, then create pages.
 
 ## 9. Known limitations
+
+* Site pages: only the two addresses in `LandingCatalog.SITE_ROUTES`. Adding one = one entry there plus a
+  `publishedSite("…")` check in the controller of that page.
+* There is no public "all artists" page; the *Discover Artists* buttons scroll to the Artists section, whose cards open
+  each artist's profile.
 
 * Cashfree and PayU are catalogued but not integrated (no adapter yet), so they can't be switched on.
 * Instalments: EMI / no-cost EMI are offered through Razorpay's own EMI; there is no in-house instalment plan.

@@ -23,6 +23,10 @@ import java.util.Map;
 @Controller
 public class PagesController {
 
+    /** A published "How it works" landing page (Admin › Landing Page Management, site page) replaces the built-in page. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.artistikcity.landing.LandingPublic landing;
+
     private final Views views;
     private final Inertia inertia;
     private final Db db;
@@ -57,6 +61,10 @@ public class PagesController {
     /** New "How it works" page (React / Inertia). */
     @GetMapping("/how-it-works")
     public ResponseEntity<String> howItWorks(HttpServletRequest request) {
+        com.artistikcity.support.Row lp = landing == null ? null : landing.publishedSite("how-it-works");
+        if (lp != null) {
+            return landing.render(request, lp);
+        }
         // step 7 (Sell) quotes the real marketplace terms, so the page stays true when the commission or payout delay changes
         java.math.BigDecimal commission = settings.commissionPercent();
         Map<String, Object> sell = Map.of(

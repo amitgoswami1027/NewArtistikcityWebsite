@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Resized copies of public uploads for responsive images: {@code /img/w640/uploads/courses/1/course.jpg}. Only fixed widths
- * and only files under uploads/ (no way to resize arbitrary things or to read private files). The first request makes the
+ * Resized copies of public uploads for responsive images: {@code /img/w640/uploads/courses/1/course.jpg} (and of the app's
+ * own {@code /assets/images/*}: {@code /img/w640/assets/images/course1.jpg}). Only fixed widths and only files under uploads/ or assets/images/ (no way to resize arbitrary things or to read private files). The first request makes the
  * copy (JPEG, quality 0.8, metadata dropped) and stores it under cache/img/; later ones are served from there with a
  * one-year cache header, so a CDN keeps them too. A source smaller than the width is re-encoded, never enlarged.
  */
@@ -71,6 +71,12 @@ public class LandingImages {
         if (url == null || url.contains("..") || url.contains("?")) {
             return null;
         }
+        // the site's own artwork images shipped with the app (marketplace demo listings use them too)
+        if (url.startsWith("/assets/images/") && url.indexOf("//", 1) < 0) {
+            String a = url.substring(1);
+            String ext = a.substring(a.lastIndexOf('.') + 1).toLowerCase();
+            return TYPES.contains(ext) ? a : null;
+        }
         // "/storage/uploads/..." or the S3 / CDN address of the same file (Storage.publicUrl)
         String p = Storage.pathOf(url).orElse(null);
         if (p == null || !p.startsWith("uploads/")) {
@@ -96,6 +102,38 @@ public class LandingImages {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
                 }
                 out = resize(storage.read(path), width);
+                if (out == null) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                }
+                storage.put(cached, out);
+            }
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
+                    .cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic().immutable()).body(out);
+        } catch (Exception e) {
+            log.warn("Could not resize {} to {}: {}", path, width, e.toString());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    /** Resized copies of the app's own images under static/assets/images (read from the jar, cached like uploads). */
+    @GetMapping("/img/w{width}/assets/images/**")
+    public ResponseEntity<byte[]> asset(HttpServletRequest request, @PathVariable("width") int width) {
+        String uri = request.getRequestURI();
+        String path = uri.substring(uri.indexOf("/assets/images/") + 1);
+        String ext = path.substring(path.lastIndexOf('.') + 1).toLowerCase();
+        if (!WIDTHS.contains(width) || path.contains("..") || path.contains("//") || !TYPES.contains(ext)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        String cached = "cache/img/w" + width + "/" + path.replaceAll("\\.(png|jpeg|jpg)$", "") + ".jpg";
+        try {
+            byte[] out = storage.exists(cached) ? storage.read(cached) : null;
+            if (out == null) {
+                try (java.io.InputStream in = LandingImages.class.getResourceAsStream("/static/" + path)) {
+                    if (in == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                    }
+                    out = resize(in.readAllBytes(), width);
+                }
                 if (out == null) {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
                 }

@@ -1698,7 +1698,9 @@ CREATE TABLE landing_pages (
     id                   BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     name                 VARCHAR(190) NOT NULL,
     slug                 VARCHAR(190) NOT NULL,
-    course_id            BIGINT       NOT NULL,
+    kind                 VARCHAR(10)  NOT NULL DEFAULT 'COURSE',
+    site_route           VARCHAR(40)  NULL,
+    course_id            BIGINT       NULL,
     campaign             VARCHAR(120) NULL,
     description          VARCHAR(500) NULL,
     template_key         VARCHAR(40)  NOT NULL,
@@ -1715,6 +1717,7 @@ CREATE TABLE landing_pages (
     updated_at           DATETIME     NOT NULL,
     CONSTRAINT landing_pages_slug_unique UNIQUE (slug),
     INDEX landing_pages_course_index (course_id, status),
+    INDEX landing_pages_site_index (site_route, status),
     CONSTRAINT landing_pages_course_id_foreign FOREIGN KEY (course_id) REFERENCES courses (id)
 );
 

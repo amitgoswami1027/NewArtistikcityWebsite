@@ -50,12 +50,33 @@ public class LandingPages {
             return null;
         }
         return db.first("select p.*, v.config as published_config, v.version_no from landing_pages p join landing_page_versions v on v.id = p.published_version_id"
-                + " where p.slug = ? and p.status = 'PUBLISHED'", slug);
+                + " where p.slug = ? and p.status = 'PUBLISHED' and p.course_id is not null", slug);
+    }
+
+    /** The live landing page that replaces a site page (LandingCatalog.SITE_ROUTES), or null: the original page is shown. */
+    public Row publishedSite(String route) {
+        return db.first("select p.*, v.config as published_config, v.version_no from landing_pages p join landing_page_versions v on v.id = p.published_version_id"
+                + " where p.kind = 'SITE' and p.site_route = ? and p.status = 'PUBLISHED' order by p.published_at desc, p.id desc limit 1", route);
+    }
+
+    public static boolean isSite(Row page) {
+        return page != null && "SITE".equals(page.str("kind", "COURSE"));
+    }
+
+    /** Where visitors see the page: /course/{slug}, or the site address it replaces. */
+    public static String publicPath(Row page) {
+        if (isSite(page)) {
+            LandingCatalog.SiteRoute r = LandingCatalog.siteRoute(page.str("site_route", ""));
+            return r == null ? "/" : r.path();
+        }
+        return "/course/" + page.str("slug");
     }
 
     // --------------------------------------------------------------------------------------------- basics
 
     public Map<String, String> checkBasics(Map<String, Object> in, Long id) {
+        Row existing = id == null ? null : find(id);
+        boolean site = existing != null ? isSite(existing) : "SITE".equals(LandingConfig.str(in.get("kind")));
         Map<String, String> e = new LinkedHashMap<>();
         String name = LandingConfig.str(in.get("name"));
         if (name.isEmpty()) {
@@ -64,8 +85,12 @@ public class LandingPages {
             e.put("name", "At most 190 characters.");
         }
         Long courseId = LandingCoupons.ids(List.of(LandingConfig.str(in.get("courseId")))).stream().findFirst().orElse(null);
-        Row course = courseId == null ? null : db.first("select id, slug from courses where id = ?", courseId);
-        if (course == null) {
+        Row course = site || courseId == null ? null : db.first("select id, slug from courses where id = ?", courseId);
+        if (site) {
+            if (LandingCatalog.siteRoute(LandingConfig.str(in.get("siteRoute"))) == null) {
+                e.put("siteRoute", "Choose the site page this landing page replaces.");
+            }
+        } else if (course == null) {
             e.put("courseId", "Choose the course this page sells.");
         }
         String slug = LandingConfig.str(in.get("slug")).toLowerCase();
@@ -87,14 +112,16 @@ public class LandingPages {
         return e;
     }
 
-    public long create(Map<String, Object> in, String templateKey, long adminId) {
+    public long create(Map<String, Object> in, String templateKey, Long adminId) {
         LandingCatalog.Template t = LandingCatalog.template(templateKey);
         if (t == null) {
             t = LandingCatalog.TEMPLATES.get(0);
         }
+        boolean site = "SITE".equals(LandingConfig.str(in.get("kind")));
         LocalDateTime now = LocalDateTime.now();
         long id = db.insert("landing_pages", Row.of("name", LandingConfig.str(in.get("name")), "slug", LandingConfig.str(in.get("slug")).toLowerCase(),
-                "course_id", Long.parseLong(LandingConfig.str(in.get("courseId")).replace(".0", "")),
+                "kind", site ? "SITE" : "COURSE", "site_route", site ? LandingConfig.str(in.get("siteRoute")) : null,
+                "course_id", site ? null : Long.parseLong(LandingConfig.str(in.get("courseId")).replace(".0", "")),
                 "campaign", blankToNull(LandingConfig.str(in.get("campaign"))), "description", blankToNull(LandingConfig.str(in.get("description"))),
                 "template_key", t.key(), "status", "DRAFT", "draft_config", json.encode(LandingConfig.initial(t)), "draft_saved_at", now, "draft_saved_by", adminId,
                 "created_by", adminId, "created_at", now, "updated_at", now));
@@ -106,16 +133,18 @@ public class LandingPages {
     }
 
     public void updateBasics(long id, Map<String, Object> in) {
+        boolean site = isSite(find(id));
         db.updateById("landing_pages", id, Row.of("name", LandingConfig.str(in.get("name")), "slug", LandingConfig.str(in.get("slug")).toLowerCase(),
-                "course_id", Long.parseLong(LandingConfig.str(in.get("courseId")).replace(".0", "")),
+                "site_route", site ? LandingConfig.str(in.get("siteRoute")) : null,
+                "course_id", site ? null : Long.parseLong(LandingConfig.str(in.get("courseId")).replace(".0", "")),
                 "campaign", blankToNull(LandingConfig.str(in.get("campaign"))), "description", blankToNull(LandingConfig.str(in.get("description"))),
                 "updated_at", LocalDateTime.now()));
     }
 
     // ----------------------------------------------------------------------------------------------- draft
 
-    public LandingConfig.Result saveDraft(long id, Object config, long adminId) {
-        LandingConfig.Result r = LandingConfig.normalize(config);
+    public LandingConfig.Result saveDraft(long id, Object config, Long adminId) {
+        LandingConfig.Result r = LandingConfig.normalize(config, isSite(find(id)));
         if (r.ok()) {
             LocalDateTime now = LocalDateTime.now();
             db.updateById("landing_pages", id, Row.of("draft_config", json.encode(r.config()), "draft_saved_at", now, "draft_saved_by", adminId, "updated_at", now));
@@ -165,9 +194,13 @@ public class LandingPages {
     /** Publishes the current draft as a new version. Returns errors (empty = published). */
     public Map<String, String> publish(long id, Long adminId, String note) {
         Row page = find(id);
-        LandingConfig.Result r = LandingConfig.normalize(draft(page));
+        LandingConfig.Result r = LandingConfig.normalize(draft(page), isSite(page));
         if (!r.ok()) {
             return r.errors();
+        }
+        String clash = siteClash(page);
+        if (clash != null) {
+            return Map.of("siteRoute", clash);
         }
         int next = (int) db.count("select coalesce(max(version_no), 0) from landing_page_versions where landing_page_id = ?", id) + 1;
         LocalDateTime now = LocalDateTime.now();
@@ -183,12 +216,27 @@ public class LandingPages {
         if (at == null || !at.isAfter(LocalDateTime.now().plusMinutes(1))) {
             return Map.of("publishAt", "Choose a time at least a couple of minutes from now.");
         }
-        LandingConfig.Result r = LandingConfig.normalize(draft(find(id)));
+        Row page = find(id);
+        LandingConfig.Result r = LandingConfig.normalize(draft(page), isSite(page));
         if (!r.ok()) {
             return r.errors();
         }
+        String clash = siteClash(page);
+        if (clash != null) {
+            return Map.of("siteRoute", clash);
+        }
         db.updateById("landing_pages", id, Row.of("status", "SCHEDULED", "publish_at", at, "updated_at", LocalDateTime.now()));
         return Map.of();
+    }
+
+    /** Only one live landing page per site address. */
+    private String siteClash(Row page) {
+        if (!isSite(page)) {
+            return null;
+        }
+        Row other = db.first("select name from landing_pages where kind = 'SITE' and site_route = ? and id <> ? and status in ('PUBLISHED', 'SCHEDULED')",
+                page.get("site_route"), page.get("id"));
+        return other == null ? null : "\"" + other.str("name") + "\" already replaces this page. Unpublish it first.";
     }
 
     public void unpublish(long id) {
@@ -241,7 +289,8 @@ public class LandingPages {
             slug = base + "-" + i;
         }
         LocalDateTime now = LocalDateTime.now();
-        long copy = db.insert("landing_pages", Row.of("name", LandingCoupons.cut(p.str("name") + " (copy)", 190), "slug", slug, "course_id", p.get("course_id"),
+        long copy = db.insert("landing_pages", Row.of("name", LandingCoupons.cut(p.str("name") + " (copy)", 190), "slug", slug, "kind", p.str("kind", "COURSE"),
+                "site_route", p.get("site_route"), "course_id", p.get("course_id"),
                 "campaign", p.get("campaign"), "description", p.get("description"), "template_key", p.get("template_key"), "status", "DRAFT",
                 "draft_config", p.get("draft_config"), "draft_saved_at", now, "draft_saved_by", adminId, "created_by", adminId, "created_at", now, "updated_at", now));
         for (String table : List.of("landing_pricing", "landing_checkout", "landing_payment_settings")) {

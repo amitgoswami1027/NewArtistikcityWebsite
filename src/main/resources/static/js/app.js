@@ -31164,20 +31164,21 @@ function MediaPicker({ open, onClose, onPick, toast }) {
     ] })
   ] });
 }
-function ImageField({ label, value, onChange, hint, error, toast, name }) {
+function ImageField({ label, value, onChange, hint, error, toast, name, clearLabel = "Use the course image" }) {
   const [open, setOpen] = (0, import_react.useState)(false);
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Field, { label, name, hint, error, children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-imgfield", children: [
       value ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: value, alt: "" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-imgfield__empty", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-picture-o", "aria-hidden": "true" }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-imgfield__actions", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-picture-o", onClick: () => setOpen(true), children: value ? "Change" : "Choose" }),
-        value && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", onClick: () => onChange(""), children: "Use the course image" })
+        value && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", onClick: () => onChange(""), children: clearLabel })
       ] })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MediaPicker, { open, onClose: () => setOpen(false), onPick: onChange, toast })
   ] });
 }
 const TEXT_FIELDS = {
+  kicker: { label: "Small label above the heading", max: 60, hint: "Leave empty for the usual label." },
   eyebrow: { label: "Small label above the title", max: 60 },
   heading: { label: "Heading", max: 120 },
   subheading: { label: "Tagline", max: 200 },
@@ -31193,7 +31194,19 @@ const ITEM_HELP = {
   artist: { label: "Awards, exhibitions and experience", title: "Title", text: "Detail", hint: "Only facts you can stand behind." },
   gallery: { label: "Artworks", title: "Caption", text: "Story", image: true, hint: "Leave empty to show the course photos and approved student work." },
   benefits: { label: "Benefits", title: "Benefit", text: "Detail", hint: "Leave empty to build them from the course." },
-  faq: { label: "Questions", title: "Question", text: "Answer", hint: "Leave empty to show the site FAQ." }
+  faq: { label: "Questions", title: "Question", text: "Answer", hint: "Leave empty to show the site FAQ." },
+  cards: { label: "Cards", title: "Title", text: "Text", image: true, link: true, hint: "Only what the platform really does. A link is optional (a site address like /marketplace, or #section-id)." },
+  steps: { label: "Steps", title: "Step", text: "What happens", link: true, hint: "In order. A link is optional." },
+  final_cta: { label: "Buttons", title: "Button label", noText: true, link: true, noLinkLabel: true, hint: "Empty: one main button (Enroll with the price on course pages). Each button needs a label and an address." }
+};
+const SOURCES = {
+  gallery: [{ value: "course", label: "The artworks below, else course photos and approved student work" }, { value: "marketplace", label: "The artworks below, else marketplace artworks" }],
+  cards: [
+    { value: "custom", label: "The cards below" },
+    { value: "course_for", label: `The course's "Who it's for" list` },
+    { value: "course_learn", label: `The course's "What you'll learn" list` },
+    { value: "course_deliverables", label: `The course's "What you finish with" list` }
+  ]
 };
 function SectionContent({ section, onChange, lookups, toast, errors = {}, prefix }) {
   const c = section.content || {};
@@ -31202,7 +31215,7 @@ function SectionContent({ section, onChange, lookups, toast, errors = {}, prefix
   const items = c.items || [];
   const help = ITEM_HELP[section.type];
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-content", children: [
-    Object.keys(TEXT_FIELDS).filter((k) => k in c).map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    Object.keys(TEXT_FIELDS).filter((k) => k in c && !(lookups.site && k === "language")).map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
       import_form.Field,
       {
         label: TEXT_FIELDS[k].label,
@@ -31219,19 +31232,63 @@ function SectionContent({ section, onChange, lookups, toast, errors = {}, prefix
       ImageField,
       {
         label: "Image",
+        clearLabel: lookups.site ? "Remove" : void 0,
         value: c.image,
         onChange: (u) => set("image", u),
         toast,
         error: err("image"),
         name: `${section.id}-image`,
-        hint: "Leave empty to use the course image."
+        hint: lookups.site ? "Leave empty for no image (or, in the hero collage, the first collage artwork)." : "Leave empty to use the course image."
       }
     ),
+    "images" in c && section.layout === "collage" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Collage artworks", name: `${section.id}-images`, hint: "Up to four artworks hung like a small gallery wall. The first is the largest.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-grid2", children: [0, 1, 2, 3].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      ImageField,
+      {
+        clearLabel: "Remove",
+        label: `Artwork ${i + 1}`,
+        value: (c.images || [])[i] || "",
+        toast,
+        name: `${section.id}-img-${i}`,
+        error: err(`images.${i}`),
+        onChange: (u) => {
+          const l = [...c.images || []];
+          l[i] = u;
+          set("images", l.filter(Boolean));
+        }
+      },
+      i
+    )) }) }),
     "beforeImage" in c && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ImageField, { label: "Before (optional)", value: c.beforeImage, onChange: (u) => set("beforeImage", u), toast, name: `${section.id}-before`, hint: "With an After image, shows a slider." }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ImageField, { label: "After (optional)", value: c.afterImage, onChange: (u) => set("afterImage", u), toast, name: `${section.id}-after` })
     ] }),
-    "source" in c && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Which reviews", name: `${section.id}-source`, hint: "Only approved course reviews and approved testimonials are ever shown.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "adm-input", value: c.source, onChange: (e) => set("source", e.target.value), id: `f-${section.id}-source`, children: [
+    "source" in c && SOURCES[section.type] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Content", name: `${section.id}-source`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { className: "adm-input", value: c.source, onChange: (e) => set("source", e.target.value), id: `f-${section.id}-source`, children: SOURCES[section.type].map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: o.value, children: o.label }, o.value)) }) }),
+    "limit" in c && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "How many", name: `${section.id}-limit`, hint: "1 to 12.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-${section.id}-limit`, type: "number", min: 1, max: 12, className: "adm-input", value: c.limit || 6, onChange: (e) => set("limit", Number(e.target.value)) }) }),
+    "ids" in c && section.type === "courses" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Courses", name: `${section.id}-ids`, hint: "None ticked = the published courses and workshops, in catalogue order. Each links to its own (landing) page.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-checks", children: (lookups.courses || []).filter((x) => String(x.status) === "1").map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        {
+          type: "checkbox",
+          checked: (c.ids || []).includes(x.id),
+          onChange: (e) => set("ids", e.target.checked ? [...c.ids || [], x.id] : (c.ids || []).filter((y) => y !== x.id))
+        }
+      ),
+      " ",
+      x.title
+    ] }, x.id)) }) }),
+    "ids" in c && section.type === "artists" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Artists", name: `${section.id}-ids`, hint: "None ticked = every instructor, most courses first. Each card links to the artist's profile.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-checks", children: (lookups.artists || []).map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "input",
+        {
+          type: "checkbox",
+          checked: (c.ids || []).includes(a.id),
+          onChange: (e) => set("ids", e.target.checked ? [...c.ids || [], a.id] : (c.ids || []).filter((x) => x !== a.id))
+        }
+      ),
+      " ",
+      a.name
+    ] }, a.id)) }) }),
+    "source" in c && !SOURCES[section.type] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Which reviews", name: `${section.id}-source`, hint: "Only approved course reviews and approved testimonials are ever shown.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "adm-input", value: c.source, onChange: (e) => set("source", e.target.value), id: `f-${section.id}-source`, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "reviews", children: "Approved reviews of this course" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "testimonials", children: "Selected site testimonials" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "both", children: "Both" })
@@ -31295,6 +31352,7 @@ function SectionContent({ section, onChange, lookups, toast, errors = {}, prefix
             ImageField,
             {
               label: "Image",
+              clearLabel: "Remove",
               value: it.image || "",
               toast,
               name: `${section.id}-item-${i}`,
@@ -31311,7 +31369,28 @@ function SectionContent({ section, onChange, lookups, toast, errors = {}, prefix
               "aria-label": `Alt text ${i + 1}`,
               onChange: (e) => set("items", items.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { alt: e.target.value }) : x))
             }
-          )
+          ),
+          help.link && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              className: "adm-input",
+              placeholder: "Link (optional): /marketplace or #section-id",
+              value: it.link || "",
+              "aria-label": `Link ${i + 1}`,
+              onChange: (e) => set("items", items.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { link: e.target.value }) : x))
+            }
+          ),
+          help.link && !help.noLinkLabel && it.link && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              className: "adm-input",
+              placeholder: "Link text, e.g. Browse courses",
+              value: it.linkLabel || "",
+              "aria-label": `Link text ${i + 1}`,
+              onChange: (e) => set("items", items.map((x, j) => j === i ? __spreadProps(__spreadValues({}, x), { linkLabel: e.target.value }) : x))
+            }
+          ),
+          err(`items.${i}.link`) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", children: err(`items.${i}.link`) })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-item__actions", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "adm-iconbtn", disabled: i === 0, "aria-label": "Move up", onClick: () => {
@@ -31330,6 +31409,10 @@ function SectionContent({ section, onChange, lookups, toast, errors = {}, prefix
       items.length < 24 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", onClick: () => set("items", [...items, { title: "", text: "" }]), children: "Add" })
     ] }),
     ["curriculum", "related"].includes(section.type) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: section.type === "curriculum" ? "Modules and lessons come from the course (Admin \u203A Courses), so they are always up to date." : "Other published courses, in the same medium first." }),
+    section.type === "courses" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Titles, pictures, levels and artists come from Admin \u203A Courses, so the list is always current." }),
+    section.type === "artists" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Names, photos and bios come from Admin \u203A Instructors." }),
+    section.type === "commission_form" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "The four styles of the commission wizard, its progress bar and the Next button. The choice is handed to step 2 exactly as the original step 1 does; steps 2-4, preview, upload and checkout are unchanged." }),
+    section.type === "commission_pricing" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Starting prices are calculated from the commission price list (CommissionPricing) every time the page is shown; they can't be typed in." }),
     section.type === "pricing" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Price, offers, inclusions, access and refund policy are set in the Pricing step. Payment options come from the Payments step." })
   ] });
 }
@@ -31667,7 +31750,7 @@ function Pages({ caps, toast }) {
       }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
       return;
     }
-    if (action === "unpublish" && !await confirm({ title: `Unpublish "${r.name}"?`, body: r.takesOverCourse ? "The regular course page comes back at this address." : "The address stops working until you publish again.", confirmLabel: "Unpublish" })) return;
+    if (action === "unpublish" && !await confirm({ title: `Unpublish "${r.name}"?`, body: r.kind === "SITE" ? `The original page comes back at ${r.publicUrl}.` : r.takesOverCourse ? "The regular course page comes back at this address." : "The address stops working until you publish again.", confirmLabel: "Unpublish" })) return;
     import_axios.default.post(`/admin/api/landing/pages/${r.id}/${action}`).then((x) => {
       toast(x.data.message);
       if (action === "duplicate") window.location.assign(`/admin/landing/pages/${x.data.id}`);
@@ -31699,8 +31782,7 @@ function Pages({ caps, toast }) {
           { key: "name", label: "Landing page", sort: "name", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-cell", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${r.id}`, className: "adm-cell__text", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: r.name }) }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { className: "adm-muted", children: [
-              "/course/",
-              r.slug,
+              r.publicUrl || `/course/${r.slug}`,
               r.campaign ? ` \xB7 ${r.campaign}` : ""
             ] })
           ] }) },
@@ -31793,7 +31875,7 @@ function PageMenu({ r, act }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-clock-o", "aria-hidden": "true" }),
         "Schedule\u2026"
       ] }) }),
-      r.status === "PUBLISHED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { role: "none", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { role: "menuitem", href: `/course/${r.slug}`, target: "_blank", rel: "noopener", children: [
+      r.status === "PUBLISHED" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { role: "none", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { role: "menuitem", href: r.publicUrl || `/course/${r.slug}`, target: "_blank", rel: "noopener", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link", "aria-hidden": "true" }),
         "Open live page"
       ] }) })
@@ -32558,6 +32640,9 @@ const STEPS = [
   { key: "publish", label: "Preview & publish", n: 9, cap: "landing", hint: "Check, publish, schedule, versions." }
 ];
 const DRAFT_STEPS = ["sections", "design", "seo"];
+const SITE_SKIP = ["pricing", "payments", "checkout"];
+const stepsFor = (site) => site ? STEPS.filter((s) => !SITE_SKIP.includes(s.key)).map((s, i) => __spreadProps(__spreadValues({}, s), { n: i + 1 })) : STEPS;
+const tplFor = (catalog, site) => catalog.templates.filter((t) => (t.kind || "COURSE") === (site ? "SITE" : "COURSE"));
 const PALETTES = {
   burgundy: { label: "Burgundy", accent: "#9C0D48", ink: "#14213D", surface: "#FBF8F4" },
   ink: { label: "Ink & gold", accent: "#C8A15A", ink: "#111318", surface: "#F6F3EE" },
@@ -32593,13 +32678,25 @@ const stepFromUrl = () => {
 const slugify = (s) => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120);
 const dtLocal = (v) => v ? String(v).replace(" ", "T").slice(0, 16) : "";
 function CreatePage({ lookups, catalog, defaults, toast }) {
-  const [v, setV] = (0, import_react.useState)({ name: "", courseId: "", slug: "", campaign: "", description: "", template: defaults && defaults.template || catalog.templates[0].key });
+  const [v, setV] = (0, import_react.useState)({ kind: "COURSE", siteRoute: "", name: "", courseId: "", slug: "", campaign: "", description: "", template: defaults && defaults.template || catalog.templates[0].key });
+  const site = v.kind === "SITE";
+  const routes = catalog.siteRoutes || [];
+  const route = routes.find((r) => r.key === v.siteRoute);
+  const setKind = (kind) => setV((o) => {
+    const list = tplFor(catalog, kind === "SITE");
+    return __spreadProps(__spreadValues({}, o), { kind, template: list.some((t) => t.key === o.template) ? o.template : list[0] && list[0].key || o.template });
+  });
   const [slugTouched, setSlugTouched] = (0, import_react.useState)(false);
   const [errors, setErrors] = (0, import_react.useState)({});
   const [busy, setBusy] = (0, import_react.useState)(false);
   const course = lookups.courses.find((c) => String(c.id) === String(v.courseId));
   const set = (k, val) => setV((o) => {
     const n = __spreadProps(__spreadValues({}, o), { [k]: val });
+    if (k === "siteRoute" && !slugTouched) {
+      const r = (catalog.siteRoutes || []).find((x) => x.key === val);
+      n.slug = r ? r.key : "";
+      if (!o.name && r) n.name = r.label;
+    }
     if (k === "courseId" && !slugTouched) {
       const c = lookups.courses.find((x) => String(x.id) === String(val));
       n.slug = c ? c.slug : "";
@@ -32620,8 +32717,21 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
   };
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: create, className: "adm-stack", noValidate: true, "data-testid": "lp-create", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "1. Basic information", subtitle: "Only staff see the name. The address is what visitors see.", children: [
+      routes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-kind", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "lpa-label", children: "Page type" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: v.kind, label: "Page type", onChange: setKind, options: [{ value: "COURSE", label: "Sells a course" }, { value: "SITE", label: "Replaces a site page" }] }),
+        site && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "A site page has no price or checkout. While it is published it is shown instead of the original page; unpublish it and the original comes back." })
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Course this page sells", name: "courseId", error: errors.courseId, required: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-courseId", className: "adm-input", value: v.courseId, onChange: (e) => set("courseId", e.target.value), "data-testid": "lp-course", children: [
+        site ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Site page it replaces", name: "siteRoute", error: errors.siteRoute, required: true, hint: route ? `Replaces ${route.original} at ${route.path}.` : void 0, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-siteRoute", className: "adm-input", value: v.siteRoute, onChange: (e) => set("siteRoute", e.target.value), "data-testid": "lp-site-route", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Choose a page\u2026" }),
+          routes.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: r.key, children: [
+            r.label,
+            " (",
+            r.path,
+            ")"
+          ] }, r.key))
+        ] }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Course this page sells", name: "courseId", error: errors.courseId, required: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-courseId", className: "adm-input", value: v.courseId, onChange: (e) => set("courseId", e.target.value), "data-testid": "lp-course", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Choose a course\u2026" }),
           lookups.courses.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: c.id, children: [
             c.title,
@@ -32632,13 +32742,13 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           import_form.Field,
           {
-            label: "Address",
+            label: site ? "Short name" : "Address",
             name: "slug",
             error: errors.slug,
             required: true,
-            hint: takesOver ? "Same address as the course: once published, this page replaces the regular course page." : "A campaign page gets its own address; the course page stays as it is.",
+            hint: site ? "Only used inside the admin: visitors see the site page's own address." : takesOver ? "Same address as the course: once published, this page replaces the regular course page." : "A campaign page gets its own address; the course page stays as it is.",
             children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-slug", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "/course/" }),
+              !site && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "/course/" }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-slug", className: "adm-input", value: v.slug, maxLength: 120, onChange: (e) => {
                 setSlugTouched(true);
                 set("slug", slugify(e.target.value));
@@ -32654,7 +32764,7 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Description", name: "description", error: errors.description, optional: true, hint: "A note for the team: who the page is for, where it's promoted.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: "f-description", className: "adm-input", rows: 2, maxLength: 500, value: v.description, onChange: (e) => set("description", e.target.value) }) })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "2. Template", subtitle: "Every template uses the same sections; you can switch later without losing what you wrote.", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-templates", role: "radiogroup", "aria-label": "Template", children: catalog.templates.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: (0, import_kit.cx)("lpa-template", v.template === t.key && "is-on"), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-templates", role: "radiogroup", "aria-label": "Template", children: tplFor(catalog, site).map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: (0, import_kit.cx)("lpa-template", v.template === t.key && "is-on"), children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "radio", name: "template", value: t.key, checked: v.template === t.key, onChange: () => set("template", t.key) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.TemplateThumb, { t }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.name }),
@@ -32663,7 +32773,7 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
       errors.template && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-danger", children: errors.template })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-savebar", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "The page starts as a draft filled from the course. Nothing is public until you publish." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: site ? "The page starts as a draft with the template's sections. Nothing is public until you publish." : "The page starts as a draft filled from the course. Nothing is public until you publish." }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", href: "/admin/landing/pages", children: "Cancel" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { type: "submit", variant: "brand", busy, icon: "fa-arrow-right", "data-testid": "lp-create-submit", children: "Create and continue" })
     ] })
@@ -32671,7 +32781,8 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
 }
 function Basics({ data, lookups, canEdit, onSaved, toast }) {
   const p = data.page;
-  const init = { name: p.name || "", courseId: String(p.course_id || ""), slug: p.slug || "", campaign: p.campaign || "", description: p.description || "" };
+  const init = { name: p.name || "", courseId: String(p.course_id || ""), siteRoute: p.site_route || "", slug: p.slug || "", campaign: p.campaign || "", description: p.description || "" };
+  const routes = lookups.siteRoutes || [];
   const [v, setV] = (0, import_react.useState)(init);
   const [errors, setErrors] = (0, import_react.useState)({});
   const [busy, setBusy] = (0, import_react.useState)(false);
@@ -32692,20 +32803,25 @@ function Basics({ data, lookups, canEdit, onSaved, toast }) {
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { disabled: !canEdit, className: "lpa-fieldset", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Landing page name", name: "name", error: errors.name, required: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-name", className: "adm-input", value: v.name, maxLength: 190, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { name: e.target.value })) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Course", name: "courseId", error: errors.courseId, required: true, hint: data.orders > 0 ? "People bought through this page, so the course can no longer change." : void 0, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { id: "f-courseId", className: "adm-input", value: v.courseId, disabled: data.orders > 0, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { courseId: e.target.value })), children: lookups.courses.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: c.id, children: [
+        p.site ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Site page it replaces", name: "siteRoute", error: errors.siteRoute, required: true, hint: p.status === "PUBLISHED" ? "Unpublish the page to change this." : p.siteOriginal ? `While published, shown instead of ${p.siteOriginal}.` : void 0, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { id: "f-siteRoute", className: "adm-input", value: v.siteRoute, disabled: p.status === "PUBLISHED" || p.status === "SCHEDULED", onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { siteRoute: e.target.value })), children: routes.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: r.key, children: [
+          r.label,
+          " (",
+          r.path,
+          ")"
+        ] }, r.key)) }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Course", name: "courseId", error: errors.courseId, required: true, hint: data.orders > 0 ? "People bought through this page, so the course can no longer change." : void 0, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { id: "f-courseId", className: "adm-input", value: v.courseId, disabled: data.orders > 0, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { courseId: e.target.value })), children: lookups.courses.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: c.id, children: [
           c.title,
           c.artist ? ` \xB7 ${c.artist}` : ""
         ] }, c.id)) }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           import_form.Field,
           {
-            label: "Address",
+            label: p.site ? "Short name" : "Address",
             name: "slug",
             error: errors.slug,
             required: true,
-            hint: course && v.slug === course.slug ? "Same as the course: when published, this page replaces the course page." : "Its own address; the course page is unchanged.",
+            hint: p.site ? "Only used inside the admin." : course && v.slug === course.slug ? "Same as the course: when published, this page replaces the course page." : "Its own address; the course page is unchanged.",
             children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-slug", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "/course/" }),
+              !p.site && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "/course/" }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-slug", className: "adm-input", value: v.slug, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { slug: slugify(e.target.value) })) })
             ] })
           }
@@ -32731,7 +32847,7 @@ function Template({ data, catalog, canEdit, onSaved, toast, draftDirty }) {
   };
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Template", subtitle: "Switching keeps every text, image and FAQ you wrote; it changes the layout, the look and adds any sections the template needs. It applies to the draft until you publish.", children: [
     draftDirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "lpa-note is-warn", role: "status", children: "Save your draft first: switching the template reloads the draft from the server." }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-templates", children: catalog.templates.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("lpa-template", data.page.template_key === t.key && "is-on"), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-templates", children: tplFor(catalog, !!data.page.site).map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("lpa-template", data.page.template_key === t.key && "is-on"), children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.TemplateThumb, { t }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.name }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.description }),
@@ -32739,7 +32855,7 @@ function Template({ data, catalog, canEdit, onSaved, toast, draftDirty }) {
     ] }, t.key)) })
   ] });
 }
-function Sections({ cfg, setCfg, catalog, lookups, errors, canEdit, toast }) {
+function Sections({ cfg, setCfg, catalog, lookups, errors, canEdit, toast, site }) {
   const [sel, setSel] = (0, import_react.useState)(cfg.sections[0] ? cfg.sections[0].id : null);
   const [drag, setDrag] = (0, import_react.useState)(null);
   const [adding, setAdding] = (0, import_react.useState)("");
@@ -32824,7 +32940,7 @@ function Sections({ cfg, setCfg, catalog, lookups, errors, canEdit, toast }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "lp-add", className: "sr-only", children: "Section to add" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "lp-add", className: "adm-input", value: adding, onChange: (e) => setAdding(e.target.value), "data-testid": "lp-add-type", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Add a section\u2026" }),
-          catalog.sections.filter((s) => s.key !== "hero").map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: s.key, disabled: s.single && present.has(s.key), children: [
+          catalog.sections.filter((s) => s.key !== "hero" && !(site && (catalog.courseOnly || []).includes(s.key))).map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: s.key, disabled: s.single && present.has(s.key), children: [
             s.label,
             s.single && present.has(s.key) ? " (already on the page)" : ""
           ] }, s.key))
@@ -32834,10 +32950,23 @@ function Sections({ cfg, setCfg, catalog, lookups, errors, canEdit, toast }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-cta", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "lpa-h", children: "Buttons" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-grid2", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Enroll button", name: "cta.primary", error: errors["cta.primary"], max: 40, counter: String(cta.primary || "").length, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-cta.primary", className: "adm-input", value: cta.primary || "", disabled: !canEdit, onChange: (e) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { primary: e.target.value }) })) }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Second button", name: "cta.secondary", max: 40, counter: String(cta.secondary || "").length, hint: "Scrolls to the curriculum.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-cta.secondary", className: "adm-input", value: cta.secondary || "", disabled: !canEdit, onChange: (e) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { secondary: e.target.value }) })) }) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: site ? "Main button" : "Enroll button", name: "cta.primary", error: errors["cta.primary"], max: 40, counter: String(cta.primary || "").length, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-cta.primary", className: "adm-input", value: cta.primary || "", disabled: !canEdit, onChange: (e) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { primary: e.target.value }) })) }) }),
+          site && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Main button goes to", name: "cta.primaryHref", error: errors["cta.primaryHref"], hint: "A site address like /courses?type=all, or #section-id for a section on this page.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-cta.primaryHref", className: "adm-input", value: cta.primaryHref || "", disabled: !canEdit, onChange: (e) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { primaryHref: e.target.value }) })) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Second button", name: "cta.secondary", max: 40, counter: String(cta.secondary || "").length, hint: cta.secondaryVideo ? 'Plays the course preview video; without one it says "Explore the course".' : "Leave the address empty to scroll to the curriculum (or the second section).", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-cta.secondary", className: "adm-input", value: cta.secondary || "", disabled: !canEdit, onChange: (e) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { secondary: e.target.value }) })) }) }),
+          !cta.secondaryVideo && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Second button goes to", name: "cta.secondaryHref", error: errors["cta.secondaryHref"], optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-cta.secondaryHref", className: "adm-input", value: cta.secondaryHref || "", disabled: !canEdit, onChange: (e) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { secondaryHref: e.target.value }) })) }) })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        !site && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Toggle,
+          {
+            checked: !!cta.secondaryVideo,
+            disabled: !canEdit,
+            onChange: (on) => setCfg(__spreadProps(__spreadValues({}, cfg), { cta: __spreadProps(__spreadValues({}, cta), { secondaryVideo: on }) })),
+            name: "cta.secondaryVideo",
+            label: "Second button plays the preview video",
+            description: "Only shown as a video button when the course (or a Video section) has a preview video."
+          }
+        ),
+        !site && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           import_form.Toggle,
           {
             checked: cta.sticky !== false,
@@ -33099,11 +33228,11 @@ function Seo({ cfg, setCfg, data, errors, canEdit }) {
   const desc = s.description || course.subTitle || course.intro || "";
   const text = (k, l, max, hint, rows, obj = s, set = setS, pre = "seo") => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: l, name: `${pre}.${k}`, error: errors[`${pre}.${k}`], hint, optional: true, max, counter: max ? String(obj[k] || "").length : void 0, children: rows ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: `f-${pre}.${k}`, className: "adm-input", rows, maxLength: max, value: obj[k] || "", onChange: (e) => set({ [k]: e.target.value }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-${pre}.${k}`, className: "adm-input", maxLength: max, value: obj[k] || "", onChange: (e) => set({ [k]: e.target.value }) }) });
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", { disabled: !canEdit, className: "lpa-fieldset adm-stack", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Search", subtitle: "Empty boxes use the course's title and summary.", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Search", subtitle: data.page.site ? "Empty boxes use the page name and the hero tagline." : "Empty boxes use the course's title and summary.", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-serp", "aria-label": "Search result preview", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
-          "artistikcity.com \u203A course \u203A ",
-          data.page.slug
+          "artistikcity.com",
+          String(data.page.publicUrl || "").replace(/\//g, " \u203A ")
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: title.slice(0, 70) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: String(desc).slice(0, 170) })
@@ -33164,7 +33293,11 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
   const [dialog, confirm] = (0, import_kit.useConfirm)();
   const canPublish = (0, import_parts.has)(caps, "landing.publish");
   const methods = availableMethods(data.payments);
-  const checks = [
+  const checks = p.site ? [
+    { ok: !draftDirty, text: draftDirty ? "You have unsaved changes in the draft." : "Draft saved.", fix: draftDirty ? "Save draft" : null },
+    { ok: !!p.site_route, text: p.siteLabel ? `Replaces ${p.siteOriginal} at ${p.publicUrl}.` : "Choose the site page it replaces.", step: "basics" },
+    { ok: !!(data.config.seo && data.config.seo.description), text: "Has a search description.", warn: true, step: "seo" }
+  ] : [
     { ok: !draftDirty, text: draftDirty ? "You have unsaved changes in the draft." : "Draft saved.", fix: draftDirty ? "Save draft" : null },
     { ok: methods.length > 0 || data.quote && data.quote.totalLabel === "Free", text: methods.length ? `Buyers can pay with: ${methods.map((m) => m.label).join(", ")}.` : "No payment method is available: buyers could not pay.", step: "payments" },
     { ok: data.course && data.course.title, text: data.course && data.course.title ? `Sells "${data.course.title}".` : "The course is missing." },
@@ -33172,7 +33305,7 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
   ];
   const blocked = checks.some((c) => !c.ok && !c.warn);
   const act = async (action, body = {}) => {
-    if (action === "unpublish" && !await confirm({ title: "Unpublish this page?", body: data.page.takesOverCourse ? "The regular course page comes back at this address." : "The address stops working until you publish again.", confirmLabel: "Unpublish" })) return;
+    if (action === "unpublish" && !await confirm({ title: "Unpublish this page?", body: data.page.site ? `The original page comes back at ${data.page.publicUrl}.` : data.page.takesOverCourse ? "The regular course page comes back at this address." : "The address stops working until you publish again.", confirmLabel: "Unpublish" })) return;
     if (action === "archive" && !await confirm({ title: "Archive this page?", body: "It disappears from the lists and its address stops working. Orders and analytics are kept.", confirmLabel: "Archive" })) return;
     setBusy(action);
     setErrors({});
@@ -33332,9 +33465,10 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
   if (!data || !cfg) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
   const p = data.page;
   const st = import_parts.STATUS[p.status] || import_parts.STATUS.DRAFT;
-  const current = STEPS.find((s) => s.key === step) || STEPS[2];
+  const steps = stepsFor(!!p.site);
+  const current = steps.find((s) => s.key === step) || steps[2];
   const canEdit = (0, import_parts.has)(caps, current.cap);
-  const isDraftStep = DRAFT_STEPS.includes(step);
+  const isDraftStep = DRAFT_STEPS.includes(current.key);
   const errorCount = Object.keys(errors).length;
   const merge = (patch) => setData((d) => __spreadValues(__spreadValues({}, d), patch));
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-editor", "data-testid": "lp-editor", "data-page-id": p.id, children: [
@@ -33349,11 +33483,8 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
             "Goes live ",
             (0, import_kit.fmtDate)(p.publish_at, true)
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-            "/course/",
-            p.slug
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: p.course_title })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: p.publicUrl }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: p.site ? `Site page: ${p.siteLabel || p.site_route}` : p.course_title })
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-ehead__actions", children: [
@@ -33364,7 +33495,7 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-ebody", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { className: "lpa-steps", "aria-label": "Steps", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: STEPS.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { children: steps.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
           "a",
           {
             href: `/admin/landing/pages/${p.id}/${s.key}`,
@@ -33388,7 +33519,8 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
         ) }, s.key)) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lpa-steps__note", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-info-circle", "aria-hidden": "true" }),
-          " Steps 3, 4 and 8 change the draft (live after publishing). Pricing, payments and checkout save straight to the page."
+          " ",
+          p.site ? "Sections, design and SEO change the draft (live after publishing)." : "Steps 3, 4 and 8 change the draft (live after publishing). Pricing, payments and checkout save straight to the page."
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-estep", children: [
@@ -33407,12 +33539,12 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
           Object.values(errors)[0],
           ")."
         ] }),
-        step === "basics" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Basics, { data, lookups, canEdit, onSaved: take, toast }, p.updated_at),
-        step === "template" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Template, { data, catalog, canEdit, onSaved: take, toast, draftDirty }),
-        step === "sections" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sections, { cfg, setCfg, catalog, lookups, errors, canEdit, toast }),
-        step === "design" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Design, { cfg, setCfg, errors, canEdit }),
-        step === "pricing" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pricing, { data, canEdit, onSaved: merge, toast }),
-        step === "payments" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment settings for this page", subtitle: "Use the global defaults, or choose exactly which providers and methods buyers see on this page. Another page is never affected.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        current.key === "basics" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Basics, { data, lookups, canEdit, onSaved: take, toast }, p.updated_at),
+        current.key === "template" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Template, { data, catalog, canEdit, onSaved: take, toast, draftDirty }),
+        current.key === "sections" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sections, { cfg, setCfg, catalog, lookups: __spreadProps(__spreadValues({}, lookups), { site: !!p.site }), errors, canEdit, toast, site: !!p.site }),
+        current.key === "design" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Design, { cfg, setCfg, errors, canEdit }),
+        current.key === "pricing" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pricing, { data, canEdit, onSaved: merge, toast }),
+        current.key === "payments" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment settings for this page", subtitle: "Use the global defaults, or choose exactly which providers and methods buyers see on this page. Another page is never affected.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           import_parts.PaymentSettings,
           {
             value: data.payments,
@@ -33425,16 +33557,16 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
             })
           }
         ) }),
-        step === "checkout" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Checkout, { data, canEdit, onSaved: merge, toast }),
-        step === "seo" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seo, { cfg, setCfg, data, errors, canEdit }),
-        step === "publish" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Publish, { data, caps, draftDirty, saveDraft: () => saveDraft(), onSaved: take, toast }),
+        current.key === "checkout" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Checkout, { data, canEdit, onSaved: merge, toast }),
+        current.key === "seo" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Seo, { cfg, setCfg, data, errors, canEdit }),
+        current.key === "publish" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Publish, { data, caps, draftDirty, saveDraft: () => saveDraft(), onSaved: take, toast }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-stepnav", children: [
-          current.n > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-arrow-left", onClick: () => go(STEPS[current.n - 2].key), children: STEPS[current.n - 2].label }),
+          current.n > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-arrow-left", onClick: () => go(steps[current.n - 2].key), children: steps[current.n - 2].label }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {}),
           isDraftStep && (0, import_parts.has)(caps, "landing.content") && draftDirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-floppy-o", onClick: () => saveDraft(), busy: saving, children: "Save draft" }),
-          current.n < STEPS.length && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Button, { variant: isDraftStep && draftDirty ? "line" : "dark", onClick: () => go(STEPS[current.n].key), "data-testid": "lp-next", children: [
+          current.n < steps.length && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Button, { variant: isDraftStep && draftDirty ? "line" : "dark", onClick: () => go(steps[current.n].key), "data-testid": "lp-next", children: [
             "Next: ",
-            STEPS[current.n].label,
+            steps[current.n].label,
             " ",
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
           ] })

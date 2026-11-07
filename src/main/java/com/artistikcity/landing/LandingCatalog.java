@@ -27,7 +27,7 @@ public final class LandingCatalog {
     }
 
     public static final List<SectionType> SECTIONS = List.of(
-            new SectionType("hero", "Hero", "Title, tagline, artwork, price and the Enroll button. Always first.", List.of("split", "immersive", "editorial", "video"), true),
+            new SectionType("hero", "Hero", "Title, tagline, artwork, price and the Enroll button. Always first.", List.of("split", "immersive", "editorial", "video", "collage"), true),
             new SectionType("intro", "Course introduction", "What the course teaches, who it is for and what makes it different.", List.of("columns", "stacked"), true),
             new SectionType("outcomes", "Learning outcomes", "Cards with what students will be able to do.", List.of("cards", "list"), true),
             new SectionType("curriculum", "Curriculum", "Modules and lessons from the course, expandable.", List.of("accordion"), true),
@@ -40,7 +40,16 @@ public final class LandingCatalog {
             new SectionType("faq", "FAQ", "Questions and answers, expandable.", List.of("accordion"), true),
             new SectionType("related", "Related courses", "Other published courses, by medium.", List.of("cards"), true),
             new SectionType("final_cta", "Final call to action", "A closing enrolment band.", List.of("band", "artwork"), true),
-            new SectionType("custom", "Custom content", "Free text with headings, lists and links (cleaned).", List.of("narrow", "wide"), false));
+            new SectionType("custom", "Custom content", "Free text with headings, lists and links (cleaned).", List.of("narrow", "wide"), false),
+            new SectionType("cards", "Feature cards", "Cards with a title, text, optional image and link: services, reasons, who it's for, what you need.", List.of("grid", "list", "tiles"), false),
+            new SectionType("steps", "Steps / journey", "Numbered steps: how the platform works, how a commission is made.", List.of("timeline", "row"), false),
+            new SectionType("courses", "Course list", "Published courses and workshops from the catalogue, each linking to its own (landing) page.", List.of("cards"), false),
+            new SectionType("artists", "Artists", "Artist profiles from Admin › Instructors, each linking to the artist's page.", List.of("cards"), false),
+            new SectionType("commission_form", "Commission request", "Step 1 of the commission wizard (choose the style), then on to the existing steps 2-4, preview and checkout.", List.of("cards"), true),
+            new SectionType("commission_pricing", "Commission prices", "Starting prices per option, calculated from the commission price list (never typed in).", List.of("table"), true));
+
+    /** Sections that need a course: not allowed on site pages. */
+    public static final Set<String> COURSE_ONLY = Set.of("curriculum", "pricing", "related");
 
     public static SectionType section(String key) {
         return SECTIONS.stream().filter(s -> s.key().equals(key)).findFirst().orElse(null);
@@ -48,10 +57,18 @@ public final class LandingCatalog {
 
     // -------------------------------------------------------------------------------------------------- templates
 
-    public record Template(String key, String name, String description, String hero, Map<String, String> design, List<String> sections) {
+    /** kind: COURSE (sells a course) or SITE (replaces one of {@link #SITE_ROUTES}). */
+    public record Template(String key, String name, String description, String hero, Map<String, String> design, List<String> sections, String kind) {
+        public Template(String key, String name, String description, String hero, Map<String, String> design, List<String> sections) {
+            this(key, name, description, hero, design, sections, "COURSE");
+        }
     }
 
     private static Map<String, String> design(String palette, String accent, String ink, String surface, String font, String radius) {
+        return design(palette, accent, ink, surface, font, radius, "none");
+    }
+
+    private static Map<String, String> design(String palette, String accent, String ink, String surface, String font, String radius, String texture) {
         Map<String, String> d = new LinkedHashMap<>();
         d.put("palette", palette);
         d.put("accent", accent);
@@ -59,6 +76,7 @@ public final class LandingCatalog {
         d.put("surface", surface);
         d.put("font", font);
         d.put("radius", radius);
+        d.put("texture", texture);
         return d;
     }
 
@@ -80,7 +98,33 @@ public final class LandingCatalog {
                     List.of("hero", "outcomes", "curriculum", "artist", "testimonials", "pricing", "faq", "final_cta")),
             new Template("conversion-sales", "Conversion-Focused Sales Page", "Price and proof early, repeated calls to action, sticky enrol bar.", "split",
                     design("sage", "#2F6B4F", "#14213D", "#F5F8F4", "jakarta", "soft"),
-                    List.of("hero", "testimonials", "outcomes", "pricing", "curriculum", "artist", "benefits", "faq", "final_cta")));
+                    List.of("hero", "testimonials", "outcomes", "pricing", "curriculum", "artist", "benefits", "faq", "final_cta")),
+            new Template("watercolour-wash", "Watercolour Wash", "Soft paper tones and washes of colour; the artwork leads, the curriculum and price follow.", "split",
+                    design("custom", "#3E6E8E", "#2A2522", "#FBF6EE", "serif", "soft", "wash"),
+                    List.of("hero", "intro", "outcomes", "curriculum", "artist", "gallery", "cards", "benefits", "testimonials", "pricing", "faq", "final_cta")),
+            new Template("platform-showcase", "Platform Showcase", "For site pages: an editorial collage of real artwork, services, the journey, courses and artists.", "collage",
+                    design("custom", "#9C0D48", "#16130F", "#F7F2EA", "serif", "sharp", "grain"),
+                    List.of("hero", "intro", "cards", "steps", "courses", "artists", "gallery", "testimonials", "faq", "final_cta"), "SITE"),
+            new Template("commission-studio", "Commission Studio", "For site pages: personal and warm, with the commission request built in.", "split",
+                    design("custom", "#8C3B4A", "#1F1A24", "#FAF6F2", "serif", "soft", "grain"),
+                    List.of("hero", "intro", "cards", "gallery", "steps", "commission_form", "commission_pricing", "artists", "testimonials", "faq", "final_cta"), "SITE"));
+
+    // ----------------------------------------------------------------------------------------------- site pages
+
+    /**
+     * Site pages a landing page may replace. Fixed in code on purpose: a landing page can never take over an arbitrary
+     * address (login, checkout, admin). The original page comes back as soon as the landing page is unpublished.
+     */
+    public record SiteRoute(String key, String path, String label, String original) {
+    }
+
+    public static final List<SiteRoute> SITE_ROUTES = List.of(
+            new SiteRoute("how-it-works", "/how-it-works", "How it works", "the built-in How it works page (7-step journey)"),
+            new SiteRoute("commission-step-1", "/commission/step-1", "Commission, step 1", "the built-in commission step 1 (choose a style)"));
+
+    public static SiteRoute siteRoute(String key) {
+        return SITE_ROUTES.stream().filter(r -> r.key().equals(key)).findFirst().orElse(null);
+    }
 
     public static Template template(String key) {
         return TEMPLATES.stream().filter(t -> t.key().equals(key)).findFirst().orElse(null);

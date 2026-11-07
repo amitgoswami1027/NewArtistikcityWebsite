@@ -69,6 +69,9 @@ public class CommissionController {
     private final CommissionRepository orders;
     private final CommissionPayments payments;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.artistikcity.landing.LandingPublic landing;
+
     public CommissionController(Inertia inertia, Json json, Auth auth, Storage storage, Redirects redirect,
                                 CommissionPricing pricing, CommissionRepository orders, CommissionPayments payments) {
         this.inertia = inertia;
@@ -90,6 +93,12 @@ public class CommissionController {
 
     @GetMapping("/commission/step-1")
     public ResponseEntity<String> step1(HttpServletRequest request) {
+        // a published commission landing page (Admin › Landing Page Management, site page) replaces step 1; its request
+        // form hands the chosen style to steps 2-4 exactly like this page does. Unpublishing it brings this page back.
+        Row lp = landing == null ? null : landing.publishedSite("commission-step-1");
+        if (lp != null) {
+            return landing.render(request, lp);
+        }
         return page(request, "Commission/Step1Theme");
     }
 

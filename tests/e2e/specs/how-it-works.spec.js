@@ -1,7 +1,33 @@
-// /how-it-works: the 7-step journey tracker and timeline, ending with selling in the marketplace.
+// /how-it-works: the built-in page (7-step journey tracker and timeline, ending with selling in the marketplace).
+// The showcase landing page replaces it while published (landing-showcase.spec.js), so these tests unpublish that
+// landing page first (the original page comes back) and publish it again afterwards.
 const { test, expect } = require('@playwright/test');
+const { api } = require('./helpers');
 
-test.describe('How it works: seven-step journey', () => {
+let admin;
+let landingId = null;
+
+test.beforeAll(async ({ browser }) => {
+    admin = await browser.newPage();
+    await admin.goto('/admin/login');
+    await admin.fill('input[name=email]', 'admin@artistikcity.com');
+    await admin.fill('input[name=password]', 'password');
+    await admin.locator('button[type=submit]').click();
+    await admin.waitForURL(/\/admin\/dashboard/);
+    const r = await api(admin, 'GET', '/admin/api/landing/pages?status=PUBLISHED&per=100');
+    const row = ((r.json && r.json.rows) || []).find((x) => x.kind === 'SITE' && x.site_route === 'how-it-works');
+    if (row) {
+        landingId = row.id;
+        expect((await api(admin, 'POST', `/admin/api/landing/pages/${landingId}/unpublish`)).status).toBe(200);
+    }
+});
+
+test.afterAll(async () => {
+    if (landingId) await api(admin, 'POST', `/admin/api/landing/pages/${landingId}/publish`, { note: 'e2e: back after the built-in page tests' });
+    await admin.close();
+});
+
+test.describe('How it works: seven-step journey (built-in page)', () => {
     test('the tracker lists the seven steps in order and jumps to Sell', async ({ page }) => {
         await page.goto('/how-it-works');
         const tracker = page.getByRole('navigation', { name: 'The student journey, step by step' });

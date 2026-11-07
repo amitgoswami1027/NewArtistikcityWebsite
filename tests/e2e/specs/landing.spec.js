@@ -18,7 +18,7 @@ const noSideScroll = (page) => page.evaluate(() => document.documentElement.scro
 test.describe('Public landing page', () => {
     test('hero, price, curriculum, FAQ, gallery and the sticky enrol bar', async ({ page }) => {
         await page.goto(PAGE);
-        await expect(page.locator('h1')).toHaveText('Watercolour Landscapes for Beginners');
+        await expect(page.locator('h1')).toHaveText('Master the Art of Watercolour Landscapes');
         await expect(page.locator('.lp-hero')).toContainText('₹3,999');
         await expect(page.locator('#lp-sticky')).not.toHaveClass(/is-on/);
         // curriculum modules expand

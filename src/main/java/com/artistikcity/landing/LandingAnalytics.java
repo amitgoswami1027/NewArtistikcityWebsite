@@ -250,7 +250,7 @@ public class LandingAnalytics {
                 + " (select count(*) from orders o where o.landing_page_id = p.id and o.payment_status = 1 and coalesce(o.is_test, 0) = 0 and o.created_at >= ? and o.created_at < ?) as enrollments,"
                 + " (select coalesce(sum(o.price + 0), 0) from orders o where o.landing_page_id = p.id and o.payment_status = 1 and o.price_type = 'inr' and coalesce(o.is_test, 0) = 0"
                 + "   and o.created_at >= ? and o.created_at < ?) as revenue"
-                + " from landing_pages p join courses c on c.id = p.course_id where p.status <> 'ARCHIVED'" + f.pageSql("p")
+                + " from landing_pages p left join courses c on c.id = p.course_id where p.status <> 'ARCHIVED'" + f.pageSql("p")
                 + " order by revenue desc, enrollments desc, visitors desc limit 10", p.toArray())) {
             Map<String, Object> m = new LinkedHashMap<>(row);
             m.put("revenue", dec(row.get("revenue")));

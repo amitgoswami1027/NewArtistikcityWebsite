@@ -1,4 +1,4 @@
-/* ArtistikCity landing pages: progressive enhancement only (the page works without it).
+/* ArtistikCity landing pages: progressive enhancement (the page reads fine without it; the commission request needs it, as the wizard does).
    Lite video embeds, gallery lightbox, before/after slider, sticky enrol bar, scroll reveal, CTA click events, and the
    page's marketing tags (GA4 / GTM / Meta Pixel), which load only after the visitor accepts cookies (ac_consent=all,
    the same cookie as the rest of the site). Nothing is tracked in admin previews. */
@@ -119,6 +119,67 @@
         })
         .catch(function () { say('That did not work. Please check your connection and try again.', true); })
         .then(function () { btn.disabled = false; });
+    });
+  }
+
+  // a reviewer's photo that can't be loaded: show their initial instead of an empty box
+  d.querySelectorAll('.lp-quote__who img').forEach(function (img) {
+    var swap = function () {
+      var who = img.closest('.lp-quote__who');
+      var name = who && who.querySelector('b');
+      var s = d.createElement('span');
+      s.className = 'lp-quote__init'; s.setAttribute('aria-hidden', 'true');
+      s.textContent = name ? name.textContent.trim().charAt(0) : '';
+      img.replaceWith(s);
+    };
+    if (img.complete && img.naturalWidth === 0) swap(); else img.addEventListener('error', swap);
+  });
+
+  // "Watch the preview": scroll to the video and start it (it still loads only now, on this click)
+  d.querySelectorAll('a[data-play]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var target = d.querySelector(a.getAttribute('href'));
+      var btn = target && target.querySelector('.lp-video__btn');
+      var vid = target && target.querySelector('.lp-video video');
+      if (!btn && !vid) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (btn) btn.click(); else { try { vid.play(); } catch (x) { /* the visitor can press play */ } }
+    });
+  });
+
+  // commission request: step 1 of the existing wizard. The choice goes into the same browser storage the wizard uses
+  // (sessionStorage "artistikcity.commission.v1"), then steps 2-4, preview and checkout carry on unchanged.
+  var cform = d.querySelector('[data-commission-form]');
+  if (cform) {
+    var KEY = 'artistikcity.commission.v1';
+    var saved = {};
+    try { saved = JSON.parse(window.sessionStorage.getItem(KEY) || '{}') || {}; } catch (x) { saved = {}; }
+    if (saved.theme) {
+      var pre = cform.querySelector('input[name="theme"][value="' + String(saved.theme).replace(/[^A-Z_]/g, '') + '"]');
+      if (pre) pre.checked = true;
+    }
+    var cmsg = cform.querySelector('.lp-cform__msg');
+    cform.addEventListener('change', function () { cmsg.textContent = ''; });
+    cform.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var picked = cform.querySelector('input[name="theme"]:checked');
+      if (!picked) {
+        cmsg.textContent = 'Select a theme to continue.';
+        var first = cform.querySelector('input[name="theme"]');
+        if (first) first.focus();
+        return;
+      }
+      var state = {};
+      try { state = JSON.parse(window.sessionStorage.getItem(KEY) || '{}') || {}; } catch (x) { state = {}; }
+      state.theme = picked.value;
+      try { window.sessionStorage.setItem(KEY, JSON.stringify(state)); } catch (x) {
+        cmsg.textContent = 'Your browser blocks storage for this site, so the next steps can\'t remember your choice. Please allow it and try again.';
+        return;
+      }
+      send('CTA', { label: 'commission-theme-' + picked.value.toLowerCase() });
+      if (preview) { cmsg.textContent = 'Preview: the style is saved; on the live page this goes on to step 2.'; return; }
+      window.location.assign('/commission/step-2');
     });
   }
 

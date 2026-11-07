@@ -185,7 +185,7 @@ public class LandingAdminController {
         String sort = sortKey == null ? "p.updated_at" : sorts.getOrDefault(sortKey, "p.updated_at");
         String dir = "asc".equals(request.getParameter("dir")) ? "asc" : "desc";
         int per = Math.max(5, Math.min(100, intOr(request.getParameter("per"), 20)));
-        long total = db.count("select count(*) from landing_pages p join courses c on c.id = p.course_id" + where, params.toArray());
+        long total = db.count("select count(*) from landing_pages p left join courses c on c.id = p.course_id" + where, params.toArray());
         int pageNo = Math.max(1, Math.min(intOr(request.getParameter("page"), 1), (int) Math.max(1, (total + per - 1) / per)));
         List<Object> lp = new ArrayList<>(params);
         lp.add(per);
@@ -193,8 +193,8 @@ public class LandingAdminController {
         Map<Long, Map<String, Object>> totals = analytics.totals();
         boolean money = kit.can(admin, "landing.orders") || kit.can(admin, "landing.pricing");
         List<Map<String, Object>> rows = new ArrayList<>();
-        for (Row r : db.select("select p.id, p.name, p.slug, p.status, p.template_key, p.campaign, p.created_at, p.updated_at, p.published_at, p.publish_at,"
-                + " c.title as course, c.slug as course_slug, a.name as artist from landing_pages p join courses c on c.id = p.course_id left join admins a on a.id = c.admin_id"
+        for (Row r : db.select("select p.id, p.name, p.slug, p.kind, p.site_route, p.status, p.template_key, p.campaign, p.created_at, p.updated_at, p.published_at, p.publish_at,"
+                + " c.title as course, c.slug as course_slug, a.name as artist from landing_pages p left join courses c on c.id = p.course_id left join admins a on a.id = c.admin_id"
                 + where + " order by " + sort + " " + dir + ", p.id desc limit ? offset ?", lp.toArray())) {
             Map<String, Object> m = new LinkedHashMap<>(r);
             LandingCatalog.Template t = LandingCatalog.template(r.str("template_key"));
@@ -204,11 +204,17 @@ public class LandingAdminController {
             m.put("enrollments", s.getOrDefault("enrollments", 0L));
             m.put("conversion", s.getOrDefault("conversion", 0.0));
             m.put("revenue", money ? s.get("revenue") : null);
-            m.put("takesOverCourse", r.str("slug").equals(r.str("course_slug")));
+            boolean site = LandingPages.isSite(r);
+            m.put("takesOverCourse", !site && r.str("slug").equals(r.str("course_slug")));
+            m.put("publicUrl", LandingPages.publicPath(r));
+            if (site) {
+                LandingCatalog.SiteRoute route = LandingCatalog.siteRoute(r.str("site_route", ""));
+                m.put("course", "Site page: " + (route == null ? r.str("site_route", "") : route.label()));
+            }
             rows.add(m);
         }
         Map<String, Object> counts = new LinkedHashMap<>();
-        for (Row r : db.select("select p.status, count(*) as n from landing_pages p join courses c on c.id = p.course_id" + (scope == null ? "" : " where c.admin_id = " + scope.longValue())
+        for (Row r : db.select("select p.status, count(*) as n from landing_pages p left join courses c on c.id = p.course_id" + (scope == null ? "" : " where c.admin_id = " + scope.longValue())
                 + " group by p.status")) {
             counts.put(r.str("status"), r.lng("n"));
         }
@@ -220,14 +226,18 @@ public class LandingAdminController {
         Row admin = kit.admin(request);
         if (!kit.can(admin, "landing.publish")) return kit.forbidden();
         Map<String, Object> in = Input.of(request, json).all();
+        boolean site = "SITE".equals(LandingConfig.str(in.get("kind")));
+        if (site && kit.teacherScope(admin) != null) return kit.forbidden();      // site pages: staff, not instructors
         Map<String, String> e = pages.checkBasics(in, null);
         String template = LandingConfig.str(in.get("template"));
-        if (LandingCatalog.template(template) == null) e.put("template", "Choose a template.");
-        if (e.isEmpty() && !courseAllowed(admin, Long.parseLong(LandingConfig.str(in.get("courseId")).replace(".0", "")))) e.put("courseId", "You can only make pages for your own courses.");
+        LandingCatalog.Template t = LandingCatalog.template(template);
+        if (t == null) e.put("template", "Choose a template.");
+        else if (site != "SITE".equals(t.kind())) e.put("template", site ? "Choose a template made for site pages." : "That template is for site pages; choose a course template.");
+        if (e.isEmpty() && !site && !courseAllowed(admin, Long.parseLong(LandingConfig.str(in.get("courseId")).replace(".0", "")))) e.put("courseId", "You can only make pages for your own courses.");
         if (!e.isEmpty()) return kit.invalid(e);
         long id = pages.create(in, template, admin.lng("id"));
         applyDefaults(id, admin.lng("id"));
-        audit.log(admin, "landing_page", id, "create", "Created landing page " + in.get("name") + " (/" + in.get("slug") + ")");
+        audit.log(admin, "landing_page", id, "create", "Created landing page " + in.get("name") + " (" + LandingPages.publicPath(pages.find(id)) + ")");
         return kit.ok(Map.of("id", id, "message", "Landing page created as a draft."));
     }
 
@@ -241,6 +251,9 @@ public class LandingAdminController {
         if (!wa.isEmpty()) {
             ((Map<String, Object>) config.get("marketing")).put("whatsapp", wa);
             pages.saveDraft(id, config, adminId);
+        }
+        if (LandingPages.isSite(page)) {
+            return;     // no price, payment or checkout on a site page
         }
         Map<String, Object> pr = new LinkedHashMap<>(commerce.pricingView(id));
         if (!LandingConfig.str(d.get("accessDuration")).isEmpty()) pr.put("accessDuration", d.get("accessDuration"));
@@ -264,27 +277,36 @@ public class LandingAdminController {
         long id = page.lng("id");
         Map<String, Object> m = new LinkedHashMap<>();
         Map<String, Object> p = new LinkedHashMap<>();
-        for (String k : List.of("id", "name", "slug", "course_id", "campaign", "description", "template_key", "status", "published_at", "publish_at", "archived_at",
+        boolean site = LandingPages.isSite(page);
+        for (String k : List.of("id", "name", "slug", "kind", "site_route", "course_id", "campaign", "description", "template_key", "status", "published_at", "publish_at", "archived_at",
                 "draft_saved_at", "created_at", "updated_at", "published_version_id")) {
             p.put(k, page.get(k));
         }
-        Row course = db.first("select slug, title from courses where id = ?", page.get("course_id"));
+        Row course = site ? null : db.first("select slug, title from courses where id = ?", page.get("course_id"));
         p.put("course_slug", course == null ? null : course.get("slug"));
         p.put("course_title", course == null ? null : course.get("title"));
-        p.put("publicUrl", "/course/" + page.str("slug"));
+        p.put("publicUrl", LandingPages.publicPath(page));
         p.put("takesOverCourse", course != null && page.str("slug").equals(course.str("slug")));
+        LandingCatalog.SiteRoute route = site ? LandingCatalog.siteRoute(page.str("site_route", "")) : null;
+        p.put("site", site);
+        p.put("siteLabel", route == null ? null : route.label());
+        p.put("siteOriginal", route == null ? null : route.original());
         Row saver = page.get("draft_saved_by") == null ? null : db.first("select name from admins where id = ?", page.get("draft_saved_by"));
         p.put("draft_saved_by_name", saver == null ? null : saver.get("name"));
         m.put("page", p);
         m.put("config", pages.draft(page));
         m.put("hasUnpublishedChanges", hasUnpublished(page));
         m.put("versions", pages.versions(id));
-        m.put("pricing", commerce.pricingView(id));
-        m.put("quote", view.price(commerce.quote(page)));
-        m.put("coursePrice", commerce.coursePrices(page.lng("course_id")));
-        m.put("payments", payments.view(payments.forPage(id)));
-        m.put("checkout", commerce.checkoutView(id));
-        m.put("course", view.course(page.lng("course_id")));
+        if (!site) {
+            m.put("pricing", commerce.pricingView(id));
+            m.put("quote", view.price(commerce.quote(page)));
+            m.put("coursePrice", commerce.coursePrices(page.lng("course_id")));
+            m.put("payments", payments.view(payments.forPage(id)));
+            m.put("checkout", commerce.checkoutView(id));
+            m.put("course", view.course(page.lng("course_id")));
+        } else {
+            m.put("course", Map.of());
+        }
         m.put("orders", db.count("select count(*) from orders where landing_page_id = ?", id));
         m.put("history", audit.history("landing_page", id).stream().limit(20).toList());
         return m;
@@ -306,6 +328,17 @@ public class LandingAdminController {
         if (!kit.can(admin, "landing.content") || page == null || !mayEdit(admin, page)) return kit.forbidden();
         Map<String, Object> in = Input.of(request, json).all();
         Map<String, String> e = pages.checkBasics(in, id);
+        if (LandingPages.isSite(page)) {
+            boolean routeChange = !page.str("site_route", "").equals(LandingConfig.str(in.get("siteRoute")));
+            if (e.isEmpty() && routeChange && !"DRAFT".equals(page.str("status")) && !"ARCHIVED".equals(page.str("status"))) {
+                e.put("siteRoute", "Unpublish the page before changing which site page it replaces.");
+            }
+            if (!e.isEmpty()) return kit.invalid(e);
+            Row before = audit.snapshot("landing_pages", id);
+            pages.updateBasics(id, in);
+            audit.change(admin, "landing_page", id, "update", "Basics", strip(before), strip(audit.snapshot("landing_pages", id)));
+            return kit.ok(Map.of("message", "Saved.", "data", editorData(admin, pages.find(id))));
+        }
         boolean addressChange = !page.str("slug").equals(LandingConfig.str(in.get("slug")).toLowerCase())
                 || !String.valueOf(page.get("course_id")).equals(LandingConfig.str(in.get("courseId")).replace(".0", ""));
         if (e.isEmpty() && addressChange && "PUBLISHED".equals(page.str("status")) && !kit.can(admin, "landing.publish")) {
@@ -356,8 +389,11 @@ public class LandingAdminController {
         if (!kit.can(admin, "landing.content") || page == null || !mayEdit(admin, page)) return kit.forbidden();
         LandingCatalog.Template t = LandingCatalog.template(Input.of(request, json).get("template"));
         if (t == null) return kit.invalid(Map.of("template", "Choose a template."));
+        if (LandingPages.isSite(page) != "SITE".equals(t.kind())) {
+            return kit.invalid(Map.of("template", LandingPages.isSite(page) ? "Choose a template made for site pages." : "That template is for site pages."));
+        }
         Map<String, Object> config = pages.applyTemplate(pages.draft(page), t);
-        LandingConfig.Result r = LandingConfig.normalize(config);
+        LandingConfig.Result r = LandingConfig.normalize(config, LandingPages.isSite(page));
         pages.setTemplate(id, t.key(), r.config(), admin.lng("id"));
         audit.log(admin, "landing_page", id, "update", "Template changed to " + t.name());
         return kit.ok(Map.of("message", "Template applied to the draft. Nothing you wrote was lost.", "data", editorData(admin, pages.find(id))));
@@ -377,7 +413,7 @@ public class LandingAdminController {
                 if (unpayable != null) return kit.invalid(Map.of("payments", unpayable));
                 Map<String, String> e = pages.publish(id, admin.lng("id"), in.get("note"));
                 if (!e.isEmpty()) return kit.invalid(e);
-                message = "Published. The page is live at /course/" + page.str("slug") + ".";
+                message = "Published. The page is live at " + LandingPages.publicPath(page) + ".";
             }
             case "schedule" -> {
                 String unpayable = unpayable(page);
@@ -388,7 +424,8 @@ public class LandingAdminController {
             }
             case "unpublish" -> {
                 pages.unpublish(id);
-                message = "Unpublished. /course/" + page.str("slug") + " shows the regular course page again.";
+                message = LandingPages.isSite(page) ? "Unpublished. " + LandingPages.publicPath(page) + " shows the original page again."
+                        : "Unpublished. /course/" + page.str("slug") + " shows the regular course page again.";
             }
             case "archive" -> {
                 pages.archive(id);
@@ -410,6 +447,7 @@ public class LandingAdminController {
 
     /** A page can only go live when buyers can pay on it (or it is free): the server decides, not the editor's checklist. */
     private String unpayable(Row page) {
+        if (LandingPages.isSite(page)) return null;     // nothing is sold on a site page
         LandingPricing.Quote q = commerce.quote(page);
         if (q.free()) return null;
         return payments.choices(payments.forPage(page.lng("id")), q.totalUsd() != null).isEmpty()
@@ -741,6 +779,13 @@ public class LandingAdminController {
             String url = "/storage/uploads/teachers/" + r.get("id") + "/" + r.str("profile_photo");
             site.add(Map.of("url", url, "thumb", LandingImages.sized(url, 320), "label", "Artist: " + r.str("name")));
         }
+        // marketplace artworks (public listings), so pages can show real work without uploading copies
+        for (Row r : db.select("select p.title, p.artist_name, i.image_url from paintings p join painting_images i on i.painting_id = p.id and i.is_primary = 1"
+                + " where p.stock_status in ('AVAILABLE', 'RESERVED', 'SOLD') order by p.id desc limit 40")) {
+            String url = r.str("image_url");
+            if (url.isEmpty() || !(url.startsWith("/") || url.startsWith("https://"))) continue;
+            site.add(Map.of("url", url, "thumb", LandingImages.sized(url, 320), "label", "Artwork: " + r.str("title") + " · " + r.str("artist_name")));
+        }
         return kit.ok(Map.of("media", rows, "site", site));
     }
 
@@ -922,7 +967,8 @@ public class LandingAdminController {
                 + (scope == null ? "" : " where c.admin_id = " + scope.longValue()) + " order by c.title"));
         m.put("artists", db.select("select id, name, admin_type from admins where admin_type in ('admin', 'teacher') order by name"));
         m.put("testimonials", db.select("select id, name, title from testimonials where status = 1 order by id desc limit 100"));
-        m.put("pages", db.select("select p.id, p.name, p.slug, p.status from landing_pages p join courses c on c.id = p.course_id"
+        m.put("siteRoutes", LandingCatalog.SITE_ROUTES.stream().map(r -> Map.of("key", r.key(), "path", r.path(), "label", r.label(), "original", r.original())).toList());
+        m.put("pages", db.select("select p.id, p.name, p.slug, p.status from landing_pages p left join courses c on c.id = p.course_id"
                 + (scope == null ? "" : " where c.admin_id = " + scope.longValue()) + " order by p.name"));
         m.put("campaigns", db.select("select distinct campaign from (select campaign from landing_pages where campaign is not null union select campaign from landing_coupons where campaign is not null"
                 + " union select utm_campaign as campaign from orders where utm_campaign is not null and landing_page_id is not null) x order by campaign limit 100"));
@@ -932,7 +978,9 @@ public class LandingAdminController {
     private static Map<String, Object> catalog() {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("templates", LandingCatalog.TEMPLATES.stream().map(t -> Map.of("key", t.key(), "name", t.name(), "description", t.description(), "hero", t.hero(),
-                "design", t.design(), "sections", t.sections())).toList());
+                "design", t.design(), "sections", t.sections(), "kind", t.kind())).toList());
+        m.put("siteRoutes", LandingCatalog.SITE_ROUTES.stream().map(r -> Map.of("key", r.key(), "path", r.path(), "label", r.label(), "original", r.original())).toList());
+        m.put("courseOnly", LandingCatalog.COURSE_ONLY);
         m.put("sections", LandingCatalog.SECTIONS.stream().map(s -> Map.of("key", s.key(), "label", s.label(), "description", s.description(), "layouts", s.layouts(), "single", s.single())).toList());
         m.put("methods", LandingCatalog.METHODS.stream().map(x -> Map.of("key", x.key(), "label", x.label(), "group", x.group(), "hint", x.hint())).toList());
         m.put("providers", LandingCatalog.PROVIDERS.stream().map(p -> Map.of("key", p.key(), "label", p.label(), "currency", p.currency(), "integrated", p.integrated(),
@@ -944,6 +992,7 @@ public class LandingAdminController {
 
     private boolean mayEdit(Row admin, Row page) {
         Long scope = kit.teacherScope(admin);
+        if (scope != null && LandingPages.isSite(page)) return false;
         return scope == null || db.count("select count(*) from courses where id = ? and admin_id = ?", page.get("course_id"), scope) > 0;
     }
 

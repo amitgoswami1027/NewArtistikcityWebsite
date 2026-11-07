@@ -25,6 +25,9 @@ const STEPS = [
     { key: 'publish', label: 'Preview & publish', n: 9, cap: 'landing', hint: 'Check, publish, schedule, versions.' },
 ];
 const DRAFT_STEPS = ['sections', 'design', 'seo'];
+const SITE_SKIP = ['pricing', 'payments', 'checkout'];      // a site page sells nothing
+const stepsFor = (site) => (site ? STEPS.filter((s) => !SITE_SKIP.includes(s.key)).map((s, i) => ({ ...s, n: i + 1 })) : STEPS);
+const tplFor = (catalog, site) => catalog.templates.filter((t) => (t.kind || 'COURSE') === (site ? 'SITE' : 'COURSE'));
 
 const PALETTES = {
     burgundy: { label: 'Burgundy', accent: '#9C0D48', ink: '#14213D', surface: '#FBF8F4' },
@@ -47,13 +50,25 @@ const dtLocal = (v) => (v ? String(v).replace(' ', 'T').slice(0, 16) : '');
 /* ============================================================================================ create wizard */
 
 function CreatePage({ lookups, catalog, defaults, toast }) {
-    const [v, setV] = useState({ name: '', courseId: '', slug: '', campaign: '', description: '', template: (defaults && defaults.template) || catalog.templates[0].key });
+    const [v, setV] = useState({ kind: 'COURSE', siteRoute: '', name: '', courseId: '', slug: '', campaign: '', description: '', template: (defaults && defaults.template) || catalog.templates[0].key });
+    const site = v.kind === 'SITE';
+    const routes = catalog.siteRoutes || [];
+    const route = routes.find((r) => r.key === v.siteRoute);
+    const setKind = (kind) => setV((o) => {
+        const list = tplFor(catalog, kind === 'SITE');
+        return { ...o, kind, template: list.some((t) => t.key === o.template) ? o.template : (list[0] && list[0].key) || o.template };
+    });
     const [slugTouched, setSlugTouched] = useState(false);
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
     const course = lookups.courses.find((c) => String(c.id) === String(v.courseId));
     const set = (k, val) => setV((o) => {
         const n = { ...o, [k]: val };
+        if (k === 'siteRoute' && !slugTouched) {
+            const r = (catalog.siteRoutes || []).find((x) => x.key === val);
+            n.slug = r ? r.key : '';
+            if (!o.name && r) n.name = r.label;
+        }
         if (k === 'courseId' && !slugTouched) {
             const c = lookups.courses.find((x) => String(x.id) === String(val));
             n.slug = c ? c.slug : '';
@@ -73,19 +88,35 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
     return (
         <form onSubmit={create} className="adm-stack" noValidate data-testid="lp-create">
             <Card title="1. Basic information" subtitle="Only staff see the name. The address is what visitors see.">
+                {routes.length > 0 && (
+                    <div className="lpa-kind">
+                        <span className="lpa-label">Page type</span>
+                        <Segments value={v.kind} label="Page type" onChange={setKind} options={[{ value: 'COURSE', label: 'Sells a course' }, { value: 'SITE', label: 'Replaces a site page' }]} />
+                        {site && <p className="adm-muted adm-small">A site page has no price or checkout. While it is published it is shown instead of the original page; unpublish it and the original comes back.</p>}
+                    </div>
+                )}
                 <div className="lpa-grid2">
+                    {site ? (
+                        <Field label="Site page it replaces" name="siteRoute" error={errors.siteRoute} required hint={route ? `Replaces ${route.original} at ${route.path}.` : undefined}>
+                            <select id="f-siteRoute" className="adm-input" value={v.siteRoute} onChange={(e) => set('siteRoute', e.target.value)} data-testid="lp-site-route">
+                                <option value="">Choose a page…</option>
+                                {routes.map((r) => <option key={r.key} value={r.key}>{r.label} ({r.path})</option>)}
+                            </select>
+                        </Field>
+                    ) : (
                     <Field label="Course this page sells" name="courseId" error={errors.courseId} required>
                         <select id="f-courseId" className="adm-input" value={v.courseId} onChange={(e) => set('courseId', e.target.value)} data-testid="lp-course">
                             <option value="">Choose a course…</option>
                             {lookups.courses.map((c) => <option key={c.id} value={c.id}>{c.title}{c.artist ? ` · ${c.artist}` : ''}</option>)}
                         </select>
                     </Field>
+                    )}
                     <Field label="Landing page name" name="name" error={errors.name} required hint="For example: Watercolour Landscapes · Diwali campaign.">
                         <input id="f-name" className="adm-input" value={v.name} maxLength={190} onChange={(e) => set('name', e.target.value)} data-testid="lp-name" />
                     </Field>
-                    <Field label="Address" name="slug" error={errors.slug} required
-                           hint={takesOver ? 'Same address as the course: once published, this page replaces the regular course page.' : 'A campaign page gets its own address; the course page stays as it is.'}>
-                        <div className="lpa-slug"><span>/course/</span>
+                    <Field label={site ? 'Short name' : 'Address'} name="slug" error={errors.slug} required
+                           hint={site ? 'Only used inside the admin: visitors see the site page\'s own address.' : takesOver ? 'Same address as the course: once published, this page replaces the regular course page.' : 'A campaign page gets its own address; the course page stays as it is.'}>
+                        <div className="lpa-slug">{!site && <span>/course/</span>}
                             <input id="f-slug" className="adm-input" value={v.slug} maxLength={120} onChange={(e) => { setSlugTouched(true); set('slug', slugify(e.target.value)); }} data-testid="lp-slug" /></div>
                     </Field>
                     <Field label="Campaign" name="campaign" error={errors.campaign} optional hint="Groups pages, coupons and orders in reports.">
@@ -99,7 +130,7 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
             </Card>
             <Card title="2. Template" subtitle="Every template uses the same sections; you can switch later without losing what you wrote.">
                 <div className="lpa-templates" role="radiogroup" aria-label="Template">
-                    {catalog.templates.map((t) => (
+                    {tplFor(catalog, site).map((t) => (
                         <label key={t.key} className={cx('lpa-template', v.template === t.key && 'is-on')}>
                             <input type="radio" name="template" value={t.key} checked={v.template === t.key} onChange={() => set('template', t.key)} />
                             <TemplateThumb t={t} />
@@ -111,7 +142,7 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
                 {errors.template && <p className="adm-danger">{errors.template}</p>}
             </Card>
             <div className="lpa-savebar">
-                <span className="adm-muted">The page starts as a draft filled from the course. Nothing is public until you publish.</span>
+                <span className="adm-muted">{site ? 'The page starts as a draft with the template\'s sections. Nothing is public until you publish.' : 'The page starts as a draft filled from the course. Nothing is public until you publish.'}</span>
                 <Button as="a" href="/admin/landing/pages">Cancel</Button>
                 <Button type="submit" variant="brand" busy={busy} icon="fa-arrow-right" data-testid="lp-create-submit">Create and continue</Button>
             </div>
@@ -123,7 +154,8 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
 
 function Basics({ data, lookups, canEdit, onSaved, toast }) {
     const p = data.page;
-    const init = { name: p.name || '', courseId: String(p.course_id || ''), slug: p.slug || '', campaign: p.campaign || '', description: p.description || '' };
+    const init = { name: p.name || '', courseId: String(p.course_id || ''), siteRoute: p.site_route || '', slug: p.slug || '', campaign: p.campaign || '', description: p.description || '' };
+    const routes = lookups.siteRoutes || [];
     const [v, setV] = useState(init);
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
@@ -143,14 +175,22 @@ function Basics({ data, lookups, canEdit, onSaved, toast }) {
                     <Field label="Landing page name" name="name" error={errors.name} required>
                         <input id="f-name" className="adm-input" value={v.name} maxLength={190} onChange={(e) => setV({ ...v, name: e.target.value })} />
                     </Field>
+                    {p.site ? (
+                        <Field label="Site page it replaces" name="siteRoute" error={errors.siteRoute} required hint={p.status === 'PUBLISHED' ? 'Unpublish the page to change this.' : p.siteOriginal ? `While published, shown instead of ${p.siteOriginal}.` : undefined}>
+                            <select id="f-siteRoute" className="adm-input" value={v.siteRoute} disabled={p.status === 'PUBLISHED' || p.status === 'SCHEDULED'} onChange={(e) => setV({ ...v, siteRoute: e.target.value })}>
+                                {routes.map((r) => <option key={r.key} value={r.key}>{r.label} ({r.path})</option>)}
+                            </select>
+                        </Field>
+                    ) : (
                     <Field label="Course" name="courseId" error={errors.courseId} required hint={data.orders > 0 ? 'People bought through this page, so the course can no longer change.' : undefined}>
                         <select id="f-courseId" className="adm-input" value={v.courseId} disabled={data.orders > 0} onChange={(e) => setV({ ...v, courseId: e.target.value })}>
                             {lookups.courses.map((c) => <option key={c.id} value={c.id}>{c.title}{c.artist ? ` · ${c.artist}` : ''}</option>)}
                         </select>
                     </Field>
-                    <Field label="Address" name="slug" error={errors.slug} required
-                           hint={course && v.slug === course.slug ? 'Same as the course: when published, this page replaces the course page.' : 'Its own address; the course page is unchanged.'}>
-                        <div className="lpa-slug"><span>/course/</span><input id="f-slug" className="adm-input" value={v.slug} onChange={(e) => setV({ ...v, slug: slugify(e.target.value) })} /></div>
+                    )}
+                    <Field label={p.site ? 'Short name' : 'Address'} name="slug" error={errors.slug} required
+                           hint={p.site ? 'Only used inside the admin.' : course && v.slug === course.slug ? 'Same as the course: when published, this page replaces the course page.' : 'Its own address; the course page is unchanged.'}>
+                        <div className="lpa-slug">{!p.site && <span>/course/</span>}<input id="f-slug" className="adm-input" value={v.slug} onChange={(e) => setV({ ...v, slug: slugify(e.target.value) })} /></div>
                     </Field>
                     <Field label="Campaign" name="campaign" error={errors.campaign} optional>
                         <input id="f-campaign" className="adm-input" list="lp-campaigns2" value={v.campaign} onChange={(e) => setV({ ...v, campaign: e.target.value })} />
@@ -177,7 +217,7 @@ function Template({ data, catalog, canEdit, onSaved, toast, draftDirty }) {
         <Card title="Template" subtitle="Switching keeps every text, image and FAQ you wrote; it changes the layout, the look and adds any sections the template needs. It applies to the draft until you publish.">
             {draftDirty && <p className="lpa-note is-warn" role="status">Save your draft first: switching the template reloads the draft from the server.</p>}
             <div className="lpa-templates">
-                {catalog.templates.map((t) => (
+                {tplFor(catalog, !!data.page.site).map((t) => (
                     <div key={t.key} className={cx('lpa-template', data.page.template_key === t.key && 'is-on')}>
                         <TemplateThumb t={t} />
                         <b>{t.name}</b>
@@ -191,7 +231,7 @@ function Template({ data, catalog, canEdit, onSaved, toast, draftDirty }) {
     );
 }
 
-function Sections({ cfg, setCfg, catalog, lookups, errors, canEdit, toast }) {
+function Sections({ cfg, setCfg, catalog, lookups, errors, canEdit, toast, site }) {
     const [sel, setSel] = useState(cfg.sections[0] ? cfg.sections[0].id : null);
     const [drag, setDrag] = useState(null);
     const [adding, setAdding] = useState('');
@@ -261,7 +301,7 @@ function Sections({ cfg, setCfg, catalog, lookups, errors, canEdit, toast }) {
                         <label htmlFor="lp-add" className="sr-only">Section to add</label>
                         <select id="lp-add" className="adm-input" value={adding} onChange={(e) => setAdding(e.target.value)} data-testid="lp-add-type">
                             <option value="">Add a section…</option>
-                            {catalog.sections.filter((s) => s.key !== 'hero').map((s) => (
+                            {catalog.sections.filter((s) => s.key !== 'hero' && !(site && (catalog.courseOnly || []).includes(s.key))).map((s) => (
                                 <option key={s.key} value={s.key} disabled={s.single && present.has(s.key)}>{s.label}{s.single && present.has(s.key) ? ' (already on the page)' : ''}</option>
                             ))}
                         </select>
@@ -271,15 +311,27 @@ function Sections({ cfg, setCfg, catalog, lookups, errors, canEdit, toast }) {
                 <div className="lpa-cta">
                     <h3 className="lpa-h">Buttons</h3>
                     <div className="lpa-grid2">
-                        <Field label="Enroll button" name="cta.primary" error={errors['cta.primary']} max={40} counter={String(cta.primary || '').length}>
+                        <Field label={site ? 'Main button' : 'Enroll button'} name="cta.primary" error={errors['cta.primary']} max={40} counter={String(cta.primary || '').length}>
                             <input id="f-cta.primary" className="adm-input" value={cta.primary || ''} disabled={!canEdit} onChange={(e) => setCfg({ ...cfg, cta: { ...cta, primary: e.target.value } })} />
                         </Field>
-                        <Field label="Second button" name="cta.secondary" max={40} counter={String(cta.secondary || '').length} hint="Scrolls to the curriculum.">
+                        {site && (
+                            <Field label="Main button goes to" name="cta.primaryHref" error={errors['cta.primaryHref']} hint="A site address like /courses?type=all, or #section-id for a section on this page.">
+                                <input id="f-cta.primaryHref" className="adm-input" value={cta.primaryHref || ''} disabled={!canEdit} onChange={(e) => setCfg({ ...cfg, cta: { ...cta, primaryHref: e.target.value } })} />
+                            </Field>
+                        )}
+                        <Field label="Second button" name="cta.secondary" max={40} counter={String(cta.secondary || '').length} hint={cta.secondaryVideo ? 'Plays the course preview video; without one it says "Explore the course".' : 'Leave the address empty to scroll to the curriculum (or the second section).'}>
                             <input id="f-cta.secondary" className="adm-input" value={cta.secondary || ''} disabled={!canEdit} onChange={(e) => setCfg({ ...cfg, cta: { ...cta, secondary: e.target.value } })} />
                         </Field>
+                        {!cta.secondaryVideo && (
+                            <Field label="Second button goes to" name="cta.secondaryHref" error={errors['cta.secondaryHref']} optional>
+                                <input id="f-cta.secondaryHref" className="adm-input" value={cta.secondaryHref || ''} disabled={!canEdit} onChange={(e) => setCfg({ ...cfg, cta: { ...cta, secondaryHref: e.target.value } })} />
+                            </Field>
+                        )}
                     </div>
-                    <Toggle checked={cta.sticky !== false} disabled={!canEdit} onChange={(on) => setCfg({ ...cfg, cta: { ...cta, sticky: on } })} name="cta.sticky"
-                            label="Sticky enrol bar" description="A slim bar with the price and the Enroll button once the hero scrolls out of view (desktop and phones)." />
+                    {!site && <Toggle checked={!!cta.secondaryVideo} disabled={!canEdit} onChange={(on) => setCfg({ ...cfg, cta: { ...cta, secondaryVideo: on } })} name="cta.secondaryVideo"
+                            label="Second button plays the preview video" description="Only shown as a video button when the course (or a Video section) has a preview video." />}
+                    {!site && <Toggle checked={cta.sticky !== false} disabled={!canEdit} onChange={(on) => setCfg({ ...cfg, cta: { ...cta, sticky: on } })} name="cta.sticky"
+                            label="Sticky enrol bar" description="A slim bar with the price and the Enroll button once the hero scrolls out of view (desktop and phones)." />}
                 </div>
             </Card>
             {current ? (
@@ -516,9 +568,9 @@ function Seo({ cfg, setCfg, data, errors, canEdit }) {
     );
     return (
         <fieldset disabled={!canEdit} className="lpa-fieldset adm-stack">
-            <Card title="Search" subtitle="Empty boxes use the course's title and summary.">
+            <Card title="Search" subtitle={data.page.site ? 'Empty boxes use the page name and the hero tagline.' : "Empty boxes use the course's title and summary."}>
                 <div className="lpa-serp" aria-label="Search result preview">
-                    <small>artistikcity.com › course › {data.page.slug}</small>
+                    <small>artistikcity.com{String(data.page.publicUrl || '').replace(/\//g, ' › ')}</small>
                     <b>{title.slice(0, 70)}</b>
                     <span>{String(desc).slice(0, 170)}</span>
                 </div>
@@ -568,7 +620,11 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
     const [dialog, confirm] = useConfirm();
     const canPublish = has(caps, 'landing.publish');
     const methods = availableMethods(data.payments);
-    const checks = [
+    const checks = p.site ? [
+        { ok: !draftDirty, text: draftDirty ? 'You have unsaved changes in the draft.' : 'Draft saved.', fix: draftDirty ? 'Save draft' : null },
+        { ok: !!p.site_route, text: p.siteLabel ? `Replaces ${p.siteOriginal} at ${p.publicUrl}.` : 'Choose the site page it replaces.', step: 'basics' },
+        { ok: !!(data.config.seo && data.config.seo.description), text: 'Has a search description.', warn: true, step: 'seo' },
+    ] : [
         { ok: !draftDirty, text: draftDirty ? 'You have unsaved changes in the draft.' : 'Draft saved.', fix: draftDirty ? 'Save draft' : null },
         { ok: methods.length > 0 || (data.quote && data.quote.totalLabel === 'Free'), text: methods.length ? `Buyers can pay with: ${methods.map((m) => m.label).join(', ')}.` : 'No payment method is available: buyers could not pay.', step: 'payments' },
         { ok: data.course && data.course.title, text: data.course && data.course.title ? `Sells "${data.course.title}".` : 'The course is missing.' },
@@ -576,7 +632,7 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
     ];
     const blocked = checks.some((c) => !c.ok && !c.warn);
     const act = async (action, body = {}) => {
-        if (action === 'unpublish' && !(await confirm({ title: 'Unpublish this page?', body: data.page.takesOverCourse ? 'The regular course page comes back at this address.' : 'The address stops working until you publish again.', confirmLabel: 'Unpublish' }))) return;
+        if (action === 'unpublish' && !(await confirm({ title: 'Unpublish this page?', body: data.page.site ? `The original page comes back at ${data.page.publicUrl}.` : data.page.takesOverCourse ? 'The regular course page comes back at this address.' : 'The address stops working until you publish again.', confirmLabel: 'Unpublish' }))) return;
         if (action === 'archive' && !(await confirm({ title: 'Archive this page?', body: 'It disappears from the lists and its address stops working. Orders and analytics are kept.', confirmLabel: 'Archive' }))) return;
         setBusy(action);
         setErrors({});
@@ -744,9 +800,10 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
     if (!data || !cfg) return <Card><p className="adm-muted">Loading…</p></Card>;   // React 17 doesn't batch updates in promises
     const p = data.page;
     const st = STATUS[p.status] || STATUS.DRAFT;
-    const current = STEPS.find((s) => s.key === step) || STEPS[2];
+    const steps = stepsFor(!!p.site);
+    const current = steps.find((s) => s.key === step) || steps[2];
     const canEdit = has(caps, current.cap);
-    const isDraftStep = DRAFT_STEPS.includes(step);
+    const isDraftStep = DRAFT_STEPS.includes(current.key);
     const errorCount = Object.keys(errors).length;
     const merge = (patch) => setData((d) => ({ ...d, ...patch }));
 
@@ -760,8 +817,8 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
                         <Badge tone={st.tone} dot>{st.label}</Badge>
                         {data.hasUnpublishedChanges && p.status === 'PUBLISHED' && <Badge tone="amber">Unpublished changes</Badge>}
                         {p.status === 'SCHEDULED' && p.publish_at && <span>Goes live {fmtDate(p.publish_at, true)}</span>}
-                        <span>/course/{p.slug}</span>
-                        <span>{p.course_title}</span>
+                        <span>{p.publicUrl}</span>
+                        <span>{p.site ? `Site page: ${p.siteLabel || p.site_route}` : p.course_title}</span>
                     </p>
                 </div>
                 <div className="lpa-ehead__actions">
@@ -774,7 +831,7 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
             <div className="lpa-ebody">
                 <nav className="lpa-steps" aria-label="Steps">
                     <ol>
-                        {STEPS.map((s) => (
+                        {steps.map((s) => (
                             <li key={s.key}>
                                 <a href={`/admin/landing/pages/${p.id}/${s.key}`} className={cx(step === s.key && 'is-on', !has(caps, s.cap) && 'is-locked')} aria-current={step === s.key ? 'step' : undefined}
                                    onClick={(e) => { e.preventDefault(); go(s.key); }} data-step={s.key}>
@@ -786,7 +843,7 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
                             </li>
                         ))}
                     </ol>
-                    <p className="lpa-steps__note"><i className="fa fa-info-circle" aria-hidden="true"></i> Steps 3, 4 and 8 change the draft (live after publishing). Pricing, payments and checkout save straight to the page.</p>
+                    <p className="lpa-steps__note"><i className="fa fa-info-circle" aria-hidden="true"></i> {p.site ? 'Sections, design and SEO change the draft (live after publishing).' : 'Steps 3, 4 and 8 change the draft (live after publishing). Pricing, payments and checkout save straight to the page.'}</p>
                 </nav>
                 <div className="lpa-estep">
                     <div className="lpa-estep__head">
@@ -796,26 +853,26 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
                     {errorCount > 0 && isDraftStep && (
                         <div className="lpa-note is-bad" role="alert">The draft wasn't saved: {errorCount === 1 ? 'one field needs' : `${errorCount} fields need`} a fix ({Object.values(errors)[0]}).</div>
                     )}
-                    {step === 'basics' && <Basics key={p.updated_at} data={data} lookups={lookups} canEdit={canEdit} onSaved={take} toast={toast} />}
-                    {step === 'template' && <Template data={data} catalog={catalog} canEdit={canEdit} onSaved={take} toast={toast} draftDirty={draftDirty} />}
-                    {step === 'sections' && <Sections cfg={cfg} setCfg={setCfg} catalog={catalog} lookups={lookups} errors={errors} canEdit={canEdit} toast={toast} />}
-                    {step === 'design' && <Design cfg={cfg} setCfg={setCfg} errors={errors} canEdit={canEdit} />}
-                    {step === 'pricing' && <Pricing data={data} canEdit={canEdit} onSaved={merge} toast={toast} />}
-                    {step === 'payments' && (
+                    {current.key === 'basics' && <Basics key={p.updated_at} data={data} lookups={lookups} canEdit={canEdit} onSaved={take} toast={toast} />}
+                    {current.key === 'template' && <Template data={data} catalog={catalog} canEdit={canEdit} onSaved={take} toast={toast} draftDirty={draftDirty} />}
+                    {current.key === 'sections' && <Sections cfg={cfg} setCfg={setCfg} catalog={catalog} lookups={{ ...lookups, site: !!p.site }} errors={errors} canEdit={canEdit} toast={toast} site={!!p.site} />}
+                    {current.key === 'design' && <Design cfg={cfg} setCfg={setCfg} errors={errors} canEdit={canEdit} />}
+                    {current.key === 'pricing' && <Pricing data={data} canEdit={canEdit} onSaved={merge} toast={toast} />}
+                    {current.key === 'payments' && (
                         <Card title="Payment settings for this page" subtitle="Use the global defaults, or choose exactly which providers and methods buyers see on this page. Another page is never affected.">
                             <PaymentSettings value={data.payments} toast={toast} canEdit={canEdit}
                                              onSave={(body) => axios.put(`/admin/api/landing/pages/${p.id}/payments`, body).then((r) => { toast(r.data.message); merge({ payments: r.data.payments }); return r.data.payments; })} />
                         </Card>
                     )}
-                    {step === 'checkout' && <Checkout data={data} canEdit={canEdit} onSaved={merge} toast={toast} />}
-                    {step === 'seo' && <Seo cfg={cfg} setCfg={setCfg} data={data} errors={errors} canEdit={canEdit} />}
-                    {step === 'publish' && <Publish data={data} caps={caps} draftDirty={draftDirty} saveDraft={() => saveDraft()} onSaved={take} toast={toast} />}
+                    {current.key === 'checkout' && <Checkout data={data} canEdit={canEdit} onSaved={merge} toast={toast} />}
+                    {current.key === 'seo' && <Seo cfg={cfg} setCfg={setCfg} data={data} errors={errors} canEdit={canEdit} />}
+                    {current.key === 'publish' && <Publish data={data} caps={caps} draftDirty={draftDirty} saveDraft={() => saveDraft()} onSaved={take} toast={toast} />}
                     <div className="lpa-stepnav">
-                        {current.n > 1 && <Button icon="fa-arrow-left" onClick={() => go(STEPS[current.n - 2].key)}>{STEPS[current.n - 2].label}</Button>}
+                        {current.n > 1 && <Button icon="fa-arrow-left" onClick={() => go(steps[current.n - 2].key)}>{steps[current.n - 2].label}</Button>}
                         <span />
                         {isDraftStep && has(caps, 'landing.content') && draftDirty && <Button variant="brand" icon="fa-floppy-o" onClick={() => saveDraft()} busy={saving}>Save draft</Button>}
-                        {current.n < STEPS.length && <Button variant={isDraftStep && draftDirty ? 'line' : 'dark'} onClick={() => go(STEPS[current.n].key)} data-testid="lp-next">
-                            Next: {STEPS[current.n].label} <i className="fa fa-arrow-right" aria-hidden="true"></i></Button>}
+                        {current.n < steps.length && <Button variant={isDraftStep && draftDirty ? 'line' : 'dark'} onClick={() => go(steps[current.n].key)} data-testid="lp-next">
+                            Next: {steps[current.n].label} <i className="fa fa-arrow-right" aria-hidden="true"></i></Button>}
                     </div>
                 </div>
             </div>

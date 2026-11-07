@@ -214,7 +214,7 @@ export function MediaPicker({ open, onClose, onPick, toast }) {
     );
 }
 
-export function ImageField({ label, value, onChange, hint, error, toast, name }) {
+export function ImageField({ label, value, onChange, hint, error, toast, name, clearLabel = 'Use the course image' }) {
     const [open, setOpen] = useState(false);
     return (
         <Field label={label} name={name} hint={hint} error={error}>
@@ -222,7 +222,7 @@ export function ImageField({ label, value, onChange, hint, error, toast, name })
                 {value ? <img src={value} alt="" /> : <span className="lpa-imgfield__empty"><i className="fa fa-picture-o" aria-hidden="true"></i></span>}
                 <div className="lpa-imgfield__actions">
                     <Button size="sm" icon="fa-picture-o" onClick={() => setOpen(true)}>{value ? 'Change' : 'Choose'}</Button>
-                    {value && <Button size="sm" variant="ghost" onClick={() => onChange('')}>Use the course image</Button>}
+                    {value && <Button size="sm" variant="ghost" onClick={() => onChange('')}>{clearLabel}</Button>}
                 </div>
             </div>
             <MediaPicker open={open} onClose={() => setOpen(false)} onPick={onChange} toast={toast} />
@@ -233,6 +233,7 @@ export function ImageField({ label, value, onChange, hint, error, toast, name })
 /* -------------------------------------------------------------------------------------- section content */
 
 const TEXT_FIELDS = {
+    kicker: { label: 'Small label above the heading', max: 60, hint: 'Leave empty for the usual label.' },
     eyebrow: { label: 'Small label above the title', max: 60 },
     heading: { label: 'Heading', max: 120 },
     subheading: { label: 'Tagline', max: 200 },
@@ -249,6 +250,14 @@ const ITEM_HELP = {
     gallery: { label: 'Artworks', title: 'Caption', text: 'Story', image: true, hint: 'Leave empty to show the course photos and approved student work.' },
     benefits: { label: 'Benefits', title: 'Benefit', text: 'Detail', hint: 'Leave empty to build them from the course.' },
     faq: { label: 'Questions', title: 'Question', text: 'Answer', hint: 'Leave empty to show the site FAQ.' },
+    cards: { label: 'Cards', title: 'Title', text: 'Text', image: true, link: true, hint: 'Only what the platform really does. A link is optional (a site address like /marketplace, or #section-id).' },
+    steps: { label: 'Steps', title: 'Step', text: 'What happens', link: true, hint: 'In order. A link is optional.' },
+    final_cta: { label: 'Buttons', title: 'Button label', noText: true, link: true, noLinkLabel: true, hint: 'Empty: one main button (Enroll with the price on course pages). Each button needs a label and an address.' },
+};
+const SOURCES = {
+    gallery: [{ value: 'course', label: 'The artworks below, else course photos and approved student work' }, { value: 'marketplace', label: 'The artworks below, else marketplace artworks' }],
+    cards: [{ value: 'custom', label: 'The cards below' }, { value: 'course_for', label: 'The course\'s "Who it\'s for" list' }, { value: 'course_learn', label: 'The course\'s "What you\'ll learn" list' },
+        { value: 'course_deliverables', label: 'The course\'s "What you finish with" list' }],
 };
 
 export function SectionContent({ section, onChange, lookups, toast, errors = {}, prefix }) {
@@ -259,7 +268,7 @@ export function SectionContent({ section, onChange, lookups, toast, errors = {},
     const help = ITEM_HELP[section.type];
     return (
         <div className="lpa-content">
-            {Object.keys(TEXT_FIELDS).filter((k) => k in c).map((k) => (
+            {Object.keys(TEXT_FIELDS).filter((k) => k in c && !(lookups.site && k === 'language')).map((k) => (
                 <Field key={k} label={TEXT_FIELDS[k].label} name={`${section.id}-${k}`} hint={TEXT_FIELDS[k].hint || (k === 'heading' && section.type === 'hero' ? 'Leave empty to use the course title.' : undefined)}
                        error={err(k)} max={TEXT_FIELDS[k].max} counter={String(c[k] || '').length}>
                     {TEXT_FIELDS[k].rows
@@ -267,15 +276,57 @@ export function SectionContent({ section, onChange, lookups, toast, errors = {},
                         : <input id={`f-${section.id}-${k}`} className="adm-input" value={c[k] || ''} onChange={(e) => set(k, e.target.value)} />}
                 </Field>
             ))}
-            {'image' in c && <ImageField label="Image" value={c.image} onChange={(u) => set('image', u)} toast={toast} error={err('image')} name={`${section.id}-image`}
-                                         hint="Leave empty to use the course image." />}
+            {'image' in c && <ImageField label="Image" clearLabel={lookups.site ? 'Remove' : undefined} value={c.image} onChange={(u) => set('image', u)} toast={toast} error={err('image')} name={`${section.id}-image`}
+                                         hint={lookups.site ? 'Leave empty for no image (or, in the hero collage, the first collage artwork).' : 'Leave empty to use the course image.'} />}
+            {'images' in c && section.layout === 'collage' && (
+                <Field label="Collage artworks" name={`${section.id}-images`} hint="Up to four artworks hung like a small gallery wall. The first is the largest.">
+                    <div className="adm-grid2">
+                        {[0, 1, 2, 3].map((i) => (
+                            <ImageField key={i} clearLabel="Remove" label={`Artwork ${i + 1}`} value={(c.images || [])[i] || ''} toast={toast} name={`${section.id}-img-${i}`} error={err(`images.${i}`)}
+                                        onChange={(u) => { const l = [...(c.images || [])]; l[i] = u; set('images', l.filter(Boolean)); }} />
+                        ))}
+                    </div>
+                </Field>
+            )}
             {'beforeImage' in c && (
                 <div className="adm-grid2">
                     <ImageField label="Before (optional)" value={c.beforeImage} onChange={(u) => set('beforeImage', u)} toast={toast} name={`${section.id}-before`} hint="With an After image, shows a slider." />
                     <ImageField label="After (optional)" value={c.afterImage} onChange={(u) => set('afterImage', u)} toast={toast} name={`${section.id}-after`} />
                 </div>
             )}
-            {'source' in c && (
+            {'source' in c && SOURCES[section.type] && (
+                <Field label="Content" name={`${section.id}-source`}>
+                    <select className="adm-input" value={c.source} onChange={(e) => set('source', e.target.value)} id={`f-${section.id}-source`}>
+                        {SOURCES[section.type].map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                </Field>
+            )}
+            {'limit' in c && (
+                <Field label="How many" name={`${section.id}-limit`} hint="1 to 12.">
+                    <input id={`f-${section.id}-limit`} type="number" min={1} max={12} className="adm-input" value={c.limit || 6} onChange={(e) => set('limit', Number(e.target.value))} />
+                </Field>
+            )}
+            {'ids' in c && section.type === 'courses' && (
+                <Field label="Courses" name={`${section.id}-ids`} hint="None ticked = the published courses and workshops, in catalogue order. Each links to its own (landing) page.">
+                    <div className="lpa-checks">
+                        {(lookups.courses || []).filter((x) => String(x.status) === '1').map((x) => (
+                            <label key={x.id}><input type="checkbox" checked={(c.ids || []).includes(x.id)}
+                                                     onChange={(e) => set('ids', e.target.checked ? [...(c.ids || []), x.id] : (c.ids || []).filter((y) => y !== x.id))} /> {x.title}</label>
+                        ))}
+                    </div>
+                </Field>
+            )}
+            {'ids' in c && section.type === 'artists' && (
+                <Field label="Artists" name={`${section.id}-ids`} hint="None ticked = every instructor, most courses first. Each card links to the artist's profile.">
+                    <div className="lpa-checks">
+                        {(lookups.artists || []).map((a) => (
+                            <label key={a.id}><input type="checkbox" checked={(c.ids || []).includes(a.id)}
+                                                     onChange={(e) => set('ids', e.target.checked ? [...(c.ids || []), a.id] : (c.ids || []).filter((x) => x !== a.id))} /> {a.name}</label>
+                        ))}
+                    </div>
+                </Field>
+            )}
+            {'source' in c && !SOURCES[section.type] && (
                 <Field label="Which reviews" name={`${section.id}-source`} hint="Only approved course reviews and approved testimonials are ever shown.">
                     <select className="adm-input" value={c.source} onChange={(e) => set('source', e.target.value)} id={`f-${section.id}-source`}>
                         <option value="reviews">Approved reviews of this course</option>
@@ -326,10 +377,15 @@ export function SectionContent({ section, onChange, lookups, toast, errors = {},
                                            onChange={(e) => set('items', items.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
                                     {!help.noText && <textarea className="adm-input" rows={2} placeholder={help.text} value={it.text || ''} aria-label={`${help.text} ${i + 1}`}
                                                                onChange={(e) => set('items', items.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} />}
-                                    {help.image && <ImageField label="Image" value={it.image || ''} toast={toast} name={`${section.id}-item-${i}`} error={err(`items.${i}.image`)}
+                                    {help.image && <ImageField label="Image" clearLabel="Remove" value={it.image || ''} toast={toast} name={`${section.id}-item-${i}`} error={err(`items.${i}.image`)}
                                                                onChange={(u) => set('items', items.map((x, j) => (j === i ? { ...x, image: u } : x)))} />}
                                     {help.image && it.image && <input className="adm-input" placeholder="Describe the artwork (alt text)" value={it.alt || ''} aria-label={`Alt text ${i + 1}`}
                                                                       onChange={(e) => set('items', items.map((x, j) => (j === i ? { ...x, alt: e.target.value } : x)))} />}
+                                    {help.link && <input className="adm-input" placeholder="Link (optional): /marketplace or #section-id" value={it.link || ''} aria-label={`Link ${i + 1}`}
+                                                         onChange={(e) => set('items', items.map((x, j) => (j === i ? { ...x, link: e.target.value } : x)))} />}
+                                    {help.link && !help.noLinkLabel && it.link && <input className="adm-input" placeholder="Link text, e.g. Browse courses" value={it.linkLabel || ''} aria-label={`Link text ${i + 1}`}
+                                                                                       onChange={(e) => set('items', items.map((x, j) => (j === i ? { ...x, linkLabel: e.target.value } : x)))} />}
+                                    {err(`items.${i}.link`) && <p className="adm-field__error">{err(`items.${i}.link`)}</p>}
                                 </div>
                                 <div className="lpa-item__actions">
                                     <button type="button" className="adm-iconbtn" disabled={i === 0} aria-label="Move up" onClick={() => { const n = [...items]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; set('items', n); }}><i className="fa fa-arrow-up" aria-hidden="true"></i></button>
@@ -343,6 +399,10 @@ export function SectionContent({ section, onChange, lookups, toast, errors = {},
                 </Field>
             )}
             {['curriculum', 'related'].includes(section.type) && <p className="adm-muted adm-small">{section.type === 'curriculum' ? 'Modules and lessons come from the course (Admin › Courses), so they are always up to date.' : 'Other published courses, in the same medium first.'}</p>}
+            {section.type === 'courses' && <p className="adm-muted adm-small">Titles, pictures, levels and artists come from Admin › Courses, so the list is always current.</p>}
+            {section.type === 'artists' && <p className="adm-muted adm-small">Names, photos and bios come from Admin › Instructors.</p>}
+            {section.type === 'commission_form' && <p className="adm-muted adm-small">The four styles of the commission wizard, its progress bar and the Next button. The choice is handed to step 2 exactly as the original step 1 does; steps 2-4, preview, upload and checkout are unchanged.</p>}
+            {section.type === 'commission_pricing' && <p className="adm-muted adm-small">Starting prices are calculated from the commission price list (CommissionPricing) every time the page is shown; they can't be typed in.</p>}
             {section.type === 'pricing' && <p className="adm-muted adm-small">Price, offers, inclusions, access and refund policy are set in the Pricing step. Payment options come from the Payments step.</p>}
         </div>
     );
