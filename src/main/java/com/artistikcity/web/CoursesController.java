@@ -29,8 +29,6 @@ public class CoursesController {
     private final com.artistikcity.http.Auth auth;
     private final com.artistikcity.web.user.WishlistService wishlist;
     @org.springframework.beans.factory.annotation.Autowired
-    private com.artistikcity.landing.LandingPublic landing;
-    @org.springframework.beans.factory.annotation.Autowired
     private com.artistikcity.seats.SeatService seatService;
 
     public CoursesController(Inertia inertia, Db db, CourseService courses, com.artistikcity.http.Auth auth,
@@ -78,11 +76,6 @@ public class CoursesController {
 
     @GetMapping("/course/{slug}")
     public ResponseEntity<String> courseDetails(HttpServletRequest request, @PathVariable("slug") String slug) {
-        // a published landing page (Admin > Landing Page Management) takes over this address; unpublishing it brings this page back
-        com.artistikcity.support.Row lp = landing == null ? null : landing.published(slug);
-        if (lp != null) {
-            return landing.render(request, lp);
-        }
         Row course = NotFoundException.orFail(db.first("select * from courses where slug = ?", slug));
         courses.withRelations(course, false);
         courses.withStats(new ArrayList<>(List.of(course)));

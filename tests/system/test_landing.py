@@ -4,7 +4,7 @@
 Covers
 * permissions: guests, students, instructors (own courses only), moderators, per-person grants (Team access) and who may grant;
 * pages: create (address rules), draft validation and cleaning, two editors saving at once, preview vs public, publish,
-  versions and rollback, unpublish (the course page comes back), schedule + the publishing job, duplicate, archive, delete;
+  own /landing/{slug} addresses (generated, unique; never replacing a site page), versions and rollback, unpublish, schedule + the publishing job, duplicate, archive, delete;
 * pricing per page: validation, offers with a real end date that end by themselves, one quote for page, checkout and gateway;
 * payments per page: custom vs global defaults, only supported / connected providers and methods, checkout shows only what
   the page allows, a method the page doesn't allow is refused, no publishing when nobody could pay, secrets never sent;
@@ -89,8 +89,12 @@ check('grant removed', sql("select coalesce(extra_capabilities, '-') from admins
 sql("delete from landing_pages where slug like 'lp-test-%'")
 r = post(adm, '/admin/api/landing/pages', {'name': 'x', 'courseId': 1, 'slug': 'watercolour-landscapes-for-beginners', 'template': 'artist-showcase'})
 check('address already used by a landing page refused', r.status_code == 422 and 'slug' in r.json()['errors'], r.text)
-r = post(adm, '/admin/api/landing/pages', {'name': 'x', 'courseId': 1, 'slug': 'pencil-sketching-essentials', 'template': 'artist-showcase'})
-check("another course's address refused", r.status_code == 422 and 'slug' in r.json()['errors'], r.text)
+r = post(adm, '/admin/api/landing/pages', {'name': 'Pencil Sketching Essentials', 'courseId': 3, 'template': 'artist-showcase'})
+check("no address typed: generated from the name, under /landing/", r.status_code == 200 and r.json().get('slug') == 'pencil-sketching-essentials', r.text)
+gen = r.json().get('id')
+r = post(adm, '/admin/api/landing/pages', {'name': 'Pencil Sketching Essentials', 'courseId': 3, 'template': 'artist-showcase'})
+check("same name again: the generated address is made unique", r.status_code == 200 and r.json().get('slug') == 'pencil-sketching-essentials-2', r.text)
+for x in (gen, r.json().get('id')): adm.delete(B + f'/admin/api/landing/pages/{x}', headers=H(adm))
 r = post(adm, '/admin/api/landing/pages', {'name': 'x', 'courseId': 1, 'slug': 'enroll', 'template': 'artist-showcase'})
 check('reserved address refused', r.status_code == 422 and 'slug' in r.json()['errors'], r.text)
 r = post(adm, '/admin/api/landing/pages', {'name': '', 'courseId': '', 'slug': 'Bad Slug!', 'template': 'nope'})
@@ -104,8 +108,8 @@ d = get(adm, f'/admin/api/landing/pages/{P}').json()
 cfg = d['config']
 check('new page: hero first, template sections, design and SEO defaults', cfg['sections'][0]['type'] == 'hero' and len(cfg['sections']) >= 8 and cfg['design']['accent'] == '#2F6B4F'
       and cfg['seo']['index'] is True, [s['type'] for s in cfg['sections']])
-check('campaign page has its own address (course page untouched)', d['page']['takesOverCourse'] is False and d['page']['status'] == 'DRAFT')
-check('draft is not public', requests.get(B + '/course/lp-test-diwali').status_code == 404)
+check('the page has its own address, shown in the editor', d['page']['publicUrl'] == '/landing/lp-test-diwali' and d['page']['fullUrl'].endswith('/landing/lp-test-diwali') and d['page']['status'] == 'DRAFT')
+check('draft is not public', requests.get(B + '/landing/lp-test-diwali').status_code == 404)
 check('admin preview renders the draft', is_landing(adm.get(B + f'/admin/landing/preview/{P}')))
 
 bad = json.loads(json.dumps(cfg))
@@ -167,33 +171,33 @@ check('payments overview: no secret ever sent', ov.status_code == 200 and 'test-
 # ============================================================================================ publish lifecycle
 r = post(adm, f'/admin/api/landing/pages/{P}/publish', {'note': 'Launch'})
 check('published', r.status_code == 200 and r.json()['data']['page']['status'] == 'PUBLISHED', r.text[:300])
-pub = requests.get(B + '/course/lp-test-diwali')
+pub = requests.get(B + '/landing/lp-test-diwali')
 check('public page live with the draft heading', is_landing(pub) and 'Paint your Diwali lights' in pub.text)
 check('version 1 kept with its note', sql(f"select concat(version_no, ':', note) from landing_page_versions where landing_page_id = {P}") == '1:Launch')
-check('sitemap lists the campaign page', '/course/lp-test-diwali<' in requests.get(B + '/sitemap.xml').text)
+check('sitemap lists the campaign page', '/landing/lp-test-diwali<' in requests.get(B + '/sitemap.xml').text)
 
 g2 = get(adm, f'/admin/api/landing/pages/{P}').json()
 c2 = g2['config']; c2['sections'][0]['content']['heading'] = 'Second headline'
 r = put(adm, f'/admin/api/landing/pages/{P}/draft', {'config': c2, 'savedAt': g2['page']['draft_saved_at']})
-check('editing the draft does not change the live page', r.status_code == 200 and r.json()['hasUnpublishedChanges'] and 'Paint your Diwali lights' in requests.get(B + '/course/lp-test-diwali').text)
+check('editing the draft does not change the live page', r.status_code == 200 and r.json()['hasUnpublishedChanges'] and 'Paint your Diwali lights' in requests.get(B + '/landing/lp-test-diwali').text)
 post(adm, f'/admin/api/landing/pages/{P}/publish')
-check('publishing again makes v2 live', 'Second headline' in requests.get(B + '/course/lp-test-diwali').text)
+check('publishing again makes v2 live', 'Second headline' in requests.get(B + '/landing/lp-test-diwali').text)
 v1 = sql(f"select id from landing_page_versions where landing_page_id = {P} and version_no = 1")
 r = post(adm, f'/admin/api/landing/pages/{P}/versions/{v1}/restore')
-check('roll back to v1 = published as v3', r.status_code == 200 and 'Paint your Diwali lights' in requests.get(B + '/course/lp-test-diwali').text
+check('roll back to v1 = published as v3', r.status_code == 200 and 'Paint your Diwali lights' in requests.get(B + '/landing/lp-test-diwali').text
       and sql(f"select max(version_no) from landing_page_versions where landing_page_id = {P}") == '3')
 check('admin can preview any version', 'Second headline' in adm.get(B + f'/admin/landing/preview/{P}?version=' + sql(f"select id from landing_page_versions where landing_page_id = {P} and version_no = 2")).text)
 
 g3 = get(adm, f'/admin/api/landing/pages/{P}').json(); c3 = g3['config']; c3['seo']['index'] = False
 put(adm, f'/admin/api/landing/pages/{P}/draft', {'config': c3, 'savedAt': g3['page']['draft_saved_at']}); post(adm, f'/admin/api/landing/pages/{P}/publish')
-pub = requests.get(B + '/course/lp-test-diwali')
-check('"hide from search": noindex and out of the sitemap', 'noindex' in pub.text and '/course/lp-test-diwali<' not in requests.get(B + '/sitemap.xml').text)
+pub = requests.get(B + '/landing/lp-test-diwali')
+check('"hide from search": noindex and out of the sitemap', 'noindex' in pub.text and '/landing/lp-test-diwali<' not in requests.get(B + '/sitemap.xml').text)
 
 # optional lead capture: off by default; on = the newsletter box with consent, tagged with the page
 check('lead box only when switched on', 'id="lp-lead"' not in pub.text)
 g4 = get(adm, f'/admin/api/landing/pages/{P}').json(); c4 = g4['config']; c4['marketing']['leadCapture'] = True; c4['seo']['index'] = True
 put(adm, f'/admin/api/landing/pages/{P}/draft', {'config': c4, 'savedAt': g4['page']['draft_saved_at']}); post(adm, f'/admin/api/landing/pages/{P}/publish')
-v0 = requests.Session(); pub = v0.get(B + '/course/lp-test-diwali')
+v0 = requests.Session(); pub = v0.get(B + '/landing/lp-test-diwali')
 check('lead box shown with a consent tick', 'id="lp-lead"' in pub.text and 'name="consent"' in pub.text)
 tok = re.search(r'name="csrf-token" content="([^"]+)"', pub.text)
 r = v0.post(B + '/api/newsletter', json={'email': 'lead.test@example.com', 'source': f'landing:{P}'},
@@ -202,13 +206,16 @@ check('sign-up stored, tagged with the page', r.status_code == 200 and sql("sele
 r = v0.post(B + '/api/newsletter', json={'email': 'lead.other@example.com', 'source': "landing:1' or 1=1"}, headers={'X-CSRF-TOKEN': tok.group(1) if tok else '', 'Accept': 'application/json', 'X-XSRF-TOKEN': xsrf(v0)})
 check('a made-up source falls back to "footer"', sql("select source from newsletters where email = 'lead.other@example.com'") == 'footer')
 
-# page 1 replaces the course page; unpublishing brings the course page back
-check('page 1 replaces /course/watercolour-landscapes-for-beginners', is_landing(requests.get(B + '/course/watercolour-landscapes-for-beginners')))
-post(adm, '/admin/api/landing/pages/1/unpublish')
+# landing pages never replace the site's pages: page 1 lives at /landing/<slug>, the course page stays as it is
+check('page 1 is at /landing/watercolour-landscapes-for-beginners', is_landing(requests.get(B + '/landing/watercolour-landscapes-for-beginners')))
 comp, _, _ = inertia(requests.Session(), '/course/watercolour-landscapes-for-beginners')
-check('unpublished: the regular course page is back', comp == 'CourseDetails', comp)
+check('the regular course page is untouched', comp == 'CourseDetails', comp)
+post(adm, '/admin/api/landing/pages/1/unpublish')
+check('unpublished: its address is a 404', requests.get(B + '/landing/watercolour-landscapes-for-beginners').status_code == 404)
 post(adm, '/admin/api/landing/pages/1/publish', {'note': 'Back'})
-check('published again', is_landing(requests.get(B + '/course/watercolour-landscapes-for-beginners')))
+check('published again', is_landing(requests.get(B + '/landing/watercolour-landscapes-for-beginners')))
+r = requests.get(B + '/course/watercolour-landscapes-for-beginners/enroll', allow_redirects=False)
+check('old checkout links go to the landing checkout', r.status_code in (301, 302) and r.headers.get('Location', '').endswith('/landing/watercolour-landscapes-for-beginners/enroll'), r.headers.get('Location'))
 
 # duplicate, archive, restore, delete
 r = post(adm, f'/admin/api/landing/pages/{P}/duplicate')
@@ -227,7 +234,7 @@ check('the publishing job puts a due page live (with a version)', sql(f"select s
       and sql(f"select count(*) from landing_page_versions where landing_page_id = {D}") == '1')
 check("a live page can't be deleted", delete(adm, f'/admin/api/landing/pages/{D}').status_code == 409)
 post(adm, f'/admin/api/landing/pages/{D}/unpublish'); post(adm, f'/admin/api/landing/pages/{D}/archive')
-check('archived: off the site', sql(f"select status from landing_pages where id = {D}") == 'ARCHIVED' and requests.get(B + '/course/' + dd['page']['slug']).status_code == 404)
+check('archived: off the site', sql(f"select status from landing_pages where id = {D}") == 'ARCHIVED' and requests.get(B + '/landing/' + dd['page']['slug']).status_code == 404)
 check('archived page must be restored before publishing', post(adm, f'/admin/api/landing/pages/{D}/publish').status_code == 409)
 post(adm, f'/admin/api/landing/pages/{D}/restore')
 check('a page nobody bought through can be deleted', delete(adm, f'/admin/api/landing/pages/{D}').status_code == 200 and sql(f"select count(*) from landing_pages where id = {D}") == '0')
@@ -242,18 +249,18 @@ r = put(adm, f'/admin/api/landing/pages/{P}/pricing', {'price': 3500, 'listPrice
         'taxMode': 'INCLUDED', 'taxRate': 18, 'taxLabel': 'GST', 'couponsEnabled': True, 'inclusions': ['Eight live classes', 'Recordings']})
 q = r.json().get('quote', {})
 check('pricing saved: the offer is what buyers see', r.status_code == 200 and q.get('totalLabel') == '₹2,999' and q.get('listLabel') == '₹4,999' and q.get('offerEndsLabel'), r.text[:300])
-pub = requests.get(B + '/course/lp-test-diwali')
+pub = requests.get(B + '/landing/lp-test-diwali')
 check('public page shows the offer price and its real end', '₹2,999' in pub.text and 'Diwali offer' in pub.text)
-check('page 1 keeps its own price', '₹3,999' in requests.get(B + '/course/watercolour-landscapes-for-beginners').text)
+check('page 1 keeps its own price', '₹3,999' in requests.get(B + '/landing/watercolour-landscapes-for-beginners').text)
 check('pricing change audited', sql(f"select count(*) from admin_audit where entity = 'landing_page' and entity_id = {P} and details = 'Pricing'") != '0')
 
 # ================================================================================================= checkout
 diya = student('diya@example.com')
-diya.get(B + '/course/lp-test-diwali?utm_source=newsletter&utm_campaign=diwali')   # visitor cookie + attribution
-comp, props, _ = inertia(diya, '/course/lp-test-diwali/enroll')
+diya.get(B + '/landing/lp-test-diwali?utm_source=newsletter&utm_campaign=diwali')   # visitor cookie + attribution
+comp, props, _ = inertia(diya, '/landing/lp-test-diwali/enroll')
 check('checkout page: only the methods this page allows', comp == 'Landing/Checkout' and [c['key'] for c in props.get('choices', [])] == ['upi'], [c.get('key') for c in props.get('choices', [])])
 check('checkout uses the page price', props.get('quote', {}).get('totalLabel') == '₹2,999')
-comp1, props1, _ = inertia(diya, '/course/watercolour-landscapes-for-beginners/enroll')
+comp1, props1, _ = inertia(diya, '/landing/watercolour-landscapes-for-beginners/enroll')
 check('page 1 checkout offers its own methods', [c['key'] for c in props1.get('choices', [])] == ['upi', 'card', 'netbanking', 'paypal'], [c.get('key') for c in props1.get('choices', [])])
 check('guest: checkout API needs sign-in', requests.post(B + f'/landing/checkout/{P}/order', json={}).status_code in (401, 419))
 
@@ -293,7 +300,7 @@ comp_c, _, _ = inertia(diya, f'/user/course/{oid}')
 check('the buyer can open the course', comp_c == 'Course/Overview', comp_c)
 check('coupon redeemed once', sql("select used_count from landing_coupons where code = 'LPTDIWALI'") == '1' and sql(f"select count(*) from landing_coupon_redemptions where order_id = {oid}") == '1')
 check('purchase in the funnel', sql(f"select count(*) from landing_events where landing_page_id = {P} and event = 'PURCHASE' and order_id = {oid}") == '1')
-_, done, _ = inertia(diya, f'/course/lp-test-diwali/enroll/done?order_id={oid}')
+_, done, _ = inertia(diya, f'/landing/lp-test-diwali/enroll/done?order_id={oid}')
 check('confirmation screen says paid', (done.get('result') or {}).get('state') in ('paid', 'success'), done.get('result'))
 check('already enrolled: a new order is refused', post(diya, f'/landing/checkout/{P}/order', {'name': 'Diya', 'phone': '9876543210', 'terms': True}).status_code == 409)
 check('...also on page 1 (same course)', post(diya, '/landing/checkout/1/order', {'name': 'Diya', 'phone': '9876543210', 'terms': True}).status_code == 409)
@@ -319,7 +326,7 @@ check('trying again reopens the same order', r.status_code == 200 and r.json()['
 sql(f"update landing_pricing set promo_ends_at = '2000-01-02 00:00:00', promo_starts_at = '2000-01-01 00:00:00' where landing_page_id = {P}")
 r = post(ishita, f'/landing/checkout/{P}/pay', {'orderId': o2, 'method': 'upi'})
 check('the offer ended: the pay step re-prices (409) instead of charging the old price', r.status_code == 409 and r.json().get('repriced') and float(sql(f"select price from orders where id = {o2}")) == 3500, r.text)
-check('...and the page shows the regular price by itself', '₹3,500' in requests.get(B + '/course/lp-test-diwali').text and '2,999' not in requests.get(B + '/course/lp-test-diwali').text)
+check('...and the page shows the regular price by itself', '₹3,500' in requests.get(B + '/landing/lp-test-diwali').text and '2,999' not in requests.get(B + '/landing/lp-test-diwali').text)
 
 # =============================================================================================== webhook
 r = post(ishita, f'/landing/checkout/{P}/pay', {'orderId': o2, 'method': 'upi'})
@@ -354,7 +361,7 @@ check("a page people bought through can't be deleted", post(adm, f'/admin/api/la
 post(adm, f'/admin/api/landing/pages/{P}/publish')
 
 # ================================================================================================ analytics
-v = requests.Session(); v.get(B + '/course/lp-test-diwali')
+v = requests.Session(); v.get(B + '/landing/lp-test-diwali')
 before = int(sql(f"select count(*) from landing_events where landing_page_id = {P} and event = 'CTA'"))
 r = v.post(B + '/landing/e', json={'event': 'CTA', 'page': P}, headers=H(v))
 check('CTA click recorded (204, no personal data)', r.status_code == 204 and int(sql(f"select count(*) from landing_events where landing_page_id = {P} and event = 'CTA'")) == before + 1)

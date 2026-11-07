@@ -48,7 +48,7 @@ public final class LandingCatalog {
             new SectionType("commission_form", "Commission request", "Step 1 of the commission wizard (choose the style), then on to the existing steps 2-4, preview and checkout.", List.of("cards"), true),
             new SectionType("commission_pricing", "Commission prices", "Starting prices per option, calculated from the commission price list (never typed in).", List.of("table"), true));
 
-    /** Sections that need a course: not allowed on site pages. */
+    /** Sections that need a course: not allowed on information pages (kind SITE). */
     public static final Set<String> COURSE_ONLY = Set.of("curriculum", "pricing", "related");
 
     public static SectionType section(String key) {
@@ -57,7 +57,7 @@ public final class LandingCatalog {
 
     // -------------------------------------------------------------------------------------------------- templates
 
-    /** kind: COURSE (sells a course) or SITE (replaces one of {@link #SITE_ROUTES}). */
+    /** kind: COURSE (sells a course) or SITE (an information page without a course, price or checkout). */
     public record Template(String key, String name, String description, String hero, Map<String, String> design, List<String> sections, String kind) {
         public Template(String key, String name, String description, String hero, Map<String, String> design, List<String> sections) {
             this(key, name, description, hero, design, sections, "COURSE");
@@ -102,29 +102,12 @@ public final class LandingCatalog {
             new Template("watercolour-wash", "Watercolour Wash", "Soft paper tones and washes of colour; the artwork leads, the curriculum and price follow.", "split",
                     design("custom", "#3E6E8E", "#2A2522", "#FBF6EE", "serif", "soft", "wash"),
                     List.of("hero", "intro", "outcomes", "curriculum", "artist", "gallery", "cards", "benefits", "testimonials", "pricing", "faq", "final_cta")),
-            new Template("platform-showcase", "Platform Showcase", "For site pages: an editorial collage of real artwork, services, the journey, courses and artists.", "collage",
+            new Template("platform-showcase", "Platform Showcase", "For information pages: an editorial collage of real artwork, services, the journey, courses and artists.", "collage",
                     design("custom", "#9C0D48", "#16130F", "#F7F2EA", "serif", "sharp", "grain"),
                     List.of("hero", "intro", "cards", "steps", "courses", "artists", "gallery", "testimonials", "faq", "final_cta"), "SITE"),
-            new Template("commission-studio", "Commission Studio", "For site pages: personal and warm, with the commission request built in.", "split",
+            new Template("commission-studio", "Commission Studio", "For information pages: personal and warm, with the commission request built in.", "split",
                     design("custom", "#8C3B4A", "#1F1A24", "#FAF6F2", "serif", "soft", "grain"),
                     List.of("hero", "intro", "cards", "gallery", "steps", "commission_form", "commission_pricing", "artists", "testimonials", "faq", "final_cta"), "SITE"));
-
-    // ----------------------------------------------------------------------------------------------- site pages
-
-    /**
-     * Site pages a landing page may replace. Fixed in code on purpose: a landing page can never take over an arbitrary
-     * address (login, checkout, admin). The original page comes back as soon as the landing page is unpublished.
-     */
-    public record SiteRoute(String key, String path, String label, String original) {
-    }
-
-    public static final List<SiteRoute> SITE_ROUTES = List.of(
-            new SiteRoute("how-it-works", "/how-it-works", "How it works", "the built-in How it works page (7-step journey)"),
-            new SiteRoute("commission-step-1", "/commission/step-1", "Commission, step 1", "the built-in commission step 1 (choose a style)"));
-
-    public static SiteRoute siteRoute(String key) {
-        return SITE_ROUTES.stream().filter(r -> r.key().equals(key)).findFirst().orElse(null);
-    }
 
     public static Template template(String key) {
         return TEMPLATES.stream().filter(t -> t.key().equals(key)).findFirst().orElse(null);

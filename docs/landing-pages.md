@@ -4,14 +4,19 @@ Configurable, conversion-focused landing pages, managed end to end from one sect
 (**Admin › Landing Page Management**, `/admin/landing`). Package `com.artistikcity.landing`; migrations
 `database/migrations/2026-11-08_landing_pages.sql` and `2026-11-09_landing_site_pages.sql`.
 
+**Every landing page has its own address, `/landing/{slug}`** (`LandingPages.PREFIX`). The slug is generated from the page
+name when none is typed (`LandingPages.freeSlug`: lower-case, dashes, made unique with -2, -3 …) and the full link is shown in
+the page list and the editor header (with Copy). A landing page never takes over an existing page of the site:
+`/how-it-works`, `/course/{slug}` and `/commission/step-1` always show the site's own pages. Unpublishing takes
+`/landing/{slug}` offline (404).
+
 Two kinds of page:
 
-* **Course pages** (`kind = COURSE`) sell one course at `/course/{slug}` with their own price, payment methods and checkout.
-* **Site pages** (`kind = SITE`) replace one of a fixed list of site pages (`LandingCatalog.SITE_ROUTES`): *How it works*
-  (`/how-it-works`) and *Commission, step 1* (`/commission/step-1`). They have no course, price, payment or checkout;
-  `PagesController` / `CommissionController` ask `LandingPublic.publishedSite(route)` first and show the original page
-  again as soon as the landing page is unpublished. Only one page per address can be live; instructors can't see or
-  make site pages. The list is in code on purpose, so a landing page can never take over login, checkout or admin pages.
+* **Course pages** (`kind = COURSE`) sell one course, with their own price, payment methods and checkout at
+  `/landing/{slug}/enroll`.
+* **Information pages** (`kind = SITE`, `course_id` empty) have no course, price, payment or checkout; their buttons lead
+  anywhere on the site (`cta.primaryHref`). Instructors can't see or make them. (`landing_pages.site_route` from the first
+  version of this feature is no longer used.)
 
 ## 1. What it reuses (nothing is duplicated)
 
@@ -29,8 +34,8 @@ Two kinds of page:
 
 ```
 Global payment infrastructure        Landing Page Management (per page)            Public
-(Configuration Panel: keys,          landing_payment_settings / _providers /       /course/{slug}            (server-rendered, Mustache)
- secrets, connectivity)       ──▶    _methods, landing_pricing, landing_checkout,  /course/{slug}/enroll     (React checkout)
+(Configuration Panel: keys,          landing_payment_settings / _providers /       /landing/{slug}           (server-rendered, Mustache)
+ secrets, connectivity)       ──▶    _methods, landing_pricing, landing_checkout,  /landing/{slug}/enroll    (React checkout)
                                      landing_coupons, draft_config + versions  ──▶ /landing/checkout/{id}/*  (JSON: quote, order, pay)
                                                                                     └─▶ CheckoutController completion / webhook / reconciler
 ```
@@ -38,17 +43,17 @@ Global payment infrastructure        Landing Page Management (per page)         
 * **Rendering** (`LandingPublic` → `LandingView` → `templates/landing/page.mustache`, `static/css/landing.css`, `static/js/landing.js`):
   server-rendered HTML (no React bundle on the public page), one small script, inline SVG icons, responsive images
   (`/img/w{width}/uploads/**`, `LandingImages`), videos only load when clicked, `<details>` accordions, design tokens from the
-  page config as CSS variables. `CoursesController` asks `LandingPublic` first, so a published page whose address equals the
-  course slug replaces the course page; unpublishing brings the course page back.
+  page config as CSS variables. `LandingCheckoutController` maps `GET /landing/{slug}` to `LandingPublic.render`. A section that
+  fails to build (unexpected data) is skipped and logged ("section … skipped") instead of failing the page.
 * **Templates and sections** (`LandingCatalog`): 9 templates: course pages (Artist Showcase, Premium Masterclass, Creative
-  Workshop, Minimal Editorial, Video-First Course, Conversion-Focused Sales Page, Watercolour Wash) and site pages (Platform
+  Workshop, Minimal Editorial, Video-First Course, Conversion-Focused Sales Page, Watercolour Wash) and information pages (Platform
   Showcase, Commission Studio); 20 section types (hero with a *collage* layout, intro, outcomes, curriculum, artist
   (several artists allowed), gallery (+ before/after slider, lightbox; course photos or marketplace artworks), benefits,
   video, testimonials, pricing, FAQ, related courses, final CTA (several buttons), custom HTML, **feature cards**
   (optionally from the course's own lists), **steps / journey**, **course list** (live catalogue, each linking to its
   landing page), **artists** (profiles from Admin › Instructors, linking to `/teacher/{slug}`), **commission request**
   (step 1 of the commission wizard) and **commission prices** ("from" prices computed from `CommissionPricing`)), each
-  with layout variants. Curriculum, pricing and related courses need a course and are refused on site pages. Every
+  with layout variants. Curriculum, pricing and related courses need a course and are refused on information pages. Every
   section has an optional small label (`kicker`); items can carry a link (site path, https or `#section-id`); design has
   a `texture` (none, paper grain, watercolour wash). Adding a template or section =
   one entry in `LandingCatalog` + its markup in `page.mustache`; old configs keep working because `LandingConfig.normalize`
@@ -72,11 +77,13 @@ unchanged. Coming back to step 1 shows the saved choice. No payment or deposit i
 
 ### Showcase pages (LandingShowcase)
 
-On its first start with the site-page migration applied, the app creates three pages through the module itself
+On its first start with the migration applied, the app creates three pages through the module itself
 (`LandingPages.create` → `saveDraft` → `publish`, version note "Showcase content (installed automatically)"):
-*How it works* (Platform Showcase), *Watercolour Landscapes for Beginners* (Watercolour Wash, at the course's address) and
-*Commission artwork* (Commission Studio). It runs once per database (`settings` `landing_pages` / `showcase_v1`, which
-also records each page's outcome), never touches a site address that already has a landing page, and updates an existing
+*How it works* (Platform Showcase, `/landing/how-it-works`), *Watercolour Landscapes for Beginners* (Watercolour Wash,
+`/landing/<the course's slug>`; the course is found by its slug or by a title with "watercolour" and "landscape") and
+*Commission artwork* (Commission Studio, `/landing/commission`). It runs once per database (`settings` `landing_pages` /
+`showcase_v1`, which also records each page's outcome; a Watercolour page skipped because the course wasn't found is
+tried again on later starts), never touches an address that already has a landing page, and updates an existing
 Watercolour page only when it has no unpublished edits (as a new version, so the earlier one is one click away under
 Versions). A page whose publish is refused (for example no live payment method) stays a draft and the outcome says why.
 Prices, durations, curriculum, reviews, artists, courses and artwork are read from the database when the page is shown.
@@ -144,9 +151,10 @@ Admin (JSON, admin session + CSRF): `GET /admin/api/landing/overview`, `GET|POST
 `PUT|DELETE .../coupons/{id}`, `GET /admin/api/landing/orders[/{id}]`, `POST .../orders/{id}/refund`,
 `GET|POST /admin/api/landing/media`, `PUT|DELETE .../media/{id}`, `GET|PUT /admin/api/landing/settings`,
 `GET /admin/api/landing/team`, `PUT /admin/api/landing/team/{adminId}`.
-Create a site page: `POST /admin/api/landing/pages` with `kind: "SITE"`, `siteRoute` (`how-it-works` or
-`commission-step-1`) and a site-page template.
-Public: `GET /course/{slug}`, `GET /how-it-works`, `GET /commission/step-1` (when a site page is live), `GET /course/{slug}/enroll`, `GET /course/{slug}/enroll/done`,
+Create an information page: `POST /admin/api/landing/pages` with `kind: "SITE"` and an information-page template; leave
+`slug` out to have it generated from `name` (the answer carries the `slug`).
+Public: `GET /landing/{slug}`, `GET /landing/{slug}/enroll`, `GET /landing/{slug}/enroll/done` (old `/course/{slug}/enroll[/done]`
+links redirect there),
 `POST /landing/checkout/{pageId}/quote|order|pay|failed`, `GET /landing/checkout/order/{orderId}/status`, `POST /landing/e`
 (CTA / method events), `GET /sitemap.xml`.
 
@@ -163,8 +171,6 @@ Public: `GET /course/{slug}`, `GET /how-it-works`, `GET /commission/step-1` (whe
 
 ## 9. Known limitations
 
-* Site pages: only the two addresses in `LandingCatalog.SITE_ROUTES`. Adding one = one entry there plus a
-  `publishedSite("…")` check in the controller of that page.
 * There is no public "all artists" page; the *Discover Artists* buttons scroll to the Artists section, whose cards open
   each artist's profile.
 

@@ -39,4 +39,4 @@ To change the schema of a database that already holds real data:
 The earlier SQL Server (T-SQL) migrations were removed when the project moved to MySQL. Everything they did is
 already in `schema.sql`, and they remain available in git history.
 
-| `2026-11-09_landing_site_pages.sql` | Landing pages can replace a site page: `landing_pages.kind` (`COURSE` / `SITE`), `site_route`, `course_id` now nullable, index on `site_route`. Additive; no rows changed. The three showcase pages are then created by the app through the landing module (not by SQL). |
+| `2026-11-09_landing_site_pages.sql` | Information landing pages (no course): `landing_pages.kind` (`COURSE` / `SITE`), `course_id` now nullable; also adds `site_route` + its index (not used any more). Additive; no rows changed. The three showcase pages are then created by the app through the landing module (not by SQL). |

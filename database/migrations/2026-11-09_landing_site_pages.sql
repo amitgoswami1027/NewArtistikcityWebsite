@@ -1,6 +1,7 @@
--- Landing Page Management: site pages. A landing page can now also replace one of a short, fixed list of site pages
--- (How it works at /how-it-works, Commission step 1 at /commission/step-1) instead of selling a course.
--- kind = COURSE (as before, course_id set, address /course/{slug}) or SITE (course_id empty, site_route set).
+-- Landing Page Management: information pages. A landing page can now also be a page without a course (no price or
+-- checkout), e.g. How it works or a commission page. kind = COURSE (course_id set) or SITE (course_id empty).
+-- Every landing page lives at its own address /landing/{slug}; none replaces an existing page of the site.
+-- (site_route was planned for replacing site pages; it is added for compatibility but no longer used.)
 -- Additive and safe to run twice: no table is recreated, no row is changed or deleted. Existing pages stay COURSE pages.
 -- The showcase content itself (the three pages) is created by the application on its next start through the landing
 -- module (LandingShowcase), never by this script.

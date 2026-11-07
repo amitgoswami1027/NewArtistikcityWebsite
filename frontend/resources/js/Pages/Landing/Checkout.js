@@ -5,7 +5,7 @@ import { authPost } from '@/Components/Auth/api';
 import axios from 'axios';
 
 /*
- * Checkout of a landing page (/course/{slug}/enroll). The server decides the price, the coupon and which payment options
+ * Checkout of a landing page (/landing/{slug}/enroll). The server decides the price, the coupon and which payment options
  * this page offers (props.choices, in the admin's order); this page only collects details, the chosen option and opens
  * the provider. Verification reuses the course checkout endpoints. /enroll/done shows success, pending or failure.
  */
@@ -113,7 +113,7 @@ function Result({ result, checkout, page, pollUrl }) {
                 <>
                     <h1>The payment didn't go through</h1>
                     <p>{checkout.failureMessage || 'No money was taken. You can try again, perhaps with another payment method.'}</p>
-                    <a className="lc-btn" href={`/course/${page.slug}/enroll`}>Try again</a>
+                    <a className="lc-btn" href={`/landing/${page.slug}/enroll`}>Try again</a>
                 </>
             )}
             {r.state === 'refunded' && (<><h1>This order was refunded</h1><p>Order {r.number}.</p></>)}
@@ -178,7 +178,7 @@ export default function Checkout() {
         }
         const done = (redirect) => {
             const flags = /duplicate=1/.test(redirect || '') ? '&duplicate=1' : /soldout=1/.test(redirect || '') ? '&soldout=1' : '';
-            window.location.assign(`/course/${page.slug}/enroll/done?order_id=${oid}${flags}`);
+            window.location.assign(`/landing/${page.slug}/enroll/done?order_id=${oid}${flags}`);
         };
         try {
             const r = await authPost(`/landing/checkout/${page.id}/pay`, { orderId: oid, method: quote.free ? 'free' : (forceMethod || method) });
@@ -225,7 +225,7 @@ export default function Checkout() {
         try {
             const r = await authPost('/checkout/test-pay', { orderId: test.orderId });
             const flags = /duplicate=1/.test(r.redirect || '') ? '&duplicate=1' : /soldout=1/.test(r.redirect || '') ? '&soldout=1' : '';
-            window.location.assign(`/course/${page.slug}/enroll/done?order_id=${test.orderId}${flags}`);
+            window.location.assign(`/landing/${page.slug}/enroll/done?order_id=${test.orderId}${flags}`);
         } catch (err) {
             setMessage({ tone: 'error', text: err.message });
             setBusy(false);
@@ -247,7 +247,7 @@ export default function Checkout() {
     return (
         <SiteLayout title={`Enrol · ${course.title}`}>
             <div className="lc" data-testid="lc-checkout">
-                <nav className="lc-crumbs" aria-label="Breadcrumb"><a href={`/course/${page.slug}`}><i className="fa fa-angle-left" aria-hidden="true"></i> Back to the course</a></nav>
+                <nav className="lc-crumbs" aria-label="Breadcrumb"><a href={`/landing/${page.slug}`}><i className="fa fa-angle-left" aria-hidden="true"></i> Back to the course</a></nav>
                 <h1 className="lc-h1">Enrol in {course.title}</h1>
                 {enrolled ? (
                     <div className="lc-note is-ok" role="status">You're already enrolled in this course. <a href={enrolled.classroom}>Go to your course</a></div>

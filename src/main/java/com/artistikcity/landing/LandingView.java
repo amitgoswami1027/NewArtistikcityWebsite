@@ -25,6 +25,8 @@ import java.util.Map;
 @Component
 public class LandingView {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LandingView.class);
+
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
     private static final DateTimeFormatter DAY_TIME = DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a", Locale.ENGLISH);
 
@@ -96,7 +98,7 @@ public class LandingView {
         Map<String, Object> seo = LandingConfig.map(config.get("seo"));
         Map<String, Object> marketing = LandingConfig.map(config.get("marketing"));
         // site pages: the main button goes where the editor says; course pages: always the page's own checkout
-        String enroll = site ? firstNonBlank(LandingConfig.str(cta.get("primaryHref")), "/courses?type=all") : "/course/" + page.str("slug") + "/enroll";
+        String enroll = site ? firstNonBlank(LandingConfig.str(cta.get("primaryHref")), "/courses?type=all") : LandingPages.enrollPath(page.str("slug"));
 
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("pageId", pageId);
@@ -148,6 +150,7 @@ public class LandingView {
             if (site && LandingCatalog.COURSE_ONLY.contains(type)) {
                 continue;       // never on a site page (the editor refuses them too)
             }
+            try {
             switch (type) {
                 case "hero" -> {
                     if (site) siteHero(v, c, page);
@@ -242,6 +245,11 @@ public class LandingView {
                     v.put("html", HtmlCleaner.clean(html));
                 }
                 default -> { }
+            }
+            } catch (RuntimeException ex) {
+                // a section that can't be built (unexpected data) is left out and logged; the rest of the page still shows
+                log.warn("Landing page {}: section {} ({}) skipped: {}", pageId, v.get("id"), type, ex.toString(), ex);
+                continue;
             }
             sections.add(v);
         }
@@ -431,7 +439,7 @@ public class LandingView {
             x.put("title", firstNonBlank(a.str("profile_title", ""), a.str("designation", "")));
             x.put("bio", paragraphs(artists.isEmpty() && !extra.isEmpty() ? extra : HtmlCleaner.text(a.str("profile_description", ""), 2000)));
             x.put("photo", a.str("profile_photo", "").isEmpty() ? null : image("/storage/uploads/teachers/" + a.get("id") + "/" + a.str("profile_photo"), 640, "(max-width: 900px) 80vw, 30vw"));
-            x.put("initial", a.str("name").substring(0, 1));
+            x.put("initial", initial(a.str("name", "")));
             artists.add(x);
         }
         if (artists.isEmpty()) return;
@@ -532,7 +540,7 @@ public class LandingView {
                     + " where r.course_id = ? and r.status = 1 and r.review is not null and r.review <> '' order by r.rating desc, r.id desc limit 9", courseId)) {
                 Map<String, Object> q = new LinkedHashMap<>();
                 q.put("name", r.str("name"));
-                q.put("initial", r.str("name").substring(0, 1));
+                q.put("initial", initial(r.str("name", "")));
                 q.put("text", HtmlCleaner.text(r.str("review"), 600));
                 q.put("rating", r.lng("rating", 0));
                 q.put("stars", "★".repeat((int) Math.max(0, Math.min(5, r.lng("rating", 0)))));
@@ -547,7 +555,7 @@ public class LandingView {
             for (Row t : db.select("select id, name, title, photo, description from testimonials where status = 1" + where + " order by id desc limit 9")) {
                 Map<String, Object> q = new LinkedHashMap<>();
                 q.put("name", t.str("name"));
-                q.put("initial", t.str("name").substring(0, 1));
+                q.put("initial", initial(t.str("name", "")));
                 q.put("text", HtmlCleaner.text(t.str("description", ""), 600));
                 q.put("photo", t.str("photo", "").isEmpty() ? null : LandingImages.sized("/storage/uploads/testimonials/" + t.get("id") + "/" + t.str("photo"), 320));
                 q.put("meta", t.str("title", ""));
@@ -584,12 +592,12 @@ public class LandingView {
     private List<Map<String, Object>> related(long courseId, Object mediumId) {
         List<Map<String, Object>> out = new ArrayList<>();
         for (Row r : db.select("select c.id, c.slug, c.title, c.sub_title, (select photo_name from course_photos p where p.course_id = c.id order by p.id limit 1) as photo,"
-                + " (select l.slug from landing_pages l where l.course_id = c.id and l.status = 'PUBLISHED' and l.slug = c.slug limit 1) as landing"
+                + " (select l.slug from landing_pages l where l.course_id = c.id and l.status = 'PUBLISHED' order by l.published_at desc limit 1) as landing"
                 + " from courses c where c.status = 1 and c.id <> ? order by case when c.medium_id = ? then 0 else 1 end, c.id limit 3", courseId, mediumId)) {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("title", r.str("title"));
             m.put("text", r.str("sub_title", ""));
-            m.put("url", "/course/" + r.str("slug"));
+            m.put("url", r.get("landing") == null ? "/course/" + r.str("slug") : LandingPages.path(r.str("landing")));
             m.put("image", r.get("photo") == null ? null : image("/storage/uploads/courses/" + r.get("id") + "/" + r.get("photo"), 640, "(max-width: 700px) 100vw, 33vw"));
             out.add(m);
         }
@@ -719,7 +727,7 @@ public class LandingView {
                 + " (select name from mediums m where m.id = c.medium_id) as medium, (select name from skills k where k.id = c.skill_id) as level,"
                 + " (select name from admins a where a.id = c.admin_id) as artist,"
                 + " (select photo_name from course_photos p where p.course_id = c.id order by p.id limit 1) as photo,"
-                + " (select l.slug from landing_pages l where l.course_id = c.id and l.status = 'PUBLISHED' order by (l.slug = c.slug) desc, l.published_at desc limit 1) as landing"
+                + " (select l.slug from landing_pages l where l.course_id = c.id and l.status = 'PUBLISHED' order by l.published_at desc limit 1) as landing"
                 + " from courses c where c.status = 1" + where + " order by c.id limit " + limit)) {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("title", r.str("title"));
@@ -727,7 +735,7 @@ public class LandingView {
             m.put("kind", r.lng("course_type_id", 1) == 2 ? "Workshop" : "Live course");
             m.put("meta", String.join(" · ", nonBlank(r.str("medium", ""), r.str("level", ""))));
             m.put("artist", r.str("artist", ""));
-            m.put("url", "/course/" + (r.get("landing") == null ? r.str("slug") : r.str("landing")));
+            m.put("url", r.get("landing") == null ? "/course/" + r.str("slug") : LandingPages.path(r.str("landing")));
             m.put("image", r.get("photo") == null ? null : image("/storage/uploads/courses/" + r.get("id") + "/" + r.get("photo"), 640, "(max-width: 700px) 100vw, 33vw"));
             m.put("alt", "Artwork from " + r.str("title"));
             out.add(m);
@@ -747,7 +755,7 @@ public class LandingView {
                 + " (select count(*) from courses c where c.admin_id = a.id and c.status = 1) as courses from admins a" + where + " order by courses desc, a.id limit " + limit)) {
             Map<String, Object> x = new LinkedHashMap<>();
             x.put("name", a.str("name"));
-            x.put("initial", a.str("name").substring(0, 1));
+            x.put("initial", initial(a.str("name", "")));
             x.put("title", firstNonBlank(a.str("profile_title", ""), a.str("designation", "")));
             x.put("bio", cut(HtmlCleaner.text(a.str("profile_description", ""), 600), 200));
             x.put("photo", a.str("profile_photo", "").isEmpty() ? null : image("/storage/uploads/teachers/" + a.get("id") + "/" + a.str("profile_photo"), 640, "(max-width: 700px) 60vw, 25vw"));
@@ -959,6 +967,11 @@ public class LandingView {
         List<String> out = new ArrayList<>();
         for (String s : values) if (s != null && !s.isBlank()) out.add(s);
         return out;
+    }
+
+    static String initial(String name) {
+        String n = name == null ? "" : name.trim();
+        return n.isEmpty() ? "?" : n.substring(0, 1).toUpperCase();
     }
 
     static String firstNonBlank(String... values) {

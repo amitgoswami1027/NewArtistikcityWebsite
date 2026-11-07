@@ -204,13 +204,9 @@ public class LandingAdminController {
             m.put("enrollments", s.getOrDefault("enrollments", 0L));
             m.put("conversion", s.getOrDefault("conversion", 0.0));
             m.put("revenue", money ? s.get("revenue") : null);
-            boolean site = LandingPages.isSite(r);
-            m.put("takesOverCourse", !site && r.str("slug").equals(r.str("course_slug")));
             m.put("publicUrl", LandingPages.publicPath(r));
-            if (site) {
-                LandingCatalog.SiteRoute route = LandingCatalog.siteRoute(r.str("site_route", ""));
-                m.put("course", "Site page: " + (route == null ? r.str("site_route", "") : route.label()));
-            }
+            m.put("fullUrl", com.artistikcity.inertia.Inertia.baseUrl(request) + LandingPages.publicPath(r));
+            if (LandingPages.isSite(r)) m.put("course", "Information page (no course)");
             rows.add(m);
         }
         Map<String, Object> counts = new LinkedHashMap<>();
@@ -225,20 +221,29 @@ public class LandingAdminController {
     public ResponseEntity<String> create(HttpServletRequest request) {
         Row admin = kit.admin(request);
         if (!kit.can(admin, "landing.publish")) return kit.forbidden();
-        Map<String, Object> in = Input.of(request, json).all();
+        Map<String, Object> in = new LinkedHashMap<>(Input.of(request, json).all());
         boolean site = "SITE".equals(LandingConfig.str(in.get("kind")));
-        if (site && kit.teacherScope(admin) != null) return kit.forbidden();      // site pages: staff, not instructors
+        if (site && kit.teacherScope(admin) != null) return kit.forbidden();      // information pages: staff, not instructors
+        if (LandingConfig.str(in.get("slug")).isEmpty()) {
+            // the address is generated from the page name (or the course title) when none is typed
+            String base = LandingConfig.str(in.get("name"));
+            if (base.isEmpty() && !site) {
+                Row c = db.first("select title from courses where id = ?", LandingConfig.str(in.get("courseId")).replace(".0", ""));
+                base = c == null ? "" : c.str("title");
+            }
+            if (!base.isEmpty()) in.put("slug", pages.freeSlug(base, null));
+        }
         Map<String, String> e = pages.checkBasics(in, null);
         String template = LandingConfig.str(in.get("template"));
         LandingCatalog.Template t = LandingCatalog.template(template);
         if (t == null) e.put("template", "Choose a template.");
-        else if (site != "SITE".equals(t.kind())) e.put("template", site ? "Choose a template made for site pages." : "That template is for site pages; choose a course template.");
+        else if (site != "SITE".equals(t.kind())) e.put("template", site ? "Choose a template made for information pages." : "That template is for information pages; choose a course template.");
         if (e.isEmpty() && !site && !courseAllowed(admin, Long.parseLong(LandingConfig.str(in.get("courseId")).replace(".0", "")))) e.put("courseId", "You can only make pages for your own courses.");
         if (!e.isEmpty()) return kit.invalid(e);
         long id = pages.create(in, template, admin.lng("id"));
         applyDefaults(id, admin.lng("id"));
         audit.log(admin, "landing_page", id, "create", "Created landing page " + in.get("name") + " (" + LandingPages.publicPath(pages.find(id)) + ")");
-        return kit.ok(Map.of("id", id, "message", "Landing page created as a draft."));
+        return kit.ok(Map.of("id", id, "slug", pages.find(id).str("slug"), "message", "Landing page created as a draft. Its address will be " + LandingPages.publicPath(pages.find(id)) + "."));
     }
 
     /** Settings > defaults applied to a new page: WhatsApp number, access, refund policy and checkout fields. */
@@ -253,7 +258,7 @@ public class LandingAdminController {
             pages.saveDraft(id, config, adminId);
         }
         if (LandingPages.isSite(page)) {
-            return;     // no price, payment or checkout on a site page
+            return;     // no price, payment or checkout on an information page
         }
         Map<String, Object> pr = new LinkedHashMap<>(commerce.pricingView(id));
         if (!LandingConfig.str(d.get("accessDuration")).isEmpty()) pr.put("accessDuration", d.get("accessDuration"));
@@ -278,7 +283,7 @@ public class LandingAdminController {
         Map<String, Object> m = new LinkedHashMap<>();
         Map<String, Object> p = new LinkedHashMap<>();
         boolean site = LandingPages.isSite(page);
-        for (String k : List.of("id", "name", "slug", "kind", "site_route", "course_id", "campaign", "description", "template_key", "status", "published_at", "publish_at", "archived_at",
+        for (String k : List.of("id", "name", "slug", "kind", "course_id", "campaign", "description", "template_key", "status", "published_at", "publish_at", "archived_at",
                 "draft_saved_at", "created_at", "updated_at", "published_version_id")) {
             p.put(k, page.get(k));
         }
@@ -286,11 +291,8 @@ public class LandingAdminController {
         p.put("course_slug", course == null ? null : course.get("slug"));
         p.put("course_title", course == null ? null : course.get("title"));
         p.put("publicUrl", LandingPages.publicPath(page));
-        p.put("takesOverCourse", course != null && page.str("slug").equals(course.str("slug")));
-        LandingCatalog.SiteRoute route = site ? LandingCatalog.siteRoute(page.str("site_route", "")) : null;
+        p.put("fullUrl", baseUrl() + LandingPages.publicPath(page));
         p.put("site", site);
-        p.put("siteLabel", route == null ? null : route.label());
-        p.put("siteOriginal", route == null ? null : route.original());
         Row saver = page.get("draft_saved_by") == null ? null : db.first("select name from admins where id = ?", page.get("draft_saved_by"));
         p.put("draft_saved_by_name", saver == null ? null : saver.get("name"));
         m.put("page", p);
@@ -329,9 +331,9 @@ public class LandingAdminController {
         Map<String, Object> in = Input.of(request, json).all();
         Map<String, String> e = pages.checkBasics(in, id);
         if (LandingPages.isSite(page)) {
-            boolean routeChange = !page.str("site_route", "").equals(LandingConfig.str(in.get("siteRoute")));
-            if (e.isEmpty() && routeChange && !"DRAFT".equals(page.str("status")) && !"ARCHIVED".equals(page.str("status"))) {
-                e.put("siteRoute", "Unpublish the page before changing which site page it replaces.");
+            if (e.isEmpty() && !page.str("slug").equals(LandingConfig.str(in.get("slug")).toLowerCase()) && "PUBLISHED".equals(page.str("status"))
+                    && !kit.can(admin, "landing.publish")) {
+                e.put("slug", "Changing the address of a live page needs publishing rights.");
             }
             if (!e.isEmpty()) return kit.invalid(e);
             Row before = audit.snapshot("landing_pages", id);
@@ -424,8 +426,7 @@ public class LandingAdminController {
             }
             case "unpublish" -> {
                 pages.unpublish(id);
-                message = LandingPages.isSite(page) ? "Unpublished. " + LandingPages.publicPath(page) + " shows the original page again."
-                        : "Unpublished. /course/" + page.str("slug") + " shows the regular course page again.";
+                message = "Unpublished. " + LandingPages.publicPath(page) + " is offline until you publish it again.";
             }
             case "archive" -> {
                 pages.archive(id);
@@ -967,7 +968,6 @@ public class LandingAdminController {
                 + (scope == null ? "" : " where c.admin_id = " + scope.longValue()) + " order by c.title"));
         m.put("artists", db.select("select id, name, admin_type from admins where admin_type in ('admin', 'teacher') order by name"));
         m.put("testimonials", db.select("select id, name, title from testimonials where status = 1 order by id desc limit 100"));
-        m.put("siteRoutes", LandingCatalog.SITE_ROUTES.stream().map(r -> Map.of("key", r.key(), "path", r.path(), "label", r.label(), "original", r.original())).toList());
         m.put("pages", db.select("select p.id, p.name, p.slug, p.status from landing_pages p left join courses c on c.id = p.course_id"
                 + (scope == null ? "" : " where c.admin_id = " + scope.longValue()) + " order by p.name"));
         m.put("campaigns", db.select("select distinct campaign from (select campaign from landing_pages where campaign is not null union select campaign from landing_coupons where campaign is not null"
@@ -979,7 +979,7 @@ public class LandingAdminController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("templates", LandingCatalog.TEMPLATES.stream().map(t -> Map.of("key", t.key(), "name", t.name(), "description", t.description(), "hero", t.hero(),
                 "design", t.design(), "sections", t.sections(), "kind", t.kind())).toList());
-        m.put("siteRoutes", LandingCatalog.SITE_ROUTES.stream().map(r -> Map.of("key", r.key(), "path", r.path(), "label", r.label(), "original", r.original())).toList());
+        m.put("prefix", LandingPages.PREFIX);
         m.put("courseOnly", LandingCatalog.COURSE_ONLY);
         m.put("sections", LandingCatalog.SECTIONS.stream().map(s -> Map.of("key", s.key(), "label", s.label(), "description", s.description(), "layouts", s.layouts(), "single", s.single())).toList());
         m.put("methods", LandingCatalog.METHODS.stream().map(x -> Map.of("key", x.key(), "label", x.label(), "group", x.group(), "hint", x.hint())).toList());
@@ -988,6 +988,15 @@ public class LandingAdminController {
         m.put("defaultSections", LandingCatalog.SECTIONS.stream().collect(java.util.stream.Collectors.toMap(LandingCatalog.SectionType::key,
                 s -> LandingConfig.section(s.key(), s.layouts().get(0)))));
         return m;
+    }
+
+    /** The site's own address (http://localhost:8080, https://www.artistikcity.com) for the full link shown in the admin. */
+    private static String baseUrl() {
+        var attrs = org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+        if (attrs instanceof org.springframework.web.context.request.ServletRequestAttributes sra) {
+            return com.artistikcity.inertia.Inertia.baseUrl(sra.getRequest());
+        }
+        return "";
     }
 
     private boolean mayEdit(Row admin, Row page) {

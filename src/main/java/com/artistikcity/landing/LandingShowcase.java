@@ -22,12 +22,14 @@ import java.util.Map;
  * publish as version N), so they are ordinary pages afterwards: editable, versioned and unpublishable in
  * Admin › Landing Page Management.
  * <ul>
- *   <li>How it works (site page, replaces /how-it-works)</li>
- *   <li>Watercolour Landscapes for Beginners (course page at /course/watercolour-landscapes-for-beginners)</li>
- *   <li>Commission artwork (site page, replaces /commission/step-1)</li>
+ *   <li>How it works (information page at /landing/how-it-works)</li>
+ *   <li>Watercolour Landscapes for Beginners (course page at /landing/{the course's slug})</li>
+ *   <li>Commission artwork (information page at /landing/commission)</li>
  * </ul>
- * Runs once per database (settings: landing_pages / showcase_v1, which also records what happened to each page) and never
- * overwrites someone's work: a site page that already has a landing page is left alone; an existing Watercolour page is
+ * They have their own addresses: /how-it-works, /course/... and /commission/step-1 stay the site's original pages.
+ * Runs once per database (settings: landing_pages / showcase_v1, which also records what happened to each page; a
+ * Watercolour page skipped for want of the course is tried again on later starts) and never overwrites someone's work:
+ * an address that already has a landing page is left alone; an existing Watercolour page is
  * only updated when it has no unpublished edits, by publishing the new content as a new version (the old version stays
  * one click away under Versions). Nothing is deleted. A page is reported as published only when publishing succeeded;
  * otherwise it stays a draft with the reason. Every text states what the platform really does: prices, durations,
@@ -66,7 +68,9 @@ public class LandingShowcase implements ApplicationRunner {
             return;
         }
         try {
-            if (db.count("select count(*) from settings where meta_tag = 'landing_pages' and meta_key = ?", FLAG) > 0) {
+            Row done = db.first("select id, meta_value from settings where meta_tag = 'landing_pages' and meta_key = ? order by id limit 1", FLAG);
+            if (done != null) {
+                retryWatercolour(done);
                 return;
             }
             if (db.count("select count(*) from information_schema.columns where table_schema = database() and table_name = 'landing_pages' and column_name = 'kind'") == 0) {
@@ -82,51 +86,73 @@ public class LandingShowcase implements ApplicationRunner {
     /** Installs the pages and records the outcome; returns it (page key -> {id, status, reason}). */
     public Map<String, Object> install() {
         Map<String, Object> outcome = new LinkedHashMap<>();
-        outcome.put("how-it-works", sitePage("how-it-works", "how-it-works", "How it works", "platform-showcase", howItWorks()));
+        outcome.put("how-it-works", sitePage("how-it-works", "How it works", "platform-showcase", howItWorks()));
         outcome.put("watercolour", watercolour());
-        outcome.put("commission", sitePage("commission-step-1", "commission", "Commission artwork", "commission-studio", commission()));
+        outcome.put("commission", sitePage("commission", "Commission artwork", "commission-studio", commission()));
         LocalDateTime now = LocalDateTime.now();
         db.insert("settings", Row.of("meta_tag", "landing_pages", "meta_key", FLAG, "meta_value", json.encode(outcome), "created_at", now, "updated_at", now));
         log.info("Landing showcase pages: {}", outcome);
         return outcome;
     }
 
+    /** An earlier start found no Watercolour course: look again (the course may have been added or have another address). */
+    @SuppressWarnings("unchecked")
+    private void retryWatercolour(Row done) {
+        Map<String, Object> outcome = json.decodeMap(done.str("meta_value", ""));
+        if (outcome == null) return;
+        Object w = outcome.get("watercolour");
+        if (!(w instanceof Map<?, ?> m) || !"skipped".equals(String.valueOf(m.get("status"))) || !String.valueOf(m.get("detail")).startsWith("There is no")) return;     // also the first release's wording
+        Map<String, Object> again = watercolour();
+        if (String.valueOf(again.get("detail")).startsWith(NO_COURSE)) return;
+        outcome.put("watercolour", again);
+        db.updateById("settings", done.lng("id"), Row.of("meta_value", json.encode(outcome), "updated_at", LocalDateTime.now()));
+        log.info("Landing showcase pages (Watercolour, second try): {}", again);
+    }
+
     // ------------------------------------------------------------------------------------------------- pages
 
-    private Map<String, Object> sitePage(String route, String slug, String name, String template, Map<String, Object> config) {
-        Row existing = db.first("select id, status from landing_pages where kind = 'SITE' and site_route = ? order by id limit 1", route);
+    private static final String NO_COURSE = "There is no Watercolour Landscapes course";
+
+    /** An information page (no course) at /landing/{slug}; left alone when a page with that address already exists. */
+    private Map<String, Object> sitePage(String slug, String name, String template, Map<String, Object> config) {
+        Row existing = db.first("select id from landing_pages where slug = ?", slug);
         if (existing != null) {
-            return result(existing.lng("id"), "skipped", "A landing page for " + LandingCatalog.siteRoute(route).path() + " already exists; it was left as it is.");
-        }
-        String s = slug;
-        for (int i = 2; db.count("select count(*) from landing_pages where slug = ?", s) > 0; i++) {
-            s = slug + "-" + i;
+            return result(existing.lng("id"), "skipped", "A landing page with the address " + LandingPages.path(slug) + " already exists; it was left as it is.");
         }
         Map<String, Object> in = new LinkedHashMap<>();
         in.put("kind", "SITE");
-        in.put("siteRoute", route);
         in.put("name", name);
-        in.put("slug", s);
-        in.put("description", "Showcase page installed with the site-page release. Replaces " + LandingCatalog.siteRoute(route).path()
-                + " while published; unpublish to bring back the original page.");
+        in.put("slug", slug);
+        in.put("description", "Showcase information page (no course). Its own address; the site's original pages are unchanged.");
         long id = pages.create(in, template, null);
         return saveAndPublish(id, config);
     }
 
-    private Map<String, Object> watercolour() {
-        Row course = db.first("select id, course_type_id, course_includes, status from courses where slug = ?", COURSE_SLUG);
-        if (course == null) {
-            return result(null, "skipped", "There is no course with the address " + COURSE_SLUG + ".");
+    /** The Watercolour course: by its usual address, else by its title. */
+    private Row findCourse() {
+        Row c = db.first("select id, slug, course_type_id, course_includes, status from courses where slug = ?", COURSE_SLUG);
+        if (c == null) {
+            c = db.first("select id, slug, course_type_id, course_includes, status from courses where lower(title) like '%watercolo%r%landscape%'"
+                    + " order by (status = 1) desc, id limit 1");
         }
-        Row page = db.first("select * from landing_pages where slug = ?", COURSE_SLUG);
+        return c;
+    }
+
+    private Map<String, Object> watercolour() {
+        Row course = findCourse();
+        if (course == null) {
+            return result(null, "skipped", NO_COURSE + " (address " + COURSE_SLUG + " or a title with \"watercolour\" and \"landscape\").");
+        }
+        String slug = course.str("slug");
+        Row page = db.first("select * from landing_pages where slug = ?", slug);
         Map<String, Object> config;
         if (page == null) {
             Map<String, Object> in = new LinkedHashMap<>();
             in.put("kind", "COURSE");
             in.put("courseId", String.valueOf(course.get("id")));
             in.put("name", "Watercolour Landscapes for Beginners");
-            in.put("slug", COURSE_SLUG);
-            in.put("description", "Course landing page (Watercolour Wash). Replaces the regular course page while published.");
+            in.put("slug", slug);
+            in.put("description", "Course landing page (Watercolour Wash) at its own address; the regular course page is unchanged.");
             long id = pages.create(in, "watercolour-wash", null);
             config = watercolourConfig(course, null);
             return saveAndPublish(id, config);

@@ -95,7 +95,7 @@ public class CheckoutController {
             return courseUrl;
         }
         return ok ? com.artistikcity.landing.LandingCheckoutController.doneUrl(page, order.lng("id"), courseUrl)
-                : "/course/" + page.str("slug") + "/enroll?payment=failed";
+                : com.artistikcity.landing.LandingPages.enrollPath(page.str("slug")) + "?payment=failed";
     }
 
     public CheckoutController(Views views, Inertia inertia, Db db, Json json, Auth auth, CourseService courses,

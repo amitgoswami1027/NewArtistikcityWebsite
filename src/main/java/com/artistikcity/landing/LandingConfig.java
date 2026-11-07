@@ -221,7 +221,7 @@ public final class LandingConfig {
         return normalize(raw, false);
     }
 
-    /** site = the page replaces a site page (no course): course-only sections are refused and the main button needs an address. */
+    /** site = an information page (no course): course-only sections are refused and the main button needs an address. */
     @SuppressWarnings("unchecked")
     public static Result normalize(Object raw, boolean site) {
         Map<String, String> errors = new LinkedHashMap<>();
@@ -263,7 +263,7 @@ public final class LandingConfig {
                 continue;
             }
             if (site && LandingCatalog.COURSE_ONLY.contains(type.key())) {
-                errors.put(p + ".type", type.label() + " needs a course, so it can't be on a site page.");
+                errors.put(p + ".type", type.label() + " needs a course, so it can't be on an information page.");
             }
             if (type.single() && !seenSingles.add(type.key())) {
                 errors.put(p + ".type", type.label() + " can only be on a page once.");

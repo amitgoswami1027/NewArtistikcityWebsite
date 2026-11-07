@@ -208,7 +208,7 @@ function Pages({ caps, toast }) {
             axios.delete(`/admin/api/landing/pages/${r.id}`).then((x) => { toast(x.data.message); load(); }).catch((e) => toast(errorText(e), 'error'));
             return;
         }
-        if (action === 'unpublish' && !(await confirm({ title: `Unpublish "${r.name}"?`, body: r.kind === 'SITE' ? `The original page comes back at ${r.publicUrl}.` : r.takesOverCourse ? 'The regular course page comes back at this address.' : 'The address stops working until you publish again.', confirmLabel: 'Unpublish' }))) return;
+        if (action === 'unpublish' && !(await confirm({ title: `Unpublish "${r.name}"?`, body: `${r.publicUrl} stops working until you publish again.`, confirmLabel: 'Unpublish' }))) return;
         axios.post(`/admin/api/landing/pages/${r.id}/${action}`).then((x) => {
             toast(x.data.message);
             if (action === 'duplicate') window.location.assign(`/admin/landing/pages/${x.data.id}`); else load();
@@ -228,7 +228,7 @@ function Pages({ caps, toast }) {
                        caption="Landing pages" columns={[
                 { key: 'name', label: 'Landing page', sort: 'name', render: (r) => (
                     <div className="adm-cell"><a href={`/admin/landing/pages/${r.id}`} className="adm-cell__text"><b>{r.name}</b></a>
-                        <small className="adm-muted">{r.publicUrl || `/course/${r.slug}`}{r.campaign ? ` · ${r.campaign}` : ''}</small></div>) },
+                        <small className="adm-muted" data-testid="lp-row-url">{r.status === 'PUBLISHED' ? <a href={r.publicUrl} target="_blank" rel="noopener noreferrer">{r.fullUrl || r.publicUrl}</a> : (r.fullUrl || r.publicUrl)}{r.campaign ? ` · ${r.campaign}` : ''}</small></div>) },
                 { key: 'course', label: 'Course · artist', sort: 'course', hide: 'md', render: (r) => <span>{r.course}<br /><small className="adm-muted">{r.artist}</small></span> },
                 { key: 'template', label: 'Template', hide: 'lg' },
                 { key: 'status', label: 'Status', sort: 'status', render: (r) => (
@@ -282,7 +282,7 @@ function PageMenu({ r, act }) {
                 <ul className="lpa-menu__list" role="menu">
                     {items.map(([a, l, i]) => <li key={a} role="none"><button type="button" role="menuitem" className={a === 'delete' ? 'is-danger' : ''} onClick={() => { setOpen(false); act(r, a); }}><i className={`fa ${i}`} aria-hidden="true"></i>{l}</button></li>)}
                     <li role="none"><a role="menuitem" href={`/admin/landing/pages/${r.id}/publish`}><i className="fa fa-clock-o" aria-hidden="true"></i>Schedule…</a></li>
-                    {r.status === 'PUBLISHED' && <li role="none"><a role="menuitem" href={r.publicUrl || `/course/${r.slug}`} target="_blank" rel="noopener"><i className="fa fa-external-link" aria-hidden="true"></i>Open live page</a></li>}
+                    {r.status === 'PUBLISHED' && <li role="none"><a role="menuitem" href={r.publicUrl} target="_blank" rel="noopener"><i className="fa fa-external-link" aria-hidden="true"></i>Open live page</a></li>}
                 </ul>
             )}
         </div>

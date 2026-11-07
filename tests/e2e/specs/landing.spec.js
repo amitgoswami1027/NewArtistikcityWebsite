@@ -3,7 +3,7 @@
 const { test, expect } = require('@playwright/test');
 const { signIn, api } = require('./helpers');
 
-const PAGE = '/course/watercolour-landscapes-for-beginners';
+const PAGE = '/landing/watercolour-landscapes-for-beginners';
 const ADMIN = { email: 'admin@artistikcity.com', password: 'password' };
 
 async function adminSignIn(page) {
@@ -106,7 +106,7 @@ test.describe('Landing Page Management: build, configure payments, publish, buy'
 
         // the public page reflects the draft
         const visitor = await browser.newPage();
-        await visitor.goto(`/course/${slug}`);
+        await visitor.goto(`/landing/${slug}`);
         await expect(visitor.locator('.lp-hero')).toContainText('Paint a bouquet in one weekend');
         await expect(visitor.locator('body')).not.toContainText('What students say');
         await visitor.close();
@@ -114,7 +114,7 @@ test.describe('Landing Page Management: build, configure payments, publish, buy'
         // a student sees UPI only, and pays (test mode)
         const buyer = await browser.newPage();
         await signIn(buyer);
-        await buyer.goto(`/course/${slug}/enroll`);
+        await buyer.goto(`/landing/${slug}/enroll`);
         await expect(buyer.getByTestId('lc-checkout')).toBeVisible();
         await expect(buyer.locator('[data-method]')).toHaveCount(1);
         await expect(buyer.locator('[data-method]')).toHaveAttribute('data-method', 'upi');

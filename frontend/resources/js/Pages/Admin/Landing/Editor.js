@@ -50,10 +50,9 @@ const dtLocal = (v) => (v ? String(v).replace(' ', 'T').slice(0, 16) : '');
 /* ============================================================================================ create wizard */
 
 function CreatePage({ lookups, catalog, defaults, toast }) {
-    const [v, setV] = useState({ kind: 'COURSE', siteRoute: '', name: '', courseId: '', slug: '', campaign: '', description: '', template: (defaults && defaults.template) || catalog.templates[0].key });
+    const [v, setV] = useState({ kind: 'COURSE', name: '', courseId: '', slug: '', campaign: '', description: '', template: (defaults && defaults.template) || catalog.templates[0].key });
     const site = v.kind === 'SITE';
-    const routes = catalog.siteRoutes || [];
-    const route = routes.find((r) => r.key === v.siteRoute);
+    const prefix = catalog.prefix || '/landing/';
     const setKind = (kind) => setV((o) => {
         const list = tplFor(catalog, kind === 'SITE');
         return { ...o, kind, template: list.some((t) => t.key === o.template) ? o.template : (list[0] && list[0].key) || o.template };
@@ -64,19 +63,14 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
     const course = lookups.courses.find((c) => String(c.id) === String(v.courseId));
     const set = (k, val) => setV((o) => {
         const n = { ...o, [k]: val };
-        if (k === 'siteRoute' && !slugTouched) {
-            const r = (catalog.siteRoutes || []).find((x) => x.key === val);
-            n.slug = r ? r.key : '';
-            if (!o.name && r) n.name = r.label;
-        }
-        if (k === 'courseId' && !slugTouched) {
+        if (k === 'courseId') {
             const c = lookups.courses.find((x) => String(x.id) === String(val));
-            n.slug = c ? c.slug : '';
             if (!o.name && c) n.name = c.title;
         }
+        // the address follows the name until someone types their own (the server makes it unique)
+        if (!slugTouched && (k === 'name' || k === 'courseId')) n.slug = slugify(n.name);
         return n;
     });
-    const takesOver = course && v.slug === course.slug;
     const create = (e) => {
         e.preventDefault();
         setBusy(true);
@@ -88,22 +82,13 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
     return (
         <form onSubmit={create} className="adm-stack" noValidate data-testid="lp-create">
             <Card title="1. Basic information" subtitle="Only staff see the name. The address is what visitors see.">
-                {routes.length > 0 && (
-                    <div className="lpa-kind">
-                        <span className="lpa-label">Page type</span>
-                        <Segments value={v.kind} label="Page type" onChange={setKind} options={[{ value: 'COURSE', label: 'Sells a course' }, { value: 'SITE', label: 'Replaces a site page' }]} />
-                        {site && <p className="adm-muted adm-small">A site page has no price or checkout. While it is published it is shown instead of the original page; unpublish it and the original comes back.</p>}
-                    </div>
-                )}
+                <div className="lpa-kind">
+                    <span className="lpa-label">Page type</span>
+                    <Segments value={v.kind} label="Page type" onChange={setKind} options={[{ value: 'COURSE', label: 'Sells a course' }, { value: 'SITE', label: 'Information page' }]} />
+                    {site && <p className="adm-muted adm-small">An information page has no price or checkout: its buttons lead to courses, artists, commissions or any page you choose.</p>}
+                </div>
                 <div className="lpa-grid2">
-                    {site ? (
-                        <Field label="Site page it replaces" name="siteRoute" error={errors.siteRoute} required hint={route ? `Replaces ${route.original} at ${route.path}.` : undefined}>
-                            <select id="f-siteRoute" className="adm-input" value={v.siteRoute} onChange={(e) => set('siteRoute', e.target.value)} data-testid="lp-site-route">
-                                <option value="">Choose a page…</option>
-                                {routes.map((r) => <option key={r.key} value={r.key}>{r.label} ({r.path})</option>)}
-                            </select>
-                        </Field>
-                    ) : (
+                    {site ? null : (
                     <Field label="Course this page sells" name="courseId" error={errors.courseId} required>
                         <select id="f-courseId" className="adm-input" value={v.courseId} onChange={(e) => set('courseId', e.target.value)} data-testid="lp-course">
                             <option value="">Choose a course…</option>
@@ -114,9 +99,9 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
                     <Field label="Landing page name" name="name" error={errors.name} required hint="For example: Watercolour Landscapes · Diwali campaign.">
                         <input id="f-name" className="adm-input" value={v.name} maxLength={190} onChange={(e) => set('name', e.target.value)} data-testid="lp-name" />
                     </Field>
-                    <Field label={site ? 'Short name' : 'Address'} name="slug" error={errors.slug} required
-                           hint={site ? 'Only used inside the admin: visitors see the site page\'s own address.' : takesOver ? 'Same address as the course: once published, this page replaces the regular course page.' : 'A campaign page gets its own address; the course page stays as it is.'}>
-                        <div className="lpa-slug">{!site && <span>/course/</span>}
+                    <Field label="Address" name="slug" error={errors.slug} optional
+                           hint={`Made from the name; change it if you like. The page will be at ${prefix}${v.slug || '…'}. The site's own pages are never replaced.`}>
+                        <div className="lpa-slug"><span>{prefix}</span>
                             <input id="f-slug" className="adm-input" value={v.slug} maxLength={120} onChange={(e) => { setSlugTouched(true); set('slug', slugify(e.target.value)); }} data-testid="lp-slug" /></div>
                     </Field>
                     <Field label="Campaign" name="campaign" error={errors.campaign} optional hint="Groups pages, coupons and orders in reports.">
@@ -154,8 +139,7 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
 
 function Basics({ data, lookups, canEdit, onSaved, toast }) {
     const p = data.page;
-    const init = { name: p.name || '', courseId: String(p.course_id || ''), siteRoute: p.site_route || '', slug: p.slug || '', campaign: p.campaign || '', description: p.description || '' };
-    const routes = lookups.siteRoutes || [];
+    const init = { name: p.name || '', courseId: String(p.course_id || ''), slug: p.slug || '', campaign: p.campaign || '', description: p.description || '' };
     const [v, setV] = useState(init);
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
@@ -175,22 +159,15 @@ function Basics({ data, lookups, canEdit, onSaved, toast }) {
                     <Field label="Landing page name" name="name" error={errors.name} required>
                         <input id="f-name" className="adm-input" value={v.name} maxLength={190} onChange={(e) => setV({ ...v, name: e.target.value })} />
                     </Field>
-                    {p.site ? (
-                        <Field label="Site page it replaces" name="siteRoute" error={errors.siteRoute} required hint={p.status === 'PUBLISHED' ? 'Unpublish the page to change this.' : p.siteOriginal ? `While published, shown instead of ${p.siteOriginal}.` : undefined}>
-                            <select id="f-siteRoute" className="adm-input" value={v.siteRoute} disabled={p.status === 'PUBLISHED' || p.status === 'SCHEDULED'} onChange={(e) => setV({ ...v, siteRoute: e.target.value })}>
-                                {routes.map((r) => <option key={r.key} value={r.key}>{r.label} ({r.path})</option>)}
-                            </select>
-                        </Field>
-                    ) : (
+                    {p.site ? null : (
                     <Field label="Course" name="courseId" error={errors.courseId} required hint={data.orders > 0 ? 'People bought through this page, so the course can no longer change.' : undefined}>
                         <select id="f-courseId" className="adm-input" value={v.courseId} disabled={data.orders > 0} onChange={(e) => setV({ ...v, courseId: e.target.value })}>
                             {lookups.courses.map((c) => <option key={c.id} value={c.id}>{c.title}{c.artist ? ` · ${c.artist}` : ''}</option>)}
                         </select>
                     </Field>
                     )}
-                    <Field label={p.site ? 'Short name' : 'Address'} name="slug" error={errors.slug} required
-                           hint={p.site ? 'Only used inside the admin.' : course && v.slug === course.slug ? 'Same as the course: when published, this page replaces the course page.' : 'Its own address; the course page is unchanged.'}>
-                        <div className="lpa-slug">{!p.site && <span>/course/</span>}<input id="f-slug" className="adm-input" value={v.slug} onChange={(e) => setV({ ...v, slug: slugify(e.target.value) })} /></div>
+                    <Field label="Address" name="slug" error={errors.slug} required hint="The page's own address. Changing it on a live page breaks links already shared.">
+                        <div className="lpa-slug"><span>/landing/</span><input id="f-slug" className="adm-input" value={v.slug} onChange={(e) => setV({ ...v, slug: slugify(e.target.value) })} /></div>
                     </Field>
                     <Field label="Campaign" name="campaign" error={errors.campaign} optional>
                         <input id="f-campaign" className="adm-input" list="lp-campaigns2" value={v.campaign} onChange={(e) => setV({ ...v, campaign: e.target.value })} />
@@ -576,7 +553,7 @@ function Seo({ cfg, setCfg, data, errors, canEdit }) {
                 </div>
                 {text('title', 'Page title', 70, 'Around 50–60 characters reads best in search results.')}
                 {text('description', 'Meta description', 170, undefined, 2)}
-                {text('canonical', 'Canonical address', undefined, 'Only for a campaign copy that should credit another page, e.g. /course/watercolour-landscapes-for-beginners.')}
+                {text('canonical', 'Canonical address', undefined, 'Only for a copy that should credit another page, e.g. /landing/watercolour-landscapes-for-beginners.')}
                 <div className="lpa-toggles">
                     <Toggle checked={s.index !== false} onChange={(on) => setS({ index: on })} name="seo.index" label="Show in search engines" description="Off adds noindex, e.g. for paid-ads-only pages." />
                     <Toggle checked={s.sitemap !== false} onChange={(on) => setS({ sitemap: on })} name="seo.sitemap" label="List in the sitemap" />
@@ -622,7 +599,7 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
     const methods = availableMethods(data.payments);
     const checks = p.site ? [
         { ok: !draftDirty, text: draftDirty ? 'You have unsaved changes in the draft.' : 'Draft saved.', fix: draftDirty ? 'Save draft' : null },
-        { ok: !!p.site_route, text: p.siteLabel ? `Replaces ${p.siteOriginal} at ${p.publicUrl}.` : 'Choose the site page it replaces.', step: 'basics' },
+        { ok: true, text: `Goes live at ${p.fullUrl || p.publicUrl}.` },
         { ok: !!(data.config.seo && data.config.seo.description), text: 'Has a search description.', warn: true, step: 'seo' },
     ] : [
         { ok: !draftDirty, text: draftDirty ? 'You have unsaved changes in the draft.' : 'Draft saved.', fix: draftDirty ? 'Save draft' : null },
@@ -632,7 +609,7 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
     ];
     const blocked = checks.some((c) => !c.ok && !c.warn);
     const act = async (action, body = {}) => {
-        if (action === 'unpublish' && !(await confirm({ title: 'Unpublish this page?', body: data.page.site ? `The original page comes back at ${data.page.publicUrl}.` : data.page.takesOverCourse ? 'The regular course page comes back at this address.' : 'The address stops working until you publish again.', confirmLabel: 'Unpublish' }))) return;
+        if (action === 'unpublish' && !(await confirm({ title: 'Unpublish this page?', body: `${data.page.publicUrl} stops working until you publish again.`, confirmLabel: 'Unpublish' }))) return;
         if (action === 'archive' && !(await confirm({ title: 'Archive this page?', body: 'It disappears from the lists and its address stops working. Orders and analytics are kept.', confirmLabel: 'Archive' }))) return;
         setBusy(action);
         setErrors({});
@@ -817,8 +794,9 @@ function EditPage({ pageId, caps, lookups, catalog, toast }) {
                         <Badge tone={st.tone} dot>{st.label}</Badge>
                         {data.hasUnpublishedChanges && p.status === 'PUBLISHED' && <Badge tone="amber">Unpublished changes</Badge>}
                         {p.status === 'SCHEDULED' && p.publish_at && <span>Goes live {fmtDate(p.publish_at, true)}</span>}
-                        <span>{p.publicUrl}</span>
-                        <span>{p.site ? `Site page: ${p.siteLabel || p.site_route}` : p.course_title}</span>
+                        <span className="lpa-url" data-testid="lp-url">{p.status === 'PUBLISHED' ? <a href={p.publicUrl} target="_blank" rel="noopener noreferrer">{p.fullUrl || p.publicUrl}</a> : <>{p.fullUrl || p.publicUrl} <small>(after publishing)</small></>}
+                            <button type="button" className="lpa-copy" aria-label="Copy the page address" onClick={() => { try { navigator.clipboard.writeText(p.fullUrl || p.publicUrl); toast('Address copied.'); } catch (e) { /* not allowed */ } }}><i className="fa fa-clipboard" aria-hidden="true"></i></button></span>
+                        <span>{p.site ? 'Information page' : p.course_title}</span>
                     </p>
                 </div>
                 <div className="lpa-ehead__actions">
@@ -890,7 +868,7 @@ export default function LandingEditor() {
                      crumbs={[{ label: 'Landing pages', href: '/admin/landing' }, { label: 'All landing pages', href: '/admin/landing/pages' }, { label: isNew ? 'Create' : 'Edit' }]}>
             {isNew ? (
                 <>
-                    <PageHeader eyebrow="Landing Page Management" title="Create landing page" subtitle="Choose the course and a template. Everything else is filled from the course and can be changed in the next steps." />
+                    <PageHeader eyebrow="Landing Page Management" title="Create landing page" subtitle="Choose the page type and a template. The page gets its own address under /landing/, made from its name." />
                     {has(caps, 'landing.publish') ? <CreatePage lookups={lookups} catalog={catalog} defaults={defaults} toast={toast} />
                         : <Card><EmptyState icon="fa-lock" title="You can't create pages">Ask a super admin for publishing rights.</EmptyState></Card>}
                 </>

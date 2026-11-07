@@ -17,8 +17,8 @@ import java.util.Map;
 /**
  * /sitemap.xml: the public pages search engines should know about: home, the course list, every live course, published
  * landing pages whose live version has "List in the sitemap" and "Show in search engines" on (Landing Page Management >
- * SEO & marketing), the journal and its published stories, and the marketplace. A landing page that replaces a course
- * page (same address) decides for that address. The host comes from the request (CloudFrontFilter already set https).
+ * SEO & marketing) at their own address /landing/{slug}, the journal and its published stories, and the marketplace. The
+ * host comes from the request (CloudFrontFilter already set https).
  */
 @RestController
 public class SitemapController {
@@ -41,16 +41,15 @@ public class SitemapController {
         for (Row c : db.select("select slug, updated_at from courses where status = '1' order by id")) {
             urls.put("/course/" + c.str("slug"), day(c.get("updated_at")));
         }
+        // landing pages have their own address (/landing/{slug}); listed when they allow it, never instead of a course page
         for (Row p : db.select("select p.slug, p.published_at, v.config from landing_pages p join landing_page_versions v on v.id = p.published_version_id"
-                + " where p.status = 'PUBLISHED' and p.course_id is not null order by p.id")) {
+                + " where p.status = 'PUBLISHED' order by p.id")) {
             Map<String, Object> seo = seo(p.str("config"));
-            String path = "/course/" + p.str("slug");
+            String path = com.artistikcity.landing.LandingPages.path(p.str("slug"));
             boolean listed = !Boolean.FALSE.equals(seo.get("sitemap")) && !Boolean.FALSE.equals(seo.get("index"));
             String canonical = seo.get("canonical") == null ? "" : String.valueOf(seo.get("canonical")).trim();
             if (listed && (canonical.isEmpty() || canonical.equals(path) || canonical.equals(base + path))) {
                 urls.put(path, day(p.get("published_at")));
-            } else {
-                urls.remove(path);       // a hidden landing page also hides the course page it replaces
             }
         }
         urls.put("/studio-stories", "");
@@ -59,17 +58,6 @@ public class SitemapController {
         }
         urls.put("/marketplace", "");
         urls.put("/how-it-works", "");
-        urls.put("/commission/step-1", "");
-        // a landing page replacing a site page: its last publish date, or left out when it is hidden from search engines
-        for (Row p : db.select("select p.site_route, p.published_at, v.config from landing_pages p join landing_page_versions v on v.id = p.published_version_id"
-                + " where p.status = 'PUBLISHED' and p.kind = 'SITE' order by p.id")) {
-            com.artistikcity.landing.LandingCatalog.SiteRoute route = com.artistikcity.landing.LandingCatalog.siteRoute(p.str("site_route", ""));
-            if (route == null) continue;
-            Map<String, Object> seo = seo(p.str("config"));
-            boolean listed = !Boolean.FALSE.equals(seo.get("sitemap")) && !Boolean.FALSE.equals(seo.get("index"));
-            if (listed) urls.put(route.path(), day(p.get("published_at")));
-            else urls.remove(route.path());
-        }
 
         StringBuilder x = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         urls.forEach((path, mod) -> {

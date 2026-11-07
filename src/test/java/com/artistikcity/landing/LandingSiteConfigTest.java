@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Site pages (no course) and the new sections: what the editor's config may and may not contain. */
+/** Information pages (no course) and the new sections: what the editor's config may and may not contain. */
 class LandingSiteConfigTest {
 
     private static Map<String, Object> siteConfig() {
@@ -117,11 +117,9 @@ class LandingSiteConfigTest {
     }
 
     @Test
-    void onlyTheListedSiteAddressesExist() {
-        assertEquals("/how-it-works", LandingCatalog.siteRoute("how-it-works").path());
-        assertEquals("/commission/step-1", LandingCatalog.siteRoute("commission-step-1").path());
-        assertNull(LandingCatalog.siteRoute("login"));
-        assertNull(LandingCatalog.siteRoute("../admin"));
+    void everyLandingPageHasItsOwnAddress() {
+        assertEquals("/landing/how-it-works", LandingPages.path("how-it-works"));
+        assertEquals("/landing/watercolour-landscapes-for-beginners/enroll", LandingPages.enrollPath("watercolour-landscapes-for-beginners"));
     }
 
     @Test

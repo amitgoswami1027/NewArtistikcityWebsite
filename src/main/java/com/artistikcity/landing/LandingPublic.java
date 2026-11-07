@@ -21,9 +21,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Renders a published landing page at /course/{slug} (CoursesController asks here first), a site page it replaces
- * (/how-it-works, /commission/step-1: PagesController and CommissionController ask here first) and the admin preview of a
- * draft. Sets the anonymous visitor cookie (ac_lv) and keeps utm_* from the address for 30 days (ac_utm) so an order
+ * Renders a published landing page at its own address /landing/{slug} (LandingCheckoutController maps it) and the admin
+ * preview of a draft. A landing page never takes over an existing page of the site. Sets the anonymous visitor cookie (ac_lv) and keeps utm_* from the address for 30 days (ac_utm) so an order
  * placed later is credited to its campaign. Views by bots, staff and previews are not counted.
  */
 @Component
@@ -50,11 +49,6 @@ public class LandingPublic {
 
     public Row published(String slug) {
         return pages.published(slug);
-    }
-
-    /** The live landing page replacing a site page (LandingCatalog.SITE_ROUTES), or null. */
-    public Row publishedSite(String route) {
-        return pages.publishedSite(route);
     }
 
     public ResponseEntity<String> render(HttpServletRequest request, Row page) {

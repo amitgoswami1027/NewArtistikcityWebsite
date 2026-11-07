@@ -43,7 +43,7 @@ AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc), the configuration panel's encryption and allow-list
 (`config/panel/ConfigPanelTest`), SNS SMS requests (`auth/sms/SnsSmsSenderTest`) and the Studio Stories / site layout checks
 (`admin/StudioAndLayoutTest`), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
-`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing.py` covers Landing Page Management end to end (`test_landing_showcase.py`: site pages and the three showcase pages) (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
+`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing.py` covers Landing Page Management end to end (`test_landing_showcase.py`: own addresses, information pages and the three showcase pages) (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
 new admin API, secret masking, validation and commit of panel values, site settings and the Studio Stories workflow. Browser tests for the purchase flow live in `tests/e2e`.
 The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
 the rest get 409 or REFUND_REQUIRED) and `seats/SeatRaceIT` (20 students, 5 seats: exactly 5 get one) run only with
@@ -63,7 +63,7 @@ print buyer / commission client, 3 Ishita `ishita.bose@example.com` email not ve
 student with live listing `shaniwar-wada-at-dusk`), courses 1-5, course orders in every payment state, shop orders `AC-S-SEED01..05`
 (DELIVERED / SHIPPED / PACKED / PAID / PAYMENT_PENDING), 3 carts, commissions `AC-SEED-C01..04`, artist threads, reviews, wishlists,
 contacts, newsletter. Course 3 has no enrolments on purpose (test_platform caps it at one seat). Diya owns no course (tests buy for her).
-Landing pages: 1 Watercolour (published, replaces `/course/watercolour-landscapes-for-beginners`; UPI, cards, net banking, PayPal),
+Landing pages: 1 Watercolour (published at `/landing/watercolour-landscapes-for-beginners`; UPI, cards, net banking, PayPal),
 2 Acrylic festive campaign (draft, own address; UPI and cards only); coupons WATERCOLOUR10 (page 1), FIRSTCOURSE (first-time), SUMMER25 (inactive).
 Optional demo pack `database/demo/demo-data.sql` (`LOAD-DEMO-DATA.bat` / `-DemoData`; generated, idempotent, ids 100+/1000+):
 teachers `ananya|kabir|meera|rohit|sana@artistikcity.com`, students `ishaan|neha|arjun|sophia|rahul|emily@example.com`,
@@ -281,9 +281,10 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   full write-up in docs/landing-pages.md). Everything about a landing page is managed there: pages, templates (`LandingCatalog`),
   sections, design, pricing & offers, **per-page payment settings**, checkout, coupons, SEO & marketing, orders & refunds, analytics,
   media, defaults and Team access. Public page: server-rendered (`LandingPublic` → `LandingView` → `templates/landing/page.mustache`,
-  `static/css/landing.css`, `static/js/landing.js`, no React); a PUBLISHED page whose slug equals the course slug replaces
-  `/course/{slug}` (`CoursesController` asks first), unpublishing brings the course page back; campaign pages get their own slug.
-  Checkout `/course/{slug}/enroll` (React `Landing/Checkout`) + JSON `/landing/checkout/{pageId}/quote|order|pay|failed`; a landing
+  `static/css/landing.css`, `static/js/landing.js`, no React) at the page's own address **`/landing/{slug}`** (slug generated from
+  the name when none is typed, unique; full link shown in the list and editor). A landing page never replaces a site page:
+  `/course/{slug}`, `/how-it-works` and `/commission/step-1` are always the original pages.
+  Checkout `/landing/{slug}/enroll` (React `Landing/Checkout`; old `/course/{slug}/enroll` links redirect) + JSON `/landing/checkout/{pageId}/quote|order|pay|failed`; a landing
   purchase is a normal course `orders` row with `landing_page_id`, coupon, amounts, `payment_method|provider`, UTM; completion,
   webhook and reconciler stay in `CheckoutController` (expected amount = the order's own price, `LandingHooks.onPaid` after every
   verified payment). Content config is versioned JSON (`draft_config` → publish = `landing_page_versions` row; rollback re-publishes;
@@ -298,16 +299,13 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   Optional lead capture = the site newsletter (`POST /api/newsletter`, source `landing:<page id>`), with a consent tick.
   Migration `2026-11-08_landing_pages.sql`. React 17 doesn't batch state updates inside promises: guard renders on every piece of
   state a load sets (`if (!data || !cfg)`), not just the first.
-  **Site pages** (`landing_pages.kind = 'SITE'`, `site_route`, `course_id` null; migration `2026-11-09_landing_site_pages.sql`):
-  a landing page can replace `/how-it-works` or `/commission/step-1` (whitelist `LandingCatalog.SITE_ROUTES`;
-  `PagesController.howItWorks` / `CommissionController.step1` ask `LandingPublic.publishedSite(route)` first; unpublishing brings
-  the original back). No price/payments/checkout (`LandingConfig.normalize(cfg, site)` refuses `COURSE_ONLY` sections, the
-  main button needs `cta.primaryHref`); one live page per route; instructors can't see them. The commission request section
-  writes the theme into the wizard's sessionStorage `artistikcity.commission.v1` and opens step 2 (keep it in sync with
+  **Information pages** (`landing_pages.kind = 'SITE'`, `course_id` null; migration `2026-11-09_landing_site_pages.sql`; the
+  `site_route` column is unused): no price/payments/checkout (`LandingConfig.normalize(cfg, site)` refuses `COURSE_ONLY` sections,
+  the main button needs `cta.primaryHref`); instructors can't see them. The commission request section writes the theme into
+  the wizard's sessionStorage `artistikcity.commission.v1` and opens `/commission/step-2` (keep it in sync with
   `CommissionStore.THEMES`; `LandingSiteConfigTest` checks the ids). `LandingShowcase` (ApplicationRunner, once per DB,
-  settings `landing_pages`/`showcase_v1`, off with `app.landing.showcase=false`) creates the How it works, Watercolour and
-  Commission pages through `LandingPages`; tests: `tests/system/test_landing_showcase.py`, `tests/e2e/specs/landing-showcase.spec.js`
-  (`how-it-works.spec.js` unpublishes the site page to test the built-in page, then publishes it again).
+  settings `landing_pages`/`showcase_v1`, off with `app.landing.showcase=false`) creates /landing/how-it-works, the Watercolour
+  page and /landing/commission through `LandingPages`; tests: `tests/system/test_landing_showcase.py`, `tests/e2e/specs/landing-showcase.spec.js`
 - Blog posts ("Studio Stories") are public only when `status = 1`; drafts 404 for visitors (admins can preview). Status: 0 draft, 1 published,
   2 archived, 3 in review, 4 scheduled (`publish_at`; `BlogAdminController.publishDue` publishes due ones every minute). CMS: Admin > Content >
   Studio Stories (`/admin/content/stories`, `/new`, `/{id}`; page `Admin/Content/StudioStories` = dashboard or editor), JSON API

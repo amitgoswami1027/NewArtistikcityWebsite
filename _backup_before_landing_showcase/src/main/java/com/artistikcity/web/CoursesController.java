@@ -1,0 +1,135 @@
+package com.artistikcity.web;
+
+import com.artistikcity.http.NotFoundException;
+import com.artistikcity.inertia.Inertia;
+import com.artistikcity.service.CourseService;
+import com.artistikcity.support.Db;
+import com.artistikcity.support.Row;
+import com.artistikcity.support.Str;
+import com.artistikcity.support.Values;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/** Course catalogue and course details (CoursesController.php). */
+@Controller
+public class CoursesController {
+
+    private final Inertia inertia;
+    private final Db db;
+    private final CourseService courses;
+    private final com.artistikcity.http.Auth auth;
+    private final com.artistikcity.web.user.WishlistService wishlist;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.landing.LandingPublic landing;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.seats.SeatService seatService;
+
+    public CoursesController(Inertia inertia, Db db, CourseService courses, com.artistikcity.http.Auth auth,
+                             com.artistikcity.web.user.WishlistService wishlist) {
+        this.inertia = inertia;
+        this.db = db;
+        this.courses = courses;
+        this.auth = auth;
+        this.wishlist = wishlist;
+    }
+
+    @GetMapping("/courses")
+    public ResponseEntity<String> courses(HttpServletRequest request,
+                                          @RequestParam(value = "type", required = false) String type,
+                                          @RequestParam(value = "medium", required = false) String medium,
+                                          @RequestParam(value = "genre", required = false) String genre,
+                                          @RequestParam(value = "skill", required = false) String skill,
+                                          @RequestParam(value = "category", required = false) String category,
+                                          @RequestParam(value = "age", required = false) String age,
+                                          @RequestParam(value = "q", required = false) String q) {
+        // "all" (the catalog view) lists courses and workshops together; the medium / genre / skill / age / q
+        // parameters are passed to the page as pre-selected filters so the visitor can refine or clear them
+        // in the browser without a round trip.
+        String t = type == null || type.isEmpty() ? "course" : type.toLowerCase();
+        String typeSlug = "all".equals(t) ? null : t;
+        var list = courses.withStats(courses.withRelations(courses.catalogue(typeSlug, null, null, null, Values.toLong(category)), true));
+        Map<String, Object> filters = new LinkedHashMap<>();
+        filters.put("medium", medium == null ? "" : medium);
+        filters.put("genre", genre == null ? "" : genre);
+        filters.put("skill", skill == null ? "" : skill);
+        filters.put("age", age == null ? "" : age);
+        filters.put("q", q == null ? "" : q);
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put("courses", courses.collection(list));
+        props.put("categories", db.select("select * from categories order by id"));
+        props.put("course_types", db.select("select * from course_types order by id"));
+        // the filter lists: switched on and not archived; parent_id nests them (Admin > Catalog)
+        props.put("genres", db.select("select id, name, genre_slug, parent_id from genres where status = 1 and archived_at is null order by name"));
+        props.put("mediums", db.select("select id, name, medium_slug, parent_id from mediums where status = 1 and archived_at is null order by id"));
+        props.put("skills", db.select("select id, name, skill_slug, parent_id from skills where status = 1 and archived_at is null order by id"));
+        props.put("type", Str.ucfirst(t));
+        props.put("filters", filters);
+        return inertia.render(request, "Courses", props);
+    }
+
+    @GetMapping("/course/{slug}")
+    public ResponseEntity<String> courseDetails(HttpServletRequest request, @PathVariable("slug") String slug) {
+        // a published landing page (Admin > Landing Page Management) takes over this address; unpublishing it brings this page back
+        com.artistikcity.support.Row lp = landing == null ? null : landing.published(slug);
+        if (lp != null) {
+            return landing.render(request, lp);
+        }
+        Row course = NotFoundException.orFail(db.first("select * from courses where slug = ?", slug));
+        courses.withRelations(course, false);
+        courses.withStats(new ArrayList<>(List.of(course)));
+        long id = course.lng("id");
+
+        // curriculum: units (modules) with their lessons
+        List<Row> modules = db.select("select id, module_title, module_duration from course_modules"
+                + " where course_id = ? and status = '1' order by sort_order, id", id);
+        List<Row> lessons = db.select("select id, module_id, lesson_title, lesson_description, case when lesson_pdf is null or lesson_pdf = ''"
+                + " then 0 else 1 end as has_download, case when video_url is null or video_url = '' then 0 else 1 end as has_video from course_module_lessons where course_id = ? and status = '1' order by sort_order, id", id);
+        for (Row m : modules) {
+            List<Row> own = new ArrayList<>();
+            for (Row l : lessons) {
+                if (m.lng("id").equals(l.lng("module_id"))) {
+                    own.add(l);
+                }
+            }
+            m.put("lessons", own);
+        }
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("students", course.get("students"));
+        stats.put("reviews", course.get("reviews"));
+        stats.put("positive", course.get("positive"));
+        stats.put("lessons", lessons.size());
+        stats.put("downloads", lessons.stream().filter(l -> l.lng("has_download", 0) == 1).count());
+        stats.put("units", modules.size());
+
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put("course", courses.resource(course));
+        props.put("curriculum", modules);
+        props.put("projects", db.select("select id, project_title, project_description from course_projects"
+                + " where course_id = ? and status = '1' order by id", id));
+        props.put("reviews", db.select("select r.id, r.rating, r.review, r.created_at, u.name, u.slug, u.profile_photo, u.id as user_id"
+                + " from course_reviews r left join users u on u.id = r.added_by_id and r.added_by_type = 'Student'"
+                + " where r.course_id = ? and r.status = 1 order by r.id desc limit 12", id));
+        props.put("gallery", db.select("select a.id, a.photo_name, a.user_id, u.name, u.slug from student_artworks a"
+                + " join users u on u.id = a.user_id where a.status = 1 order by a.id desc limit 8"));
+        // the course's intro / trailer video (lesson videos are only shown to enrolled students)
+        String intro = db.first("select intro_video_url from courses where id = ?", id).str("intro_video_url", "").trim();
+        props.put("videos", intro.isEmpty() ? List.of() : List.of(Map.of("video_title", "Trailer", "video_url", intro)));
+        props.put("related", courses.withStats(courses.withRelations(db.select("select * from courses where status = 1 and id <> ?"
+                + " and course_start_date >= ? order by case when medium_id = ? then 0 else 1 end, id limit 4", id, java.time.LocalDate.now(),
+                course.get("medium_id")), true)));
+        props.put("stats", stats);
+        props.put("seats", seatService.forStudent(id, auth.userId(request)));
+        props.put("saved", wishlist.isSaved(auth.userId(request), com.artistikcity.web.user.WishlistService.COURSE, id));
+        return inertia.render(request, "CourseDetails", props);
+    }
+}

@@ -76,25 +76,48 @@ public class LandingCheckoutController {
 
     // ------------------------------------------------------------------------------------------------ the page
 
-    @GetMapping("/course/{slug}/enroll")
+    @org.springframework.beans.factory.annotation.Autowired
+    private LandingPublic publicView;
+
+    /** The public landing page: its own address, generated from the page's slug (Admin › Landing Page Management). */
+    @GetMapping({"/landing/{slug}", "/landing/{slug}/"})
+    public ResponseEntity<String> landing(HttpServletRequest request, @PathVariable("slug") String slug) {
+        Row page = pages.published(slug);
+        if (page == null) {
+            throw new com.artistikcity.http.NotFoundException();
+        }
+        return publicView.render(request, page);
+    }
+
+    @GetMapping("/landing/{slug}/enroll")
     public ResponseEntity<String> page(HttpServletRequest request, @PathVariable("slug") String slug) {
         return render(request, slug, null);
     }
 
-    @GetMapping("/course/{slug}/enroll/done")
+    @GetMapping("/landing/{slug}/enroll/done")
     public ResponseEntity<String> done(HttpServletRequest request, @PathVariable("slug") String slug, @RequestParam(value = "order_id", required = false) Long orderId) {
         return render(request, slug, orderId);
     }
 
+    /** Checkout links of the previous release (/course/{slug}/enroll): sent on to the landing page's checkout, or to the course. */
+    @GetMapping({"/course/{slug}/enroll", "/course/{slug}/enroll/done"})
+    public ResponseEntity<String> legacy(HttpServletRequest request, @PathVariable("slug") String slug) {
+        String q = request.getQueryString() == null ? "" : "?" + request.getQueryString();
+        if (pages.published(slug) != null) {
+            return redirect(LandingPages.enrollPath(slug) + (request.getRequestURI().endsWith("/done") ? "/done" : "") + q);
+        }
+        return redirect("/course/" + slug);
+    }
+
     private ResponseEntity<String> render(HttpServletRequest request, String slug, Long doneOrder) {
         Row page = pages.published(slug);
-        if (page == null) {
-            Row c = db.first("select slug from courses where slug = ?", slug);
-            return redirect(c == null ? "/courses?type=all" : "/course/" + slug);
+        if (page == null || page.get("course_id") == null) {
+            if (page != null) return redirect(LandingPages.publicPath(page));     // an information page sells nothing
+            return redirect("/courses?type=all");
         }
         Row user = auth.user(request);
         if (user == null) {
-            String back = "/course/" + slug + "/enroll" + (request.getQueryString() == null ? "" : "?" + request.getQueryString());
+            String back = LandingPages.enrollPath(slug) + (request.getQueryString() == null ? "" : "?" + request.getQueryString());
             return redirect(PurchaseIntent.signIn(back));
         }
         long uid = user.lng("id");
@@ -314,7 +337,7 @@ public class LandingCheckoutController {
                 }
                 String base = Inertia.baseUrl(request);
                 String[] created = gateways.paypalCreateOrder(order.str("order_number"), usd, String.valueOf(view.course(courseId).get("title")),
-                        base + "/checkout/paypal/return", base + "/course/" + page.str("slug") + "/enroll?payment=cancelled");
+                        base + "/checkout/paypal/return", base + LandingPages.enrollPath(page.str("slug")) + "?payment=cancelled");
                 if (created[1] == null) {
                     return error(HttpStatus.BAD_GATEWAY, "PayPal didn't respond. Please try again.");
                 }
@@ -409,7 +432,7 @@ public class LandingCheckoutController {
     /** Where a paid landing order lands: the page's confirmation screen, keeping the course checkout's flags. */
     public static String doneUrl(Row page, long orderId, String courseUrl) {
         String flags = courseUrl != null && courseUrl.contains("duplicate=1") ? "&duplicate=1" : courseUrl != null && courseUrl.contains("soldout=1") ? "&soldout=1" : "";
-        return "/course/" + page.str("slug") + "/enroll/done?order_id=" + orderId + flags;
+        return LandingPages.enrollPath(page.str("slug")) + "/done?order_id=" + orderId + flags;
     }
 
     private static String visitor(HttpServletRequest request) {
