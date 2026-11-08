@@ -38,6 +38,14 @@ public class LandingPages {
         this.json = json;
     }
 
+    /** Null while the landing migrations aren't applied: public pages then simply have no landing page (no error). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private LandingSchema schema;
+
+    private boolean ready() {
+        return schema == null || schema.ok();
+    }
+
     public Row find(long id) {
         return db.find("landing_pages", id);
     }
@@ -49,7 +57,7 @@ public class LandingPages {
 
     /** The live page for a public address, with its published config; null when there is none. */
     public Row published(String slug) {
-        if (slug == null || !SLUG.matcher(slug).matches()) {
+        if (slug == null || !SLUG.matcher(slug).matches() || !ready()) {
             return null;
         }
         return db.first("select p.*, v.config as published_config, v.version_no from landing_pages p join landing_page_versions v on v.id = p.published_version_id"
@@ -306,6 +314,7 @@ public class LandingPages {
     /** Scheduled pages go live on time (checked every minute). */
     @Scheduled(cron = "15 */1 * * * *")
     public void publishDue() {
+        if (!ready()) return;
         for (Row p : db.select("select id from landing_pages where status = 'SCHEDULED' and publish_at <= ?", LocalDateTime.now())) {
             Map<String, String> errors = publish(p.lng("id"), null, "Scheduled publish");
             if (!errors.isEmpty()) {

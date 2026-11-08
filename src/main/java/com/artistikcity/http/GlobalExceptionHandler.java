@@ -122,7 +122,7 @@ public class GlobalExceptionHandler {
     }
 
     /** A small branded error page (no app shell, so it works even when the page props can't be built). */
-    static ResponseEntity<String> page(int code, String title, String message, String ref) {
+    public static ResponseEntity<String> page(int code, String title, String message, String ref) {
         String html = """
                 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
                 <meta name="robots" content="noindex"><title>%s · ArtistikCity</title>

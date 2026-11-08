@@ -119,6 +119,10 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   and never concatenate input into SQL.
 - `Db` returns `Row` maps with **lower-case column names**. Dates are serialized as Laravel strings
   (`yyyy-MM-dd HH:mm:ss`), and the React pages depend on that exact JSON shape.
+- **Collations:** a database loaded from a dump (AWS RDS imported from a PC) keeps each table's collation, while tables created by
+  later migrations get the database default; mixed collations break joins/UNIONs on text ("Illegal mix of collations").
+  `2026-11-10_landing_collation.sql` aligns the landing tables and the database default with `orders`. Don't add COLLATE/CHARSET to
+  new CREATE TABLEs: let them inherit the database default.
 - **Schema changes:** update `database/schema.sql` (fresh installs) **and** add a dated, re-runnable MySQL script to
   `database/migrations/` for databases that already hold data (see its README; MySQL has no `ADD COLUMN IF NOT EXISTS`).
   Update `seed.sql` if demo data needs it. Types: `BIGINT AUTO_INCREMENT` keys, `VARCHAR(n)` / `LONGTEXT`, `DATETIME`,

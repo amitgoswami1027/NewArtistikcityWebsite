@@ -314,10 +314,32 @@ Then open `https://www.yourdomain.com` - courses, photos, the studio and the adm
 | Every page is **403** | The server's `ORIGIN_VERIFY_SECRET` differs from CloudFront's header (secret changed without redeploying). Re-run the last deploy. |
 | **502 / 504** from CloudFront | The app isn't running or is still starting. Check the log; `--status` on the server. |
 | Images **403/404** | File not in the bucket under `storage/...` (step 7.4), or the bucket policy was changed. |
+| Error 500 with **"Illegal mix of collations"** in the log (e.g. on `/admin/landing`) | Tables imported from your PC use a different collation than tables created on RDS later. Deploy a release with `2026-11-10_landing_collation.sql` (it runs automatically) or apply it by hand (below). |
+| Landing Page Management says **Database update needed** (or Error 500 on `/admin/landing`, and course checkout fails) | The database is missing `database/migrations/2026-11-08_landing_pages.sql` and/or `2026-11-09_landing_site_pages.sql` (the page names which). Re-run the last deploy: it applies migrations that are not in `schema_migrations` yet. If the page still says so, `schema_migrations` lists them without their tables (e.g. an imported dump): apply them by hand, see "Apply a migration by hand" below. Both are safe to run twice. |
 | Deploy fails at "database migration" | The SQL error is in the workflow log; nothing was changed on the live site. Fix the migration and push again. |
 | Deploy fails at the health check and rolls back | The app's last log lines are in the workflow log (often a missing setting). |
 | Stack stuck on `AppInstance` | The server's set-up script failed: EC2 → instance → Actions → Monitor → *Get system log*, or `/var/log/cloud-init-output.log` via Session Manager. |
 | `aws cloudformation delete-stack` fails | The database has deletion protection on purpose; turn it off in RDS first. The bucket and image repository are kept when the stack is deleted. |
+
+### Apply a migration by hand
+
+Open the tunnel to RDS (Step 7, part 2), then in a second PowerShell window in the project folder:
+
+```powershell
+$out = aws cloudformation describe-stacks --region ap-south-1 --stack-name artistikcity --query "Stacks[0].Outputs" | ConvertFrom-Json
+$sec = aws secretsmanager get-secret-value --region ap-south-1 --secret-id ($out | ? OutputKey -eq DatabaseSecretArn).OutputValue `
+  --query SecretString --output text | ConvertFrom-Json
+$env:MYSQL_PWD = $sec.password
+$mysql = ".\.tools\mysql-8.4.13-winx64\bin\mysql.exe"
+foreach ($f in "2026-11-08_landing_pages.sql", "2026-11-09_landing_site_pages.sql", "2026-11-10_landing_collation.sql") {
+  & $mysql -h 127.0.0.1 -P 13306 -u $sec.username --ssl-mode=REQUIRED --default-character-set=utf8mb4 artistikcity --execute="source database/migrations/$f"
+  & $mysql -h 127.0.0.1 -P 13306 -u $sec.username --ssl-mode=REQUIRED artistikcity --execute="INSERT IGNORE INTO schema_migrations (filename) VALUES ('$f')"
+}
+Remove-Item Env:\MYSQL_PWD
+```
+
+The landing scripts only add tables and columns (nothing is dropped or changed) and can be run again safely. The app notices
+the new tables within a minute; no restart is needed.
 
 ## Files
 

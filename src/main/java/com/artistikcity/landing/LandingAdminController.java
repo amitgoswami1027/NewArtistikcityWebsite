@@ -72,6 +72,30 @@ public class LandingAdminController {
         this.refunds = refunds;
     }
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private LandingSchema schema;
+
+    /** Thrown before any landing admin page or API runs when the database hasn't had the landing migrations applied. */
+    static final class NotMigrated extends RuntimeException {
+        NotMigrated(String message) {
+            super(message);
+        }
+    }
+
+    @org.springframework.web.bind.annotation.ModelAttribute
+    void requireSchema() {
+        if (!schema.ok()) throw new NotMigrated(schema.message());
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(NotMigrated.class)
+    public ResponseEntity<String> notMigrated(HttpServletRequest request, NotMigrated e) {
+        if (request.getRequestURI().startsWith("/admin/api/")) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(json.encode(Map.of("message", e.getMessage(), "code", "LANDING_MIGRATION_MISSING")));
+        }
+        return com.artistikcity.http.GlobalExceptionHandler.page(503, "Database update needed", e.getMessage(), null);
+    }
+
     // =================================================================================================== pages
 
     @GetMapping({"/admin/landing", "/admin/landing/{tab}"})
