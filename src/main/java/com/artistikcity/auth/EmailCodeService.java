@@ -29,7 +29,7 @@ public class EmailCodeService {
     public static final int MAX_ATTEMPTS = 5;
     public static final int RESEND_COOLDOWN_SECONDS = 30;
 
-    public record SendResult(int expiresIn, int resendIn, String devCode) {
+    public record SendResult(int expiresIn, int resendIn, String devCode, boolean simulated) {
     }
 
     private final Db db;
@@ -62,7 +62,7 @@ public class EmailCodeService {
         return (mailer.enabled() || devCodesVisible(request)) && tableReady();
     }
 
-    private boolean tableReady() {
+    public boolean tableReady() {
         if (!tableReady) {
             try {
                 tableReady = db.count("select count(*) from information_schema.tables where table_schema = database() and table_name = 'auth_email_codes'") > 0;
@@ -79,6 +79,11 @@ public class EmailCodeService {
 
     /** Sends a new code to {@code email} (normalised). Throws {@link OtpService.OtpLimitException} when a limit is hit. */
     public SendResult send(HttpServletRequest request, String email, String name) {
+        return send(request, email, name, false);
+    }
+
+    /** With {@code simulate} nothing is e-mailed: the code is returned to be shown on the screen (see {@link LoginSettings#email}). */
+    public SendResult send(HttpServletRequest request, String email, String name, boolean simulate) {
         String ip = AuthEvents.ip(request);
         LocalDateTime now = LocalDateTime.now();
         RateLimiter.Decision burst = limiter.hit("ecode:send:ip:" + ip, 5, 60);
@@ -106,6 +111,10 @@ public class EmailCodeService {
         db.update("update auth_email_codes set consumed_at = ? where email = ? and consumed_at is null", now, email);
         long id = db.insertReturningId("auth_email_codes", Row.of("email", email, "purpose", "login", "code_hash", hash(email, code), "attempts", 0,
                 "expires_at", now.plusSeconds(TTL_SECONDS), "ip_address", ip, "created_at", now));
+        if (simulate) {
+            events.ok(request, null, "email_code_simulated", "email_code");
+            return new SendResult(TTL_SECONDS, RESEND_COOLDOWN_SECONDS, code, true);
+        }
         boolean sent = mailer.send(email, code + " is your ArtistikCity sign-in code", "emails/sign-in-code",
                 Row.of("name", name == null || name.isBlank() ? "there" : name, "code", code, "expire", TTL_SECONDS / 60,
                         "requestedFrom", AuthMail.describe(request), "baseUrl", authMail.baseUrl(request)));
@@ -115,7 +124,7 @@ public class EmailCodeService {
             throw new IllegalStateException("mail failed");
         }
         events.ok(request, null, "email_code_sent", "email_code");
-        return new SendResult(TTL_SECONDS, RESEND_COOLDOWN_SECONDS, devCodesVisible(request) ? code : null);
+        return new SendResult(TTL_SECONDS, RESEND_COOLDOWN_SECONDS, devCodesVisible(request) ? code : null, false);
     }
 
     /** Checks a code; on success it is consumed and can't be used again. */

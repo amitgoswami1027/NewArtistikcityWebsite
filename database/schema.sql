@@ -1814,6 +1814,7 @@ CREATE TABLE landing_checkout (
     success_redirect VARCHAR(255)  NULL,
     failure_message  VARCHAR(500)  NULL,
     pending_message  VARCHAR(500)  NULL,
+    verify_with      VARCHAR(10)   NULL,
     updated_by       BIGINT        NULL,
     updated_at       DATETIME      NOT NULL,
     CONSTRAINT landing_checkout_page_foreign FOREIGN KEY (landing_page_id) REFERENCES landing_pages (id) ON DELETE CASCADE

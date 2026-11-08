@@ -4,6 +4,7 @@ import com.artistikcity.auth.AccountService;
 import com.artistikcity.auth.AuthEvents;
 import com.artistikcity.auth.EmailCodeService;
 import com.artistikcity.auth.JwtVerifier;
+import com.artistikcity.auth.LoginSettings;
 import com.artistikcity.auth.OtpService;
 import com.artistikcity.auth.RateLimiter;
 import com.artistikcity.auth.Tokens;
@@ -59,10 +60,12 @@ public class QuickSignInController {
     private final AuthEvents events;
     private final Environment env;
     private final Db db;
+    private final LoginSettings login;
 
     public QuickSignInController(Auth auth, Json json, AccountService accounts, EmailCodeService emailCodes, OtpService otp, SmsSender sms,
-                                 JwtVerifier jwt, RateLimiter limiter, AuthEvents events, Environment env, Db db) {
+                                 JwtVerifier jwt, RateLimiter limiter, AuthEvents events, Environment env, Db db, LoginSettings login) {
         this.db = db;
+        this.login = login;
         this.auth = auth;
         this.json = json;
         this.accounts = accounts;
@@ -104,12 +107,15 @@ public class QuickSignInController {
         m.put("google", Map.of("ready", google, "detail", google
                 ? "Uses the Google client ID from the Configuration Panel. Add your site's address (e.g. https://www.artistikcity.com) under Authorized JavaScript origins of that client in Google Cloud Console."
                 : "Add the Google client ID (and secret) in System parameters › Configuration Panel › Google sign-in."));
+        LoginSettings.Values lv = login.values();
         boolean mail = emailCodes.available(request);
-        m.put("email", Map.of("ready", mail, "detail", mail ? "Codes are sent by the site's mail server."
-                : "Needs a mail server: set MAIL_HOST (for example Amazon SES) in the server settings, then deploy again."));
-        boolean phone = !sms.isDevelopment() || otp.devCodesVisible(request);
-        m.put("phone", Map.of("ready", phone, "detail", phone ? "Codes are sent by the SMS provider chosen in the Configuration Panel."
-                : "Choose an SMS provider (Twilio, Amazon SNS or Infobip) in System parameters › Configuration Panel › SMS."));
+        m.put("email", Map.of("ready", mail || login.emailReady(request), "detail", mail ? "Codes are sent by the site's mail server."
+                : login.emailReady(request) ? "Simulated: no mail server yet, so the code is shown on the screen (Login & verification)."
+                : "Needs a mail server: set MAIL_HOST (for example Amazon SES) in the server settings, or switch on simulated e-mail codes in Login & verification."));
+        boolean phone = login.smsReal() || otp.devCodesVisible(request);
+        m.put("phone", Map.of("ready", phone || lv.simulatePhone(), "detail", phone ? "Codes are sent by the SMS provider chosen in the Configuration Panel."
+                : lv.simulatePhone() ? "Simulated: no SMS provider yet, so the code is shown on the screen (Login & verification)."
+                : "Choose an SMS provider (Twilio, Amazon SNS or Infobip) in System parameters › Configuration Panel › SMS, or switch on simulated SMS codes in Login & verification."));
         m.put("passkey", Map.of("ready", true, "detail", "For buyers who saved a passkey in My account › Login & security; their browser decides."));
         m.put("password", Map.of("ready", true, "detail", "E-mail and password: works with no setup. New buyers create an account with a password."));
         return m;
@@ -129,13 +135,15 @@ public class QuickSignInController {
         } else {
             m.put("google", null);
         }
-        m.put("email", on.get("email") && emailCodes.available(request));
-        m.put("phone", on.get("phone") && (!sms.isDevelopment() || otp.devCodesVisible(request)));
+        m.put("email", on.get("email") && login.emailReady(request));
+        m.put("phone", on.get("phone") && login.phoneReady(request));
         m.put("passkey", on.get("passkey"));       // the browser decides whether it can
         // e-mail + password (the site's own /login and /register): needs no setup; on when switched on, or when nothing else could work
         boolean anyCode = Boolean.TRUE.equals(m.get("email")) || Boolean.TRUE.equals(m.get("phone")) || m.get("google") != null;
         m.put("password", on.get("password") || !anyCode);
         m.put("country", env.getProperty("app.auth.default-country-code", "91"));
+        LoginSettings.Values lv = login.values();
+        m.put("simulated", Map.of("phone", lv.simulatePhone(), "email", lv.simulateEmail()));
         return m;
     }
 
@@ -151,14 +159,16 @@ public class QuickSignInController {
         Input in = Input.of(request, json);
         String email = email(in.get("email"));
         if (email == null) return invalid("email", "Enter a valid e-mail address.");
-        if (!emailCodes.available(request)) return error(HttpStatus.SERVICE_UNAVAILABLE, "E-mail codes aren't available right now. Please sign in another way.");
+        LoginSettings.Decision how = login.email(request, email);
+        if (how.mode() == LoginSettings.Mode.REFUSE) return json(HttpStatus.CONFLICT, Map.of("message", how.message(), "code", "CODE_UNAVAILABLE"));
         try {
-            EmailCodeService.SendResult r = emailCodes.send(request, email, trim(in.get("name"), 120));
+            EmailCodeService.SendResult r = emailCodes.send(request, email, trim(in.get("name"), 120), how.mode() == LoginSettings.Mode.SIMULATE);
             Map<String, Object> body = ok();
             body.put("email", email);
             body.put("expiresIn", r.expiresIn());
             body.put("resendIn", r.resendIn());
-            if (r.devCode() != null) body.put("devCode", r.devCode());     // development only (no mail server, local browser)
+            if (r.devCode() != null) body.put("devCode", r.devCode());     // development (local browser) or a simulated code
+            body.put("simulated", r.simulated());
             return json(HttpStatus.OK, body);
         } catch (OtpService.OtpLimitException e) {
             return tooMany(e.getMessage(), e.retryAfter());
@@ -203,10 +213,18 @@ public class QuickSignInController {
             id = accounts.create(trim(in.get("name"), 255), email, true, null, false, null, null);
             created = true;
             events.ok(request, id, "signup", "email_code");
+            if (login.values().simulateEmail()) login.markSimulated(request, id, "email_code");
         }
         auth.login(request, id, "otp", in.get("remember") == null || in.bool("remember"));
         events.ok(request, id, "login", "email_code");
-        return signedIn(request, created);
+        ResponseEntity<String> res = signedIn(request, created);
+        if (in.bool("returnTo")) {
+            // the main log-in page: go where the visitor was heading (e.g. "Go to my course" in the thank-you e-mail)
+            Map<String, Object> body = json.decodeMap(res.getBody());
+            body.put("redirect", AuthController.takeReturnTo(request, com.artistikcity.http.GuardInterceptors.HOME));
+            return json(HttpStatus.OK, body);
+        }
+        return res;
     }
 
     // ------------------------------------------------------------------ Google Identity Services

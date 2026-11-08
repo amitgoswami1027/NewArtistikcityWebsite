@@ -82,6 +82,12 @@ public class AuthController {
     }
 
     /** Props shared by the log in / join pages: which sign-in methods are available. */
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.auth.LoginSettings loginSettings;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private QuickSignInController quickSignIn;
+
     private Map<String, Object> methods(HttpServletRequest request) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("providers", SocialController.enabledProviders(env));
@@ -91,6 +97,10 @@ public class AuthController {
         // on the developer's own computer, explain why the Google / Facebook buttons are missing
         m.put("socialSetupHint", !providers.containsValue(true) && OtpService.isLocalRequest(request));
         m.put("status", Flash.get(request, "status"));
+        // Login & verification (Admin › Landing Page Management): a 6-digit e-mail code, and simulated SMS / e-mail codes
+        m.put("emailCode", loginSettings.emailReady(request) && quickSignIn.switches().get("email"));
+        com.artistikcity.auth.LoginSettings.Values lv = loginSettings.values();
+        m.put("simulated", Map.of("phone", lv.simulatePhone(), "email", lv.simulateEmail()));
         return m;
     }
 

@@ -1,5 +1,5 @@
 // Landing Page Management: the public page (desktop + phone), the editor (create, sections, payments, publish) and the
-// checkout inside the page (quick sign-in with an e-mail code, only the methods that page allows, test payment, result).
+// checkout inside the page (details first, a mobile code at Pay, only the methods that page allows, test payment, result).
 const { test, expect } = require('@playwright/test');
 const { signIn, api } = require('./helpers');
 
@@ -41,25 +41,25 @@ test.describe('Public landing page', () => {
         expect(await noSideScroll(page)).toBeLessThanOrEqual(1);
     });
 
-    test('a guest enrols without leaving the page: e-mail code, details, test payment, result', async ({ page }) => {
+    test('a guest enrols without leaving the page: details, mobile code at Pay, test payment, congratulations', async ({ page }) => {
         await page.goto(PAGE);
         await page.locator('.lp-hero a[data-cta=hero]').click();
         const dlg = page.getByTestId('lp-checkout');
         await expect(dlg).toBeVisible();
         await expect(page).toHaveURL(new RegExp(`${PAGE}#enroll$`));            // still the landing page
-        const email = `e2e.${Date.now()}@example.com`;
-        await page.fill('#lp-co-email', email);
-        await page.getByTestId('lp-co-send').click();
-        const text = await dlg.locator('.lp-co__note').first().textContent();     // development: the code is shown to a local browser
-        await page.getByTestId('lp-co-code').fill(text.match(/(\d{6})/)[1]);   // six digits submit by themselves
-        await expect(page.getByTestId('lp-co-pay')).toBeVisible();
-        await expect(page.locator('.lp-top__end .lp-top__link')).toHaveText('My studio');
+        await expect(page.getByTestId('lp-co-guest')).toBeVisible();             // no sign-in first
         await page.fill('#lp-co-fname', 'E2E Buyer');
-        await page.fill('#lp-co-fphone', '9876543210');
+        await page.fill('#lp-co-femail', `e2e.${Date.now()}@example.com`);
+        await page.fill('#lp-co-fphone', `98${String(Date.now()).slice(-8)}`);
         await page.getByTestId('lp-co-terms').check();
         await page.getByTestId('lp-co-pay').click();
+        // development: the code is shown to a local browser
+        const text = await dlg.locator('.lp-co__note').first().textContent();
+        await page.getByTestId('lp-co-vcode').fill(text.match(/(\d{6})/)[1]);   // six digits submit by themselves
         await page.getByTestId('lp-co-test-complete').click();
         await expect(page.getByTestId('lp-co-result')).toHaveAttribute('data-state', 'success');
+        await expect(page.getByTestId('lp-co-congrats')).toHaveText('Congratulations, E2E!');
+        await expect(page.locator('.lp-top__end .lp-top__link')).toHaveText('My studio');
         await expect(page).toHaveURL(new RegExp(`${PAGE}#enroll$`));
         // closing the dialog leaves the visitor on the page
         await page.keyboard.press('Escape');

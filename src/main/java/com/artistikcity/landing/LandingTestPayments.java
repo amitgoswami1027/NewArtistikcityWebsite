@@ -87,6 +87,7 @@ public class LandingTestPayments {
         m.put("enabled", testPayments.testBuyersEnabled());
         m.put("devMode", testPayments.devMode());
         m.put("simulateRazorpay", payments.simulateRazorpaySetting());
+        m.put("simulateForEveryone", payments.simulateForEveryone());
         m.put("razorpaySimulated", payments.razorpaySimulated());
         m.put("razorpayKeys", gateways.razorpayConfigured());
         m.put("gateways", Map.of(
@@ -141,7 +142,8 @@ public class LandingTestPayments {
         return kit.ok(body);
     }
 
-    private Map<String, Object> signInView(HttpServletRequest request) {
+    @SuppressWarnings("unchecked")
+    Map<String, Object> signInView(HttpServletRequest request) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("switches", signIn.switches());
         m.put("readiness", signIn.readiness(request));
@@ -160,7 +162,20 @@ public class LandingTestPayments {
     public ResponseEntity<String> simulateRazorpay(HttpServletRequest request) {
         Row admin = kit.admin(request);
         if (!kit.can(admin, "landing.payments")) return kit.forbidden();
-        boolean on = Input.of(request, json).bool("on");
+        Input in = Input.of(request, json);
+        if (in.get("everyone") != null && in.get("on") == null) {
+            // who may pay: test buyers only, or every visitor (testing a page as a brand-new buyer)
+            boolean all = in.bool("everyone");
+            boolean was = payments.simulateForEveryone();
+            payments.saveSimulateForEveryone(all);
+            audit.change(admin, "landing_settings", 0, "update", all ? "Simulated Razorpay: every visitor may pay" : "Simulated Razorpay: test buyers only",
+                    Map.of("simulate_razorpay_all", was), Map.of("simulate_razorpay_all", all));
+            Map<String, Object> body = view();
+            body.put("message", all ? "Every visitor can now pay with simulated Razorpay. Their orders are test orders, and they do get the course: switch this back when you finish testing."
+                    : "Only test buyers can pay with simulated Razorpay now.");
+            return kit.ok(body);
+        }
+        boolean on = in.bool("on");
         boolean before = payments.simulateRazorpaySetting();
         payments.saveSimulateRazorpay(on);
         audit.change(admin, "landing_settings", 0, "update", on ? "Simulated Razorpay switched on" : "Simulated Razorpay switched off",

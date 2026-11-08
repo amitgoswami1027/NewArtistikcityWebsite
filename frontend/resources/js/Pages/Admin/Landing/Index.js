@@ -17,6 +17,7 @@ export const TABS = [
     { key: 'pages', label: 'All landing pages', icon: 'fa-files-o', cap: 'landing' },
     { key: 'templates', label: 'Templates & sections', icon: 'fa-columns', cap: 'landing' },
     { key: 'payments', label: 'Payments & checkout', icon: 'fa-credit-card', cap: 'landing.payments' },
+    { key: 'login', label: 'Login & verification', icon: 'fa-shield', cap: 'landing.payments' },
     { key: 'coupons', label: 'Coupons & promotions', icon: 'fa-ticket', cap: 'landing.pricing' },
     { key: 'orders', label: 'Orders & transactions', icon: 'fa-shopping-cart', cap: 'landing.orders' },
     { key: 'analytics', label: 'Analytics & reports', icon: 'fa-line-chart', cap: 'landing' },
@@ -339,7 +340,7 @@ function SignInSettings({ toast }) {
         .then((r) => { setData(r.data); toast(r.data.message); })
         .catch((e) => toast(errorText(e), 'error'));
     return (
-        <Card title="Sign-in at checkout" subtitle="How buyers sign in inside a landing page's checkout, without leaving the page. A method that this server can't run yet is not shown to buyers, even when it is switched on.">
+        <Card title="4. Sign-in methods" subtitle="For buyers who log in instead (the 'Have an account? Log in' link, the header's Log in, and pages set to 'Sign in first'). A method that this server can't run yet is not shown, even when it is switched on.">
             <ul className="lpa-signin" data-testid="lp-signin">
                 {SIGNIN.map((m) => {
                     const r = data.readiness[m.key] || {};
@@ -359,6 +360,83 @@ function SignInSettings({ toast }) {
             </ul>
             <p className="adm-muted adm-small">Google, SMS and the mail server are set up once for the whole site in <a href="/admin/setup">System parameters › Configuration Panel</a> (the mail server in the server settings). E-mail and password always works, so buyers can always sign in.</p>
         </Card>
+    );
+}
+
+/* Login & verification (LandingLoginAdmin): how a guest is verified at Pay, simulated codes, who may pay with
+   simulated Razorpay, the sign-in methods, and each page's own choice. */
+const VERIFY_OPTIONS = [
+    { value: 'PHONE', label: 'Mobile code', hint: 'A 6-digit code by SMS. The account is the mobile number (plus the e-mail typed for the receipt).' },
+    { value: 'EMAIL', label: 'E-mail code', hint: 'A 6-digit code to the e-mail typed at checkout.' },
+    { value: 'EITHER', label: 'Buyer chooses', hint: 'The checkout offers both; mobile first.' },
+    { value: 'SIGNIN', label: 'Sign in first', hint: 'The earlier way: the checkout starts with the sign-in methods below, before the details.' },
+];
+const VERIFY_SHORT = { PHONE: 'Mobile code', EMAIL: 'E-mail code', EITHER: 'Mobile or e-mail code', SIGNIN: 'Sign in first' };
+
+function LoginVerification({ toast }) {
+    const [data, setData] = useState(null);
+    const [busy, setBusy] = useState(false);
+    const [confirmNode, confirm] = useConfirm();
+    const load = () => axios.get('/admin/api/landing/login').then((r) => setData(r.data)).catch((e) => toast(errorText(e), 'error'));
+    useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!data) return <Card title="Login & verification"><p className="adm-muted">Loading…</p></Card>;
+    const st = data.settings, sv = data.server;
+    const save = (patch) => {
+        setBusy(true);
+        return axios.put('/admin/api/landing/login', patch).then((r) => { setData(r.data); toast(r.data.message); })
+            .catch((e) => toast(errorText(e), 'error')).finally(() => setBusy(false));
+    };
+    const everyone = async (on) => {
+        if (on && !(await confirm({ title: 'Let every visitor pay with simulated Razorpay?', body: 'Anybody can then enrol without paying: their orders are marked as tests and they do get the course. Use it only while you test, and switch it back afterwards.', confirmLabel: 'Allow every visitor' }))) return;
+        axios.post('/admin/api/landing/test-payments/simulate-razorpay', { everyone: on }).then((r) => { toast(r.data.message); load(); }).catch((e) => toast(errorText(e), 'error'));
+    };
+    const ready = (ok, yes, no) => <Badge tone={ok ? 'green' : 'amber'}>{ok ? yes : no}</Badge>;
+    return (
+        <div className="adm-stack" data-testid="lp-login">
+            {confirmNode}
+            {data.warnings.map((w, i) => <div key={i} className="adm-alert" role="status"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i><span>{w}</span></div>)}
+            <Card title="1. Verify buyers when they pay" subtitle="Visitors see the whole landing page and fill in the checkout without an account. When they press Pay, a one-time code confirms who they are and signs them in (a new buyer gets an account), then the payment opens. This is the default; a page can choose its own in its editor's Checkout step.">
+                <Segments value={st.checkoutVerify} onChange={(val) => save({ checkoutVerify: val })} label="How buyers are verified" options={VERIFY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
+                <p className="adm-muted adm-small" data-testid="lp-login-hint">{(VERIFY_OPTIONS.find((o) => o.value === st.checkoutVerify) || {}).hint}</p>
+                <ul className="lpa-signin">
+                    <li><i className="fa fa-mobile" aria-hidden="true"></i><div className="lpa-signin__text"><b>SMS codes</b><small>{sv.sms ? 'Sent by the SMS provider chosen in the Configuration Panel.' : st.simulatePhone ? 'Simulated (see 2): shown on the screen.' : 'No SMS provider yet: choose one in System parameters › Configuration Panel › SMS, or simulate them below.'}</small></div>
+                        {ready(sv.phoneReady, sv.sms ? 'Ready' : 'Simulated', 'Needs setup')}</li>
+                    <li><i className="fa fa-envelope-o" aria-hidden="true"></i><div className="lpa-signin__text"><b>E-mail codes</b><small>{sv.mail ? 'Sent by the site\'s mail server.' : st.simulateEmail ? 'Simulated (see 2): shown on the screen.' : 'No mail server yet (MAIL_HOST in the server settings), or simulate them below.'}</small></div>
+                        {ready(sv.emailReady, sv.mail ? 'Ready' : 'Simulated', 'Needs setup')}</li>
+                </ul>
+            </Card>
+            <Card title="2. Simulated codes (testing)" subtitle="Try the whole checkout without an SMS provider or mail server. Nothing is sent: the code is shown on the screen with a Test mode label. Real accounts are protected: a code is only simulated for a new number or e-mail, a test buyer, or an account made with a simulated code; anybody else gets a real code or is asked to log in.">
+                <div className="lpa-toggles">
+                    <Toggle name="sim-phone" checked={!!st.simulatePhone} disabled={busy} onChange={(on) => save({ simulatePhone: on })} label="Simulate SMS codes (mobile OTP)"
+                            description={sv.sms ? 'An SMS provider is set: new numbers still get a simulated code while this is on.' : 'Shows the mobile code on the screen.'} />
+                    <Toggle name="sim-email" checked={!!st.simulateEmail} disabled={busy} onChange={(on) => save({ simulateEmail: on })} label="Simulate e-mail codes (e-mail OTP)"
+                            description={sv.mail ? 'A mail server is set: new addresses still get a simulated code while this is on.' : 'Shows the e-mail code on the screen.'} />
+                </div>
+                <p className="adm-muted adm-small">Accounts made with a simulated code so far: <b data-testid="lp-login-simaccounts">{data.simulatedAccounts}</b>. They work on the main log-in page too (mobile or e-mail code). Switch simulation off before you launch.</p>
+            </Card>
+            <Card title="3. Simulated payment" subtitle="With no Razorpay keys, Razorpay can be simulated so a verified buyer can finish the purchase and see the congratulations screen and e-mail.">
+                {sv.razorpayKeys ? <p className="adm-muted">Razorpay keys are set on this server, so the real Razorpay is used.</p> : (
+                    <div className="lpa-toggles">
+                        <Toggle name="sim-rzp" checked={!!sv.simulateRazorpay} disabled={busy} label="Simulate Razorpay"
+                                description="Landing pages offer UPI, cards and net banking; the payment happens in a simulated Razorpay window (success or failure, no money). Also in Payments & checkout › Test payments."
+                                onChange={(on) => axios.post('/admin/api/landing/test-payments/simulate-razorpay', { on }).then((r) => { toast(r.data.message); load(); }).catch((e) => toast(errorText(e), 'error'))} />
+                        <Toggle name="sim-rzp-all" checked={!!sv.simulateForEveryone} disabled={busy || !sv.simulateRazorpay} label="Every visitor may pay with it (testing only)"
+                                description="Off: only test buyers can pay; everybody else is told payment opens soon. On: anybody, including a brand-new buyer who just verified with a code. Their orders are test orders."
+                                onChange={everyone} />
+                    </div>
+                )}
+            </Card>
+            <SignInSettings toast={toast} />
+            <Card title="Every page" subtitle="What each landing page asks for at Pay. Change a page's choice in its editor's Checkout step." flush>
+                <DataTable rows={data.pages} columns={[
+                    { key: 'name', label: 'Page', render: (r) => <a href={`/admin/landing/pages/${r.id}/checkout`}>{r.name}</a> },
+                    { key: 'status', label: 'Status', render: (r) => <Badge tone={(STATUS[r.status] || {}).tone}>{(STATUS[r.status] || {}).label || r.status}</Badge> },
+                    { key: 'verifyWith', label: 'Setting', render: (r) => (r.verifyWith === 'DEFAULT' ? <Badge>Default</Badge> : <Badge tone="pink">{VERIFY_SHORT[r.verifyWith]}</Badge>) },
+                    { key: 'channels', label: 'Buyers get', render: (r) => (r.mode === 'SIGNIN' ? 'Sign in first' : r.channels.length ? r.channels.map((c) => (c === 'phone' ? 'Mobile code' : 'E-mail code')).join(' or ') : <span className="adm-danger">Sign in first (codes not set up)</span>) },
+                    { key: 'edit', label: '', render: (r) => <Button as="a" size="sm" href={`/admin/landing/pages/${r.id}/checkout`} icon="fa-pencil">Checkout step</Button> },
+                ]} empty={<EmptyState icon="fa-files-o" title="No course landing pages yet" />} />
+            </Card>
+        </div>
     );
 }
 
@@ -508,7 +586,8 @@ function Payments({ caps, toast }) {
     return (
         <div className="adm-stack" data-testid="lp-payments">
             <TestPayments toast={toast} />
-            <SignInSettings toast={toast} />
+            <Card title="Login & verification" subtitle="How buyers confirm who they are when they pay (a code to their mobile or e-mail), simulated codes for testing, and the sign-in methods of the checkout."
+                  actions={<Button as="a" size="sm" href="/admin/landing/login" icon="fa-shield">Open Login &amp; verification</Button>} />
             <Card title="Payment settings of every page" subtitle="Each page either follows the global defaults below or has its own settings. Open a page to change it." flush>
                 <DataTable rows={data.pages} columns={[
                     { key: 'name', label: 'Page', render: (r) => <a href={`/admin/landing/pages/${r.id}/payments`}>{r.name}</a> },
@@ -892,6 +971,7 @@ export default function LandingIndex() {
         pages: 'Search, filter and manage every landing page.',
         templates: 'Starting points for new pages, and the sections pages are built from.',
         payments: 'Test payments, which payment providers and methods each page offers, and the global defaults.',
+        login: 'How buyers confirm who they are when they pay, simulated SMS and e-mail codes, and the sign-in methods.',
         coupons: 'Codes for pages, courses and campaigns.',
         orders: 'Orders placed through landing pages, with payment details and refunds.',
         analytics: 'Funnel, payment methods, providers and devices.',
@@ -909,6 +989,7 @@ export default function LandingIndex() {
                     {current.key === 'pages' && <Pages caps={caps} toast={toast} />}
                     {current.key === 'templates' && <Templates catalog={catalog} caps={caps} />}
                     {current.key === 'payments' && <Payments caps={caps} toast={toast} />}
+                    {current.key === 'login' && <LoginVerification toast={toast} />}
                     {current.key === 'coupons' && <Coupons lookups={lookups} toast={toast} />}
                     {current.key === 'orders' && <Orders lookups={lookups} toast={toast} />}
                     {current.key === 'analytics' && <Analytics lookups={lookups} />}

@@ -11720,10 +11720,12 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var SignInMethods_exports = {};
 __export(SignInMethods_exports, {
+  EmailCodeForm: () => EmailCodeForm,
   MagicLinkForm: () => MagicLinkForm,
   MethodTabs: () => MethodTabs,
   PasskeyButton: () => PasskeyButton,
-  PhoneOtpForm: () => PhoneOtpForm
+  PhoneOtpForm: () => PhoneOtpForm,
+  SimulatedCode: () => SimulatedCode
 });
 module.exports = __toCommonJS(SignInMethods_exports);
 var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
@@ -11835,6 +11837,7 @@ function PhoneOtpForm({ defaultCountryCode = "91", remember = true, devMode = fa
   const [masked, setMasked] = (0, import_react.useState)("");
   const [code, setCode] = (0, import_react.useState)("");
   const [devCode, setDevCode] = (0, import_react.useState)(null);
+  const [simulated, setSimulated] = (0, import_react.useState)(false);
   const [name, setName] = (0, import_react.useState)("");
   const [email, setEmail] = (0, import_react.useState)("");
   const [errors, setErrors] = (0, import_react.useState)({});
@@ -11871,6 +11874,7 @@ function PhoneOtpForm({ defaultCountryCode = "91", remember = true, devMode = fa
       setMasked(r.masked);
       setWait(r.resendIn || 30);
       setDevCode(r.devCode || null);
+      setSimulated(!!r.simulated);
       setCode("");
       setStep("code");
       setTimeout(() => codeRef.current && codeRef.current.focus(), 50);
@@ -11965,7 +11969,11 @@ function PhoneOtpForm({ defaultCountryCode = "91", remember = true, devMode = fa
           setPhone(null);
         }, children: "Change" })
       ] }),
-      devMode && devCode && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-alert ac-alert--ok dm-devcode", children: [
+      simulated && devCode && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimulatedCode, { kind: "SMS", code: devCode, onUse: () => {
+        setCode(devCode);
+        verify(null, devCode);
+      } }),
+      !simulated && devMode && devCode && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-alert ac-alert--ok dm-devcode", children: [
         "Development mode (no SMS is sent): your code is ",
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: devCode })
       ] }),
@@ -12027,6 +12035,139 @@ function PhoneOtpForm({ defaultCountryCode = "91", remember = true, devMode = fa
       errors.phone ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-field__error", id: "e-phone", children: errors.phone }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-field__hint", id: "h-phone", children: "We'll text you a code. No password needed. Standard SMS rates may apply." })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: busy || number.replace(/\D/g, "").length < 6 || wait > 0, children: busy ? "Sending code\u2026" : wait > 0 ? `Try again in ${wait}s` : "Send code" })
+  ] });
+}
+function SimulatedCode({ kind, code, onUse }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-alert dm-simcode", role: "status", "data-testid": "simulated-code", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
+      "Test mode \xB7 simulated ",
+      kind,
+      " code"
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "dm-simcode__code", children: code }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Nothing was sent: this site shows the code here while it is being tested." }),
+    onUse && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-btn dm-btn--line dm-btn--block", onClick: onUse, children: "Use this code" })
+  ] });
+}
+function EmailCodeForm({ initialEmail = "", remember = true, children }) {
+  const [step, setStep] = (0, import_react.useState)("email");
+  const [email, setEmail] = (0, import_react.useState)(initialEmail);
+  const [code, setCode] = (0, import_react.useState)("");
+  const [devCode, setDevCode] = (0, import_react.useState)(null);
+  const [simulated, setSimulated] = (0, import_react.useState)(false);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [wait, setWait] = (0, import_react.useState)(0);
+  const codeRef = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (wait <= 0) return void 0;
+    const t = setTimeout(() => setWait(wait - 1), 1e3);
+    return () => clearTimeout(t);
+  }, [wait]);
+  const send = async (e) => {
+    e && e.preventDefault();
+    setBusy(true);
+    setErrors({});
+    try {
+      const r = await (0, import_api.authPost)("/auth/email-code/send", { email: email.trim() });
+      setEmail(r.email || email.trim());
+      setWait(r.resendIn || 30);
+      setDevCode(r.devCode || null);
+      setSimulated(!!r.simulated);
+      setCode("");
+      setStep("code");
+      setTimeout(() => codeRef.current && codeRef.current.focus(), 50);
+    } catch (err) {
+      setErrors({ email: err.message });
+      if (err.retryAfter) setWait(Math.min(err.retryAfter, 3600));
+    }
+    setBusy(false);
+  };
+  const verify = async (e, value) => {
+    e && e.preventDefault();
+    const c = (value || code).replace(/\D/g, "");
+    if (c.length !== 6) {
+      setErrors({ code: "Enter the 6-digit code." });
+      return;
+    }
+    setBusy(true);
+    setErrors({});
+    try {
+      const r = await (0, import_api.authPost)("/auth/email-code/verify", { email, code: c, remember, returnTo: true });
+      (0, import_api.goTo)(r.redirect);
+    } catch (err) {
+      setErrors({ code: err.fieldErrors.code || err.message });
+      if (err.status === 410 || err.status === 429) setCode("");
+      setBusy(false);
+    }
+  };
+  if (step === "code") {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: verify, noValidate: true, "data-testid": "email-code-form", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-muted dm-center", children: [
+        "We sent a 6-digit code to ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: email }),
+        ".",
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setStep("email"), children: "Change" })
+      ] }),
+      simulated && devCode && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimulatedCode, { kind: "e-mail", code: devCode, onUse: () => {
+        setCode(devCode);
+        verify(null, devCode);
+      } }),
+      !simulated && devCode && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-alert ac-alert--ok dm-devcode", children: [
+        "Development mode (no e-mail is sent): your code is ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: devCode })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-field", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "f-ecode", children: "Code from the e-mail" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "input",
+          {
+            id: "f-ecode",
+            ref: codeRef,
+            className: `ac-input dm-otp ${errors.code ? "is-invalid" : ""}`,
+            inputMode: "numeric",
+            autoComplete: "one-time-code",
+            pattern: "[0-9]*",
+            maxLength: 6,
+            value: code,
+            placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022",
+            "aria-invalid": !!errors.code,
+            "aria-describedby": errors.code ? "e-ecode" : void 0,
+            onChange: (e) => {
+              const v = e.target.value.replace(/\D/g, "").slice(0, 6);
+              setCode(v);
+              if (v.length === 6) verify(null, v);
+            }
+          }
+        ),
+        errors.code && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac-field__error", id: "e-ecode", children: errors.code })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: busy || code.length !== 6, children: busy ? "Checking\u2026" : "Verify and continue" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-muted dm-center", style: { marginTop: 14 }, children: wait > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        "You can request a new code in ",
+        wait,
+        "s"
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: send, disabled: busy, children: "Send a new code" }) })
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: send, noValidate: true, "data-testid": "email-code-start", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_AuthFields.Field,
+      {
+        label: "Email",
+        name: "email",
+        type: "email",
+        value: email,
+        onChange: (e) => setEmail(e.target.value),
+        error: errors.email,
+        autoComplete: "email",
+        placeholder: "you@example.com",
+        hint: "We'll e-mail you a 6-digit code. No password needed."
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "dm-btn dm-btn--brand dm-btn--block dm-btn--lg", disabled: busy || !email.includes("@") || wait > 0, children: busy ? "Sending code\u2026" : wait > 0 ? `Try again in ${wait}s` : "Email me a code" }),
+    children
   ] });
 }
 
@@ -31586,6 +31727,7 @@ const TABS = [
   { key: "pages", label: "All landing pages", icon: "fa-files-o", cap: "landing" },
   { key: "templates", label: "Templates & sections", icon: "fa-columns", cap: "landing" },
   { key: "payments", label: "Payments & checkout", icon: "fa-credit-card", cap: "landing.payments" },
+  { key: "login", label: "Login & verification", icon: "fa-shield", cap: "landing.payments" },
   { key: "coupons", label: "Coupons & promotions", icon: "fa-ticket", cap: "landing.pricing" },
   { key: "orders", label: "Orders & transactions", icon: "fa-shopping-cart", cap: "landing.orders" },
   { key: "analytics", label: "Analytics & reports", icon: "fa-line-chart", cap: "landing" },
@@ -31933,7 +32075,7 @@ function SignInSettings({ toast }) {
     setData(r.data);
     toast(r.data.message);
   }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Sign-in at checkout", subtitle: "How buyers sign in inside a landing page's checkout, without leaving the page. A method that this server can't run yet is not shown to buyers, even when it is switched on.", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "4. Sign-in methods", subtitle: "For buyers who log in instead (the 'Have an account? Log in' link, the header's Log in, and pages set to 'Sign in first'). A method that this server can't run yet is not shown, even when it is switched on.", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-signin", "data-testid": "lp-signin", children: SIGNIN.map((m) => {
       const r = data.readiness[m.key] || {};
       const shown = !!data.offered[m.key];
@@ -31952,6 +32094,134 @@ function SignInSettings({ toast }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/admin/setup", children: "System parameters \u203A Configuration Panel" }),
       " (the mail server in the server settings). E-mail and password always works, so buyers can always sign in."
     ] })
+  ] });
+}
+const VERIFY_OPTIONS = [
+  { value: "PHONE", label: "Mobile code", hint: "A 6-digit code by SMS. The account is the mobile number (plus the e-mail typed for the receipt)." },
+  { value: "EMAIL", label: "E-mail code", hint: "A 6-digit code to the e-mail typed at checkout." },
+  { value: "EITHER", label: "Buyer chooses", hint: "The checkout offers both; mobile first." },
+  { value: "SIGNIN", label: "Sign in first", hint: "The earlier way: the checkout starts with the sign-in methods below, before the details." }
+];
+const VERIFY_SHORT = { PHONE: "Mobile code", EMAIL: "E-mail code", EITHER: "Mobile or e-mail code", SIGNIN: "Sign in first" };
+function LoginVerification({ toast }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [confirmNode, confirm] = (0, import_kit.useConfirm)();
+  const load = () => import_axios.default.get("/admin/api/landing/login").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  (0, import_react.useEffect)(() => {
+    load();
+  }, []);
+  if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Login & verification", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
+  const st = data.settings, sv = data.server;
+  const save = (patch) => {
+    setBusy(true);
+    return import_axios.default.put("/admin/api/landing/login", patch).then((r) => {
+      setData(r.data);
+      toast(r.data.message);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(false));
+  };
+  const everyone = async (on) => {
+    if (on && !await confirm({ title: "Let every visitor pay with simulated Razorpay?", body: "Anybody can then enrol without paying: their orders are marked as tests and they do get the course. Use it only while you test, and switch it back afterwards.", confirmLabel: "Allow every visitor" })) return;
+    import_axios.default.post("/admin/api/landing/test-payments/simulate-razorpay", { everyone: on }).then((r) => {
+      toast(r.data.message);
+      load();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const ready = (ok, yes, no) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: ok ? "green" : "amber", children: ok ? yes : no });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-login", children: [
+    confirmNode,
+    data.warnings.map((w, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-alert", role: "status", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-triangle", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: w })
+    ] }, i)),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "1. Verify buyers when they pay", subtitle: "Visitors see the whole landing page and fill in the checkout without an account. When they press Pay, a one-time code confirms who they are and signs them in (a new buyer gets an account), then the payment opens. This is the default; a page can choose its own in its editor's Checkout step.", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: st.checkoutVerify, onChange: (val) => save({ checkoutVerify: val }), label: "How buyers are verified", options: VERIFY_OPTIONS.map((o) => ({ value: o.value, label: o.label })) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", "data-testid": "lp-login-hint", children: (VERIFY_OPTIONS.find((o) => o.value === st.checkoutVerify) || {}).hint }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "lpa-signin", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-mobile", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-signin__text", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "SMS codes" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: sv.sms ? "Sent by the SMS provider chosen in the Configuration Panel." : st.simulatePhone ? "Simulated (see 2): shown on the screen." : "No SMS provider yet: choose one in System parameters \u203A Configuration Panel \u203A SMS, or simulate them below." })
+          ] }),
+          ready(sv.phoneReady, sv.sms ? "Ready" : "Simulated", "Needs setup")
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-envelope-o", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-signin__text", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "E-mail codes" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: sv.mail ? "Sent by the site's mail server." : st.simulateEmail ? "Simulated (see 2): shown on the screen." : "No mail server yet (MAIL_HOST in the server settings), or simulate them below." })
+          ] }),
+          ready(sv.emailReady, sv.mail ? "Ready" : "Simulated", "Needs setup")
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "2. Simulated codes (testing)", subtitle: "Try the whole checkout without an SMS provider or mail server. Nothing is sent: the code is shown on the screen with a Test mode label. Real accounts are protected: a code is only simulated for a new number or e-mail, a test buyer, or an account made with a simulated code; anybody else gets a real code or is asked to log in.", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-toggles", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Toggle,
+          {
+            name: "sim-phone",
+            checked: !!st.simulatePhone,
+            disabled: busy,
+            onChange: (on) => save({ simulatePhone: on }),
+            label: "Simulate SMS codes (mobile OTP)",
+            description: sv.sms ? "An SMS provider is set: new numbers still get a simulated code while this is on." : "Shows the mobile code on the screen."
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Toggle,
+          {
+            name: "sim-email",
+            checked: !!st.simulateEmail,
+            disabled: busy,
+            onChange: (on) => save({ simulateEmail: on }),
+            label: "Simulate e-mail codes (e-mail OTP)",
+            description: sv.mail ? "A mail server is set: new addresses still get a simulated code while this is on." : "Shows the e-mail code on the screen."
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+        "Accounts made with a simulated code so far: ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { "data-testid": "lp-login-simaccounts", children: data.simulatedAccounts }),
+        ". They work on the main log-in page too (mobile or e-mail code). Switch simulation off before you launch."
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "3. Simulated payment", subtitle: "With no Razorpay keys, Razorpay can be simulated so a verified buyer can finish the purchase and see the congratulations screen and e-mail.", children: sv.razorpayKeys ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Razorpay keys are set on this server, so the real Razorpay is used." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-toggles", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_form.Toggle,
+        {
+          name: "sim-rzp",
+          checked: !!sv.simulateRazorpay,
+          disabled: busy,
+          label: "Simulate Razorpay",
+          description: "Landing pages offer UPI, cards and net banking; the payment happens in a simulated Razorpay window (success or failure, no money). Also in Payments & checkout \u203A Test payments.",
+          onChange: (on) => import_axios.default.post("/admin/api/landing/test-payments/simulate-razorpay", { on }).then((r) => {
+            toast(r.data.message);
+            load();
+          }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"))
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        import_form.Toggle,
+        {
+          name: "sim-rzp-all",
+          checked: !!sv.simulateForEveryone,
+          disabled: busy || !sv.simulateRazorpay,
+          label: "Every visitor may pay with it (testing only)",
+          description: "Off: only test buyers can pay; everybody else is told payment opens soon. On: anybody, including a brand-new buyer who just verified with a code. Their orders are test orders.",
+          onChange: everyone
+        }
+      )
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SignInSettings, { toast }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Every page", subtitle: "What each landing page asks for at Pay. Change a page's choice in its editor's Checkout step.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.pages, columns: [
+      { key: "name", label: "Page", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${r.id}/checkout`, children: r.name }) },
+      { key: "status", label: "Status", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: (import_parts.STATUS[r.status] || {}).tone, children: (import_parts.STATUS[r.status] || {}).label || r.status }) },
+      { key: "verifyWith", label: "Setting", render: (r) => r.verifyWith === "DEFAULT" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Default" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "pink", children: VERIFY_SHORT[r.verifyWith] }) },
+      { key: "channels", label: "Buyers get", render: (r) => r.mode === "SIGNIN" ? "Sign in first" : r.channels.length ? r.channels.map((c) => c === "phone" ? "Mobile code" : "E-mail code").join(" or ") : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-danger", children: "Sign in first (codes not set up)" }) },
+      { key: "edit", label: "", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `/admin/landing/pages/${r.id}/checkout`, icon: "fa-pencil", children: "Checkout step" }) }
+    ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-files-o", title: "No course landing pages yet" }) }) })
   ] });
 }
 const TEST_STATUS = { 0: ["Waiting", "amber"], 1: ["Paid (test)", "green"], 2: ["Failed", "red"], 3: ["Undone", "grey"], 4: ["Refund due", "amber"] };
@@ -32155,7 +32425,14 @@ function Payments({ caps, toast }) {
   if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-payments", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TestPayments, { toast }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SignInSettings, { toast }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Card,
+      {
+        title: "Login & verification",
+        subtitle: "How buyers confirm who they are when they pay (a code to their mobile or e-mail), simulated codes for testing, and the sign-in methods of the checkout.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: "/admin/landing/login", icon: "fa-shield", children: "Open Login & verification" })
+      }
+    ),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment settings of every page", subtitle: "Each page either follows the global defaults below or has its own settings. Open a page to change it.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.pages, columns: [
       { key: "name", label: "Page", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${r.id}/payments`, children: r.name }) },
       { key: "status", label: "Status", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: import_parts.STATUS[r.status].tone, children: import_parts.STATUS[r.status].label }) },
@@ -32777,6 +33054,7 @@ function LandingIndex() {
     pages: "Search, filter and manage every landing page.",
     templates: "Starting points for new pages, and the sections pages are built from.",
     payments: "Test payments, which payment providers and methods each page offers, and the global defaults.",
+    login: "How buyers confirm who they are when they pay, simulated SMS and e-mail codes, and the sign-in methods.",
     coupons: "Codes for pages, courses and campaigns.",
     orders: "Orders placed through landing pages, with payment details and refunds.",
     analytics: "Funnel, payment methods, providers and devices.",
@@ -32799,6 +33077,7 @@ function LandingIndex() {
       current.key === "pages" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pages, { caps, toast }),
       current.key === "templates" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Templates, { catalog, caps }),
       current.key === "payments" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Payments, { caps, toast }),
+      current.key === "login" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoginVerification, { toast }),
       current.key === "coupons" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Coupons, { lookups, toast }),
       current.key === "orders" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Orders, { lookups, toast }),
       current.key === "analytics" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Analytics, { lookups }),
@@ -33390,12 +33669,14 @@ function Pricing({ data, canEdit, onSaved, toast }) {
     ] })
   ] });
 }
+const VERIFY_LABEL = { PHONE: "A code to their mobile (SMS)", EMAIL: "A code to their e-mail", EITHER: "Mobile or e-mail code (buyer chooses)", SIGNIN: "Sign in before the details (no code at Pay)" };
 function Checkout({ data, canEdit, onSaved, toast }) {
   const init = __spreadProps(__spreadValues({}, data.checkout), {
     successMessage: data.checkout.successMessage || "",
     successRedirect: data.checkout.successRedirect || "",
     failureMessage: data.checkout.failureMessage || "",
-    pendingMessage: data.checkout.pendingMessage || ""
+    pendingMessage: data.checkout.pendingMessage || "",
+    verifyWith: data.checkout.verifyWith || "DEFAULT"
   });
   const [v, setV] = (0, import_react.useState)(init);
   const [errors, setErrors] = (0, import_react.useState)({});
@@ -33415,8 +33696,33 @@ function Checkout({ data, canEdit, onSaved, toast }) {
   const tog = (k, l, d, lock) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { checked: !!v[k], onChange: (on) => setV(__spreadProps(__spreadValues({}, v), { [k]: on })), name: k, label: l, description: d, disabled: !canEdit || lock });
   const msg = (k, l, hint) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: l, name: k, error: errors[k], hint, optional: true, counter: v[k].length, max: 500, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: `f-${k}`, className: "adm-input", rows: 2, value: v[k], disabled: !canEdit, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { [k]: e.target.value })) }) });
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_kit.Card,
+      {
+        title: "Verify buyers with",
+        subtitle: "Visitors see the whole page and the checkout without an account. When they press Pay, a one-time code confirms who they are, signs them in (a new buyer gets an account), and then the payment opens.",
+        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: "/admin/landing/login", icon: "fa-shield", children: "Login & verification" }),
+        children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Field,
+          {
+            label: "How buyers confirm who they are",
+            name: "verifyWith",
+            error: errors.verifyWith,
+            hint: data.verifyColumn === false ? "Needs the database update 2026-11-12_landing_login_verify.sql; until then this page uses the default." : "Simulated codes and the sign-in methods are set in Login & verification.",
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-verifyWith", className: "adm-input", value: v.verifyWith, disabled: !canEdit || data.verifyColumn === false, onChange: (e) => setV(__spreadProps(__spreadValues({}, v), { verifyWith: e.target.value })), "data-testid": "lp-verify-with", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: "DEFAULT", children: [
+                "Use the default (",
+                VERIFY_LABEL[data.verifyDefault] || "mobile number code",
+                ")"
+              ] }),
+              Object.keys(VERIFY_LABEL).map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: k, children: VERIFY_LABEL[k] }, k))
+            ] })
+          }
+        )
+      }
+    ),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Details we ask for", subtitle: "Name and e-mail are always required (they make the account and the receipt).", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-toggles", children: [
-      tog("requirePhone", "Phone number", "For class reminders on WhatsApp. Kept on the order, never used to sign in."),
+      tog("requirePhone", "Phone number", "For class reminders on WhatsApp. Always asked for when buyers verify with a mobile code."),
       tog("requireAddress", "Billing address", "Only if your accountant needs it for invoices."),
       tog("requireTerms", "Accept the terms", "A required tick box linking to the terms of use."),
       tog("requirePrivacy", "Privacy consent", "A required tick box linking to the privacy policy."),
@@ -34444,9 +34750,10 @@ var import_AuthLayout = __toESM(__webpack_require__("./resources/js/Layouts/Auth
 var import_PurchaseIntent = __toESM(__webpack_require__("./resources/js/Components/Auth/PurchaseIntent.js"));
 var import_AuthFields = __webpack_require__("./resources/js/Components/Auth/AuthFields.js");
 var import_SignInMethods = __webpack_require__("./resources/js/Components/Auth/SignInMethods.js");
-function Login({ intent, status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, errors: pageErrors = {} }) {
+function Login({ intent, status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, emailCode, errors: pageErrors = {} }) {
   const [tab, setTab] = (0, import_react.useState)(() => typeof window !== "undefined" && window.localStorage && safeGet("ac.login.tab") || "email");
   const [usePassword, setUsePassword] = (0, import_react.useState)(() => !!(pageErrors.email || pageErrors.password));
+  const [useLink, setUseLink] = (0, import_react.useState)(false);
   const [passkeyError, setPasskeyError] = (0, import_react.useState)(null);
   const { data, setData, post, processing, errors, reset } = (0, import_inertia_react.useForm)({ email: "", password: "", remember: true });
   (0, import_react.useEffect)(() => () => reset("password"), []);
@@ -34479,7 +34786,15 @@ function Login({ intent, status, canResetPassword, providers, defaultCountryCode
       { id: "phone", label: "Phone", icon: "fa-mobile" }
     ] }),
     tab === "phone" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.PhoneOtpForm, { defaultCountryCode, remember: data.remember, devMode: otpDevMode }),
-    tab === "email" && !usePassword && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+    tab === "email" && !usePassword && emailCode && !useLink && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.EmailCodeForm, { initialEmail: data.email, remember: data.remember }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "dm-center dm-muted", style: { marginTop: 14 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setUsePassword(true), children: "Log in with a password instead" }),
+        " \xB7 ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setUseLink(true), children: "Email me a link instead" })
+      ] })
+    ] }),
+    tab === "email" && !usePassword && (!emailCode || useLink) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SignInMethods.MagicLinkForm, { initialEmail: data.email }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "dm-center dm-muted", style: { marginTop: 14 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "dm-linkbtn", onClick: () => setUsePassword(true), children: "Log in with a password instead" }) })
     ] }),

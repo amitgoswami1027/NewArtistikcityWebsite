@@ -105,6 +105,7 @@ export function PhoneOtpForm({ defaultCountryCode = '91', remember = true, devMo
     const [masked, setMasked] = useState('');
     const [code, setCode] = useState('');
     const [devCode, setDevCode] = useState(null);
+    const [simulated, setSimulated] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [errors, setErrors] = useState({});
@@ -142,6 +143,7 @@ export function PhoneOtpForm({ defaultCountryCode = '91', remember = true, devMo
             setMasked(r.masked);
             setWait(r.resendIn || 30);
             setDevCode(r.devCode || null);
+            setSimulated(!!r.simulated);
             setCode('');
             setStep('code');
             setTimeout(() => codeRef.current && codeRef.current.focus(), 50);
@@ -215,7 +217,8 @@ export function PhoneOtpForm({ defaultCountryCode = '91', remember = true, devMo
                 <p className="dm-muted dm-center">We sent a 6-digit code to <b>{masked}</b>.{' '}
                     <button type="button" className="dm-linkbtn" onClick={() => { setStep('phone'); setPhone(null); }}>Change</button>
                 </p>
-                {devMode && devCode && (
+                {simulated && devCode && <SimulatedCode kind="SMS" code={devCode} onUse={() => { setCode(devCode); verify(null, devCode); }} />}
+                {!simulated && devMode && devCode && (
                     <div className="ac-alert ac-alert--ok dm-devcode">Development mode (no SMS is sent): your code is <b>{devCode}</b></div>
                 )}
                 <div className="ac-field">
@@ -260,6 +263,121 @@ export function PhoneOtpForm({ defaultCountryCode = '91', remember = true, devMo
             <button type="submit" className="dm-btn dm-btn--brand dm-btn--block dm-btn--lg" disabled={busy || number.replace(/\D/g, '').length < 6 || wait > 0}>
                 {busy ? 'Sending code…' : wait > 0 ? `Try again in ${wait}s` : 'Send code'}
             </button>
+        </form>
+    );
+}
+
+/* ------------------------------------------------------------------------------------- simulated code */
+
+/** Login & verification › simulated codes: nothing was sent, the code is shown here with a Test mode label. */
+export function SimulatedCode({ kind, code, onUse }) {
+    return (
+        <div className="ac-alert dm-simcode" role="status" data-testid="simulated-code">
+            <b>Test mode · simulated {kind} code</b>
+            <span className="dm-simcode__code">{code}</span>
+            <small>Nothing was sent: this site shows the code here while it is being tested.</small>
+            {onUse && <button type="button" className="dm-btn dm-btn--line dm-btn--block" onClick={onUse}>Use this code</button>}
+        </div>
+    );
+}
+
+/* -------------------------------------------------------------------------------------- e-mail code */
+
+/** A six-digit code by e-mail (no link to open, no password). A new address gets an account. */
+export function EmailCodeForm({ initialEmail = '', remember = true, children }) {
+    const [step, setStep] = useState('email');
+    const [email, setEmail] = useState(initialEmail);
+    const [code, setCode] = useState('');
+    const [devCode, setDevCode] = useState(null);
+    const [simulated, setSimulated] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [busy, setBusy] = useState(false);
+    const [wait, setWait] = useState(0);
+    const codeRef = useRef(null);
+
+    useEffect(() => {
+        if (wait <= 0) return undefined;
+        const t = setTimeout(() => setWait(wait - 1), 1000);
+        return () => clearTimeout(t);
+    }, [wait]);
+
+    const send = async (e) => {
+        e && e.preventDefault();
+        setBusy(true);
+        setErrors({});
+        try {
+            const r = await authPost('/auth/email-code/send', { email: email.trim() });
+            setEmail(r.email || email.trim());
+            setWait(r.resendIn || 30);
+            setDevCode(r.devCode || null);
+            setSimulated(!!r.simulated);
+            setCode('');
+            setStep('code');
+            setTimeout(() => codeRef.current && codeRef.current.focus(), 50);
+        } catch (err) {
+            setErrors({ email: err.message });
+            if (err.retryAfter) setWait(Math.min(err.retryAfter, 3600));
+        }
+        setBusy(false);
+    };
+
+    const verify = async (e, value) => {
+        e && e.preventDefault();
+        const c = (value || code).replace(/\D/g, '');
+        if (c.length !== 6) {
+            setErrors({ code: 'Enter the 6-digit code.' });
+            return;
+        }
+        setBusy(true);
+        setErrors({});
+        try {
+            const r = await authPost('/auth/email-code/verify', { email, code: c, remember, returnTo: true });
+            goTo(r.redirect);
+        } catch (err) {
+            setErrors({ code: err.fieldErrors.code || err.message });
+            if (err.status === 410 || err.status === 429) setCode('');
+            setBusy(false);
+        }
+    };
+
+    if (step === 'code') {
+        return (
+            <form onSubmit={verify} noValidate data-testid="email-code-form">
+                <p className="dm-muted dm-center">We sent a 6-digit code to <b>{email}</b>.{' '}
+                    <button type="button" className="dm-linkbtn" onClick={() => setStep('email')}>Change</button>
+                </p>
+                {simulated && devCode && <SimulatedCode kind="e-mail" code={devCode} onUse={() => { setCode(devCode); verify(null, devCode); }} />}
+                {!simulated && devCode && <div className="ac-alert ac-alert--ok dm-devcode">Development mode (no e-mail is sent): your code is <b>{devCode}</b></div>}
+                <div className="ac-field">
+                    <label htmlFor="f-ecode">Code from the e-mail</label>
+                    <input id="f-ecode" ref={codeRef} className={`ac-input dm-otp ${errors.code ? 'is-invalid' : ''}`} inputMode="numeric"
+                           autoComplete="one-time-code" pattern="[0-9]*" maxLength={6} value={code} placeholder="••••••"
+                           aria-invalid={!!errors.code} aria-describedby={errors.code ? 'e-ecode' : undefined}
+                           onChange={(e) => {
+                               const v = e.target.value.replace(/\D/g, '').slice(0, 6);
+                               setCode(v);
+                               if (v.length === 6) verify(null, v);
+                           }} />
+                    {errors.code && <div className="ac-field__error" id="e-ecode">{errors.code}</div>}
+                </div>
+                <button type="submit" className="dm-btn dm-btn--brand dm-btn--block dm-btn--lg" disabled={busy || code.length !== 6}>
+                    {busy ? 'Checking…' : 'Verify and continue'}
+                </button>
+                <p className="dm-muted dm-center" style={{ marginTop: 14 }}>
+                    {wait > 0 ? <>You can request a new code in {wait}s</> :
+                        <button type="button" className="dm-linkbtn" onClick={send} disabled={busy}>Send a new code</button>}
+                </p>
+            </form>
+        );
+    }
+    return (
+        <form onSubmit={send} noValidate data-testid="email-code-start">
+            <Field label="Email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email}
+                   autoComplete="email" placeholder="you@example.com" hint="We'll e-mail you a 6-digit code. No password needed." />
+            <button type="submit" className="dm-btn dm-btn--brand dm-btn--block dm-btn--lg" disabled={busy || !email.includes('@') || wait > 0}>
+                {busy ? 'Sending code…' : wait > 0 ? `Try again in ${wait}s` : 'Email me a code'}
+            </button>
+            {children}
         </form>
     );
 }

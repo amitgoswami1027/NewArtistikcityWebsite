@@ -664,11 +664,30 @@ public class CheckoutController {
     }
 
     private void sendOrderConfirmation(HttpServletRequest request, long orderId, String email) {
+        HttpServletRequest req = request != null ? request : currentRequest();
+        String base = env.getProperty("app.url", "").trim();
+        if (base.isEmpty() && req != null) base = Inertia.baseUrl(req);
+        base = base.replaceAll("/+$", "");
+        // a landing page order gets the landing thank-you e-mail (logo, course, payment, "Go to my course")
+        Row lp = db.first("select landing_page_id from orders where id = ?", orderId);
+        if (lp != null && lp.get("landing_page_id") != null && landingHooks != null && landingHooks.getIfAvailable() != null && email != null) {
+            try {
+                if (landingHooks.getIfAvailable().sendThankYou(orderId, email, base)) return;
+            } catch (RuntimeException e) {
+                log.warn("Landing thank-you e-mail for order {} failed, sending the standard confirmation: {}", orderId, e.toString());
+            }
+        }
         Row data = orderMailData(orderId);
         if (data != null && email != null) {
             mailer.send(email, "Order Confirmation - " + data.str("order_number"), "emails/order-confirmation",
-                    Row.of("orderData", data, "baseUrl", request == null ? env.getProperty("app.url", "") : Inertia.baseUrl(request)));
+                    Row.of("orderData", data, "baseUrl", base));
         }
+    }
+
+    /** The web request this thread is answering, if any (payments completed by the webhook / reconciler have none). */
+    private static HttpServletRequest currentRequest() {
+        var attrs = org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+        return attrs instanceof org.springframework.web.context.request.ServletRequestAttributes sra ? sra.getRequest() : null;
     }
 
     /** /payment/ordermail - preview of the order confirmation e-mail for the latest order of the user. */

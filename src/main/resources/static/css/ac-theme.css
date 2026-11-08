@@ -966,6 +966,9 @@
 .dm-phone { display: flex; gap: 8px; }
 .dm-phone select.ac-input { width: 118px; flex: 0 0 118px; padding: 0 8px; }
 .dm-devcode { font-weight: 500; }
+.dm-simcode { display: grid; gap: 6px; text-align: center; border: 2px dashed #C99A00; background: #FFF8E1; color: #3D3000; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
+.dm-simcode__code { font: 800 28px/1.1 Consolas, Menlo, monospace; letter-spacing: 8px; color: #2C3E50; }
+.dm-simcode small { color: #3D3000; }
 .dm-remember { margin: 4px 0 16px; }
 
 /* ---------- Login & security (student account) ---------- */

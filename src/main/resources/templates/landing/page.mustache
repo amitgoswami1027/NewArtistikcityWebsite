@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800{{#fontSerif}}&family=Fraunces:opsz,wght@9..144,500;9..144,600{{/fontSerif}}&display=swap">
 {{#sections}}{{#is_hero}}{{#image}}<link rel="preload" as="image" href="{{src}}"{{#srcset}} imagesrcset="{{srcset}}" imagesizes="{{sizes}}"{{/srcset}} fetchpriority="high">{{/image}}{{#preloadImage}}<link rel="preload" as="image" href="{{src}}"{{#srcset}} imagesrcset="{{srcset}}" imagesizes="{{sizes}}"{{/srcset}} fetchpriority="high">{{/preloadImage}}{{/is_hero}}{{/sections}}
-<link rel="stylesheet" href="/css/landing.css?v=4">
+<link rel="stylesheet" href="/css/landing.css?v=5">
 <style>:root{--accent:{{accent}};--accent-dark:{{accentDark}};--on-accent:{{accentInk}};--ink:{{ink}};--surface:{{surface}}}</style>
 {{#meta.jsonLd}}<script type="application/ld+json">{{{meta.jsonLd}}}</script>{{/meta.jsonLd}}
 </head>
@@ -502,6 +502,6 @@
 </dialog>
 {{/checkout}}
 <script src="/js/landing.js?v=3" defer></script>
-{{#checkout}}<script src="/js/landing-checkout.js?v=3" defer></script>{{/checkout}}
+{{#checkout}}<script src="/js/landing-checkout.js?v=4" defer></script>{{/checkout}}
 </body>
 </html>

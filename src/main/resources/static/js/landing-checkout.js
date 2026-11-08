@@ -1,8 +1,11 @@
 /* ArtistikCity landing pages: the checkout runs inside the page (a dialog), so a visitor never leaves it.
-   Steps: 1. quick sign-in (Google one-tap / button, a six-digit code by e-mail or SMS, or a passkey) - skipped when
-   already signed in; 2. details and payment (the page's own payment options; Razorpay opens its own window on top of
-   the page); 3. the result. The server decides prices, coupons and which payment options exist
-   (GET /landing/checkout/{page}/state); this file only collects input and shows answers. No framework, no build step. */
+   Steps: 1. details and payment choice - a guest needs no account for this; 2. when they press Pay, a six-digit code
+   to their mobile (SMS) or e-mail confirms who they are and signs them in (a new account is made from the code), then
+   the payment opens (Razorpay's own window on top of the page); 3. the result: congratulations, and "Log in to My
+   studio". Pages set to "sign in first" (Admin › Landing Page Management › Login & verification) start with the quick
+   sign-in instead (Google one-tap, a code by e-mail or SMS, a passkey, or e-mail and password). The server decides
+   prices, coupons, payment options and how buyers are verified (GET /landing/checkout/{page}/state); this file only
+   collects input and shows answers. No framework, no build step. */
 (function () {
   'use strict';
   var d = document;
@@ -22,6 +25,8 @@
   var timers = [];
   var opener = null;
   var signinOnly = false;
+  var forceSignin = false;    // a guest chose "Log in" instead of verifying at Pay
+  var vchannel = null;        // how a guest confirms who they are: 'phone' or 'email'
 
   // ------------------------------------------------------------------ helpers
 
@@ -157,10 +162,14 @@
 
   var signin = { mode: 'email', email: '', name: '', phone: '', sent: null, profile: false, msg: null };
 
-  function signedIn(r) {
-    var u = r && r.user;
+  function markSignedIn() {
     var link = d.querySelector('.lp-top__end [data-signin]');
     if (link) { link.textContent = 'My studio'; link.setAttribute('href', '/dashboard'); link.removeAttribute('data-signin'); }
+  }
+
+  function signedIn(r) {
+    var u = r && r.user;
+    markSignedIn();
     if (signinOnly) {
       render([note('ok', 'You\'re signed in' + (u && u.name ? ' as ' + u.name : '') + '.'), button('Continue', { onclick: close })], 'Signed in');
       return;
@@ -204,12 +213,16 @@
     if (!o.google && !codeChannels.length && !o.passkey) {
       kids.push(note('info', 'Quick sign-in isn\'t set up on this server yet.'));
     }
+    if (forceSignin && guestCanVerify()) {
+      kids.push(el('button', { type: 'button', class: 'lp-co__link', 'data-testid': 'lp-co-back-guest', onclick: function () { forceSignin = false; stepPay(); } },
+        ['Back: continue without logging in']));
+    }
     kids.push(el('p', { class: 'lp-co__fine' }, [
       'By continuing you agree to our ', el('a', { href: '/terms-conditions', target: '_blank', rel: 'noopener', text: 'terms' }), ' and ',
       el('a', { href: '/privacy-policy', target: '_blank', rel: 'noopener', text: 'privacy policy' }), '. ',
       el('a', { href: '/login?return_to=' + encodeURIComponent('/landing/' + slug + '/enroll'), text: 'Other ways to sign in' })
     ]));
-    render(kids, signinOnly ? 'Sign in' : 'Enrol · step 1 of 2');
+    render(kids, signinOnly ? 'Sign in' : forceSignin ? 'Log in' : 'Enrol · step 1 of 2');
     var first = main.querySelector('input:not([type=hidden])');
     if (first && !o.google) first.focus();
   }
@@ -448,13 +461,24 @@
 
   // ------------------------------------------------------------------ step 2: details and payment
 
+  function guestCanVerify() {
+    var v = state && state.verify;
+    return !!(v && v.mode !== 'SIGNIN' && v.channels && v.channels.length);
+  }
+
   function stepPay(message, errors) {
     var q = state.quote, ck = state.checkout || {}, u = state.user || {}, a = state.address || {};
+    var guest = !state.user;
     errors = errors || {};
     if (!form) {
-      form = { name: u.name || '', phone: u.phone || '', address: a.address || '', city: a.city || '', state: a.state || '', zipcode: a.zipcode || '',
+      form = { name: u.name || '', email: u.email || '', phone: u.phone || '', address: a.address || '', city: a.city || '', state: a.state || '', zipcode: a.zipcode || '',
         country: a.country || 'India', terms: false, privacy: false };
+    } else if (!guest) {
+      if (!form.name) form.name = u.name || '';
+      if (!form.phone) form.phone = u.phone || '';
     }
+    var channels = guest ? state.verify.channels : [];
+    if (guest && channels.indexOf(vchannel) < 0) vchannel = channels[0];
     if (!method && state.choices.length) method = state.choices[0].key;
     function input(key, attrs) {
       var i = el('input', Object.assign({ value: form[key] || '' }, attrs || {}));
@@ -482,14 +506,33 @@
       } }, [ci, cb, cmsg]));
     }
 
-    var who = el('div', { class: 'lp-co__who' }, [
-      el('span', {}, ['Enrolling as ', el('b', { text: u.email || u.phone || u.name })]),
-      el('button', { type: 'button', class: 'lp-co__link', onclick: switchAccount }, ['Not you?'])
-    ]);
+    var who = guest
+      ? el('div', { class: 'lp-co__who', 'data-testid': 'lp-co-guest' }, [
+          el('span', { text: 'No account needed: we\'ll confirm it\'s you with a one-time code when you pay.' }),
+          el('button', { type: 'button', class: 'lp-co__link', 'data-testid': 'lp-co-login-instead', onclick: function () { forceSignin = true; signin.email = form.email || signin.email; stepSignin(); } }, ['Have an account? Log in'])
+        ])
+      : el('div', { class: 'lp-co__who' }, [
+          el('span', {}, ['Enrolling as ', el('b', { text: u.email || u.phone || u.name })]),
+          el('button', { type: 'button', class: 'lp-co__link', onclick: switchAccount }, ['Not you?'])
+        ]);
+    var phoneNeeded = ck.requirePhone || (guest && vchannel === 'phone');
     var fields = el('div', { class: 'lp-co__fields' }, [
-      field('lp-co-fname', 'Full name', input('name', { autocomplete: 'name', required: true }), errors.name),
-      field('lp-co-fphone', 'Phone' + (ck.requirePhone ? '' : ' (optional)'), input('phone', { type: 'tel', autocomplete: 'tel', inputmode: 'tel', placeholder: '+91 98765 43210' }), errors.phone)
+      field('lp-co-fname', 'Full name', input('name', { autocomplete: 'name', required: true, 'data-testid': 'lp-co-fname' }), errors.name),
+      guest ? field('lp-co-femail', 'E-mail', input('email', { type: 'email', autocomplete: 'email', inputmode: 'email', required: true, placeholder: 'you@example.com', 'data-testid': 'lp-co-femail' }),
+        errors.email, 'Your receipt and course details go here.') : null,
+      field('lp-co-fphone', (guest ? 'Mobile number' : 'Phone') + (phoneNeeded ? '' : ' (optional)'),
+        input('phone', { type: 'tel', autocomplete: 'tel', inputmode: 'tel', placeholder: '+91 98765 43210', 'data-testid': 'lp-co-fphone' }), errors.phone,
+        guest && vchannel === 'phone' ? 'We\'ll text a 6-digit code to this number when you pay.' : null)
     ]);
+    if (guest && channels.length > 1) {
+      var vset = el('div', { class: 'lp-co__vch', role: 'radiogroup', 'aria-label': 'Confirm it\'s you with' });
+      [['phone', 'A code to my mobile'], ['email', 'A code to my e-mail']].forEach(function (c) {
+        var r = el('input', { type: 'radio', name: 'lp-co-vch', value: c[0], checked: vchannel === c[0], 'data-testid': 'lp-co-vch-' + c[0] });
+        r.addEventListener('change', function () { vchannel = c[0]; stepPay(); });
+        vset.appendChild(el('label', { class: 'lp-co__check' }, [r, el('span', { text: c[1] })]));
+      });
+      fields.appendChild(el('fieldset', { class: 'lp-co__set' }, [el('legend', { text: 'Confirm it\'s you with' }), vset]));
+    }
     if (ck.requireAddress) {
       fields.appendChild(field('lp-co-faddress', 'Address', input('address', { autocomplete: 'street-address' }), errors.address));
       fields.appendChild(field('lp-co-fcity', 'City', input('city', { autocomplete: 'address-level2' }), errors.city));
@@ -511,7 +554,9 @@
       payForm.appendChild(el('fieldset', { class: 'lp-co__set' }, [el('legend', { text: 'How would you like to pay?' }), methods]));
       if (!state.choices.length && !state.simulate) payForm.appendChild(note('error', 'Online payment isn\'t available for this course right now. Please contact us and we\'ll help you enrol.'));
       if (state.paymentsClosed) payForm.appendChild(note('info', 'Online payment for this course opens soon. Please check back, or contact us and we\'ll help you enrol.'));
-      else if (state.razorpaySimulated) payForm.appendChild(el('p', { class: 'lp-co__fine', 'data-testid': 'lp-co-simnote', text: 'Test mode: Razorpay is simulated on this site. You are a test buyer, so no real payment is made.' }));
+      else if (state.razorpaySimulated) payForm.appendChild(el('p', { class: 'lp-co__fine', 'data-testid': 'lp-co-simnote', text: state.simulatedForEveryone
+        ? 'Test mode: Razorpay is simulated on this site. No real payment is made.'
+        : 'Test mode: Razorpay is simulated on this site. You are a test buyer, so no real payment is made.' }));
       if (state.testMode) payForm.appendChild(el('p', { class: 'lp-co__fine', text: 'Test mode: no real payment is taken on this server.' }));
     }
     function check(key, id, label) {
@@ -535,15 +580,130 @@
     }
     refreshPay();
     payForm.appendChild(payBtn);
+    if (guest) {
+      payForm.appendChild(el('p', { class: 'lp-co__fine lp-co__center', 'data-testid': 'lp-co-verify-hint', text: vchannel === 'email'
+        ? 'When you press the button, we\'ll e-mail you a 6-digit code to confirm it\'s you. No password needed.'
+        : 'When you press the button, we\'ll text a 6-digit code to your mobile to confirm it\'s you. No password needed.' }));
+    }
     if (state.simulate && !q.free && !state.razorpaySimulated) {     // with simulated Razorpay, Pay already opens the simulated window
       payForm.appendChild(button('Simulate payment (test buyer)', { class: 'lp-btn lp-btn--ghost lp-btn--block', 'data-testid': 'lp-co-simulate', onclick: function () { pay('test', this); } }));
     }
     payForm.appendChild(el('p', { class: 'lp-co__fine lp-co__center' }, [icon('i-lock'), ' Encrypted payment by our payment partners. We never see your card or UPI PIN.']));
-    payForm.addEventListener('submit', function (e) { e.preventDefault(); pay(q.free ? 'free' : method, payBtn); });
+    payForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (guest) startVerify(q.free ? 'free' : method, payBtn);
+      else pay(q.free ? 'free' : method, payBtn);
+    });
     kids.push(payForm);
-    render(kids, 'Enrol · step 2 of 2');
+    render(kids, guest ? 'Enrol' : 'Enrol · step 2 of 2');
     var firstErr = main.querySelector('[aria-invalid=true]');
     if (firstErr) firstErr.focus();
+  }
+
+  // ------------------------------------------------------------------ a guest pays: confirm it's them with a code
+
+  function startVerify(choice, btn) {
+    var ck = state.checkout || {};
+    var errs = {};
+    if (!String(form.name || '').trim()) errs.name = 'Enter your full name.';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(form.email || '').trim())) errs.email = 'Enter your e-mail: your receipt and course details go there.';
+    if ((vchannel === 'phone' || ck.requirePhone) && String(form.phone || '').replace(/\D/g, '').length < 8) errs.phone = 'Enter your mobile number.';
+    if (ck.requireTerms && !form.terms) errs.terms = 'Please accept the terms to continue.';
+    if (ck.requirePrivacy && !form.privacy) errs.privacy = 'Please accept the privacy policy to continue.';
+    if (Object.keys(errs).length) { stepPay({ tone: 'error', text: 'Please check the highlighted fields.' }, errs); return; }
+    busy(btn, true, 'Sending your code…');
+    sendCode(choice).catch(function (e) {
+      busy(btn, false);
+      if (e.data && e.data.signIn) { forceSignin = true; signin.email = form.email; stepSignin({ tone: 'info', text: e.message }); return; }
+      if (e.data && e.data.signedIn) { load(); return; }
+      stepPay({ tone: 'error', text: e.message }, e.fields || {});
+    });
+  }
+
+  function sendCode(choice) {
+    return post('/landing/checkout/' + pageId + '/verify/send', { channel: vchannel, name: form.name, email: form.email, phone: form.phone }).then(function (r) {
+      stepVerify(r, choice);
+    });
+  }
+
+  function stepVerify(sent, choice, message) {
+    var input = el('input', { type: 'text', name: 'code', autocomplete: 'one-time-code', inputmode: 'numeric', pattern: '[0-9]*', maxlength: 6,
+      class: 'lp-co__code', placeholder: '••••••', required: true, 'aria-label': '6-digit code', 'data-testid': 'lp-co-vcode' });
+    var btn = el('button', { type: 'submit', class: 'lp-btn lp-btn--block', 'data-testid': 'lp-co-vsubmit' }, [icon('i-lock'), ' Confirm & pay']);
+    var err = el('small', { class: 'lp-co__err', role: 'alert' });
+    var resend = el('button', { type: 'button', class: 'lp-co__link', disabled: true, 'data-testid': 'lp-co-vresend' });
+    var left = sent.resendIn || 30;
+    function tick() {
+      if (left > 0) { resend.textContent = 'Send a new code in ' + left + 's'; resend.disabled = true; left--; }
+      else { resend.textContent = 'Send a new code'; resend.disabled = false; }
+    }
+    resend.addEventListener('click', function () {
+      resend.disabled = true;
+      sendCode(choice).catch(function (e) { stepVerify(sent, choice, { tone: 'error', text: e.message }); });
+    });
+    var busyNow = false;
+    function submit() {
+      var code = input.value.replace(/\D/g, '');
+      if (code.length !== 6) { err.textContent = 'Enter the 6 digits from the ' + (sent.channel === 'email' ? 'e-mail' : 'text message') + '.'; return; }
+      if (busyNow) return;
+      busyNow = true;
+      busy(btn, true, 'Checking…');
+      post('/landing/checkout/' + pageId + '/verify/check', { code: code }).then(function () {
+        markSignedIn();
+        render([el('div', { class: 'lp-co__wait', 'aria-busy': 'true' }, [el('span', { class: 'lp-co__spin' }), 'Confirmed. Opening the payment…'])], 'Payment');
+        return api('GET', '/landing/checkout/' + pageId + '/state').then(function (s) {
+          state = s;
+          if (s.enrolled) { load(); return; }
+          if (s.paymentsClosed && !state.quote.free) { stepPay(); return; }
+          pay(choice, null);
+        });
+      }).catch(function (e) {
+        busyNow = false;
+        busy(btn, false);
+        if (e.status === 410 || (e.data && e.data.code === 'EMAIL_HAS_ACCOUNT')) { stepPay({ tone: 'error', text: e.message }); return; }
+        err.textContent = (e.fields && e.fields.code) || e.message;
+        input.select();
+      });
+    }
+    input.addEventListener('input', function () {
+      input.value = input.value.replace(/\D/g, '').slice(0, 6);
+      err.textContent = '';
+      if (input.value.length === 6) submit();
+    });
+    var where = sent.channel === 'email' ? 'e-mail' : 'mobile';
+    var simBox = null;
+    if (sent.code && sent.simulated) {
+      simBox = el('div', { class: 'lp-co__sim', 'data-testid': 'lp-co-simcode', role: 'status' }, [
+        el('p', {}, [el('b', { text: 'Test mode · simulated ' + (sent.channel === 'email' ? 'e-mail' : 'SMS') + ' code' })]),
+        el('p', { class: 'lp-co__simcode', text: sent.code }),
+        el('p', { class: 'lp-co__fine', text: 'Nothing was sent: this site shows the code here while it is being tested.' }),
+        button('Use this code', { class: 'lp-btn lp-btn--ghost lp-btn--block', 'data-testid': 'lp-co-usecode', onclick: function () { input.value = sent.code; submit(); } })
+      ]);
+    } else if (sent.code) {
+      simBox = note('info', 'Development server: your code is ' + sent.code + ' (shown only on this computer).');
+    }
+    var f = el('form', { class: 'lp-co__form', novalidate: true, onsubmit: function (e) { e.preventDefault(); submit(); } }, [
+      el('p', { class: 'lp-co__lead' }, ['To keep your enrolment safe, enter the 6-digit code we sent to your ' + where + ' ', el('b', { text: sent.masked }), '.']),
+      sent.notice ? note('info', sent.notice) : null,
+      message ? note(message.tone, message.text) : null,
+      simBox,
+      input, err, btn,
+      el('div', { class: 'lp-co__row' }, [
+        el('button', { type: 'button', class: 'lp-co__link', 'data-testid': 'lp-co-vchange', onclick: function () { stepPay(); } }, ['Change details']),
+        resend
+      ])
+    ]);
+    render([summary(true), f], 'Confirm it\'s you');
+    tick();
+    timers.push(setInterval(tick, 1000));
+    setTimeout(function () { input.focus(); }, 30);
+    if (sent.channel === 'phone' && !sent.simulated && 'OTPCredential' in window) {     // Android Chrome reads the code from the SMS
+      var ac = new AbortController();
+      timers.push(setTimeout(function () { ac.abort(); }, 120000));
+      navigator.credentials.get({ otp: { transport: ['sms'] }, signal: ac.signal }).then(function (otp) {
+        if (otp && otp.code && d.body.contains(input)) { input.value = otp.code; submit(); }
+      }).catch(function () {});
+    }
   }
 
   function switchAccount() {
@@ -574,6 +734,7 @@
       if (e.data && e.data.enrolled) return load();
       if (e.data && e.data.repriced && e.data.quote) state.quote = e.data.quote;
       if (e.data && e.data.code === 'SIGN_IN' || e.status === 401) { state.user = null; return load(); }
+      if (!btn) { stepPay({ tone: 'error', text: e.message }, e.fields || {}); return; }
       stepPay({ tone: 'error', text: e.message }, e.fields || {});
     });
   }
@@ -717,10 +878,18 @@
     var box = el('div', { class: 'lp-co__result is-' + r.state, 'data-testid': 'lp-co-result', 'data-state': r.state, role: 'status' });
     function add(h, p) { box.appendChild(el('h3', { text: h })); if (p) box.appendChild(el('p', { text: p })); }
     if (ok && !r.duplicate && !r.soldout) {
-      add('You\'re in!', ck.successMessage || 'Your payment is confirmed and your seat is booked. We have e-mailed your receipt and joining details.');
-      box.appendChild(el('p', { class: 'lp-co__fine', text: 'Order ' + r.number + ' · ' + r.amount }));
-      if (next) box.appendChild(el('a', { class: 'lp-btn lp-btn--block', href: next, 'data-testid': 'lp-co-next', text: ck.successRedirect ? 'Continue' : 'Start learning' }));
-      box.appendChild(el('a', { class: 'lp-btn lp-btn--ghost lp-btn--block', href: '/dashboard', text: 'Open my studio' }));
+      var first = String(r.name || '').trim().split(/\s+/)[0];
+      box.classList.add('lp-co__congrats');
+      box.appendChild(el('h3', { 'data-testid': 'lp-co-congrats', text: 'Congratulations' + (first ? ', ' + first : '') + '!' }));
+      box.appendChild(el('p', {}, ['You\'ve joined ', el('b', { text: state.course.title }), '. Your payment is complete and your seat is booked.']));
+      if (ck.successMessage) box.appendChild(el('p', { text: ck.successMessage }));
+      var dl = el('dl', { class: 'lp-co__lines' });
+      [['Course', state.course.title], ['Order', r.number], ['Amount paid', r.amount]].forEach(function (x) { dl.appendChild(el('div', {}, [el('dt', { text: x[0] }), el('dd', { text: x[1] })])); });
+      box.appendChild(dl);
+      if (r.mailed && r.email) box.appendChild(el('p', { class: 'lp-co__fine', text: 'We\'ve e-mailed your receipt and a link to your course to ' + r.email + '.' }));
+      if (r.continueUrl) box.appendChild(el('a', { class: 'lp-btn lp-btn--lg lp-btn--block', href: r.continueUrl, 'data-testid': 'lp-co-studio' }, [icon('i-lock'), ' Log in to My studio']));
+      if (next) box.appendChild(el('a', { class: 'lp-btn lp-btn--ghost lp-btn--block', href: next, 'data-testid': 'lp-co-next', text: ck.successRedirect ? 'Continue' : 'Start learning now' }));
+      if (!r.continueUrl) box.appendChild(el('a', { class: 'lp-btn lp-btn--ghost lp-btn--block', href: '/dashboard', text: 'Open my studio' }));
     } else if (ok && r.duplicate) {
       add('You were already enrolled', 'This payment will be refunded in full. Nothing else to do.');
     } else if (ok && r.soldout) {
@@ -744,7 +913,7 @@
     }
     kids.push(box);
     render(kids, ok ? 'Enrolled' : 'Your enrolment');
-    var r1 = d.querySelector('[data-testid=lp-co-next]');
+    var r1 = d.querySelector('[data-testid=lp-co-studio]') || d.querySelector('[data-testid=lp-co-next]');
     if (r1) r1.focus();
   }
 
@@ -767,7 +936,12 @@
         history.replaceState(history.state, '', location.pathname + (params.toString() ? '?' + params : '') + location.hash);
         message = message || (notice === 'cancelled' ? { tone: 'info', text: 'Payment cancelled. No money was taken.' } : { tone: 'error', text: 'The payment did not complete. No money was taken; please try again.' });
       }
-      if (!s.user) { stepSignin(message); return; }
+      if (!s.user) {
+        if (!signinOnly && !forceSignin && guestCanVerify()) { stepPay(message); return; }     // details first; the code comes at Pay
+        stepSignin(message);
+        return;
+      }
+      forceSignin = false;
       if (signinOnly) { signedIn({ user: s.user }); return; }
       if (s.enrolled) {
         render([summary(true), el('div', { class: 'lp-co__result is-success', 'data-testid': 'lp-co-result', 'data-state': 'enrolled' }, [

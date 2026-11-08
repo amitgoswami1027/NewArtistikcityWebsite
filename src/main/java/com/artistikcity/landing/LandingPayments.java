@@ -155,6 +155,32 @@ public class LandingPayments {
         simulatedAt = System.currentTimeMillis();
     }
 
+    private volatile Boolean everyone;
+    private volatile long everyoneAt;
+
+    /**
+     * Who may pay with simulated Razorpay: false = test buyers only (default), true = every visitor (testing a whole
+     * landing page as a new buyer; their orders are test orders too, and they do get the course).
+     */
+    public boolean simulateForEveryone() {
+        if (everyone == null || System.currentTimeMillis() - everyoneAt > 10_000) {
+            Row r = db.first("select meta_value from settings where meta_tag = 'landing_pages' and meta_key = 'simulate_razorpay_all' order by id desc limit 1");
+            everyone = r != null && "1".equals(r.str("meta_value"));
+            everyoneAt = System.currentTimeMillis();
+        }
+        return everyone;
+    }
+
+    public void saveSimulateForEveryone(boolean on) {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        int n = db.update("update settings set meta_value = ?, updated_at = ? where meta_tag = 'landing_pages' and meta_key = 'simulate_razorpay_all'", on ? "1" : "0", now);
+        if (n == 0) {
+            db.insert("settings", Row.of("meta_tag", "landing_pages", "meta_key", "simulate_razorpay_all", "meta_value", on ? "1" : "0", "created_at", now, "updated_at", now));
+        }
+        everyone = on;
+        everyoneAt = System.currentTimeMillis();
+    }
+
     /** connected = can take a payment right now (keys set, or simulated in test mode). */
     public boolean connected(String provider) {
         return switch (provider) {
@@ -173,7 +199,7 @@ public class LandingPayments {
             case "razorpay" -> gateways.razorpayConfigured()
                     ? ("live".equals(gateways.razorpayKeyMode()) ? "Connected · live keys" : "Connected · test keys")
                     : gateways.testMode() ? "Test mode · payments are simulated"
-                    : simulateRazorpaySetting() ? "Simulated · test buyers only, no real payments" : "Keys not set";
+                    : simulateRazorpaySetting() ? (simulateForEveryone() ? "Simulated · every visitor, no real payments" : "Simulated · test buyers only, no real payments") : "Keys not set";
             case "paypal" -> gateways.paypalConfigured() ? "Connected · " + gateways.paypalMode()
                     : gateways.testMode() ? "Test mode · payments are simulated" : "Keys not set";
             default -> "Not connected";

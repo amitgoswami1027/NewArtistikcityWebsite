@@ -71,6 +71,9 @@ public class AuthApiController {
     private final AuthEvents events;
     private final String countryCode;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.auth.LoginSettings login;
+
     public AuthApiController(Auth auth, Db db, Json json, Validator validator, AccountService accounts, OtpService otp, AuthMail authMail,
                              EmailTokenService emailTokens, WebAuthnService webauthn, SessionService sessions, RateLimiter limiter,
                              AuthEvents events, Environment env) {
@@ -96,15 +99,21 @@ public class AuthApiController {
         Input in = Input.of(request, json);
         String phone = phone(in.get("phone"));
         try {
-            OtpService.SendResult r = otp.send(request, phone, "login", null);
+            com.artistikcity.auth.LoginSettings.Decision how = login.phone(request, phone);
+            if (how.mode() == com.artistikcity.auth.LoginSettings.Mode.REFUSE && login.values().simulatePhone()) {
+                // simulated codes are on, but this number belongs to a real account and no SMS provider is set
+                return json(HttpStatus.CONFLICT, Map.of("message", how.message(), "code", "CODE_UNAVAILABLE"));
+            }
+            OtpService.SendResult r = otp.send(request, phone, "login", null, how.mode() == com.artistikcity.auth.LoginSettings.Mode.SIMULATE);
             Map<String, Object> body = ok();
             body.put("phone", phone);
             body.put("masked", PhoneNumbers.mask(phone));
             body.put("expiresIn", r.expiresIn());
             body.put("resendIn", r.resendIn());
             if (r.devCode() != null) {
-                body.put("devCode", r.devCode()); // development only (SMS_PROVIDER=log + expose-dev-otp)
+                body.put("devCode", r.devCode()); // development (SMS_PROVIDER=log + expose-dev-otp) or a simulated code
             }
+            body.put("simulated", r.simulated());
             return json(HttpStatus.OK, body);
         } catch (OtpService.OtpLimitException e) {
             return tooMany(e.getMessage(), e.retryAfter());
@@ -172,6 +181,9 @@ public class AuthApiController {
             }
             id = accounts.create(in.get("name"), email, false, phone, true, null, null);
             events.ok(request, id, "signup", "otp");
+            if (login.values().simulatePhone()) {
+                login.markSimulated(request, id, "otp");
+            }
             if (email != null) {
                 authMail.sendVerification(request, id, email, in.get("name"));
             }

@@ -84,6 +84,15 @@ public class LandingCheckoutController {
     @org.springframework.beans.factory.annotation.Autowired
     private LandingPublic publicView;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private LandingBuyerVerify buyerVerify;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.auth.RateLimiter limiter;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.service.Mailer mailer;
+
     /** The public landing page: its own address, generated from the page's slug (Admin › Landing Page Management). */
     @GetMapping({"/landing/{slug}", "/landing/{slug}/"})
     public ResponseEntity<String> landing(HttpServletRequest request, @PathVariable("slug") String slug) {
@@ -170,9 +179,12 @@ public class LandingCheckoutController {
         props.put("testMode", gateways.testMode() && !gateways.razorpayConfigured());
         boolean sim = payments.razorpaySimulated();
         props.put("razorpaySimulated", sim);
-        // simulated Razorpay: only test buyers can pay; everybody else sees that payment opens soon
-        props.put("paymentsClosed", sim && !gateways.paypalConfigured() && (user == null || !testPayments.isTestBuyer(request)));
+        // simulated Razorpay: only test buyers can pay (or every visitor, when the admin chose that); others see that payment opens soon
+        props.put("paymentsClosed", sim && !gateways.paypalConfigured() && !payments.simulateForEveryone() && (user == null || !testPayments.isTestBuyer(request)));
+        props.put("simulatedForEveryone", sim && payments.simulateForEveryone());
         props.put("signIn", user == null ? quickSignIn.options(request) : null);
+        // a guest goes through the details and payment choice first; the code (SMS / e-mail) is asked for at Pay
+        props.put("verify", user == null ? buyerVerify.view(request, pageId) : null);
         props.put("user", user == null ? null : QuickSignInController.summary(user));
         props.put("simulate", user != null && !q.free() && testPayments.offerSimulation(request));
         if (user != null) {
@@ -183,7 +195,14 @@ public class LandingCheckoutController {
             if (orderId != null) {
                 Row o = db.first("select id, order_number, payment_status, gateway_ref, price, price_type, payment_method from orders where id = ? and user_id = ? and landing_page_id = ?",
                         orderId, uid, pageId);
-                props.put("result", o == null ? null : result(o, request));
+                Map<String, Object> res = o == null ? null : result(o, request);
+                if (res != null && "success".equals(res.get("state"))) {
+                    res.put("name", user.str("name", ""));
+                    res.put("email", user.str("email", ""));
+                    res.put("continueUrl", LandingBuyerVerify.continueUrl(request, uid));
+                    res.put("mailed", mailer.enabled());
+                }
+                props.put("result", res);
             }
         }
         if (orderId == null && !LandingPublic.isBot(request) && auth.admin(request) == null) {
@@ -214,11 +233,15 @@ public class LandingCheckoutController {
     public ResponseEntity<String> quote(HttpServletRequest request, @PathVariable("pageId") long pageId) {
         Row user = auth.user(request);
         Row page = livePage(pageId);
-        if (user == null || page == null) {
-            return error(user == null ? HttpStatus.UNAUTHORIZED : HttpStatus.GONE, user == null ? "Please sign in to continue." : "This page is no longer available.");
+        if (page == null) {
+            return error(HttpStatus.GONE, "This page is no longer available.");
+        }
+        if (!limiter.hit("landing:coupon:" + com.artistikcity.auth.AuthEvents.ip(request), 30, 600).allowed()) {
+            return error(HttpStatus.TOO_MANY_REQUESTS, "Too many tries. Please wait a few minutes.");
         }
         Input in = Input.of(request, json);
-        LandingCommerce.Priced p = commerce.quote(page, in.get("coupon"), user.lng("id"));
+        // a guest can try a code before verifying (first-time / per-buyer limits are checked again when the order is made)
+        LandingCommerce.Priced p = commerce.quote(page, in.get("coupon"), user == null ? null : user.lng("id"));
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("quote", view.price(p.quote()));
         body.put("couponError", p.couponError());
@@ -377,7 +400,7 @@ public class LandingCheckoutController {
             if (!gateways.razorpayConfigured()) {
                 if (gateways.testMode()) return ok(Map.of("gateway", "test", "amount", q.total(), "currency", "INR"));
                 if (payments.razorpaySimulated()) {
-                    if (!testPayments.isTestBuyer(request)) {
+                    if (!mayPaySimulated(request)) {
                         return error(HttpStatus.SERVICE_UNAVAILABLE, "Online payment for this course opens soon. Please check back, or contact us and we'll help you enrol.");
                     }
                     // simulated Razorpay: a test order, paid (or failed) in the page's own simulated payment window
@@ -426,7 +449,7 @@ public class LandingCheckoutController {
     public ResponseEntity<String> simulate(HttpServletRequest request, @PathVariable("pageId") long pageId) {
         Row user = auth.user(request);
         if (user == null) return error(HttpStatus.UNAUTHORIZED, "Please sign in to continue.");
-        if (!payments.razorpaySimulated() || !testPayments.isTestBuyer(request)) return error(HttpStatus.FORBIDDEN, "Simulated payments are only for test accounts.");
+        if (!payments.razorpaySimulated() || !mayPaySimulated(request)) return error(HttpStatus.FORBIDDEN, "Simulated payments are only for test accounts.");
         Input in = Input.of(request, json);
         Row order = db.first("select * from orders where id = ? and user_id = ? and landing_page_id = ? and is_test = 1 and payment_provider = 'razorpay' and payment_status in (0, 2)",
                 in.lng("orderId"), user.get("id"), pageId);
@@ -498,6 +521,11 @@ public class LandingCheckoutController {
     }
 
     // ------------------------------------------------------------------------------------------------ helpers
+
+    /** Simulated Razorpay: a test buyer, or anybody when Login & verification / Test payments says "every visitor". */
+    private boolean mayPaySimulated(HttpServletRequest request) {
+        return payments.simulateForEveryone() || testPayments.isTestBuyer(request);
+    }
 
     private Row livePage(long pageId) {
         return db.first("select * from landing_pages where id = ? and status = 'PUBLISHED' and course_id is not null", pageId);

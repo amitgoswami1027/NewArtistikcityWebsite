@@ -485,9 +485,11 @@ function Pricing({ data, canEdit, onSaved, toast }) {
     );
 }
 
+const VERIFY_LABEL = { PHONE: 'A code to their mobile (SMS)', EMAIL: 'A code to their e-mail', EITHER: 'Mobile or e-mail code (buyer chooses)', SIGNIN: 'Sign in before the details (no code at Pay)' };
+
 function Checkout({ data, canEdit, onSaved, toast }) {
     const init = { ...data.checkout, successMessage: data.checkout.successMessage || '', successRedirect: data.checkout.successRedirect || '',
-        failureMessage: data.checkout.failureMessage || '', pendingMessage: data.checkout.pendingMessage || '' };
+        failureMessage: data.checkout.failureMessage || '', pendingMessage: data.checkout.pendingMessage || '', verifyWith: data.checkout.verifyWith || 'DEFAULT' };
     const [v, setV] = useState(init);
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
@@ -507,9 +509,19 @@ function Checkout({ data, canEdit, onSaved, toast }) {
     );
     return (
         <div className="adm-stack">
+            <Card title="Verify buyers with" subtitle="Visitors see the whole page and the checkout without an account. When they press Pay, a one-time code confirms who they are, signs them in (a new buyer gets an account), and then the payment opens."
+                  actions={<Button as="a" size="sm" href="/admin/landing/login" icon="fa-shield">Login &amp; verification</Button>}>
+                <Field label="How buyers confirm who they are" name="verifyWith" error={errors.verifyWith}
+                       hint={data.verifyColumn === false ? 'Needs the database update 2026-11-12_landing_login_verify.sql; until then this page uses the default.' : 'Simulated codes and the sign-in methods are set in Login & verification.'}>
+                    <select id="f-verifyWith" className="adm-input" value={v.verifyWith} disabled={!canEdit || data.verifyColumn === false} onChange={(e) => setV({ ...v, verifyWith: e.target.value })} data-testid="lp-verify-with">
+                        <option value="DEFAULT">Use the default ({VERIFY_LABEL[data.verifyDefault] || 'mobile number code'})</option>
+                        {Object.keys(VERIFY_LABEL).map((k) => <option key={k} value={k}>{VERIFY_LABEL[k]}</option>)}
+                    </select>
+                </Field>
+            </Card>
             <Card title="Details we ask for" subtitle="Name and e-mail are always required (they make the account and the receipt).">
                 <div className="lpa-toggles">
-                    {tog('requirePhone', 'Phone number', 'For class reminders on WhatsApp. Kept on the order, never used to sign in.')}
+                    {tog('requirePhone', 'Phone number', 'For class reminders on WhatsApp. Always asked for when buyers verify with a mobile code.')}
                     {tog('requireAddress', 'Billing address', 'Only if your accountant needs it for invoices.')}
                     {tog('requireTerms', 'Accept the terms', 'A required tick box linking to the terms of use.')}
                     {tog('requirePrivacy', 'Privacy consent', 'A required tick box linking to the privacy policy.')}

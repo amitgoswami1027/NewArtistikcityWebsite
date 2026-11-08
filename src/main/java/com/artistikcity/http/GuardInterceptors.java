@@ -53,7 +53,11 @@ public class GuardInterceptors {
                 if (!(handler instanceof HandlerMethod) || !auth.check(request)) {
                     return true;
                 }
-                redirect(request, response, HOME);
+                // already signed in: go where the link wanted to take them (e.g. "Go to my course" in an e-mail), else the studio
+                String to = request.getParameter("return_to");
+                boolean safe = to != null && to.startsWith("/") && !to.startsWith("//") && !to.contains("\\") && !to.contains("://")
+                        && !to.startsWith("/login") && !to.startsWith("/register") && !to.startsWith("/join") && !to.startsWith("/auth/") && to.length() < 500;
+                redirect(request, response, safe ? to : HOME);
                 return false;
             }
         };

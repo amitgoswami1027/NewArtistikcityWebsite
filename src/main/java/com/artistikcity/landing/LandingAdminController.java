@@ -38,7 +38,7 @@ import java.util.Set;
 @RestController
 public class LandingAdminController {
 
-    private static final Set<String> TABS = Set.of("overview", "pages", "templates", "payments", "coupons", "orders", "analytics", "media", "settings");
+    private static final Set<String> TABS = Set.of("overview", "pages", "templates", "payments", "login", "coupons", "orders", "analytics", "media", "settings");
 
     private final AdminKit kit;
     private final Db db;
@@ -47,6 +47,9 @@ public class LandingAdminController {
     private final Storage storage;
     private final LandingPages pages;
     private final LandingCommerce commerce;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.auth.LoginSettings loginSettings;
     private final LandingPayments payments;
     private final LandingCoupons coupons;
     private final LandingAnalytics analytics;
@@ -329,6 +332,8 @@ public class LandingAdminController {
             m.put("coursePrice", commerce.coursePrices(page.lng("course_id")));
             m.put("payments", payments.view(payments.forPage(id)));
             m.put("checkout", commerce.checkoutView(id));
+            m.put("verifyDefault", loginSettings.values().checkoutVerify());
+            m.put("verifyColumn", commerce.verifyColumnReady());
             m.put("course", view.course(page.lng("course_id")));
         } else {
             m.put("course", Map.of());

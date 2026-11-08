@@ -159,7 +159,26 @@ public class LandingCommerce {
         m.put("successRedirect", r == null ? null : r.get("success_redirect"));
         m.put("failureMessage", r == null ? null : r.get("failure_message"));
         m.put("pendingMessage", r == null ? null : r.get("pending_message"));
+        // how the buyer is verified when paying (DEFAULT = Login & verification's setting); migration 2026-11-12
+        String v = r == null || r.get("verify_with") == null ? "DEFAULT" : r.str("verify_with");
+        m.put("verifyWith", VERIFY_WITH.contains(v) ? v : "DEFAULT");
         return m;
+    }
+
+    public static final List<String> VERIFY_WITH = List.of("DEFAULT", "PHONE", "EMAIL", "EITHER", "SIGNIN");
+
+    private volatile boolean verifyColumn;
+
+    /** landing_checkout.verify_with exists (migration 2026-11-12 applied); until then the page follows the default. */
+    boolean verifyColumnReady() {
+        if (!verifyColumn) {
+            try {
+                verifyColumn = db.count("select count(*) from information_schema.columns where table_schema = database() and table_name = 'landing_checkout' and column_name = 'verify_with'") > 0;
+            } catch (RuntimeException e) {
+                return false;
+            }
+        }
+        return verifyColumn;
     }
 
     public Map<String, String> saveCheckout(long pageId, Map<String, Object> in, long adminId) {
@@ -172,6 +191,10 @@ public class LandingCommerce {
         for (String k : List.of("successMessage", "failureMessage", "pendingMessage")) {
             if (LandingConfig.str(in.get(k)).length() > 500) e.put(k, "At most 500 characters.");
         }
+        String verify = LandingConfig.str(in.get("verifyWith")).toUpperCase();
+        if (!verify.isEmpty() && !VERIFY_WITH.contains(verify)) {
+            e.put("verifyWith", "Choose how buyers are verified.");
+        }
         if (!e.isEmpty()) {
             return e;
         }
@@ -180,6 +203,9 @@ public class LandingCommerce {
                 "show_coupon", flag(in, "showCoupon", true), "show_summary", flag(in, "showSummary", true),
                 "success_message", nul(in, "successMessage"), "success_redirect", redirect.isEmpty() ? null : redirect,
                 "failure_message", nul(in, "failureMessage"), "pending_message", nul(in, "pendingMessage"), "updated_by", adminId, "updated_at", LocalDateTime.now());
+        if (in.containsKey("verifyWith") && verifyColumnReady()) {
+            values.put("verify_with", verify.isEmpty() || "DEFAULT".equals(verify) ? null : verify);
+        }
         if (db.updateWhere("landing_checkout", values, "landing_page_id = ?", pageId) == 0) {
             values.put("landing_page_id", pageId);
             db.insertPlain("landing_checkout", values);

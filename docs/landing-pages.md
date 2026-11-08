@@ -123,6 +123,35 @@ Every button that links to the page's `/enroll` and the header *Log in* (`data-s
    PayPal's page and comes back to `/landing/{slug}/enroll/done`, which reopens the page at the result.
 3. **Result**: success, waiting (polled), failed (try again) - in the same dialog.
 
+### Login & verification (verify at Pay)
+
+Admin › Landing Page Management › **Login & verification** (`/admin/landing/login`, capability `landing.payments`,
+`landing/LandingLoginAdmin`, `GET|PUT /admin/api/landing/login`, every change audited).
+
+- **No account before paying.** A visitor sees the whole page and the checkout (details, coupon, payment choice) as a
+  guest. Pressing Pay asks for a six-digit code to their mobile (SMS) or e-mail (`landing/LandingBuyerVerify`:
+  `POST /landing/checkout/{page}/verify/send {channel, name, email, phone}` and `.../verify/check {code}`; what was asked
+  for is kept in the server session). The code signs them in (`auth_sessions` method `otp`) and creates the account when
+  it is new; then the order and payment open as before. An e-mail that already belongs to another account is never
+  attached to a new phone account: the code goes to that e-mail instead, or the buyer is asked to log in.
+- **Default and per page.** `settings` tag `landing_pages`, key `login` (`auth/LoginSettings`): `checkoutVerify` =
+  PHONE (default) | EMAIL | EITHER | SIGNIN (sign in before the details, the earlier behaviour). A page can override it in
+  its editor's Checkout step (`landing_checkout.verify_with`, migration `2026-11-12_landing_login_verify.sql`; NULL =
+  default; without the migration the page follows the default). When no channel can reach people, the checkout falls
+  back to signing in first.
+- **Simulated codes** (`simulatePhone`, `simulateEmail`): nothing is sent, the code is shown on the screen with a Test mode
+  label ("Use this code"). Only for a number / e-mail without an account, a test buyer, or an account created with a
+  simulated code (`auth_events` row `simulated_signup`); a real account gets a real code or is asked to log in
+  (409 `CODE_UNAVAILABLE`). Applies to the main `/login` too (phone tab, and the new e-mail code form).
+- **Simulated Razorpay for everyone**: settings key `simulate_razorpay_all` (`LandingPayments.simulateForEveryone`); off =
+  only test buyers pay, on = any verified visitor (orders are `is_test = 1`, they do get the course).
+- **After payment**: congratulations screen (name, course, order, amount) with **Log in to My studio** = a single-use
+  link `/auth/continue?t=` bound to the browser session (30 min) that signs the buyer in if needed and opens `/dashboard`.
+  The thank-you e-mail (`LandingHooks.sendThankYou`, `templates/emails/landing-thank-you.mustache`: logo, course,
+  payment, "Go to my course" = `/login?return_to=/user/course/{order}`) replaces the standard order confirmation for
+  landing orders. A signed-in visitor opening `/login?return_to=…` goes straight there.
+- Tests: `tests/system/test_landing_login_verify.py` (production mode), `tests/e2e/specs/landing-verify.spec.js`.
+
 ### Test payments
 
 Admin › Landing Page Management › *Payments & checkout* › **Test payments** (`LandingTestPayments`, capability

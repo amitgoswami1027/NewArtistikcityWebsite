@@ -34,7 +34,8 @@ public class OtpService {
     public static final int MAX_ATTEMPTS = 5;
     public static final int RESEND_COOLDOWN_SECONDS = 30;
 
-    public record SendResult(int expiresIn, int resendIn, String devCode) {
+    /** devCode = the code, when it may be shown on the screen (development, or a simulated code); simulated = nothing was sent. */
+    public record SendResult(int expiresIn, int resendIn, String devCode, boolean simulated) {
     }
 
     public enum Outcome { OK, INVALID, EXPIRED, LOCKED, NONE }
@@ -99,6 +100,14 @@ public class OtpService {
 
     /** Sends a new code to {@code phone} (E.164). Throws {@link OtpLimitException} when a limit is hit. */
     public SendResult send(HttpServletRequest request, String phone, String purpose, Long userId) throws SmsSender.SmsException {
+        return send(request, phone, purpose, userId, false);
+    }
+
+    /**
+     * Same, and with {@code simulate} nothing is sent: the code is returned to be shown on the screen (Login & verification
+     * › simulated codes; the caller decides who may get one, see {@link LoginSettings#phone}). Same limits and rules.
+     */
+    public SendResult send(HttpServletRequest request, String phone, String purpose, Long userId, boolean simulate) throws SmsSender.SmsException {
         String ip = AuthEvents.ip(request);
         LocalDateTime now = LocalDateTime.now();
 
@@ -129,6 +138,10 @@ public class OtpService {
         long id = db.insertReturningId("auth_otps", Row.of("phone_number", phone, "purpose", purpose, "user_id", userId,
                 "code_hash", hash(phone, purpose, code), "attempts", 0, "expires_at", now.plusSeconds(TTL_SECONDS),
                 "ip_address", ip, "created_at", now));
+        if (simulate) {
+            events.ok(request, userId, "otp_simulated", "otp");
+            return new SendResult(TTL_SECONDS, RESEND_COOLDOWN_SECONDS, code, true);
+        }
         try {
             sms.send(phone, message(request, code));
         } catch (SmsSender.SmsException e) {
@@ -137,7 +150,7 @@ public class OtpService {
             throw e;
         }
         events.ok(request, userId, "otp_sent", "otp");
-        return new SendResult(TTL_SECONDS, RESEND_COOLDOWN_SECONDS, devCodesVisible(request) ? code : null);
+        return new SendResult(TTL_SECONDS, RESEND_COOLDOWN_SECONDS, devCodesVisible(request) ? code : null, false);
     }
 
     /** Checks a code; on success it is consumed and can't be used again. */

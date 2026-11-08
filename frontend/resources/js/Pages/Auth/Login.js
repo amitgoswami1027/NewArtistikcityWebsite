@@ -3,14 +3,16 @@ import { useForm } from '@inertiajs/inertia-react';
 import AuthLayout from '@/Layouts/AuthLayout';
 import PurchaseIntentBanner from '@/Components/Auth/PurchaseIntent';
 import { Field, SocialButtons } from '@/Components/Auth/AuthFields';
-import { MagicLinkForm, MethodTabs, PasskeyButton, PhoneOtpForm } from '@/Components/Auth/SignInMethods';
+import { EmailCodeForm, MagicLinkForm, MethodTabs, PasskeyButton, PhoneOtpForm } from '@/Components/Auth/SignInMethods';
 
 /**
- * Log in: Google / Facebook, passkey, then e-mail (magic link or password) or phone (SMS code).
+ * Log in: Google / Facebook, passkey, then e-mail (a 6-digit code, a magic link or the password) or phone (SMS code).
+ * The e-mail code and simulated codes follow Admin › Landing Page Management › Login & verification (props emailCode, simulated).
  */
-export default function Login({ intent, status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, errors: pageErrors = {} }) {
+export default function Login({ intent, status, canResetPassword, providers, defaultCountryCode, otpDevMode, socialSetupHint, emailCode, errors: pageErrors = {} }) {
     const [tab, setTab] = useState(() => (typeof window !== 'undefined' && window.localStorage && safeGet('ac.login.tab')) || 'email');
     const [usePassword, setUsePassword] = useState(() => !!(pageErrors.email || pageErrors.password));
+    const [useLink, setUseLink] = useState(false);
     const [passkeyError, setPasskeyError] = useState(null);
     const { data, setData, post, processing, errors, reset } = useForm({ email: '', password: '', remember: true });
 
@@ -44,7 +46,18 @@ export default function Login({ intent, status, canResetPassword, providers, def
 
             {tab === 'phone' && <PhoneOtpForm defaultCountryCode={defaultCountryCode} remember={data.remember} devMode={otpDevMode} />}
 
-            {tab === 'email' && !usePassword && (
+            {tab === 'email' && !usePassword && emailCode && !useLink && (
+                <>
+                    <EmailCodeForm initialEmail={data.email} remember={data.remember} />
+                    <p className="dm-center dm-muted" style={{ marginTop: 14 }}>
+                        <button type="button" className="dm-linkbtn" onClick={() => setUsePassword(true)}>Log in with a password instead</button>
+                        {' · '}
+                        <button type="button" className="dm-linkbtn" onClick={() => setUseLink(true)}>Email me a link instead</button>
+                    </p>
+                </>
+            )}
+
+            {tab === 'email' && !usePassword && (!emailCode || useLink) && (
                 <>
                     <MagicLinkForm initialEmail={data.email} />
                     <p className="dm-center dm-muted" style={{ marginTop: 14 }}>
