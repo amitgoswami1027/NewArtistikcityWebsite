@@ -32209,7 +32209,7 @@ function LoginVerification({ toast }) {
           checked: !!sv.simulateForEveryone,
           disabled: busy || !sv.simulateRazorpay,
           label: "Every visitor may pay with it (testing only)",
-          description: "Off: only test buyers can pay; everybody else is told payment opens soon. On: anybody, including a brand-new buyer who just verified with a code. Their orders are test orders.",
+          description: "Off: test buyers, and new buyers who verified with a simulated code, can pay; real accounts are told payment opens soon. On: anybody. Their orders are test orders.",
           onChange: everyone
         }
       )

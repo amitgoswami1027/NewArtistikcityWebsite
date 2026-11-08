@@ -324,7 +324,7 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   account (`landing/LandingBuyerVerify`, `/landing/checkout/{id}/verify/send|check`); per page `landing_checkout.verify_with`
   (migration `2026-11-12_landing_login_verify.sql`). Simulated SMS / e-mail codes are shown on screen only for new identities,
   test buyers and accounts made with a simulated code (`auth_events` `simulated_signup`), also on `/login`. `simulate_razorpay_all`
-  lets every visitor pay with simulated Razorpay. After paying: congratulations + single-use `/auth/continue?t=` ("Log in to My
+  lets every visitor pay with simulated Razorpay (otherwise test buyers and simulated-code accounts). After paying: congratulations + single-use `/auth/continue?t=` ("Log in to My
   studio"), and the thank-you e-mail `emails/landing-thank-you` (`LandingHooks.sendThankYou`). Test: `test_landing_login_verify.py`.
   **Information pages** (`landing_pages.kind = 'SITE'`, `course_id` null; migration `2026-11-09_landing_site_pages.sql`; the
   `site_route` column is unused): no price/payments/checkout (`LandingConfig.normalize(cfg, site)` refuses `COURSE_ONLY` sections,

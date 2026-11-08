@@ -554,9 +554,7 @@
       payForm.appendChild(el('fieldset', { class: 'lp-co__set' }, [el('legend', { text: 'How would you like to pay?' }), methods]));
       if (!state.choices.length && !state.simulate) payForm.appendChild(note('error', 'Online payment isn\'t available for this course right now. Please contact us and we\'ll help you enrol.'));
       if (state.paymentsClosed) payForm.appendChild(note('info', 'Online payment for this course opens soon. Please check back, or contact us and we\'ll help you enrol.'));
-      else if (state.razorpaySimulated) payForm.appendChild(el('p', { class: 'lp-co__fine', 'data-testid': 'lp-co-simnote', text: state.simulatedForEveryone
-        ? 'Test mode: Razorpay is simulated on this site. No real payment is made.'
-        : 'Test mode: Razorpay is simulated on this site. You are a test buyer, so no real payment is made.' }));
+      else if (state.razorpaySimulated) payForm.appendChild(el('p', { class: 'lp-co__fine', 'data-testid': 'lp-co-simnote', text: 'Test mode: Razorpay is simulated on this site. No real payment is made.' }));
       if (state.testMode) payForm.appendChild(el('p', { class: 'lp-co__fine', text: 'Test mode: no real payment is taken on this server.' }));
     }
     function check(key, id, label) {

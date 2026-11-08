@@ -93,6 +93,9 @@ public class LandingCheckoutController {
     @org.springframework.beans.factory.annotation.Autowired
     private com.artistikcity.service.Mailer mailer;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.auth.LoginSettings loginSettings;
+
     /** The public landing page: its own address, generated from the page's slug (Admin › Landing Page Management). */
     @GetMapping({"/landing/{slug}", "/landing/{slug}/"})
     public ResponseEntity<String> landing(HttpServletRequest request, @PathVariable("slug") String slug) {
@@ -180,7 +183,9 @@ public class LandingCheckoutController {
         boolean sim = payments.razorpaySimulated();
         props.put("razorpaySimulated", sim);
         // simulated Razorpay: only test buyers can pay (or every visitor, when the admin chose that); others see that payment opens soon
-        props.put("paymentsClosed", sim && !gateways.paypalConfigured() && !payments.simulateForEveryone() && (user == null || !testPayments.isTestBuyer(request)));
+        // a guest who can verify at Pay is let through to the code step; who they are decides afterwards
+        boolean guestVerifies = user == null && !buyerVerify.channels(request, pageId).isEmpty();
+        props.put("paymentsClosed", sim && !gateways.paypalConfigured() && !guestVerifies && (user == null || !mayPaySimulated(request)));
         props.put("simulatedForEveryone", sim && payments.simulateForEveryone());
         props.put("signIn", user == null ? quickSignIn.options(request) : null);
         // a guest goes through the details and payment choice first; the code (SMS / e-mail) is asked for at Pay
@@ -524,7 +529,11 @@ public class LandingCheckoutController {
 
     /** Simulated Razorpay: a test buyer, or anybody when Login & verification / Test payments says "every visitor". */
     private boolean mayPaySimulated(HttpServletRequest request) {
-        return payments.simulateForEveryone() || testPayments.isTestBuyer(request);
+        if (payments.simulateForEveryone() || testPayments.isTestBuyer(request)) return true;
+        // an account made with a simulated SMS / e-mail code (Login & verification) is a test identity: it may pay
+        // with simulated Razorpay too, so the whole test flow works; real accounts still can't
+        Long uid = auth.userId(request);
+        return uid != null && loginSettings.isSimulatedAccount(uid);
     }
 
     private Row livePage(long pageId) {

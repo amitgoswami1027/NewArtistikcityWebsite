@@ -68,7 +68,7 @@ check('warning about simulated codes', any('Simulated codes are on' in w for w i
 r = post(adm, '/admin/api/landing/test-payments/simulate-razorpay', {'on': True})
 check('simulated Razorpay on', r.status_code == 200)
 st = get(g, '/landing/checkout/1/state').json()
-check('guest: payment opens soon while only test buyers may pay', st['paymentsClosed'] is True)
+check('guest who can verify with a code: Pay is open (who they are decides after the code)', st['paymentsClosed'] is False, st)
 check('teacher can\'t let everyone pay', post(teacher, '/admin/api/landing/test-payments/simulate-razorpay', {'everyone': True}).status_code == 403)
 r = post(adm, '/admin/api/landing/test-payments/simulate-razorpay', {'everyone': True})
 check('every visitor may pay with simulated Razorpay, audited', r.status_code == 200 and r.json()['simulateForEveryone'] is True
@@ -200,8 +200,14 @@ r = post(l4, '/auth/email-code/send', {'email': 'ishita.bose@example.com'})
 check('a real account gets no simulated e-mail code', r.status_code == 409 and 'devCode' not in r.json(), r.text)
 
 # ------------------------------------------------------------------ switching off
-put(adm, '/admin/api/landing/login', {'simulatePhone': False, 'simulateEmail': False})
 post(adm, '/admin/api/landing/test-payments/simulate-razorpay', {'everyone': False})
+check('test buyers only: an account made with a simulated code may still pay', get(l3, '/landing/checkout/1/state').json()['paymentsClosed'] is False)
+ish = requests.Session(); ish.get(B + '/login')
+assert post(ish, '/login', {'email': 'ishita.bose@example.com', 'password': 'password'}).status_code == 200
+check('… a real account is told payment opens soon', get(ish, '/landing/checkout/1/state').json()['paymentsClosed'] is True)
+ishita_order = post(ish, '/landing/checkout/1/order', {'name': 'Ishita Bose', 'phone': '9876500099', 'terms': True}).json()['orderId']
+check('… and can\'t pay', post(ish, '/landing/checkout/1/pay', {'orderId': ishita_order, 'method': 'upi'}).status_code == 503)
+put(adm, '/admin/api/landing/login', {'simulatePhone': False, 'simulateEmail': False})
 st = get(guest(), '/landing/checkout/1/state').json()
 check('simulation off: back to signing in first, payment closed for guests', st['verify']['channels'] == [] and st['paymentsClosed'] is True, st['verify'])
 time.sleep(max(0, 31 - (time.time() - t_sent)))

@@ -421,7 +421,7 @@ function LoginVerification({ toast }) {
                                 description="Landing pages offer UPI, cards and net banking; the payment happens in a simulated Razorpay window (success or failure, no money). Also in Payments & checkout › Test payments."
                                 onChange={(on) => axios.post('/admin/api/landing/test-payments/simulate-razorpay', { on }).then((r) => { toast(r.data.message); load(); }).catch((e) => toast(errorText(e), 'error'))} />
                         <Toggle name="sim-rzp-all" checked={!!sv.simulateForEveryone} disabled={busy || !sv.simulateRazorpay} label="Every visitor may pay with it (testing only)"
-                                description="Off: only test buyers can pay; everybody else is told payment opens soon. On: anybody, including a brand-new buyer who just verified with a code. Their orders are test orders."
+                                description="Off: test buyers, and new buyers who verified with a simulated code, can pay; real accounts are told payment opens soon. On: anybody. Their orders are test orders."
                                 onChange={everyone} />
                     </div>
                 )}

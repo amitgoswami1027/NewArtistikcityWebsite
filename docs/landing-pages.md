@@ -144,7 +144,7 @@ Admin › Landing Page Management › **Login & verification** (`/admin/landing/
   simulated code (`auth_events` row `simulated_signup`); a real account gets a real code or is asked to log in
   (409 `CODE_UNAVAILABLE`). Applies to the main `/login` too (phone tab, and the new e-mail code form).
 - **Simulated Razorpay for everyone**: settings key `simulate_razorpay_all` (`LandingPayments.simulateForEveryone`); off =
-  only test buyers pay, on = any verified visitor (orders are `is_test = 1`, they do get the course).
+  test buyers and accounts made with a simulated code pay (a guest who can verify is always let through to the code step), on = anybody (orders are `is_test = 1`, they do get the course).
 - **After payment**: congratulations screen (name, course, order, amount) with **Log in to My studio** = a single-use
   link `/auth/continue?t=` bound to the browser session (30 min) that signs the buyer in if needed and opens `/dashboard`.
   The thank-you e-mail (`LandingHooks.sendThankYou`, `templates/emails/landing-thank-you.mustache`: logo, course,

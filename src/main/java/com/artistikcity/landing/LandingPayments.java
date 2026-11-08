@@ -199,7 +199,7 @@ public class LandingPayments {
             case "razorpay" -> gateways.razorpayConfigured()
                     ? ("live".equals(gateways.razorpayKeyMode()) ? "Connected · live keys" : "Connected · test keys")
                     : gateways.testMode() ? "Test mode · payments are simulated"
-                    : simulateRazorpaySetting() ? (simulateForEveryone() ? "Simulated · every visitor, no real payments" : "Simulated · test buyers only, no real payments") : "Keys not set";
+                    : simulateRazorpaySetting() ? (simulateForEveryone() ? "Simulated · every visitor, no real payments" : "Simulated · test buyers and simulated-code accounts, no real payments") : "Keys not set";
             case "paypal" -> gateways.paypalConfigured() ? "Connected · " + gateways.paypalMode()
                     : gateways.testMode() ? "Test mode · payments are simulated" : "Keys not set";
             default -> "Not connected";
