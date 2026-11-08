@@ -1,0 +1,54 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<title>ArtistikCity receipt {{orderNumber}}</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Poppins'; font-size: 10pt; color: #34495E; line-height: 1.5; }
+  .logo { text-align: center; padding-bottom: 12pt; border-bottom: 1px solid #F0E6EA; }
+  .logo img { width: 170pt; }
+  .eyebrow { text-align: center; color: #9C0D48; font-weight: 700; font-size: 8.5pt; letter-spacing: 1.5pt; margin: 16pt 0 4pt; }
+  h1 { text-align: center; font-size: 20pt; color: #2C3E50; margin: 0 0 6pt; font-weight: 700; }
+  .lede { text-align: center; color: #4A5866; margin: 0 30pt 16pt; }
+  table.r { width: 100%; border-collapse: collapse; border: 1px solid #ECF0F1; }
+  table.r td { padding: 5pt 12pt; vertical-align: top; }
+  .head td { background: #F8F9FA; padding: 9pt 12pt; }
+  .head .t { font-size: 12pt; font-weight: 700; color: #2C3E50; }
+  .muted { color: #4A5866; }
+  table.r td.right { width: 52%; }
+  .right { text-align: right; }
+  .line td { border-top: 1px solid #ECF0F1; padding-top: 9pt; }
+  .course { font-weight: 700; color: #2C3E50; }
+  .good { color: #17643A; }
+  .total td { border-top: 1px solid #ECF0F1; font-weight: 700; color: #2C3E50; padding-top: 9pt; padding-bottom: 9pt; }
+  .total .amt { font-size: 13pt; }
+  .mono { font-family: 'Courier'; font-size: 8.5pt; }
+  .test { color: #8a6d00; font-size: 8.5pt; margin-top: 6pt; }
+  .stamp { margin: 10pt 0 0; padding: 6pt 10pt; border: 1px solid #B42318; color: #B42318; font-weight: 700; text-align: center; }
+  .foot { margin-top: 22pt; padding-top: 10pt; border-top: 1px solid #ECF0F1; color: #4A5866; font-size: 8pt; text-align: center; }
+</style>
+</head>
+<body>
+  <div class="logo"><img src="{{logo}}" alt="ArtistikCity" /></div>
+  <p class="eyebrow">PAYMENT RECEIPT</p>
+  <h1>Thank you, {{first}}!</h1>
+  <p class="lede">For taking {{course}}{{#artist}} with {{artist}}{{/artist}} at ArtistikCity.</p>
+  <table class="r">
+    <tr class="head"><td class="t">Receipt</td><td class="right muted">No. {{orderNumber}}</td></tr>
+    <tr><td class="muted" style="padding-top:9pt">Date paid</td><td class="right" style="padding-top:9pt">{{paidOn}}</td></tr>
+    <tr><td class="muted">Billed to</td><td class="right">{{billedTo}}<br /><span class="muted">{{billedEmail}}</span>{{#billedAddress}}<br /><span class="muted">{{billedAddress}}</span>{{/billedAddress}}</td></tr>
+    <tr class="line"><td><span class="course">{{course}}</span><br /><span class="muted">{{kind}}{{#duration}} · {{duration}}{{/duration}}{{#starts}} · starts {{starts}}{{/starts}}{{#artist}} · with {{artist}}{{/artist}}</span></td>
+      <td class="right">{{#listPrice}}{{listPrice}}{{/listPrice}}{{^listPrice}}{{amount}}{{/listPrice}}</td></tr>
+    {{#offer}}<tr><td class="good">Offer price saving</td><td class="right good">−{{offer}}</td></tr>{{/offer}}
+    {{#discount}}<tr><td class="good">Coupon discount{{#coupon}} ({{coupon}}){{/coupon}}</td><td class="right good">−{{discount}}</td></tr>{{/discount}}
+    {{#tax}}<tr><td class="muted">{{taxLabel}}</td><td class="right">{{#taxIncluded}}({{tax}}){{/taxIncluded}}{{^taxIncluded}}{{tax}}{{/taxIncluded}}</td></tr>{{/tax}}
+    <tr class="total"><td>Total paid</td><td class="right amt">{{amount}}</td></tr>
+    <tr><td class="muted">Paid with</td><td class="right">{{paidWith}}</td></tr>
+    {{#paymentRef}}<tr><td class="muted" style="padding-bottom:10pt">Payment reference</td><td class="right mono" style="padding-bottom:10pt">{{paymentRef}}</td></tr>{{/paymentRef}}
+  </table>
+  {{#test}}<p class="test">Test order: the payment was simulated and no money was taken.</p>{{/test}}
+  {{#refunded}}<p class="stamp">REFUNDED: this payment was refunded.</p>{{/refunded}}
+  <div class="foot">ArtistikCity · {{site}} · This receipt was generated on {{generatedOn}}. Keep it for your records.</div>
+</body>
+</html>

@@ -150,7 +150,30 @@ Admin › Landing Page Management › **Login & verification** (`/admin/landing/
   The thank-you e-mail (`LandingHooks.sendThankYou`, `templates/emails/landing-thank-you.mustache`: logo, course,
   payment, "Go to my course" = `/login?return_to=/user/course/{order}`) replaces the standard order confirmation for
   landing orders. A signed-in visitor opening `/login?return_to=…` goes straight there.
-- Tests: `tests/system/test_landing_login_verify.py` (production mode), `tests/e2e/specs/landing-verify.spec.js`.
+- **Test pages** (Login & verification › 5, `landing/LandingTestKit`, `GET|POST /admin/api/landing/test-kit`, `POST .../test-kit/remove`,
+  capabilities landing.payments + landing.publish, audited): one click publishes `/landing/test-mobile-otp-razorpay` (PHONE),
+  `/landing/test-email-otp-razorpay` (EMAIL), `/landing/test-buyer-chooses-otp` (EITHER) and `/landing/test-sign-in-first` (SIGNIN),
+  named "[Test] …", noindex and out of the sitemap, for the course of the first published course landing page (else the first live paid
+  course), and switches on simulated SMS / e-mail codes and Razorpay. Clicking again changes nothing; an address used by another page
+  is never taken over; Remove unpublishes and archives them (orders kept).
+- **Thank-you e-mail = receipt** (`LandingHooks.thankYouModel` / `sendThankYou`, `emails/landing-thank-you`): ArtistikCity logo,
+  congratulations, receipt (number, date paid, billed to, course line, discount + coupon, tax, total, method, payment reference, test
+  note) and **Go to my course** = `landing/CourseAccessLink`: a single-use sign-in link (`auth_tokens` purpose magic_link, meta
+  kind course_access, 72 h, only to the account's own e-mail). `GET /auth/course-access?t=` shows a small branded page that POSTs by
+  itself (scanners that only fetch the link don't use it up); `POST /auth/course-access` signs in (method magic_link, an unverified
+  e-mail becomes verified with the magic-link protections) and opens `/user/course/{order}`; used / expired -> `/login?return_to=`.
+  Admin › Login & verification › 6: Preview (`/admin/landing/email-preview[?order=]`, no live link, scripts off) and Send a test
+  copy (`POST /admin/api/landing/login/test-email {email, order?}`, audited; the copy's button is the log-in link). Without
+  `MAIL_HOST` e-mails are only saved under `logs/mail-outbox` and the answer says so.
+- **Receipt on the congratulations screen + PDF** (`landing/LandingReceipt`): the state's `result.receipt` carries the same lines
+  as the e-mail (number, date, billed to, course, list price, offer saving, coupon, tax included / added, total, method, payment
+  reference, test note; they always add up), shown in the dialog with **Download receipt (PDF)** =
+  `GET /landing/receipt/{orderId}.pdf` (signed-in buyer of that order only, else 404; guests -> log in; paid or refunded, a
+  refunded one stamped). Rendered in memory with OpenHTMLtoPDF from `templates/landing/receipt-pdf.mustache` with the bundled
+  Poppins font (`resources/fonts/poppins`, SIL OFL, has the ₹ sign); nothing is stored.
+- Simulated purchases (`payment_option = 'Simulated (test)'`) are left out of the funnel (no PURCHASE event), like revenue.
+- Tests: `tests/system/test_landing_login_verify.py`, `test_landing_regression.py` (independent groups) and
+  `test_landing_migrations.py` (upgrade path from the release before landing pages), all production mode; `tests/e2e/specs/landing-verify.spec.js`.
 
 ### Test payments
 

@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>You're enrolled in {{course}}</title>
+    <title>You're enrolled in {{course}} · Receipt {{orderNumber}}</title>
     <style type="text/css">
         body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
         table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
@@ -17,7 +17,7 @@
 </head>
 <body style="margin:0;padding:0;background-color:#f3eef0;" bgcolor="#f3eef0">
 <!-- preview text -->
-<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Your payment is complete and your seat is booked. Here is how to open your course.</div>
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Your payment is complete and your seat is booked. Your receipt and a one-click link to your course are inside.</div>
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
     <tr>
         <td align="center" style="padding:24px 12px;">
@@ -31,23 +31,37 @@
                 <!-- congratulations -->
                 <tr>
                     <td class="pad" align="center" style="padding:34px 40px 8px;font-family:'Open Sans',Helvetica,Arial,sans-serif;color:#2C3E50;">
-                        <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9C0D48;">Payment complete</p>
+                        <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9C0D48;">Payment complete · Receipt enclosed</p>
                         <h1 class="h1" style="margin:0 0 14px;font-size:30px;line-height:38px;font-weight:800;color:#2C3E50;">Congratulations, {{first}}!</h1>
                         <p style="margin:0;font-size:16px;line-height:26px;color:#4A5866;">Thank you for taking <b style="color:#2C3E50;">{{course}}</b>{{#artist}} with {{artist}}{{/artist}}. Your payment is complete and your seat is booked. We can't wait to see what you paint.</p>
                     </td>
                 </tr>
-                <!-- summary -->
+                <!-- receipt -->
                 <tr>
                     <td class="pad" style="padding:26px 40px 6px;">
-                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background:#F8F9FA;border-radius:10px;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;color:#34495E;">
-                            <tr><td style="padding:14px 18px 6px;color:#4A5866;">Course</td><td align="right" style="padding:14px 18px 6px;font-weight:700;color:#2C3E50;">{{course}}</td></tr>
-                            {{#kind}}<tr><td style="padding:6px 18px;color:#4A5866;">Format</td><td align="right" style="padding:6px 18px;">{{kind}}{{#duration}} · {{duration}}{{/duration}}</td></tr>{{/kind}}
-                            {{#starts}}<tr><td style="padding:6px 18px;color:#4A5866;">Starts</td><td align="right" style="padding:6px 18px;">{{starts}}</td></tr>{{/starts}}
-                            <tr><td style="padding:6px 18px;color:#4A5866;">Order</td><td align="right" style="padding:6px 18px;">{{orderNumber}}</td></tr>
-                            {{#coupon}}<tr><td style="padding:6px 18px;color:#4A5866;">Coupon</td><td align="right" style="padding:6px 18px;">{{coupon}}</td></tr>{{/coupon}}
-                            <tr><td style="padding:6px 18px;color:#4A5866;">Paid with</td><td align="right" style="padding:6px 18px;">{{paidWith}}</td></tr>
-                            <tr><td style="padding:10px 18px 16px;border-top:1px solid #ECF0F1;font-weight:700;color:#2C3E50;">Amount paid</td><td align="right" style="padding:10px 18px 16px;border-top:1px solid #ECF0F1;font-weight:800;font-size:16px;color:#2C3E50;">{{amount}}</td></tr>
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #ECF0F1;border-radius:12px;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;color:#34495E;">
+                            <tr>
+                                <td colspan="2" style="padding:16px 18px 10px;background:#F8F9FA;border-radius:12px 12px 0 0;">
+                                    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tr>
+                                        <td style="font-size:16px;font-weight:800;color:#2C3E50;font-family:'Open Sans',Helvetica,Arial,sans-serif;">Receipt</td>
+                                        <td align="right" style="font-size:13px;color:#4A5866;font-family:'Open Sans',Helvetica,Arial,sans-serif;">No. {{orderNumber}}</td>
+                                    </tr></table>
+                                </td>
+                            </tr>
+                            <tr><td style="padding:12px 18px 4px;color:#4A5866;">Date paid</td><td align="right" style="padding:12px 18px 4px;">{{paidOn}}</td></tr>
+                            <tr><td style="padding:4px 18px;color:#4A5866;vertical-align:top;">Billed to</td><td align="right" style="padding:4px 18px;">{{billedTo}}<br><span style="color:#4A5866;">{{billedEmail}}</span>{{#billedAddress}}<br><span style="color:#4A5866;">{{billedAddress}}</span>{{/billedAddress}}</td></tr>
+                            <tr><td colspan="2" style="padding:10px 18px 0;"><div style="border-top:1px solid #ECF0F1;"></div></td></tr>
+                            <tr><td style="padding:10px 18px 4px;font-weight:700;color:#2C3E50;vertical-align:top;">{{course}}<br><span style="font-weight:400;color:#4A5866;">{{kind}}{{#duration}} · {{duration}}{{/duration}}{{#starts}} · starts {{starts}}{{/starts}}{{#artist}} · with {{artist}}{{/artist}}</span></td>
+                                <td align="right" style="padding:10px 18px 4px;vertical-align:top;">{{#listPrice}}{{listPrice}}{{/listPrice}}{{^listPrice}}{{amount}}{{/listPrice}}</td></tr>
+                            {{#offer}}<tr><td style="padding:4px 18px;color:#17643A;">Offer price saving</td><td align="right" style="padding:4px 18px;color:#17643A;">−{{offer}}</td></tr>{{/offer}}
+                            {{#discount}}<tr><td style="padding:4px 18px;color:#17643A;">Coupon discount{{#coupon}} ({{coupon}}){{/coupon}}</td><td align="right" style="padding:4px 18px;color:#17643A;">−{{discount}}</td></tr>{{/discount}}
+                            {{#tax}}<tr><td style="padding:4px 18px;color:#4A5866;">{{taxLabel}}</td><td align="right" style="padding:4px 18px;">{{#taxIncluded}}({{tax}}){{/taxIncluded}}{{^taxIncluded}}{{tax}}{{/taxIncluded}}</td></tr>{{/tax}}
+                            <tr><td style="padding:12px 18px;border-top:1px solid #ECF0F1;font-weight:800;color:#2C3E50;">Total paid</td><td align="right" style="padding:12px 18px;border-top:1px solid #ECF0F1;font-weight:800;font-size:17px;color:#2C3E50;">{{amount}}</td></tr>
+                            <tr><td style="padding:0 18px 4px;color:#4A5866;">Paid with</td><td align="right" style="padding:0 18px 4px;">{{paidWith}}</td></tr>
+                            {{#paymentRef}}<tr><td style="padding:0 18px 14px;color:#4A5866;">Payment reference</td><td align="right" style="padding:0 18px 14px;font-family:Consolas,Menlo,monospace;font-size:12px;">{{paymentRef}}</td></tr>{{/paymentRef}}
+                            {{^paymentRef}}<tr><td colspan="2" style="padding:0 0 10px;"></td></tr>{{/paymentRef}}
                         </table>
+                        {{#test}}<p style="margin:10px 0 0;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:12px;color:#8a6d00;">Test order: the payment was simulated and no money was taken.</p>{{/test}}
                     </td>
                 </tr>
                 <!-- button -->
@@ -64,7 +78,9 @@
                 </tr>
                 <tr>
                     <td class="pad" align="center" style="padding:6px 40px 26px;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#4A5866;">
-                        Log in with {{#phone}}your mobile number ({{phone}}) or {{/phone}}your e-mail ({{email}}) and the one-time code we send you. No password needed.
+                        {{#autoLogin}}The button signs you in to ArtistikCity and opens your course: no password needed. It works once, for the next 3 days.
+                        Afterwards, <a href="{{loginUrl}}" target="_blank" style="color:#9C0D48;">log in</a> with {{#phone}}your mobile number ({{phone}}) or {{/phone}}your e-mail and a one-time code.{{/autoLogin}}
+                        {{^autoLogin}}Log in with {{#phone}}your mobile number ({{phone}}) or {{/phone}}your e-mail ({{email}}) and the one-time code we send you. No password needed.{{/autoLogin}}
                     </td>
                 </tr>
                 <!-- next steps -->
@@ -80,7 +96,7 @@
                 <tr>
                     <td align="center" style="padding:22px 24px;background:#2C3E50;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#ECF0F1;">
                         <img src="{{baseUrl}}/assets/images/footerlogo.png" width="150" height="37" alt="ArtistikCity" style="display:block;margin:0 auto 10px;border:0;width:150px;height:auto;" />
-                        You get this e-mail because you enrolled in a course on ArtistikCity. © {{year}} ArtistikCity.
+                        This is your receipt for a course on ArtistikCity. Keep it for your records. © {{year}} ArtistikCity.
                     </td>
                 </tr>
             </table>

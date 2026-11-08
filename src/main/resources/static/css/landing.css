@@ -611,6 +611,24 @@ body.lp-co-open{overflow:hidden}
 .lp-co__sim p{margin:0;color:#3D3000;font-size:14px}
 .lp-co__simcode{font:800 30px/1.1 Consolas,Menlo,monospace!important;letter-spacing:8px;color:#2C3E50!important}
 .lp-co__vch{display:grid;gap:6px}
+.lp-co__rcpt{text-align:left;border:1px solid #ECF0F1;border-radius:12px;overflow:hidden;font-size:14px;color:#34495E;margin:4px 0}
+.lp-co__rhead{display:flex;justify-content:space-between;align-items:center;background:#F8F9FA;padding:10px 14px}
+.lp-co__rhead b{font-size:16px;color:#2C3E50}.lp-co__rhead span{color:#4A5866;font-size:13px}
+.lp-co__rrow{display:flex;justify-content:space-between;gap:12px;padding:5px 14px}
+.lp-co__rrow>span:first-child{color:#4A5866}
+.lp-co__rrow>span:last-child{text-align:right;word-break:break-word}
+.lp-co__rrow small{display:block;color:#4A5866;font-size:12.5px}
+.lp-co__rrow.is-top{padding-bottom:9px}
+.lp-co__rrow.is-course{border-top:1px solid #ECF0F1;padding-top:9px}
+.lp-co__rrow.is-course>span:first-child{color:#2C3E50}
+.lp-co__rrow.is-course>span:last-child,.lp-co__rrow.is-total>span:last-child{white-space:nowrap;word-break:normal}
+.lp-co__rrow.is-good,.lp-co__rrow.is-good>span:first-child{color:#17643A}
+.lp-co__rrow.is-total{border-top:1px solid #ECF0F1;padding:9px 14px;font-weight:800;color:#2C3E50}
+.lp-co__rrow.is-total>span:first-child{color:#2C3E50}.lp-co__rrow.is-total>span:last-child{font-size:17px}
+.lp-co__rrow.is-ref>span:last-child{font:12px/1.4 Consolas,Menlo,monospace}
+.lp-co__rrow:last-child,.lp-co__rrow.is-ref{padding-bottom:12px}
+.lp-co__rtest{margin:0;padding:0 14px 12px;color:#8a6d00;font-size:12.5px}
+.lp-co__pdf{justify-self:center}
 .lp-co__result::before{content:"";justify-self:center;width:64px;height:64px;border-radius:999px;background:#EEF2F7 center/30px no-repeat}
 .lp-co__result.is-success::before{background-color:#E7F6EC;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2317643A' d='M9.5 16.2 5.3 12l-1.4 1.4 5.6 5.6L20.1 8.4 18.7 7z'/%3E%3C/svg%3E")}
 .lp-co__result.is-failed::before{background-color:#FDECEA;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23B42318' d='M18.3 5.7 12 12l6.3 6.3-1.4 1.4-6.3-6.3-6.3 6.3-1.4-1.4L9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z'/%3E%3C/svg%3E")}

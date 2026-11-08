@@ -41,16 +41,35 @@ public class LandingHooks {
     }
 
     /**
-     * The thank-you e-mail of a landing page purchase: the ArtistikCity logo, congratulations, the course, the payment,
-     * and "Go to my course" (the sign-in page, then the course: a code to the buyer's mobile or e-mail, no password).
+     * The thank-you e-mail and receipt of a landing page purchase: the ArtistikCity logo, congratulations, the course, a
+     * receipt (number, date, billed to, price, discount, tax, total, method, payment reference) and "Go to my course",
+     * which signs the buyer straight in and opens the course ({@link CourseAccessLink}: single use, 72 hours); after
+     * that the log-in page (a code to the buyer's mobile or e-mail, no password).
      * Returns false when the order isn't a landing order (the caller then sends the standard confirmation).
      */
     public boolean sendThankYou(long orderId, String email, String baseUrl) {
+        Map<String, Object> model = thankYouModel(orderId, email, baseUrl, true);
+        if (model == null) {
+            return false;
+        }
+        return mailer.send(email, thankYouSubject(model), "emails/landing-thank-you", model);
+    }
+
+    public static String thankYouSubject(Map<String, Object> model) {
+        return "Congratulations! You're enrolled in " + model.get("course") + " · Receipt " + model.get("orderNumber");
+    }
+
+    /**
+     * Everything the thank-you e-mail shows, or null when the order isn't a landing order. {@code withLink} = create the
+     * one-click course link (only for the real e-mail to the buyer; previews and test sends get the log-in link).
+     */
+    public Map<String, Object> thankYouModel(long orderId, String email, String baseUrl, boolean withLink) {
         Row o = db.first("select o.id, o.order_number, o.course_id, o.price, o.price_type, o.payment_method, o.payment_option, o.is_test, o.billing_name,"
-                + " o.list_amount, o.discount_amount, o.coupon_code, o.created_at, u.name as user_name, u.phone_number"
+                + " o.list_amount, o.discount_amount, o.tax_amount, o.coupon_code, o.created_at, o.updated_at, o.payment_id, o.billing_email, o.billing_phone,"
+                + " o.billing_address, o.billing_city, o.billing_state, o.billing_zipcode, o.billing_country, u.name as user_name, u.phone_number"
                 + " from orders o left join users u on u.id = o.user_id where o.id = ? and o.landing_page_id is not null", orderId);
         if (o == null) {
-            return false;
+            return null;
         }
         Map<String, Object> course = view.course(o.lng("course_id"));
         Row artist = course.get("adminId") == null ? null : db.first("select name from admins where id = ?", course.get("adminId"));
@@ -72,7 +91,32 @@ public class LandingHooks {
         String name = o.str("billing_name", o.str("user_name", "")).trim();
         String first = name.isEmpty() ? "there" : name.split("\\s+")[0];
         String back = "/user/course/" + orderId;
-        String courseUrl = base + "/login?return_to=" + java.net.URLEncoder.encode(back, java.nio.charset.StandardCharsets.UTF_8);
+        String loginUrl = base + "/login?return_to=" + java.net.URLEncoder.encode(back, java.nio.charset.StandardCharsets.UTF_8);
+        // the button signs the buyer straight in and opens the course (single use, 72 hours); after that, the log-in page
+        String access = null;
+        try {
+            access = !withLink || courseAccess == null ? null : courseAccess.issue(currentRequest(), orderId, email);
+        } catch (RuntimeException e) {
+            log.warn("Course access link for order {} not created: {}", orderId, e.toString());
+        }
+        String courseUrl = access == null ? loginUrl : base + access;
+        boolean usd = "usd".equals(o.str("price_type"));
+        java.util.function.Function<String, String> money = k -> {
+            String v = o.str(k);
+            if (v == null || v.isBlank()) return null;
+            java.math.BigDecimal d = new java.math.BigDecimal(v);
+            return d.signum() == 0 ? null : usd ? LandingView.usd(d) : LandingView.inr(d);
+        };
+        String paidAt = o.str("updated_at", o.str("created_at", ""));
+        java.time.format.DateTimeFormatter shown = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a", java.util.Locale.ENGLISH);
+        String paidOn;
+        try {
+            paidOn = java.time.LocalDateTime.parse(paidAt.replace(' ', 'T')).format(shown) + " IST";
+        } catch (RuntimeException e) {
+            paidOn = paidAt;
+        }
+        String address = java.util.stream.Stream.of(o.str("billing_address"), o.str("billing_city"), o.str("billing_state"), o.str("billing_zipcode"), o.str("billing_country"))
+                .filter(x -> x != null && !x.isBlank()).collect(java.util.stream.Collectors.joining(", "));
         Map<String, Object> model = new java.util.LinkedHashMap<>();
         model.put("baseUrl", base);
         model.put("first", first);
@@ -86,15 +130,47 @@ public class LandingHooks {
         model.put("coupon", o.str("coupon_code"));
         model.put("paidWith", paidWith);
         model.put("courseUrl", courseUrl);
+        model.put("autoLogin", access != null);
+        model.put("loginUrl", loginUrl);
+        model.put("paidOn", paidOn);
+        model.put("billedTo", name.isEmpty() ? email : name);
+        model.put("billedEmail", email);
+        model.put("billedAddress", address.isEmpty() ? null : address);
+        // the lines add up to the total: list price - offer saving - coupon (+ tax when it is added on top)
+        Row pr = db.first("select p.tax_mode, p.tax_label from landing_pricing p join orders o on o.landing_page_id = p.landing_page_id where o.id = ?", orderId);
+        boolean taxAdded = pr != null && "ADDED".equals(pr.str("tax_mode"));
+        java.math.BigDecimal zero = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal list = o.get("list_amount") == null ? null : new java.math.BigDecimal(o.str("list_amount"));
+        java.math.BigDecimal coupon = o.get("discount_amount") == null ? zero : new java.math.BigDecimal(o.str("discount_amount"));
+        java.math.BigDecimal tax = o.get("tax_amount") == null ? zero : new java.math.BigDecimal(o.str("tax_amount"));
+        java.math.BigDecimal offer = list == null ? zero : list.subtract(coupon).subtract(taxAdded ? price.subtract(tax) : price);
+        java.util.function.Function<java.math.BigDecimal, String> fmt = v -> usd ? LandingView.usd(v) : LandingView.inr(v);
+        model.put("listPrice", list == null || list.signum() == 0 ? null : fmt.apply(list));
+        model.put("offer", offer.compareTo(new java.math.BigDecimal("0.5")) >= 0 && list != null ? fmt.apply(offer) : null);
+        model.put("discount", coupon.signum() > 0 ? fmt.apply(coupon) : null);
+        String taxLabel = pr == null || pr.str("tax_label") == null || pr.str("tax_label").isBlank() ? "GST" : pr.str("tax_label");
+        model.put("tax", tax.signum() > 0 ? fmt.apply(tax) : null);
+        model.put("taxLabel", taxAdded ? taxLabel : taxLabel + " included in the total");
+        model.put("taxIncluded", !taxAdded);
+        model.put("paymentRef", o.str("payment_id"));
+        model.put("test", o.lng("is_test", 0) == 1);
         model.put("studioUrl", base + "/login?return_to=%2Fdashboard");
         model.put("email", email);
         model.put("phone", o.str("phone_number") == null ? null : com.artistikcity.auth.PhoneNumbers.mask(o.str("phone_number")));
         model.put("year", String.valueOf(java.time.Year.now().getValue()));
-        return mailer.send(email, "Congratulations! You're enrolled in " + course.get("title"), "emails/landing-thank-you", model);
+        return model;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private CourseAccessLink courseAccess;
+
+    private static jakarta.servlet.http.HttpServletRequest currentRequest() {
+        var attrs = org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+        return attrs instanceof org.springframework.web.context.request.ServletRequestAttributes sra ? sra.getRequest() : null;
     }
 
     public void onPaid(long orderId) {
-        Row o = db.first("select id, landing_page_id, landing_visitor, payment_id, payment_option, payment_method, payment_provider, utm_source, utm_medium, utm_campaign"
+        Row o = db.first("select id, landing_page_id, landing_visitor, payment_id, payment_option, payment_method, payment_provider, utm_source, utm_medium, utm_campaign, is_test"
                 + " from orders where id = ? and landing_page_id is not null", orderId);
         if (o == null) {
             return;
@@ -127,7 +203,9 @@ public class LandingHooks {
             chosen = mapped;
         }
         String visitor = o.str("landing_visitor");
-        if (visitor != null && visitor.length() == 32) {
+        // simulated payments on a real server (test buyers, simulated Razorpay) stay out of the funnel, like they stay out of
+        // revenue; a development server's own test payments still count, so its analytics screens have data
+        if (visitor != null && visitor.length() == 32 && !"Simulated (test)".equals(o.str("payment_option"))) {
             db.insertReturningId("landing_events", Row.of("landing_page_id", o.get("landing_page_id"), "event", "PURCHASE", "visitor", visitor, "method", chosen,
                     "provider", o.get("payment_provider"), "order_id", orderId, "utm_source", o.get("utm_source"), "utm_medium", o.get("utm_medium"),
                     "utm_campaign", o.get("utm_campaign"), "device", null, "created_at", LocalDateTime.now()));

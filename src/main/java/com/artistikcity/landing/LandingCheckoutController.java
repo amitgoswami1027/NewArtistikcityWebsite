@@ -94,6 +94,9 @@ public class LandingCheckoutController {
     private com.artistikcity.service.Mailer mailer;
 
     @org.springframework.beans.factory.annotation.Autowired
+    private LandingReceipt receipt;
+
+    @org.springframework.beans.factory.annotation.Autowired
     private com.artistikcity.auth.LoginSettings loginSettings;
 
     /** The public landing page: its own address, generated from the page's slug (Admin › Landing Page Management). */
@@ -206,6 +209,11 @@ public class LandingCheckoutController {
                     res.put("email", user.str("email", ""));
                     res.put("continueUrl", LandingBuyerVerify.continueUrl(request, uid));
                     res.put("mailed", mailer.enabled());
+                    try {
+                        res.put("receipt", receipt.view(request, orderId, user.str("email", "")));
+                    } catch (RuntimeException e) {
+                        log.warn("Receipt for order {} not shown: {}", orderId, e.toString());
+                    }
                 }
                 props.put("result", res);
             }

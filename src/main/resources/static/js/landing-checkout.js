@@ -867,6 +867,28 @@
     });
   }
 
+  // the receipt on the congratulations screen: the same lines as the e-mail and the PDF
+  function receiptBox(x) {
+    var t = el('div', { class: 'lp-co__rcpt', 'data-testid': 'lp-co-receipt' });
+    t.appendChild(el('div', { class: 'lp-co__rhead' }, [el('b', { text: 'Receipt' }), el('span', { text: 'No. ' + x.orderNumber })]));
+    function row(label, value, cls, sub) {
+      if (!value) return;
+      t.appendChild(el('div', { class: 'lp-co__rrow ' + (cls || '') }, [el('span', { text: label }), el('span', {}, [value].concat(sub ? [el('small', { text: sub })] : []))]));
+    }
+    row('Date paid', x.paidOn);
+    row('Billed to', x.billedTo, 'is-top', [x.billedEmail, x.billedAddress].filter(Boolean).join(' · '));
+    var detail = [x.kind, x.duration, x.starts ? 'starts ' + x.starts : null, x.artist ? 'with ' + x.artist : null].filter(Boolean).join(' · ');
+    t.appendChild(el('div', { class: 'lp-co__rrow is-course' }, [el('span', {}, [el('b', { text: x.course }), detail ? el('small', { text: detail }) : null]), el('span', { text: x.listPrice || x.amount })]));
+    if (x.offer) row('Offer price saving', '\u2212' + x.offer, 'is-good');
+    if (x.discount) row('Coupon discount' + (x.coupon ? ' (' + x.coupon + ')' : ''), '\u2212' + x.discount, 'is-good');
+    if (x.tax) row(x.taxLabel || 'Tax', x.taxIncluded ? '(' + x.tax + ')' : x.tax);
+    row('Total paid', x.amount, 'is-total');
+    row('Paid with', x.paidWith);
+    if (x.paymentRef) row('Payment reference', x.paymentRef, 'is-ref');
+    if (x.test) t.appendChild(el('p', { class: 'lp-co__rtest', text: 'Test order: the payment was simulated and no money was taken.' }));
+    return t;
+  }
+
   function stepResult(r, tries) {
     if (!r) { stepPay(); return; }
     var ck = state.checkout || {};
@@ -881,13 +903,18 @@
       box.appendChild(el('h3', { 'data-testid': 'lp-co-congrats', text: 'Congratulations' + (first ? ', ' + first : '') + '!' }));
       box.appendChild(el('p', {}, ['You\'ve joined ', el('b', { text: state.course.title }), '. Your payment is complete and your seat is booked.']));
       if (ck.successMessage) box.appendChild(el('p', { text: ck.successMessage }));
-      var dl = el('dl', { class: 'lp-co__lines' });
-      [['Course', state.course.title], ['Order', r.number], ['Amount paid', r.amount]].forEach(function (x) { dl.appendChild(el('div', {}, [el('dt', { text: x[0] }), el('dd', { text: x[1] })])); });
-      box.appendChild(dl);
+      if (r.receipt) {
+        box.appendChild(receiptBox(r.receipt));
+      } else {
+        var dl = el('dl', { class: 'lp-co__lines' });
+        [['Course', state.course.title], ['Order', r.number], ['Amount paid', r.amount]].forEach(function (x) { dl.appendChild(el('div', {}, [el('dt', { text: x[0] }), el('dd', { text: x[1] })])); });
+        box.appendChild(dl);
+      }
       if (r.mailed && r.email) box.appendChild(el('p', { class: 'lp-co__fine', text: 'We\'ve e-mailed your receipt and a link to your course to ' + r.email + '.' }));
       if (r.continueUrl) box.appendChild(el('a', { class: 'lp-btn lp-btn--lg lp-btn--block', href: r.continueUrl, 'data-testid': 'lp-co-studio' }, [icon('i-lock'), ' Log in to My studio']));
       if (next) box.appendChild(el('a', { class: 'lp-btn lp-btn--ghost lp-btn--block', href: next, 'data-testid': 'lp-co-next', text: ck.successRedirect ? 'Continue' : 'Start learning now' }));
       if (!r.continueUrl) box.appendChild(el('a', { class: 'lp-btn lp-btn--ghost lp-btn--block', href: '/dashboard', text: 'Open my studio' }));
+      if (r.receipt && r.receipt.pdf) box.appendChild(el('a', { class: 'lp-co__link lp-co__pdf', href: r.receipt.pdf, download: '', 'data-testid': 'lp-co-receipt-pdf' }, ['Download receipt (PDF)']));
     } else if (ok && r.duplicate) {
       add('You were already enrolled', 'This payment will be refunded in full. Nothing else to do.');
     } else if (ok && r.soldout) {

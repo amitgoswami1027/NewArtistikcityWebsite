@@ -32215,6 +32215,8 @@ function LoginVerification({ toast }) {
       )
     ] }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SignInSettings, { toast }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TestPages, { toast, onChange: load }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuyerEmail, { toast, mail: sv.mail, from: sv.mailFrom }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Every page", subtitle: "What each landing page asks for at Pay. Change a page's choice in its editor's Checkout step.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.pages, columns: [
       { key: "name", label: "Page", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${r.id}/checkout`, children: r.name }) },
       { key: "status", label: "Status", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: (import_parts.STATUS[r.status] || {}).tone, children: (import_parts.STATUS[r.status] || {}).label || r.status }) },
@@ -32223,6 +32225,108 @@ function LoginVerification({ toast }) {
       { key: "edit", label: "", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `/admin/landing/pages/${r.id}/checkout`, icon: "fa-pencil", children: "Checkout step" }) }
     ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-files-o", title: "No course landing pages yet" }) }) })
   ] });
+}
+function BuyerEmail({ toast, mail, from }) {
+  const [to, setTo] = (0, import_react.useState)("");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [result, setResult] = (0, import_react.useState)(null);
+  const send = (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setResult(null);
+    import_axios.default.post("/admin/api/landing/login/test-email", { email: to }).then((r) => {
+      setResult(r.data);
+      toast(r.data.message, r.data.sent ? "success" : "error");
+    }).catch((x) => toast((0, import_AdminLayout.errorText)(x), "error")).finally(() => setBusy(false));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Card,
+    {
+      title: "6. The buyer's e-mail",
+      subtitle: "After paying, the buyer gets one ArtistikCity e-mail: congratulations, the receipt (number, date, billed to, price, discount, tax, total, method, payment reference) and a 'Go to my course' button that signs them in and opens the course (one click, single use, 3 days; after that the log-in page with a code).",
+      actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: "/admin/landing/email-preview", target: "_blank", rel: "noopener", icon: "fa-eye", "data-testid": "lp-mail-preview", children: "Preview" }),
+      children: [
+        !mail && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-alert", role: "status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-triangle", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "This server has no mail server yet, so e-mails are only saved on the server and nobody receives them. Set MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD and MAIL_FROM_ADDRESS (for example Amazon SES, or Gmail with an app password) in the server settings, then deploy again." })
+        ] }),
+        mail && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+          "Sent from ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: from }),
+          "."
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: send, className: "lpa-test__add", "data-testid": "lp-mail-test", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Send a test copy to", name: "mail-to", hint: "Uses the latest paid landing page order. A test copy's button goes to the log-in page: the one-click sign-in link only ever goes to the buyer's own address.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-mail-to", type: "email", className: "adm-input", placeholder: "you@example.com", value: to, onChange: (e) => setTo(e.target.value), required: true }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { type: "submit", icon: "fa-paper-plane", busy, children: "Send test e-mail" })
+        ] }),
+        result && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: (0, import_kit.cx)("adm-small", result.sent ? "adm-muted" : "adm-danger"), role: "status", children: result.message })
+      ]
+    }
+  );
+}
+const TP_STATUS = { PUBLISHED: ["Published", "green"], DRAFT: ["Draft", "grey"], ARCHIVED: ["Archived", "grey"], SCHEDULED: ["Scheduled", "blue"], MISSING: ["Not created", "grey"] };
+function TestPages({ toast, onChange }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [results, setResults] = (0, import_react.useState)(null);
+  const [confirmNode, confirm] = (0, import_kit.useConfirm)();
+  const load = () => import_axios.default.get("/admin/api/landing/test-kit").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  (0, import_react.useEffect)(() => {
+    load();
+  }, []);
+  if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "5. Test pages", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
+  const make = () => {
+    setBusy(true);
+    import_axios.default.post("/admin/api/landing/test-kit", { simulate: true }).then((r) => {
+      setData(r.data);
+      setResults(r.data.results);
+      toast(r.data.message);
+      onChange && onChange();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(false));
+  };
+  const remove = async () => {
+    if (!await confirm({ title: "Remove the test pages?", body: "They are unpublished and archived. Orders made on them are kept; nothing is deleted.", confirmLabel: "Remove test pages" })) return;
+    setBusy(true);
+    import_axios.default.post("/admin/api/landing/test-kit/remove").then((r) => {
+      setData(r.data);
+      setResults(null);
+      toast(r.data.message);
+      onChange && onChange();
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(false));
+  };
+  const live = data.pages.some((p) => p.status === "PUBLISHED" && p.ours);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Card,
+    {
+      title: "5. Test pages",
+      subtitle: "One click makes four published test pages, one for each way of verifying a buyer, and switches on simulated SMS codes, e-mail codes and Razorpay. They stay out of search engines and the sitemap. Open them in a private window to test as a new buyer.",
+      actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-archive", onClick: remove, busy, "data-testid": "lp-testkit-remove", children: "Remove test pages" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "dark", icon: "fa-flask", onClick: make, busy, "data-testid": "lp-testkit-create", children: live ? "Check / recreate test pages" : "Create test pages" })
+      ] }),
+      children: [
+        confirmNode,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-signin", "data-testid": "lp-testkit", children: data.pages.map((p) => {
+          const [label, tone] = TP_STATUS[p.status] || [p.status, "grey"];
+          const res = results && results.find((x) => x.slug === p.slug);
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { "data-slug": p.slug, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-file-text-o", "aria-hidden": "true" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-signin__text", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: p.name }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                VERIFY_SHORT[p.verify],
+                " \xB7 ",
+                p.status === "PUBLISHED" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: p.url, target: "_blank", rel: "noopener", children: p.url }) : p.url,
+                res && res.status !== "published" ? ` \xB7 ${res.detail}` : "",
+                !p.ours ? " \xB7 this address belongs to another page" : ""
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone, children: label })
+          ] }, p.slug);
+        }) })
+      ]
+    }
+  );
 }
 const TEST_STATUS = { 0: ["Waiting", "amber"], 1: ["Paid (test)", "green"], 2: ["Failed", "red"], 3: ["Undone", "grey"], 4: ["Refund due", "amber"] };
 const GW_LABEL = { live: ["Live keys", "red"], test: ["Test keys", "green"], sandbox: ["Sandbox", "green"], unknown: ["Keys set", "blue"], simulated: ["Simulated", "amber"], none: ["Not connected", "grey"] };

@@ -23,7 +23,11 @@ test.describe.serial('Login & verification', () => {
         const sim = page.locator('[data-field=sim-phone] input');
         if (!(await sim.isChecked())) await sim.click({ force: true });
         await expect(sim).toBeChecked();
-        await expect(page.locator('.adm-alert')).toContainText('Simulated codes are on');
+        await expect(page.locator('.adm-alert', { hasText: 'Simulated codes are on' })).toBeVisible();
+        // Test pages: one click publishes the four test pages
+        await page.getByTestId('lp-testkit-create').click();
+        await expect(page.locator('[data-testid=lp-testkit] li')).toHaveCount(4);
+        await expect(page.locator('[data-testid=lp-testkit] li', { hasText: 'Published' })).toHaveCount(4);
         // the page editor's Checkout step has the per-page choice
         await page.goto('/admin/landing/pages/1/checkout');
         await expect(page.getByTestId('lp-verify-with')).toHaveValue('DEFAULT');
@@ -45,6 +49,10 @@ test.describe.serial('Login & verification', () => {
         await page.getByTestId('lp-co-test-complete').click();                   // dev profile: test payment step
         await expect(page.getByTestId('lp-co-congrats')).toHaveText('Congratulations, Rhea!');
         await expect(page.getByTestId('lp-co-result')).toContainText('Watercolour');
+        // the receipt, as in the e-mail, and as a PDF
+        await expect(page.getByTestId('lp-co-receipt')).toContainText('Total paid');
+        const [pdf] = await Promise.all([page.waitForEvent('download'), page.getByTestId('lp-co-receipt-pdf').click()]);
+        expect(pdf.suggestedFilename()).toMatch(/^ArtistikCity-receipt-ORD\d+\.pdf$/);
         await page.getByTestId('lp-co-studio').click();
         await page.waitForURL(/\/dashboard/);
     });

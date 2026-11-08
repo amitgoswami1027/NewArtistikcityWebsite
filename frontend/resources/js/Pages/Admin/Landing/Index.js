@@ -427,6 +427,8 @@ function LoginVerification({ toast }) {
                 )}
             </Card>
             <SignInSettings toast={toast} />
+            <TestPages toast={toast} onChange={load} />
+            <BuyerEmail toast={toast} mail={sv.mail} from={sv.mailFrom} />
             <Card title="Every page" subtitle="What each landing page asks for at Pay. Change a page's choice in its editor's Checkout step." flush>
                 <DataTable rows={data.pages} columns={[
                     { key: 'name', label: 'Page', render: (r) => <a href={`/admin/landing/pages/${r.id}/checkout`}>{r.name}</a> },
@@ -437,6 +439,82 @@ function LoginVerification({ toast }) {
                 ]} empty={<EmptyState icon="fa-files-o" title="No course landing pages yet" />} />
             </Card>
         </div>
+    );
+}
+
+/* Login & verification › The buyer's e-mail: preview the thank-you e-mail + receipt, and send a test copy. */
+function BuyerEmail({ toast, mail, from }) {
+    const [to, setTo] = useState('');
+    const [busy, setBusy] = useState(false);
+    const [result, setResult] = useState(null);
+    const send = (e) => {
+        e.preventDefault();
+        setBusy(true); setResult(null);
+        axios.post('/admin/api/landing/login/test-email', { email: to })
+            .then((r) => { setResult(r.data); toast(r.data.message, r.data.sent ? 'success' : 'error'); })
+            .catch((x) => toast(errorText(x), 'error')).finally(() => setBusy(false));
+    };
+    return (
+        <Card title="6. The buyer's e-mail" subtitle="After paying, the buyer gets one ArtistikCity e-mail: congratulations, the receipt (number, date, billed to, price, discount, tax, total, method, payment reference) and a 'Go to my course' button that signs them in and opens the course (one click, single use, 3 days; after that the log-in page with a code)."
+              actions={<Button as="a" size="sm" href="/admin/landing/email-preview" target="_blank" rel="noopener" icon="fa-eye" data-testid="lp-mail-preview">Preview</Button>}>
+            {!mail && <div className="adm-alert" role="status"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i><span>This server has no mail server yet, so e-mails are only saved on the server and nobody receives them. Set MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD and MAIL_FROM_ADDRESS (for example Amazon SES, or Gmail with an app password) in the server settings, then deploy again.</span></div>}
+            {mail && <p className="adm-muted adm-small">Sent from <b>{from}</b>.</p>}
+            <form onSubmit={send} className="lpa-test__add" data-testid="lp-mail-test">
+                <Field label="Send a test copy to" name="mail-to" hint="Uses the latest paid landing page order. A test copy's button goes to the log-in page: the one-click sign-in link only ever goes to the buyer's own address.">
+                    <input id="f-mail-to" type="email" className="adm-input" placeholder="you@example.com" value={to} onChange={(e) => setTo(e.target.value)} required />
+                </Field>
+                <Button type="submit" icon="fa-paper-plane" busy={busy}>Send test e-mail</Button>
+            </form>
+            {result && <p className={cx('adm-small', result.sent ? 'adm-muted' : 'adm-danger')} role="status">{result.message}</p>}
+        </Card>
+    );
+}
+
+/* Login & verification › Test pages (LandingTestKit): four published test pages, one per way of verifying a buyer. */
+const TP_STATUS = { PUBLISHED: ['Published', 'green'], DRAFT: ['Draft', 'grey'], ARCHIVED: ['Archived', 'grey'], SCHEDULED: ['Scheduled', 'blue'], MISSING: ['Not created', 'grey'] };
+function TestPages({ toast, onChange }) {
+    const [data, setData] = useState(null);
+    const [busy, setBusy] = useState(false);
+    const [results, setResults] = useState(null);
+    const [confirmNode, confirm] = useConfirm();
+    const load = () => axios.get('/admin/api/landing/test-kit').then((r) => setData(r.data)).catch((e) => toast(errorText(e), 'error'));
+    useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!data) return <Card title="5. Test pages"><p className="adm-muted">Loading…</p></Card>;
+    const make = () => {
+        setBusy(true);
+        axios.post('/admin/api/landing/test-kit', { simulate: true })
+            .then((r) => { setData(r.data); setResults(r.data.results); toast(r.data.message); onChange && onChange(); })
+            .catch((e) => toast(errorText(e), 'error')).finally(() => setBusy(false));
+    };
+    const remove = async () => {
+        if (!(await confirm({ title: 'Remove the test pages?', body: 'They are unpublished and archived. Orders made on them are kept; nothing is deleted.', confirmLabel: 'Remove test pages' }))) return;
+        setBusy(true);
+        axios.post('/admin/api/landing/test-kit/remove').then((r) => { setData(r.data); setResults(null); toast(r.data.message); onChange && onChange(); })
+            .catch((e) => toast(errorText(e), 'error')).finally(() => setBusy(false));
+    };
+    const live = data.pages.some((p) => p.status === 'PUBLISHED' && p.ours);
+    return (
+        <Card title="5. Test pages" subtitle="One click makes four published test pages, one for each way of verifying a buyer, and switches on simulated SMS codes, e-mail codes and Razorpay. They stay out of search engines and the sitemap. Open them in a private window to test as a new buyer."
+              actions={<>{live && <Button size="sm" icon="fa-archive" onClick={remove} busy={busy} data-testid="lp-testkit-remove">Remove test pages</Button>}
+                  <Button size="sm" variant="dark" icon="fa-flask" onClick={make} busy={busy} data-testid="lp-testkit-create">{live ? 'Check / recreate test pages' : 'Create test pages'}</Button></>}>
+            {confirmNode}
+            <ul className="lpa-signin" data-testid="lp-testkit">
+                {data.pages.map((p) => {
+                    const [label, tone] = TP_STATUS[p.status] || [p.status, 'grey'];
+                    const res = results && results.find((x) => x.slug === p.slug);
+                    return (
+                        <li key={p.slug} data-slug={p.slug}>
+                            <i className="fa fa-file-text-o" aria-hidden="true"></i>
+                            <div className="lpa-signin__text">
+                                <b>{p.name}</b>
+                                <small>{VERIFY_SHORT[p.verify]} · {p.status === 'PUBLISHED' ? <a href={p.url} target="_blank" rel="noopener">{p.url}</a> : p.url}{res && res.status !== 'published' ? ` · ${res.detail}` : ''}{!p.ours ? ' · this address belongs to another page' : ''}</small>
+                            </div>
+                            <Badge tone={tone}>{label}</Badge>
+                        </li>
+                    );
+                })}
+            </ul>
+        </Card>
     );
 }
 

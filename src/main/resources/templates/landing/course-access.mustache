@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Opening your course · ArtistikCity</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f3eef0;font:16px/1.5 "Open Sans",Helvetica,Arial,sans-serif;color:#2C3E50;padding:16px}
+  .card{width:100%;max-width:420px;background:#fff;border-radius:16px;padding:32px 28px;text-align:center;box-shadow:0 10px 30px rgba(44,62,80,.08)}
+  .card img{width:200px;max-width:100%;height:auto;margin:0 auto 18px;display:block}
+  h1{font-size:22px;margin:0 0 8px}
+  p{margin:0 0 18px;color:#4A5866}
+  .spin{width:34px;height:34px;border:3px solid #f0dbe4;border-top-color:#9C0D48;border-radius:50%;margin:6px auto 18px;animation:s 0.8s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  button{width:100%;border:0;border-radius:999px;background:#9C0D48;color:#fff;font:700 17px/1 inherit;padding:15px 20px;cursor:pointer}
+  button:focus-visible{outline:3px solid #2C3E50;outline-offset:3px}
+  small{display:block;margin-top:14px;color:#4A5866}
+  @media (prefers-reduced-motion: reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<main class="card">
+  <img src="/assets/images/logo.png" alt="ArtistikCity" width="200" height="49">
+  <h1>Opening your course…</h1>
+  <p>Signing you in as <b>{{email}}</b>.</p>
+  <div class="spin" aria-hidden="true"></div>
+  <form method="post" action="/auth/course-access" id="go">
+    <input type="hidden" name="_token" value="{{csrf}}">
+    <input type="hidden" name="t" value="{{t}}">
+    <button type="submit" data-testid="course-access-go">Open my course</button>
+  </form>
+  <small>If nothing happens, press the button.</small>
+</main>
+<script>
+  // continue by itself in a real browser (mail scanners that only fetch the link don't run this)
+  setTimeout(function () { var f = document.getElementById('go'); if (f) f.submit(); }, 400);
+</script>
+</body>
+</html>
