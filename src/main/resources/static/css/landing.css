@@ -614,3 +614,23 @@ body.lp-co-open{overflow:hidden}
 .lp-co .lp-btn{box-shadow:none}
 .lp-co .lp-btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}
 .lp-co [hidden]{display:none!important}
+
+/* simulated Razorpay window (test mode without keys) */
+.lp-rzs{position:absolute;inset:0;z-index:10;background:rgba(14,20,33,.5);display:flex;align-items:center;justify-content:center;padding:16px}
+.lp-rzs__panel{width:100%;max-width:380px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);max-height:100%;display:flex;flex-direction:column}
+.lp-rzs__head{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#0C2651;color:#fff}
+.lp-rzs__brand{flex:1;display:grid;line-height:1.3;min-width:0}
+.lp-rzs__brand b{font-size:16px}
+.lp-rzs__brand small{opacity:.8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp-rzs__amt{display:grid;text-align:right;line-height:1.2}
+.lp-rzs__amt small{opacity:.8;font-size:11px}
+.lp-rzs__x{width:32px;height:32px;border-radius:999px;border:0;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;display:grid;place-items:center}
+.lp-rzs__body{padding:16px;display:grid;gap:12px;overflow-y:auto}
+.lp-rzs__body select{width:100%;min-height:48px;border:1.5px solid #C9CED6;border-radius:12px;padding:10px 12px;font:500 16px inherit;background:#fff}
+.lp-rzs__method{margin:0;font-weight:800;color:#0C2651}
+.lp-rzs__ribbon{margin:0;background:#FFF4C2;color:#3D3000;border-radius:8px;padding:8px 10px;font-size:13px;font-weight:600}
+.lp-rzs__row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lp-rzs .lp-btn{--b:#3395FF;--accent-dark:#1f7de6;color:#fff}
+.lp-rzs .lp-btn--ghost{background:#fff;color:#B42318;border-color:#E4C3BF}
+.lp-rzs__ok{--b:#13804B!important}
+.lp-rzs__foot{margin:0;padding:10px 16px;border-top:1px solid #E6E9EE;font-size:12px;color:#55606C;display:flex;gap:6px;align-items:center;justify-content:center}

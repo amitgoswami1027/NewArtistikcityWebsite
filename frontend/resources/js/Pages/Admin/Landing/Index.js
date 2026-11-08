@@ -323,7 +323,7 @@ function Templates({ catalog, caps }) {
 
 /* Test payments: test buyers, an end-to-end simulator and the recent test orders (LandingTestPayments). */
 const TEST_STATUS = { 0: ['Waiting', 'amber'], 1: ['Paid (test)', 'green'], 2: ['Failed', 'red'], 3: ['Undone', 'grey'], 4: ['Refund due', 'amber'] };
-const GW_LABEL = { live: ['Live keys', 'red'], test: ['Test keys', 'green'], sandbox: ['Sandbox', 'green'], unknown: ['Keys set', 'blue'], none: ['Not connected', 'grey'] };
+const GW_LABEL = { live: ['Live keys', 'red'], test: ['Test keys', 'green'], sandbox: ['Sandbox', 'green'], unknown: ['Keys set', 'blue'], simulated: ['Simulated', 'amber'], none: ['Not connected', 'grey'] };
 
 function TestPayments({ toast }) {
     const [data, setData] = useState(null);
@@ -371,6 +371,13 @@ function TestPayments({ toast }) {
               actions={<span className="lpa-test__gw">Razorpay {gw('razorpay')} PayPal {gw('paypal')}</span>}>
             {confirmNode}
             {!data.enabled && <div className="adm-alert" role="status"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i><span>Test buyers are switched off on this server (PAYMENTS_TEST_BUYERS=false), so they can't use Simulate payment on the page. The simulator below still works.</span></div>}
+            <div className="lpa-test__sim" data-testid="lp-test-simrzp">
+                <Toggle name="simulate-razorpay" checked={!!data.simulateRazorpay} label="Simulate Razorpay (no Razorpay account or keys needed)"
+                        description={data.razorpayKeys
+                            ? 'Razorpay keys are set on this server, so the real Razorpay (test or live keys) is used. This switch only matters without keys.'
+                            : 'Landing pages offer Razorpay\'s UPI, card and net banking. Test buyers pay in a simulated Razorpay window on the page (success or failure, no money); every other visitor is told online payment opens soon. Switch it off, or add the Razorpay keys in the Configuration Panel, to take real payments.'}
+                        onChange={(on) => axios.post('/admin/api/landing/test-payments/simulate-razorpay', { on }).then((r) => { fresh(r); toast(r.data.message); }).catch((x) => toast(errorText(x), 'error'))} />
+            </div>
             <div className="lpa-test" data-testid="lp-test-payments">
                 <section className="lpa-test__col" aria-labelledby="lpa-sim-h">
                     <h3 id="lpa-sim-h">1. Simulate a payment</h3>

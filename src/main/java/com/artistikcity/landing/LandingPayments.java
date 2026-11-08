@@ -121,10 +121,44 @@ public class LandingPayments {
 
     // ------------------------------------------------------------------------------------------- provider state
 
+    // --------------------------------------------------------------------------- simulated Razorpay (no keys needed)
+
+    private volatile Boolean simulated;
+    private volatile long simulatedAt;
+
+    /**
+     * Admin › Landing › Payments & checkout › Test payments › "Simulate Razorpay": with no Razorpay keys on the server,
+     * Razorpay counts as connected for landing pages, but every payment is simulated and only test buyers can make one
+     * (everybody else is told online payment isn't open yet). Settings tag landing_pages, key simulate_razorpay.
+     */
+    public boolean simulateRazorpaySetting() {
+        if (simulated == null || System.currentTimeMillis() - simulatedAt > 10_000) {
+            Row r = db.first("select meta_value from settings where meta_tag = 'landing_pages' and meta_key = 'simulate_razorpay' order by id desc limit 1");
+            simulated = r != null && "1".equals(r.str("meta_value"));
+            simulatedAt = System.currentTimeMillis();
+        }
+        return simulated;
+    }
+
+    /** Razorpay is simulated right now: the switch is on and the server has no Razorpay keys (keys always win). */
+    public boolean razorpaySimulated() {
+        return !gateways.razorpayConfigured() && !gateways.testMode() && simulateRazorpaySetting();
+    }
+
+    public void saveSimulateRazorpay(boolean on) {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        int n = db.update("update settings set meta_value = ?, updated_at = ? where meta_tag = 'landing_pages' and meta_key = 'simulate_razorpay'", on ? "1" : "0", now);
+        if (n == 0) {
+            db.insert("settings", Row.of("meta_tag", "landing_pages", "meta_key", "simulate_razorpay", "meta_value", on ? "1" : "0", "created_at", now, "updated_at", now));
+        }
+        simulated = on;
+        simulatedAt = System.currentTimeMillis();
+    }
+
     /** connected = can take a payment right now (keys set, or simulated in test mode). */
     public boolean connected(String provider) {
         return switch (provider) {
-            case "razorpay" -> gateways.razorpayConfigured() || gateways.testMode();
+            case "razorpay" -> gateways.razorpayConfigured() || gateways.testMode() || simulateRazorpaySetting();
             case "paypal" -> gateways.paypalConfigured() || gateways.testMode();
             default -> false;
         };
@@ -138,7 +172,8 @@ public class LandingPayments {
         return switch (provider) {
             case "razorpay" -> gateways.razorpayConfigured()
                     ? ("live".equals(gateways.razorpayKeyMode()) ? "Connected · live keys" : "Connected · test keys")
-                    : gateways.testMode() ? "Test mode · payments are simulated" : "Keys not set";
+                    : gateways.testMode() ? "Test mode · payments are simulated"
+                    : simulateRazorpaySetting() ? "Simulated · test buyers only, no real payments" : "Keys not set";
             case "paypal" -> gateways.paypalConfigured() ? "Connected · " + gateways.paypalMode()
                     : gateways.testMode() ? "Test mode · payments are simulated" : "Keys not set";
             default -> "Not connected";
@@ -148,7 +183,7 @@ public class LandingPayments {
     /** null when the provider answers; otherwise what is wrong (no secrets in the text). */
     public String test(String provider) {
         return switch (provider) {
-            case "razorpay" -> gateways.razorpayConfigured() ? gateways.razorpayPing() : gateways.testMode() ? null : gateways.razorpayPing();
+            case "razorpay" -> gateways.razorpayConfigured() ? gateways.razorpayPing() : gateways.testMode() || simulateRazorpaySetting() ? null : gateways.razorpayPing();
             case "paypal" -> gateways.paypalConfigured() ? gateways.paypalPing() : gateways.testMode() ? null : gateways.paypalPing();
             default -> "This provider is not connected yet: its adapter is planned.";
         };

@@ -131,6 +131,16 @@ Admin › Landing Page Management › *Payments & checkout* › **Test payments*
 * **Recent test orders** with **Undo**: a paid test order is marked refunded and the access and seat are released (like a
   confirmed refund); an open one is closed. Nothing is deleted.
 
+* **Simulate Razorpay** (switch at the top of the card): for a site with **no Razorpay account or keys yet**. Razorpay
+  then counts as connected for landing pages (its UPI, card and net-banking methods can be switched on and pages can be
+  published). A test buyer who pays opens a **simulated Razorpay window on the page**: the chosen method with Razorpay's
+  test values (`success@razorpay`, card 4111 1111 1111 1111), then the bank's *Success* / *Failure* page, like Razorpay's
+  own test mode; *Success* completes the order through the same code as a verified payment. Every other visitor sees
+  "Online payment for this course opens soon" and can't pay. As soon as Razorpay keys are set (Configuration Panel), the
+  real Razorpay is used and the switch has no effect. Setting `landing_pages` / `simulate_razorpay`;
+  `POST /admin/api/landing/test-payments/simulate-razorpay` `{on}`; the page's window calls `POST /landing/checkout/{id}/simulate`
+  `{orderId, outcome: success|failed}` (test buyers' own simulated orders only).
+
 Simulated orders have `is_test = 1` and `payment_option = 'Simulated (test)'`: they stay out of revenue, analytics, the
 ledger, payouts and the reconciler, and they never use up a coupon. Every action is audited.
 

@@ -451,6 +451,8 @@
       });
       payForm.appendChild(el('fieldset', { class: 'lp-co__set' }, [el('legend', { text: 'How would you like to pay?' }), methods]));
       if (!state.choices.length && !state.simulate) payForm.appendChild(note('error', 'Online payment isn\'t available for this course right now. Please contact us and we\'ll help you enrol.'));
+      if (state.paymentsClosed) payForm.appendChild(note('info', 'Online payment for this course opens soon. Please check back, or contact us and we\'ll help you enrol.'));
+      else if (state.razorpaySimulated) payForm.appendChild(el('p', { class: 'lp-co__fine', 'data-testid': 'lp-co-simnote', text: 'Test mode: Razorpay is simulated on this site. You are a test buyer, so no real payment is made.' }));
       if (state.testMode) payForm.appendChild(el('p', { class: 'lp-co__fine', text: 'Test mode: no real payment is taken on this server.' }));
     }
     function check(key, id, label) {
@@ -470,11 +472,11 @@
       payBtn.innerHTML = '';
       payBtn.appendChild(icon('i-lock'));
       payBtn.appendChild(d.createTextNode(q.free ? ' Enrol for free' : ' Pay ' + (c ? c.amount : q.totalLabel)));
-      payBtn.disabled = !(q.free || c);
+      payBtn.disabled = !(q.free || c) || (!!state.paymentsClosed && !q.free);
     }
     refreshPay();
     payForm.appendChild(payBtn);
-    if (state.simulate && !q.free) {
+    if (state.simulate && !q.free && !state.razorpaySimulated) {     // with simulated Razorpay, Pay already opens the simulated window
       payForm.appendChild(button('Simulate payment (test buyer)', { class: 'lp-btn lp-btn--ghost lp-btn--block', 'data-testid': 'lp-co-simulate', onclick: function () { pay('test', this); } }));
     }
     payForm.appendChild(el('p', { class: 'lp-co__fine lp-co__center' }, [icon('i-lock'), ' Encrypted payment by our payment partners. We never see your card or UPI PIN.']));
@@ -506,6 +508,7 @@
       if (r.gateway === 'done') return showResult(orderId);
       if (r.gateway === 'paypal') { window.location.assign(r.approveUrl); return null; }    // PayPal's page, then back here
       if (r.gateway === 'test') return stepTest(r);
+      if (r.gateway === 'razorpay-sim') { busy(btn, false); return razorpaySim(r); }
       return razorpay(r, btn);
     }).catch(function (e) {
       busy(btn, false);
@@ -542,6 +545,79 @@
       busy(btn, false);
       stepPay({ tone: 'error', text: 'Could not load the payment window. Check your connection and try again.' });
     });
+  }
+
+  // Simulated Razorpay (Admin › Landing › Payments & checkout › Simulate Razorpay; no keys on the server): a window that
+  // works like Razorpay's test mode - the chosen method, then the bank's Success / Failure page - but nothing leaves the site.
+  function razorpaySim(r) {
+    var old = d.getElementById('lp-rzs');
+    if (old) old.remove();
+    var box = el('div', { class: 'lp-rzs', id: 'lp-rzs', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'lp-rzs-h', 'data-testid': 'lp-rzs' });
+    var panel = el('div', { class: 'lp-rzs__panel' });
+    function closeSim(msg) {
+      box.remove();
+      if (msg) stepPay(msg);
+    }
+    var head = el('div', { class: 'lp-rzs__head' }, [
+      el('div', { class: 'lp-rzs__brand' }, [el('b', { id: 'lp-rzs-h', text: r.name }), el('small', { text: r.description })]),
+      el('div', { class: 'lp-rzs__amt' }, [el('small', { text: 'Amount' }), el('b', { text: r.amountLabel })]),
+      el('button', { type: 'button', class: 'lp-rzs__x', 'aria-label': 'Close the payment window', onclick: function () {
+        post('/landing/checkout/' + pageId + '/failed', { orderId: orderId, reason: 'closed' }).catch(function () {});
+        closeSim({ tone: 'info', text: 'Payment window closed. No money was taken; you can try again any time.' });
+      } }, [icon('i-close')])
+    ]);
+    var ribbon = el('p', { class: 'lp-rzs__ribbon', text: 'Test mode · Razorpay is simulated. No real payment is made.' });
+    var body2 = el('div', { class: 'lp-rzs__body' });
+    function methodForm() {
+      body2.innerHTML = '';
+      var m = r.method, inputs;
+      if (m === 'upi' || m === 'upi_qr') {
+        inputs = [el('label', { class: 'lp-co__field' }, [el('span', { text: 'UPI ID' }), el('input', { value: 'success@razorpay', 'aria-label': 'UPI ID' })])];
+      } else if (m === 'card' || m === 'emi') {
+        inputs = [
+          el('label', { class: 'lp-co__field' }, [el('span', { text: 'Card number' }), el('input', { value: '4111 1111 1111 1111', inputmode: 'numeric', 'aria-label': 'Card number' })]),
+          el('div', { class: 'lp-rzs__row' }, [
+            el('label', { class: 'lp-co__field' }, [el('span', { text: 'Expiry' }), el('input', { value: '12 / 30', 'aria-label': 'Expiry' })]),
+            el('label', { class: 'lp-co__field' }, [el('span', { text: 'CVV' }), el('input', { value: '123', inputmode: 'numeric', 'aria-label': 'CVV' })])
+          ])
+        ];
+      } else if (m === 'netbanking') {
+        var sel = el('select', { 'aria-label': 'Bank' });
+        ['State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra Bank'].forEach(function (b) { sel.appendChild(el('option', { text: b })); });
+        inputs = [el('label', { class: 'lp-co__field' }, [el('span', { text: 'Bank' }), sel])];
+      } else {
+        inputs = [el('p', { class: 'lp-co__lead', text: r.methodLabel })];
+      }
+      var pay = button('Pay ' + r.amountLabel, { 'data-testid': 'lp-rzs-pay' });
+      pay.addEventListener('click', bankPage);
+      [el('p', { class: 'lp-rzs__method', text: r.methodLabel }), ribbon].concat(inputs).concat([pay]).forEach(function (n) { body2.appendChild(n); });
+      setTimeout(function () { pay.focus(); }, 30);
+    }
+    function bankPage() {
+      body2.innerHTML = '';
+      var ok = button('Success', { class: 'lp-btn lp-btn--block lp-rzs__ok', 'data-testid': 'lp-rzs-success' });
+      var no = button('Failure', { class: 'lp-btn lp-btn--ghost lp-btn--block', 'data-testid': 'lp-rzs-failure' });
+      function finish(outcome, b) {
+        busy(b, true, outcome === 'success' ? 'Confirming…' : 'Declining…');
+        post('/landing/checkout/' + pageId + '/simulate', { orderId: orderId, outcome: outcome }).then(function () {
+          closeSim();
+          showResult(orderId);
+        }).catch(function (e) { closeSim({ tone: 'error', text: e.message }); });
+      }
+      ok.addEventListener('click', function () { finish('success', ok); });
+      no.addEventListener('click', function () { finish('failed', no); });
+      [el('p', { class: 'lp-rzs__method', text: 'Bank page (simulated)' }),
+        el('p', { class: 'lp-co__lead', text: 'In Razorpay\'s test mode the bank asks you to choose what happens. Choose the outcome to test.' }),
+        el('p', { class: 'lp-co__fine', text: 'Order ' + r.razorpayOrderId + ' · ' + r.amountLabel }), ok, no].forEach(function (n) { body2.appendChild(n); });
+      setTimeout(function () { ok.focus(); }, 30);
+    }
+    panel.appendChild(head);
+    panel.appendChild(body2);
+    panel.appendChild(el('p', { class: 'lp-rzs__foot' }, [icon('i-lock'), ' Secured by Razorpay · simulated']));
+    box.appendChild(panel);
+    box.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); head.querySelector('.lp-rzs__x').click(); } });
+    dlg.appendChild(box);
+    methodForm();
   }
 
   function stepTest(r) {

@@ -4248,3 +4248,4 @@ h2.of-h.of-h { margin: 8px 0 12px; font-size: 18px; line-height: 1.3; font-weigh
 .adm .lpa-test__buyers li span { display: grid; min-width: 0; }
 .adm .lpa-test__buyers small { color: var(--adm-muted); overflow-wrap: anywhere; }
 .adm .lpa-test__add { display: grid; gap: 10px; padding-top: 6px; border-top: 1px dashed var(--adm-line); }
+.adm .lpa-test__sim { border: 1px solid #f1d38a; background: #fffaf0; border-radius: 12px; padding: 12px 14px; margin-bottom: 18px; }

@@ -160,6 +160,8 @@ TB = 'qa.tester@example.com'
 r = post(adm, '/admin/api/landing/test-payments/buyers', {'email': TB, 'name': 'QA Tester'})
 check('add test buyer: a passwordless test account is created', r.status_code == 200 and any(b['email'] == TB for b in r.json()['buyers'])
       and sql(f"select concat(test_buyer, '/', password_hash is null, '/', email_verified_at is not null) from users where email = '{TB}'") == '1/1/1', r.text)
+r = post(adm, '/admin/api/landing/test-payments/buyers', {'email': 'new.nameless@example.com'})
+check('add test buyer without a name: account named "Test buyer"', r.status_code == 200 and sql("select name from users where email = 'new.nameless@example.com'") == 'Test buyer', r.text)
 r = post(adm, '/admin/api/landing/test-payments/buyers', {'email': 'diya@example.com'})
 check('add test buyer: an existing account is marked', r.status_code == 200 and sql("select test_buyer from users where email = 'diya@example.com'") == '1')
 check('test buyer change audited', sql("select count(*) from admin_audit where entity = 'user' and action = 'test buyer on'") != '0')

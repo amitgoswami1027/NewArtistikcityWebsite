@@ -168,6 +168,10 @@ public class LandingCheckoutController {
         props.put("choices", choices);
         props.put("checkout", commerce.checkoutView(pageId));
         props.put("testMode", gateways.testMode() && !gateways.razorpayConfigured());
+        boolean sim = payments.razorpaySimulated();
+        props.put("razorpaySimulated", sim);
+        // simulated Razorpay: only test buyers can pay; everybody else sees that payment opens soon
+        props.put("paymentsClosed", sim && !gateways.paypalConfigured() && (user == null || !testPayments.isTestBuyer(request)));
         props.put("signIn", user == null ? quickSignIn.options(request) : null);
         props.put("user", user == null ? null : QuickSignInController.summary(user));
         props.put("simulate", user != null && !q.free() && testPayments.offerSimulation(request));
@@ -371,8 +375,27 @@ public class LandingCheckoutController {
             db.updateById("orders", orderId, Row.of("price_type", "inr", "price", q.total().toPlainString(), "payment_option", "RazorPay", "payment_provider", "razorpay",
                     "payment_method", choice.key()));
             if (!gateways.razorpayConfigured()) {
-                return gateways.testMode() ? ok(Map.of("gateway", "test", "amount", q.total(), "currency", "INR"))
-                        : error(HttpStatus.SERVICE_UNAVAILABLE, "Card, UPI and net banking payments aren't available right now. Please contact us.");
+                if (gateways.testMode()) return ok(Map.of("gateway", "test", "amount", q.total(), "currency", "INR"));
+                if (payments.razorpaySimulated()) {
+                    if (!testPayments.isTestBuyer(request)) {
+                        return error(HttpStatus.SERVICE_UNAVAILABLE, "Online payment for this course opens soon. Please check back, or contact us and we'll help you enrol.");
+                    }
+                    // simulated Razorpay: a test order, paid (or failed) in the page's own simulated payment window
+                    db.updateById("orders", orderId, Row.of("payment_option", "Simulated (test)", "is_test", 1, "gateway_ref", "order_SIM" + orderId));
+                    Map<String, Object> sim = new LinkedHashMap<>();
+                    sim.put("gateway", "razorpay-sim");
+                    sim.put("amount", q.total());
+                    sim.put("amountLabel", LandingView.inr(q.total()));
+                    sim.put("currency", "INR");
+                    sim.put("method", choice.key());
+                    sim.put("methodLabel", choice.label());
+                    sim.put("name", "ArtistikCity");
+                    sim.put("description", view.course(courseId).get("title"));
+                    sim.put("razorpayOrderId", "order_SIM" + orderId);
+                    sim.put("prefill", Row.of("email", user.get("email"), "contact", user.get("phone")));
+                    return ok(sim);
+                }
+                return error(HttpStatus.SERVICE_UNAVAILABLE, "Card, UPI and net banking payments aren't available right now. Please contact us.");
             }
             String rzp = gateways.razorpayCreateOrder(order.str("order_number"), q.total(),
                     Map.of("order_id", String.valueOf(orderId), "course_id", String.valueOf(courseId), "landing_page_id", String.valueOf(pageId)));
@@ -392,6 +415,33 @@ public class LandingCheckoutController {
             log.error("Starting landing payment failed for order {}", orderId, e);
             return error(HttpStatus.BAD_GATEWAY, "We couldn't reach the payment provider. No money was taken. Please try again.");
         }
+    }
+
+    /**
+     * The simulated Razorpay window (Admin › Landing › Payments & checkout › Simulate Razorpay, no keys on the server):
+     * {orderId, outcome: success|failed}. Only a test buyer's own simulated test order; success goes through the same
+     * completion as a verified Razorpay payment (enrolment, e-mail, landing follow-up), failure fails the order.
+     */
+    @PostMapping("/landing/checkout/{pageId}/simulate")
+    public ResponseEntity<String> simulate(HttpServletRequest request, @PathVariable("pageId") long pageId) {
+        Row user = auth.user(request);
+        if (user == null) return error(HttpStatus.UNAUTHORIZED, "Please sign in to continue.");
+        if (!payments.razorpaySimulated() || !testPayments.isTestBuyer(request)) return error(HttpStatus.FORBIDDEN, "Simulated payments are only for test accounts.");
+        Input in = Input.of(request, json);
+        Row order = db.first("select * from orders where id = ? and user_id = ? and landing_page_id = ? and is_test = 1 and payment_provider = 'razorpay' and payment_status in (0, 2)",
+                in.lng("orderId"), user.get("id"), pageId);
+        if (order == null) return error(HttpStatus.GONE, "This order is no longer open. Please start again.");
+        long orderId = order.lng("id");
+        if ("failed".equals(in.get("outcome"))) {
+            db.update("update orders set payment_status = 2, updated_at = ? where id = ? and payment_status = 0", LocalDateTime.now(), orderId);
+            analytics.record(pageId, "PAY_FAIL", visitor(request), order.str("payment_method"), "razorpay", orderId, LandingPublic.utm(request),
+                    LandingAnalytics.device(request.getHeader("User-Agent")));
+            return ok(Map.of("ok", true, "state", "failed"));
+        }
+        String paymentId = "pay_SIM" + orderId + Long.toString(System.currentTimeMillis(), 36).toUpperCase();
+        String url = courseCheckout.completeFromGateway(orderId, "Simulated (test)", paymentId,
+                Map.of("simulated", "razorpay", "razorpay_order_id", order.str("gateway_ref", ""), "razorpay_payment_id", paymentId, "method", order.str("payment_method", "")));
+        return ok(Map.of("ok", true, "redirect", doneUrl(livePage(pageId) == null ? Row.of("slug", "") : livePage(pageId), orderId, url)));
     }
 
     /** The payment sheet was closed or the provider declined: remembered for the funnel; the order can be paid again. */

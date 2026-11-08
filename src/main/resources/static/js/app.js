@@ -31916,7 +31916,7 @@ function Templates({ catalog, caps }) {
   ] });
 }
 const TEST_STATUS = { 0: ["Waiting", "amber"], 1: ["Paid (test)", "green"], 2: ["Failed", "red"], 3: ["Undone", "grey"], 4: ["Refund due", "amber"] };
-const GW_LABEL = { live: ["Live keys", "red"], test: ["Test keys", "green"], sandbox: ["Sandbox", "green"], unknown: ["Keys set", "blue"], none: ["Not connected", "grey"] };
+const GW_LABEL = { live: ["Live keys", "red"], test: ["Test keys", "green"], sandbox: ["Sandbox", "green"], unknown: ["Keys set", "blue"], simulated: ["Simulated", "amber"], none: ["Not connected", "grey"] };
 function TestPayments({ toast }) {
   const [data, setData] = (0, import_react.useState)(null);
   const [run, setRun] = (0, import_react.useState)({ pageId: "", buyerId: "", method: "", outcome: "success", coupon: "" });
@@ -31996,6 +31996,19 @@ function TestPayments({ toast }) {
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-triangle", "aria-hidden": "true" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Test buyers are switched off on this server (PAYMENTS_TEST_BUYERS=false), so they can't use Simulate payment on the page. The simulator below still works." })
         ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "lpa-test__sim", "data-testid": "lp-test-simrzp", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          import_form.Toggle,
+          {
+            name: "simulate-razorpay",
+            checked: !!data.simulateRazorpay,
+            label: "Simulate Razorpay (no Razorpay account or keys needed)",
+            description: data.razorpayKeys ? "Razorpay keys are set on this server, so the real Razorpay (test or live keys) is used. This switch only matters without keys." : "Landing pages offer Razorpay's UPI, card and net banking. Test buyers pay in a simulated Razorpay window on the page (success or failure, no money); every other visitor is told online payment opens soon. Switch it off, or add the Razorpay keys in the Configuration Panel, to take real payments.",
+            onChange: (on) => import_axios.default.post("/admin/api/landing/test-payments/simulate-razorpay", { on }).then((r) => {
+              fresh(r);
+              toast(r.data.message);
+            }).catch((x) => toast((0, import_AdminLayout.errorText)(x), "error"))
+          }
+        ) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-test", "data-testid": "lp-test-payments", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "lpa-test__col", "aria-labelledby": "lpa-sim-h", children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { id: "lpa-sim-h", children: "1. Simulate a payment" }),
@@ -32894,7 +32907,7 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
     e.preventDefault();
     setBusy(true);
     setErrors({});
-    import_axios.default.post("/admin/api/landing/pages", v).then((r) => window.location.assign(`/admin/landing/pages/${r.data.id}/sections`)).catch((x) => {
+    import_axios.default.post("/admin/api/landing/pages", __spreadProps(__spreadValues({}, v), { slug: slugTouched ? v.slug : "" })).then((r) => window.location.assign(`/admin/landing/pages/${r.data.id}/sections`)).catch((x) => {
       setBusy(false);
       setErrors(x.response && x.response.data && x.response.data.errors || {});
       toast((0, import_AdminLayout.errorText)(x), "error");
@@ -32923,7 +32936,7 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
             name: "slug",
             error: errors.slug,
             optional: true,
-            hint: `Made from the name; change it if you like. The page will be at ${prefix}${v.slug || "\u2026"}. The site's own pages are never replaced.`,
+            hint: `Made from the name; change it if you like. The page will be at ${prefix}${v.slug || "\u2026"}${slugTouched ? "" : " (a number is added if another page already has it)"}. The site's own pages are never replaced.`,
             children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-slug", children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: prefix }),
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-slug", className: "adm-input", value: v.slug, maxLength: 120, onChange: (e) => {

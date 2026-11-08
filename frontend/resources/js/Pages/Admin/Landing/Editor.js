@@ -75,7 +75,8 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
         e.preventDefault();
         setBusy(true);
         setErrors({});
-        axios.post('/admin/api/landing/pages', v)
+        // an address nobody typed is left to the server, which makes it unique ("...-2" when the name's address is taken)
+        axios.post('/admin/api/landing/pages', { ...v, slug: slugTouched ? v.slug : '' })
             .then((r) => window.location.assign(`/admin/landing/pages/${r.data.id}/sections`))
             .catch((x) => { setBusy(false); setErrors((x.response && x.response.data && x.response.data.errors) || {}); toast(errorText(x), 'error'); });
     };
@@ -100,7 +101,7 @@ function CreatePage({ lookups, catalog, defaults, toast }) {
                         <input id="f-name" className="adm-input" value={v.name} maxLength={190} onChange={(e) => set('name', e.target.value)} data-testid="lp-name" />
                     </Field>
                     <Field label="Address" name="slug" error={errors.slug} optional
-                           hint={`Made from the name; change it if you like. The page will be at ${prefix}${v.slug || '…'}. The site's own pages are never replaced.`}>
+                           hint={`Made from the name; change it if you like. The page will be at ${prefix}${v.slug || '…'}${slugTouched ? '' : ' (a number is added if another page already has it)'}. The site's own pages are never replaced.`}>
                         <div className="lpa-slug"><span>{prefix}</span>
                             <input id="f-slug" className="adm-input" value={v.slug} maxLength={120} onChange={(e) => { setSlugTouched(true); set('slug', slugify(e.target.value)); }} data-testid="lp-slug" /></div>
                     </Field>

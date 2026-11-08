@@ -81,8 +81,12 @@ public class LandingTestPayments {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("enabled", testPayments.testBuyersEnabled());
         m.put("devMode", testPayments.devMode());
+        m.put("simulateRazorpay", payments.simulateRazorpaySetting());
+        m.put("razorpaySimulated", payments.razorpaySimulated());
+        m.put("razorpayKeys", gateways.razorpayConfigured());
         m.put("gateways", Map.of(
-                "razorpay", gateways.razorpayConfigured() ? (gateways.razorpayKeyMode() == null ? "unknown" : gateways.razorpayKeyMode()) : "none",
+                "razorpay", gateways.razorpayConfigured() ? (gateways.razorpayKeyMode() == null ? "unknown" : gateways.razorpayKeyMode())
+                        : payments.razorpaySimulated() ? "simulated" : "none",
                 "paypal", gateways.paypalConfigured() ? gateways.paypalMode() : "none"));
         m.put("buyers", db.select("select u.id, u.name, u.email, u.phone_number as phone,"
                 + " (select count(*) from orders o where o.user_id = u.id and o.is_test = 1 and o.landing_page_id is not null) as test_orders"
@@ -106,6 +110,27 @@ public class LandingTestPayments {
         return m;
     }
 
+    /**
+     * {on}: "Simulate Razorpay". With no Razorpay keys on the server, landing pages can then offer Razorpay's methods and
+     * test buyers pay in a simulated Razorpay window (no account, no keys, no money); everybody else is told payment opens
+     * soon. Ignored as soon as real Razorpay keys are set.
+     */
+    @PostMapping("/admin/api/landing/test-payments/simulate-razorpay")
+    public ResponseEntity<String> simulateRazorpay(HttpServletRequest request) {
+        Row admin = kit.admin(request);
+        if (!kit.can(admin, "landing.payments")) return kit.forbidden();
+        boolean on = Input.of(request, json).bool("on");
+        boolean before = payments.simulateRazorpaySetting();
+        payments.saveSimulateRazorpay(on);
+        audit.change(admin, "landing_settings", 0, "update", on ? "Simulated Razorpay switched on" : "Simulated Razorpay switched off",
+                Map.of("simulate_razorpay", before), Map.of("simulate_razorpay", on));
+        Map<String, Object> body = view();
+        body.put("message", on ? (gateways.razorpayConfigured() ? "Saved. Razorpay keys are set on this server, so real Razorpay is used until they are removed."
+                : "Razorpay is simulated now: test buyers can pay on your landing pages with no Razorpay account. Nobody else can pay until you connect Razorpay.")
+                : "Simulated Razorpay is off.");
+        return kit.ok(body);
+    }
+
     /** {email, name?, on}: marks an account as a test buyer (or creates a passwordless test account when none has that e-mail). */
     @PostMapping("/admin/api/landing/test-payments/buyers")
     public ResponseEntity<String> buyer(HttpServletRequest request) {
@@ -121,7 +146,7 @@ public class LandingTestPayments {
             if (!on) return kit.fail(HttpStatus.NOT_FOUND, "Account not found.");
             if (email == null || !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) return kit.invalid(Map.of("email", "Enter the e-mail address of the test account."));
             String name = AdminKit.trim(in.get("name"), 120);
-            long id = accounts.create(name.isBlank() ? "Test buyer" : name, email, true, null, false, null, null);
+            long id = accounts.create(name == null || name.isBlank() ? "Test buyer" : name, email, true, null, false, null, null);
             user = db.first("select id, name, email from users where id = ?", id);
             audit.log(admin, "user", id, "create", "Test buyer account created for landing page testing: " + email);
         }
