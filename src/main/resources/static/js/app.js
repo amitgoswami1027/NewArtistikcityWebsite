@@ -31533,6 +31533,18 @@ var __spreadValues = (a, b) => {
   return a;
 };
 var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -31625,7 +31637,7 @@ function useReport(lookups) {
 function Overview({ lookups, caps }) {
   const { data, loading, filters } = useReport(lookups);
   const k = data && data.kpis;
-  const money = data && !data.moneyHidden;
+  const money2 = data && !data.moneyHidden;
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-overview", children: [
     filters,
     !data ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
@@ -31640,16 +31652,16 @@ function Overview({ lookups, caps }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Unique visitors", value: (0, import_parts.num)(k.visitors), icon: "fa-user" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Enrolments", value: (0, import_parts.num)(k.enrollments), icon: "fa-graduation-cap", tone: "green" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Conversion", value: (0, import_parts.pct)(k.conversion), icon: "fa-percent" }),
-        money && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Revenue (INR)", value: (0, import_parts.inr)(k.revenueInr), icon: "fa-inr", tone: "green" }),
-        money && Number(k.revenueUsd) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Revenue (USD)", value: `$${(0, import_parts.num)(k.revenueUsd)}`, icon: "fa-usd" }),
+        money2 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Revenue (INR)", value: (0, import_parts.inr)(k.revenueInr), icon: "fa-inr", tone: "green" }),
+        money2 && Number(k.revenueUsd) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Revenue (USD)", value: `$${(0, import_parts.num)(k.revenueUsd)}`, icon: "fa-usd" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Successful payments", value: (0, import_parts.num)(k.successful), icon: "fa-check" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Failed payments", value: (0, import_parts.num)(k.failed), icon: "fa-times", tone: k.failed ? "red" : void 0 }),
-        money && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Average order", value: (0, import_parts.inr)(k.aovInr), icon: "fa-shopping-bag" })
+        money2 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Average order", value: (0, import_parts.inr)(k.aovInr), icon: "fa-shopping-bag" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Trend", subtitle: `${data.range.from} to ${data.range.to}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-charts", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.SeriesChart, { series: data.series, keyName: "visitors", label: "Visitors" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.SeriesChart, { series: data.series, keyName: "enrollments", label: "Enrolments" }),
-        money && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.SeriesChart, { series: data.series, keyName: "revenue", label: "Revenue", format: import_parts.inr })
+        money2 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_parts.SeriesChart, { series: data.series, keyName: "revenue", label: "Revenue", format: import_parts.inr })
       ] }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Best-performing pages", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byPage, columns: [
@@ -31657,19 +31669,19 @@ function Overview({ lookups, caps }) {
           { key: "visitors", label: "Visitors", align: "right", render: (r) => (0, import_parts.num)(r.visitors) },
           { key: "enrollments", label: "Enrolled", align: "right" },
           { key: "conversion", label: "Conv.", align: "right", render: (r) => (0, import_parts.pct)(r.conversion) },
-          ...money ? [{ key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) }] : []
+          ...money2 ? [{ key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) }] : []
         ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-files-o", title: "No pages yet" }) }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Best-performing courses", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byCourse, rowKey: "id", columns: [
           { key: "course", label: "Course" },
           { key: "artist", label: "Artist" },
           { key: "enrollments", label: "Enrolled", align: "right" },
-          ...money ? [{ key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) }] : []
+          ...money2 ? [{ key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) }] : []
         ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-graduation-cap", title: "No enrolments in this period" }) }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Top campaigns", subtitle: "From UTM tags, coupon campaigns and page campaigns.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byCampaign, rowKey: "campaign", columns: [
         { key: "campaign", label: "Campaign" },
         { key: "enrollments", label: "Enrolled", align: "right" },
-        ...money ? [
+        ...money2 ? [
           { key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) },
           { key: "discounts", label: "Discounts given", align: "right", render: (r) => (0, import_parts.inr)(r.discounts) }
         ] : []
@@ -31681,7 +31693,7 @@ const METHOD_LABEL = { upi: "UPI", card: "Cards", netbanking: "Net banking", wal
 function Analytics({ lookups }) {
   const { data, loading, filters } = useReport(lookups);
   const k = data && data.kpis;
-  const money = data && !data.moneyHidden;
+  const money2 = data && !data.moneyHidden;
   const funnel = k ? [["Visitors", k.visitors], ["Clicked Enroll", k.ctaClicks], ["Opened checkout", k.checkouts], ["Enrolled", k.enrollments]] : [];
   const top = funnel.length ? Math.max(1, funnel[0][1]) : 1;
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-analytics", children: [
@@ -31701,7 +31713,7 @@ function Analytics({ lookups }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Abandoned checkouts", value: `${(0, import_parts.num)(k.abandoned)} \xB7 ${(0, import_parts.pct)(k.abandonRate)}`, icon: "fa-sign-out", tone: k.abandonRate > 60 ? "amber" : void 0 }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Payment success rate", value: (0, import_parts.pct)(k.paymentSuccessRate), icon: "fa-check-circle", tone: "green" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Pending payments", value: (0, import_parts.num)(k.pending), icon: "fa-hourglass-half" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Refunds", value: `${(0, import_parts.num)(k.refunded)}${money ? ` \xB7 ${(0, import_parts.inr)(k.refundsInr)}` : ""}`, icon: "fa-undo" })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Stat, { label: "Refunds", value: `${(0, import_parts.num)(k.refunded)}${money2 ? ` \xB7 ${(0, import_parts.inr)(k.refundsInr)}` : ""}`, icon: "fa-undo" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment methods", subtitle: "Picked = buyers who chose it at checkout. Conversion = paid \xF7 picked.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byMethod, rowKey: "method", columns: [
         { key: "method", label: "Method", render: (r) => METHOD_LABEL[r.method] || r.method },
@@ -31711,7 +31723,7 @@ function Analytics({ lookups }) {
         { key: "failed", label: "Failed", align: "right" },
         { key: "successRate", label: "Success rate", align: "right", render: (r) => (0, import_parts.pct)(r.successRate) },
         { key: "conversion", label: "Conversion", align: "right", render: (r) => (0, import_parts.pct)(r.conversion) },
-        ...money ? [{ key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) }] : []
+        ...money2 ? [{ key: "revenue", label: "Revenue", align: "right", render: (r) => (0, import_parts.inr)(r.revenue) }] : []
       ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-credit-card", title: "No payments in this period" }) }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-grid2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment providers", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.byProvider, rowKey: "provider", columns: [
@@ -31903,6 +31915,185 @@ function Templates({ catalog, caps }) {
     ] }) })
   ] });
 }
+const TEST_STATUS = { 0: ["Waiting", "amber"], 1: ["Paid (test)", "green"], 2: ["Failed", "red"], 3: ["Undone", "grey"], 4: ["Refund due", "amber"] };
+const GW_LABEL = { live: ["Live keys", "red"], test: ["Test keys", "green"], sandbox: ["Sandbox", "green"], unknown: ["Keys set", "blue"], none: ["Not connected", "grey"] };
+function TestPayments({ toast }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [run, setRun] = (0, import_react.useState)({ pageId: "", buyerId: "", method: "", outcome: "success", coupon: "" });
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [result, setResult] = (0, import_react.useState)(null);
+  const [buyer, setBuyer] = (0, import_react.useState)({ email: "", name: "" });
+  const [confirmNode, confirm] = (0, import_kit.useConfirm)();
+  const load = () => import_axios.default.get("/admin/api/landing/test-payments").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  (0, import_react.useEffect)(() => {
+    load();
+  }, []);
+  if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Test payments", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
+  const page = data.pages.find((p) => String(p.id) === String(run.pageId));
+  const methods = page ? page.methods : [];
+  const method = run.method && methods.some((m) => m.key === run.method) ? run.method : methods[0] && methods[0].key || "";
+  const set = (k) => (e) => setRun(__spreadProps(__spreadValues({}, run), { [k]: e.target.value }));
+  const fresh = (r) => {
+    const _a = r.data, { steps, summary, ok, order, message } = _a, rest = __objRest(_a, ["steps", "summary", "ok", "order", "message"]);
+    setData(rest);
+    return r.data;
+  };
+  const simulate = () => {
+    setBusy(true);
+    setErrors({});
+    setResult(null);
+    import_axios.default.post("/admin/api/landing/test-payments/run", __spreadProps(__spreadValues({}, run), { method })).then((r) => {
+      const d = fresh(r);
+      setResult(d);
+      toast(d.summary, d.ok ? "success" : "error");
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const addBuyer = (e) => {
+    e.preventDefault();
+    setBusy(true);
+    import_axios.default.post("/admin/api/landing/test-payments/buyers", __spreadProps(__spreadValues({}, buyer), { on: true })).then((r) => {
+      fresh(r);
+      toast(r.data.message);
+      setBuyer({ email: "", name: "" });
+    }).catch((x) => toast((0, import_AdminLayout.errorText)(x), "error")).finally(() => setBusy(false));
+  };
+  const removeBuyer = async (b) => {
+    if (!await confirm({ title: `Stop ${b.name} simulating payments?`, body: "Their earlier test orders stay as they are.", confirmLabel: "Remove test buyer" })) return;
+    import_axios.default.post("/admin/api/landing/test-payments/buyers", { id: b.id, on: false }).then((r) => {
+      fresh(r);
+      toast(r.data.message);
+    }).catch((x) => toast((0, import_AdminLayout.errorText)(x), "error"));
+  };
+  const undo = async (o) => {
+    if (!await confirm({ title: `Undo test order ${o.number}?`, body: o.status === 1 ? "The order is marked refunded and the test buyer loses access to the course, so you can run the test again. Nothing is deleted." : "The order is closed as failed.", confirmLabel: "Undo" })) return;
+    import_axios.default.post(`/admin/api/landing/test-payments/orders/${o.id}/undo`).then((r) => {
+      fresh(r);
+      toast(r.data.message);
+    }).catch((x) => toast((0, import_AdminLayout.errorText)(x), "error"));
+  };
+  const gw = (k) => {
+    const [label, tone] = GW_LABEL[data.gateways[k]] || GW_LABEL.none;
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone, children: label });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Card,
+    {
+      title: "Test payments",
+      subtitle: "Try a landing page's checkout without real money. Test orders are marked as tests: they never count in revenue, analytics, payouts or coupon limits, and real buyers never see this.",
+      actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-test__gw", children: [
+        "Razorpay ",
+        gw("razorpay"),
+        " PayPal ",
+        gw("paypal")
+      ] }),
+      children: [
+        confirmNode,
+        !data.enabled && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-alert", role: "status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-triangle", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Test buyers are switched off on this server (PAYMENTS_TEST_BUYERS=false), so they can't use Simulate payment on the page. The simulator below still works." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-test", "data-testid": "lp-test-payments", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "lpa-test__col", "aria-labelledby": "lpa-sim-h", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { id: "lpa-sim-h", children: "1. Simulate a payment" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "Runs the whole checkout on the server: price, payment option, order, seat, then the outcome you pick, through the same code as a real payment." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Landing page", name: "sim-page", error: errors.pageId, required: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-sim-page", className: "adm-input", value: run.pageId, onChange: (e) => setRun(__spreadProps(__spreadValues({}, run), { pageId: e.target.value, method: "" })), "data-testid": "lp-test-page", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Choose a page\u2026" }),
+              data.pages.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: p.id, children: [
+                p.name,
+                " \xB7 ",
+                import_parts.STATUS[p.status] ? import_parts.STATUS[p.status].label : p.status,
+                " \xB7 ",
+                p.total
+              ] }, p.id))
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Test buyer", name: "sim-buyer", error: errors.buyerId, required: true, hint: data.buyers.length ? null : "Add a test buyer on the right first.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { id: "f-sim-buyer", className: "adm-input", value: run.buyerId, onChange: set("buyerId"), "data-testid": "lp-test-buyer", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Choose a test buyer\u2026" }),
+              data.buyers.map((b) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: b.id, children: [
+                b.name,
+                " \xB7 ",
+                b.email || b.phone
+              ] }, b.id))
+            ] }) }),
+            page && !page.free && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Payment option", name: "sim-method", hint: methods.length ? "The options this page offers buyers right now." : null, error: !methods.length ? "This page offers no way to pay. Check its payment settings." : errors.method, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { id: "f-sim-method", className: "adm-input", value: method, onChange: set("method"), disabled: !methods.length, "data-testid": "lp-test-method", children: methods.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: m.key, children: m.label }, m.key)) }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Coupon", name: "sim-coupon", optional: true, hint: "Checked like at checkout. Test orders don't use up a coupon.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-sim-coupon", className: "adm-input adm-mono", value: run.coupon, onChange: (e) => setRun(__spreadProps(__spreadValues({}, run), { coupon: e.target.value.toUpperCase().replace(/\s/g, "") })), maxLength: 40 }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Outcome", name: "sim-outcome", error: errors.outcome, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Segments, { value: run.outcome, onChange: (v) => setRun(__spreadProps(__spreadValues({}, run), { outcome: v })), label: "Outcome", options: [
+              { value: "success", label: "Paid" },
+              { value: "failed", label: "Declined" },
+              { value: "pending", label: "Bank still confirming" }
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", icon: "fa-flask", busy, onClick: simulate, "data-testid": "lp-test-run", children: "Run test payment" }),
+            result && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: (0, import_kit.cx)("lpa-test__result", result.ok ? "is-ok" : "is-bad"), role: "status", "data-testid": "lp-test-result", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "lpa-test__sum", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: result.summary }),
+                result.order && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+                  " \xB7 Order ",
+                  result.order.number
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "lpa-test__steps", children: result.steps.map((st, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: st.ok ? "is-ok" : "is-bad", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${st.ok ? "fa-check-circle" : "fa-times-circle"}`, "aria-hidden": "true" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: st.label }),
+                  " ",
+                  st.detail
+                ] })
+              ] }, i)) })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "lpa-test__col", "aria-labelledby": "lpa-buyers-h", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { id: "lpa-buyers-h", children: "2. Test buyers" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+              "Accounts that may simulate payments. Signed in on a landing page, they also see ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Simulate payment" }),
+              " in the checkout, to click through it like a buyer."
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", { className: "lpa-test__buyers", children: [
+              data.buyers.map((b) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: b.name }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                    b.email || b.phone,
+                    " \xB7 ",
+                    (0, import_kit.plural)(b.test_orders, "test order", "test orders")
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-times", onClick: () => removeBuyer(b), "aria-label": `Remove ${b.name}`, children: "Remove" })
+              ] }, b.id)),
+              !data.buyers.length && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: "adm-muted", children: "No test buyers yet." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: addBuyer, className: "lpa-test__add", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Add a test buyer", name: "tb-email", hint: "An existing account's e-mail, or a new address: a passwordless test account is created (it signs in on a landing page with an e-mail code).", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-tb-email", type: "email", className: "adm-input", placeholder: "tester@example.com", value: buyer.email, onChange: (e) => setBuyer(__spreadProps(__spreadValues({}, buyer), { email: e.target.value })), required: true, "data-testid": "lp-test-buyer-email" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Name for a new account", name: "tb-name", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-tb-name", className: "adm-input", value: buyer.name, onChange: (e) => setBuyer(__spreadProps(__spreadValues({}, buyer), { name: e.target.value })), maxLength: 120 }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { type: "submit", icon: "fa-user-plus", busy, "data-testid": "lp-test-buyer-add", children: "Add test buyer" })
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "lpa-test__h", children: "Recent test orders" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.recent, columns: [
+          { key: "number", label: "Order", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-mono", children: r.number }) },
+          { key: "page", label: "Page", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/landing/${r.slug}`, target: "_blank", rel: "noopener", children: r.page }) },
+          { key: "buyer", label: "Test buyer", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            r.buyer,
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: r.email })
+          ] }) },
+          { key: "price", label: "Amount", render: (r) => (0, import_kit.money)(r.price, r.currency === "usd" ? "USD" : "INR") },
+          { key: "method", label: "Method", render: (r) => r.method || "\u2014" },
+          { key: "status", label: "Status", render: (r) => {
+            const [l, t] = TEST_STATUS[r.status] || ["?", "grey"];
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: t, children: l });
+          } },
+          { key: "created_at", label: "When", render: (r) => (0, import_kit.fmtDate)(r.created_at, true) },
+          { key: "undo", label: "", render: (r) => r.status === 3 || r.status === 2 ? null : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-undo", onClick: () => undo(r), "data-testid": `lp-test-undo-${r.id}`, children: "Undo" }) }
+        ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-flask", title: "No test orders yet", children: "Run a test payment above." }) })
+      ]
+    }
+  );
+}
 function Payments({ caps, toast }) {
   const [data, setData] = (0, import_react.useState)(null);
   const load = () => import_axios.default.get("/admin/api/landing/payments").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
@@ -31911,6 +32102,7 @@ function Payments({ caps, toast }) {
   }, []);
   if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-payments", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TestPayments, { toast }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment settings of every page", subtitle: "Each page either follows the global defaults below or has its own settings. Open a page to change it.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.pages, columns: [
       { key: "name", label: "Page", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${r.id}/payments`, children: r.name }) },
       { key: "status", label: "Status", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: import_parts.STATUS[r.status].tone, children: import_parts.STATUS[r.status].label }) },
@@ -32531,7 +32723,7 @@ function LandingIndex() {
     overview: "Every artist course landing page in one place: create, design, price, take payments, publish and measure.",
     pages: "Search, filter and manage every landing page.",
     templates: "Starting points for new pages, and the sections pages are built from.",
-    payments: "Which payment providers and methods each page offers, and the global defaults.",
+    payments: "Test payments, which payment providers and methods each page offers, and the global defaults.",
     coupons: "Codes for pages, courses and campaigns.",
     orders: "Orders placed through landing pages, with payment details and refunds.",
     analytics: "Funnel, payment methods, providers and devices.",

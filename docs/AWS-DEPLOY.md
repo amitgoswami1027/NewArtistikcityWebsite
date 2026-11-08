@@ -182,6 +182,9 @@ Also update the addresses registered with your providers to the real domain:
 Razorpay webhook `https://www.yourdomain.com/api/v1/courses/razorpay-webhook`,
 Google `https://www.yourdomain.com/social-login/google/callback`, Facebook `https://www.yourdomain.com/social-login/facebook/callback`.
 For e-mail, Amazon SES in ap-south-1 works well (verify your domain in SES first).
+Landing pages sign buyers in without leaving the page: Google one-tap needs `https://www.yourdomain.com` under
+*Authorized JavaScript origins* of the same Google OAuth client; six-digit e-mail codes need `MAIL_HOST` (without a mail server
+that option is simply not offered); phone codes need an SMS provider in the Configuration Panel.
 
 ### Keep the site private until launch
 

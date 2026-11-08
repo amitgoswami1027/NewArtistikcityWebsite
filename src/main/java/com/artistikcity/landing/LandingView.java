@@ -107,6 +107,8 @@ public class LandingView {
         m.put("pageName", page.str("name"));
         m.put("preview", preview);
         m.put("enrollUrl", enroll);
+        m.put("checkout", !site);       // course pages: the in-page checkout dialog (static/js/landing-checkout.js)
+        m.put("loginReturn", java.net.URLEncoder.encode(LandingPages.path(page.str("slug")), java.nio.charset.StandardCharsets.UTF_8));
         m.put("ctaPrimary", LandingConfig.str(cta.get("primary")).isEmpty() ? (site ? "Explore courses" : "Enroll now") : LandingConfig.str(cta.get("primary")));
         m.put("sticky", !site && LandingConfig.bool(cta.get("sticky"), true));
         m.put("course", course);

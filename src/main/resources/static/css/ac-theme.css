@@ -4228,3 +4228,23 @@ h2.of-h.of-h { margin: 8px 0 12px; font-size: 18px; line-height: 1.3; font-weigh
 .adm .lpa-capchips { display: inline-flex; flex-wrap: wrap; gap: 4px; }
 .lpa-kind{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 18px}.lpa-kind p{flex:1 1 100%;margin:0}
 .adm .lpa-url{display:inline-flex;align-items:center;gap:6px;font-weight:600}.adm .lpa-url small{font-weight:400;color:var(--adm-muted,#5b6472)}.adm .lpa-copy{border:0;background:transparent;cursor:pointer;color:inherit;padding:2px 4px;border-radius:4px}.adm .lpa-copy:hover{background:rgba(20,33,61,.08)}
+
+/* Landing Page Management > Payments & checkout > Test payments */
+.adm .lpa-test { display: grid; gap: 24px; margin-bottom: 20px; }
+@media (min-width: 1100px) { .adm .lpa-test { grid-template-columns: 1.25fr 1fr; } }
+.adm .lpa-test__col { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.adm .lpa-test__col h3, .adm .lpa-test__h { margin: 0; font-size: 15px; font-weight: 800; color: var(--adm-ink, #1f2a37); }
+.adm .lpa-test__h { margin: 8px 0 10px; }
+.adm .lpa-test__gw { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--adm-muted); flex-wrap: wrap; }
+.adm .lpa-test__result { border: 1px solid var(--adm-line); border-radius: 12px; padding: 12px 14px; background: #f7faf8; }
+.adm .lpa-test__result.is-bad { background: #fff7f6; }
+.adm .lpa-test__sum { margin: 0 0 8px; font-size: 14px; }
+.adm .lpa-test__steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13.5px; }
+.adm .lpa-test__steps li { display: flex; gap: 8px; align-items: flex-start; }
+.adm .lpa-test__steps li.is-ok .fa { color: #13804b; margin-top: 3px; }
+.adm .lpa-test__steps li.is-bad .fa { color: #c0352b; margin-top: 3px; }
+.adm .lpa-test__buyers { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.adm .lpa-test__buyers li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--adm-line); border-radius: 10px; }
+.adm .lpa-test__buyers li span { display: grid; min-width: 0; }
+.adm .lpa-test__buyers small { color: var(--adm-muted); overflow-wrap: anywhere; }
+.adm .lpa-test__add { display: grid; gap: 10px; padding-top: 6px; border-top: 1px dashed var(--adm-line); }

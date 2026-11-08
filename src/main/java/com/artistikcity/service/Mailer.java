@@ -35,6 +35,11 @@ public class Mailer {
         this.enabled = host != null && !host.isBlank();
     }
 
+    /** A mail server is configured (MAIL_HOST); without it messages are only saved to logs/mail-outbox. */
+    public boolean enabled() {
+        return enabled;
+    }
+
     /** @return true when the mail was sent (or logged because mail is disabled), false on failure */
     public boolean send(String to, String subject, String template, Map<String, ?> model) {
         String html = views.render(template, model);

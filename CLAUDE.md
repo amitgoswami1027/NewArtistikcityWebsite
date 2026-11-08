@@ -43,7 +43,7 @@ AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc), the configuration panel's encryption and allow-list
 (`config/panel/ConfigPanelTest`), SNS SMS requests (`auth/sms/SnsSmsSenderTest`) and the Studio Stories / site layout checks
 (`admin/StudioAndLayoutTest`), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
-`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing.py` covers Landing Page Management end to end (`test_landing_showcase.py`: own addresses, information pages and the three showcase pages) (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
+`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing_quick_checkout.py` covers the in-page checkout, quick sign-in and admin test payments; `tests/system/test_landing.py` covers Landing Page Management end to end (`test_landing_showcase.py`: own addresses, information pages and the three showcase pages) (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
 new admin API, secret masking, validation and commit of panel values, site settings and the Studio Stories workflow. Browser tests for the purchase flow live in `tests/e2e`.
 The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
 the rest get 409 or REFUND_REQUIRED) and `seats/SeatRaceIT` (20 students, 5 seats: exactly 5 get one) run only with
@@ -288,7 +288,18 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   `static/css/landing.css`, `static/js/landing.js`, no React) at the page's own address **`/landing/{slug}`** (slug generated from
   the name when none is typed, unique; full link shown in the list and editor). A landing page never replaces a site page:
   `/course/{slug}`, `/how-it-works` and `/commission/step-1` are always the original pages.
-  Checkout `/landing/{slug}/enroll` (React `Landing/Checkout`; old `/course/{slug}/enroll` links redirect) + JSON `/landing/checkout/{pageId}/quote|order|pay|failed`; a landing
+  **Checkout inside the page**: every Enroll button and the header *Log in* (`data-signin`) open a dialog on the landing page
+  (`#lp-co`, `static/js/landing-checkout.js`, no React, `.lp-co*` in `landing.css`): quick sign-in for guests (Google Identity
+  Services one-tap / button -> `POST /auth/google/credential`, a six-digit e-mail code `POST /auth/email-code/send|verify`
+  (`auth/EmailCodeService`, table `auth_email_codes`), SMS code `/auth/otp/*` with WebOTP, passkey), then details + payment
+  (Razorpay's window opens on top of the page), then the result; `QuickSignInController.options` only offers methods that can
+  reach people (mail server / SMS provider / Google client id). `/landing/{slug}/enroll` and `/enroll/done?order_id=` only redirect
+  to the page (`#enroll`, `?order=`; the old React `Pages/Landing/Checkout` is no longer used; old `/course/{slug}/enroll` links
+  redirect) + JSON `GET /landing/checkout/{pageId}/state[?order=]` (guests too), `/landing/checkout/{pageId}/quote|order|pay|failed`.
+  A passwordless account's first order sets its name. **Test payments** (Payments & checkout tab, `LandingTestPayments`,
+  `landing.payments`): test buyers (existing account or a new passwordless one), a server-side simulator (page incl. drafts,
+  buyer, method, coupon, outcome paid / declined / pending; lists every step) and undo of test orders (paid -> refunded, access
+  and seat released; nothing deleted); simulated orders (`payment_option = 'Simulated (test)'`) never use up a coupon. A landing
   purchase is a normal course `orders` row with `landing_page_id`, coupon, amounts, `payment_method|provider`, UTM; completion,
   webhook and reconciler stay in `CheckoutController` (expected amount = the order's own price, `LandingHooks.onPaid` after every
   verified payment). Content config is versioned JSON (`draft_config` → publish = `landing_page_versions` row; rollback re-publishes;

@@ -1,5 +1,5 @@
 // Landing Page Management: the public page (desktop + phone), the editor (create, sections, payments, publish) and the
-// page's own checkout (only the methods that page allows, test payment, confirmation).
+// checkout inside the page (quick sign-in with an e-mail code, only the methods that page allows, test payment, result).
 const { test, expect } = require('@playwright/test');
 const { signIn, api } = require('./helpers');
 
@@ -41,10 +41,38 @@ test.describe('Public landing page', () => {
         expect(await noSideScroll(page)).toBeLessThanOrEqual(1);
     });
 
-    test('a guest choosing Enroll is asked to sign in and comes back to the checkout', async ({ page }) => {
+    test('a guest enrols without leaving the page: e-mail code, details, test payment, result', async ({ page }) => {
         await page.goto(PAGE);
         await page.locator('.lp-hero a[data-cta=hero]').click();
-        await expect(page).toHaveURL(/\/login\?return_to=.*enroll/);
+        const dlg = page.getByTestId('lp-checkout');
+        await expect(dlg).toBeVisible();
+        await expect(page).toHaveURL(new RegExp(`${PAGE}#enroll$`));            // still the landing page
+        const email = `e2e.${Date.now()}@example.com`;
+        await page.fill('#lp-co-email', email);
+        await page.getByTestId('lp-co-send').click();
+        const text = await dlg.locator('.lp-co__note').first().textContent();     // development: the code is shown to a local browser
+        await page.getByTestId('lp-co-code').fill(text.match(/(\d{6})/)[1]);   // six digits submit by themselves
+        await expect(page.getByTestId('lp-co-pay')).toBeVisible();
+        await expect(page.locator('.lp-top__end .lp-top__link')).toHaveText('My studio');
+        await page.fill('#lp-co-fname', 'E2E Buyer');
+        await page.fill('#lp-co-fphone', '9876543210');
+        await page.getByTestId('lp-co-terms').check();
+        await page.getByTestId('lp-co-pay').click();
+        await page.getByTestId('lp-co-test-complete').click();
+        await expect(page.getByTestId('lp-co-result')).toHaveAttribute('data-state', 'success');
+        await expect(page).toHaveURL(new RegExp(`${PAGE}#enroll$`));
+        // closing the dialog leaves the visitor on the page
+        await page.keyboard.press('Escape');
+        await expect(dlg).toBeHidden();
+        await expect(page).toHaveURL(new RegExp(`${PAGE}$`));
+    });
+
+    test('Log in in the header signs in on the page', async ({ page }) => {
+        await page.goto(PAGE);
+        await page.locator('.lp-top__end [data-signin]').click();
+        await expect(page.getByTestId('lp-checkout')).toBeVisible();
+        await expect(page.locator('#lp-co-h')).toHaveText('Sign in');
+        await expect(page.getByTestId('lp-co-switch')).toBeVisible();          // e-mail or mobile number
     });
 
     test('@mobile phone layout: artwork first, fits the screen, sticky enrol bar', async ({ page, isMobile }) => {
@@ -115,16 +143,16 @@ test.describe('Landing Page Management: build, configure payments, publish, buy'
         const buyer = await browser.newPage();
         await signIn(buyer);
         await buyer.goto(`/landing/${slug}/enroll`);
-        await expect(buyer.getByTestId('lc-checkout')).toBeVisible();
-        await expect(buyer.locator('[data-method]')).toHaveCount(1);
-        await expect(buyer.locator('[data-method]')).toHaveAttribute('data-method', 'upi');
-        if (await buyer.getByTestId('lc-pay').count()) {
-            await buyer.locator('#lc-phone').fill('9876543210');
-            await buyer.getByTestId('lc-terms').check();
-            await buyer.getByTestId('lc-pay').click();
-            await buyer.getByTestId('lc-test-complete').click();
-            await buyer.waitForURL(/\/enroll\/done\?order_id=/);
-            await expect(buyer.getByTestId('lc-result')).toHaveAttribute('data-state', /paid|success/);
+        await expect(buyer).toHaveURL(new RegExp(`/landing/${slug}#enroll$`));
+        await expect(buyer.getByTestId('lp-checkout')).toBeVisible();
+        await expect(buyer.locator('#lp-co [data-method]')).toHaveCount(1);
+        await expect(buyer.locator('#lp-co [data-method]')).toHaveAttribute('data-method', 'upi');
+        if (await buyer.getByTestId('lp-co-pay').count()) {
+            await buyer.locator('#lp-co-fphone').fill('9876543210');
+            await buyer.getByTestId('lp-co-terms').check();
+            await buyer.getByTestId('lp-co-pay').click();
+            await buyer.getByTestId('lp-co-test-complete').click();
+            await expect(buyer.getByTestId('lp-co-result')).toHaveAttribute('data-state', /paid|success/);
         }
         await buyer.close();
 
@@ -137,7 +165,10 @@ test.describe('Landing Page Management: build, configure payments, publish, buy'
         test.skip(!isMobile, 'phone layout');
         await signIn(page, { email: 'diya@example.com', password: 'password' });     // not enrolled in course 1
         await page.goto(`${PAGE}/enroll`);
-        expect(await noSideScroll(page)).toBeLessThanOrEqual(1);
-        await expect(page.locator('[data-method]').first()).toBeVisible();
+        await expect(page.getByTestId('lp-checkout')).toBeVisible();
+        await expect(page.locator('#lp-co [data-method]').first()).toBeVisible();
+        const panel = await page.locator('.lp-co__panel').boundingBox();
+        expect(panel.width).toBeLessThanOrEqual(page.viewportSize().width + 1);   // full screen sheet on a phone
+        expect(await page.evaluate(() => { const b = document.getElementById('lp-co-body'); return b.scrollWidth - b.clientWidth; })).toBeLessThanOrEqual(1);
     });
 });

@@ -41,6 +41,7 @@ already in `schema.sql`, and they remain available in git history.
 
 | `2026-11-09_landing_site_pages.sql` | Information landing pages (no course): `landing_pages.kind` (`COURSE` / `SITE`), `course_id` now nullable; also adds `site_route` + its index (not used any more). Additive; no rows changed. The three showcase pages are then created by the app through the landing module (not by SQL). |
 | `2026-11-10_landing_collation.sql` | Gives the landing tables the text collation of the rest of the database (the `orders` table's) and sets the database default to it. Fixes "Illegal mix of collations" (Error 500 on Admin › Landing Page Management) on databases loaded from a dump, e.g. AWS RDS imported from a PC. Does nothing where everything already matches. |
+| `2026-11-11_landing_quick_signin.sql` | Quick sign-in on landing pages: `auth_email_codes` (six-digit sign-in codes sent by e-mail, stored as an HMAC). |
 
 **Collations.** A database loaded from a dump keeps each table's own collation, while tables created later by a migration get
 the database default. Mixed collations make MySQL refuse joins / UNIONs on text columns. `2026-11-10_landing_collation.sql`

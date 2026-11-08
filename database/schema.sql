@@ -106,6 +106,7 @@ DROP TABLE IF EXISTS password_resets;
 DROP TABLE IF EXISTS auth_events;
 DROP TABLE IF EXISTS webauthn_credentials;
 DROP TABLE IF EXISTS auth_tokens;
+DROP TABLE IF EXISTS auth_email_codes;
 DROP TABLE IF EXISTS auth_otps;
 DROP TABLE IF EXISTS auth_refresh_tokens;
 DROP TABLE IF EXISTS auth_sessions;
@@ -223,6 +224,21 @@ CREATE TABLE auth_otps (
 );
 CREATE INDEX auth_otps_phone_index ON auth_otps (phone_number, created_at);
 CREATE INDEX auth_otps_ip_index ON auth_otps (ip_address, created_at);
+
+-- six-digit sign-in codes sent by e-mail (landing page quick sign-in); HMAC only, 10 minutes, 5 guesses
+CREATE TABLE auth_email_codes (
+    id            BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    email         VARCHAR(255) NOT NULL,
+    purpose       VARCHAR(20) NOT NULL DEFAULT 'login',
+    code_hash     CHAR(64) NOT NULL,
+    attempts      INT NOT NULL DEFAULT 0,
+    expires_at    DATETIME NOT NULL,
+    consumed_at   DATETIME NULL,
+    ip_address    VARCHAR(45) NULL,
+    created_at    DATETIME NOT NULL
+);
+CREATE INDEX auth_email_codes_email_index ON auth_email_codes (email, created_at);
+CREATE INDEX auth_email_codes_ip_index ON auth_email_codes (ip_address, created_at);
 
 -- Single-use e-mailed tokens: magic links, e-mail verification, password reset (SHA-256 hashed).
 CREATE TABLE auth_tokens (

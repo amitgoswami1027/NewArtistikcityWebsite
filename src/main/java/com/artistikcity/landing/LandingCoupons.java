@@ -80,7 +80,9 @@ public class LandingCoupons {
 
     /** After a verified payment: one redemption per order (a webhook and the browser arriving together count once). */
     public void redeem(long orderId) {
-        Row o = db.first("select id, user_id, coupon_code, discount_amount from orders where id = ? and coupon_code is not null", orderId);
+        // simulated payments (test buyers, the admin simulator) never use up a coupon; development test mode still counts
+        Row o = db.first("select id, user_id, coupon_code, discount_amount from orders where id = ? and coupon_code is not null"
+                + " and not (coalesce(is_test, 0) = 1 and payment_option = 'Simulated (test)')", orderId);
         if (o == null) {
             return;
         }

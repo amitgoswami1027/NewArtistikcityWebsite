@@ -21,12 +21,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800{{#fontSerif}}&family=Fraunces:opsz,wght@9..144,500;9..144,600{{/fontSerif}}&display=swap">
 {{#sections}}{{#is_hero}}{{#image}}<link rel="preload" as="image" href="{{src}}"{{#srcset}} imagesrcset="{{srcset}}" imagesizes="{{sizes}}"{{/srcset}} fetchpriority="high">{{/image}}{{#preloadImage}}<link rel="preload" as="image" href="{{src}}"{{#srcset}} imagesrcset="{{srcset}}" imagesizes="{{sizes}}"{{/srcset}} fetchpriority="high">{{/preloadImage}}{{/is_hero}}{{/sections}}
-<link rel="stylesheet" href="/css/landing.css?v=2">
+<link rel="stylesheet" href="/css/landing.css?v=3">
 <style>:root{--accent:{{accent}};--accent-dark:{{accentDark}};--on-accent:{{accentInk}};--ink:{{ink}};--surface:{{surface}}}</style>
 {{#meta.jsonLd}}<script type="application/ld+json">{{{meta.jsonLd}}}</script>{{/meta.jsonLd}}
 </head>
 <body class="lp lp--tex-{{texture}}{{#site}} lp--site{{/site}}{{#fontSerif}} lp--serif{{/fontSerif}}{{#radiusSharp}} lp--sharp{{/radiusSharp}}{{#preview}} lp--preview{{/preview}}"
-      data-page="{{pageId}}" data-ga4="{{marketing.ga4}}" data-gtm="{{marketing.gtm}}" data-pixel="{{marketing.pixel}}"{{#preview}} data-preview="1"{{/preview}}>
+      data-page="{{pageId}}"{{#checkout}} data-slug="{{slug}}"{{/checkout}} data-ga4="{{marketing.ga4}}" data-gtm="{{marketing.gtm}}" data-pixel="{{marketing.pixel}}"{{#preview}} data-preview="1"{{/preview}}>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M9.5 16.2 5.3 12l-1.4 1.4 5.6 5.6L20.1 8.4 18.7 7z" fill="currentColor"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2h12.2l-4.6-4.6z" fill="currentColor"/></symbol>
@@ -50,7 +50,7 @@
     </nav>
     <div class="lp-top__end">
       {{#auth.check}}<a class="lp-top__link" href="/dashboard">My studio</a>{{/auth.check}}
-      {{#auth.guest}}<a class="lp-top__link" href="/login">Log in</a>{{/auth.guest}}
+      {{#auth.guest}}<a class="lp-top__link" href="/login?return_to={{loginReturn}}"{{#checkout}} data-signin{{/checkout}}>Log in</a>{{/auth.guest}}
       <a class="lp-btn lp-btn--sm lp-top__cta" href="{{enrollUrl}}" data-cta="header">{{ctaPrimary}}</a>
     </div>
   </div>
@@ -489,6 +489,19 @@
   <img alt="">
   <p></p>
 </dialog>
-<script src="/js/landing.js?v=2" defer></script>
+{{#checkout}}
+<dialog class="lp-co" id="lp-co" aria-labelledby="lp-co-h" data-testid="lp-checkout">
+  <div class="lp-co__panel">
+    <header class="lp-co__head">
+      <h2 id="lp-co-h">Enrol</h2>
+      <button type="button" class="lp-co__x" data-close aria-label="Close"><svg aria-hidden="true"><use href="#i-close"/></svg></button>
+    </header>
+    <div class="lp-co__body" id="lp-co-body" aria-live="polite"></div>
+    <footer class="lp-co__foot"><svg aria-hidden="true"><use href="#i-lock"/></svg> Secure checkout · ArtistikCity</footer>
+  </div>
+</dialog>
+{{/checkout}}
+<script src="/js/landing.js?v=3" defer></script>
+{{#checkout}}<script src="/js/landing-checkout.js?v=1" defer></script>{{/checkout}}
 </body>
 </html>

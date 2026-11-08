@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePage } from '@inertiajs/inertia-react';
 import axios from 'axios';
 import AdminLayout, { PageHeader, useToast, errorText } from '@/Components/Admin/AdminLayout';
-import { Card, Button, Badge, DataTable, Segments, Toolbar, SearchBox, FilterSelect, EmptyState, Drawer, Stat, useConfirm, fmtDate, cx } from '@/Components/Admin/kit';
+import { Card, Button, Badge, DataTable, Segments, Toolbar, SearchBox, FilterSelect, EmptyState, Drawer, Stat, useConfirm, fmtDate, money, plural, cx } from '@/Components/Admin/kit';
 import { Field, Toggle } from '@/Components/Admin/form';
 import { STATUS, inr, pct, num, has, PaymentSettings, TemplateThumb, SeriesChart } from '@/Components/Admin/Landing/parts';
 
@@ -321,6 +321,137 @@ function Templates({ catalog, caps }) {
 
 /* ---------------------------------------------------------------------------------------------- payments */
 
+/* Test payments: test buyers, an end-to-end simulator and the recent test orders (LandingTestPayments). */
+const TEST_STATUS = { 0: ['Waiting', 'amber'], 1: ['Paid (test)', 'green'], 2: ['Failed', 'red'], 3: ['Undone', 'grey'], 4: ['Refund due', 'amber'] };
+const GW_LABEL = { live: ['Live keys', 'red'], test: ['Test keys', 'green'], sandbox: ['Sandbox', 'green'], unknown: ['Keys set', 'blue'], none: ['Not connected', 'grey'] };
+
+function TestPayments({ toast }) {
+    const [data, setData] = useState(null);
+    const [run, setRun] = useState({ pageId: '', buyerId: '', method: '', outcome: 'success', coupon: '' });
+    const [errors, setErrors] = useState({});
+    const [busy, setBusy] = useState(false);
+    const [result, setResult] = useState(null);
+    const [buyer, setBuyer] = useState({ email: '', name: '' });
+    const [confirmNode, confirm] = useConfirm();
+    const load = () => axios.get('/admin/api/landing/test-payments').then((r) => setData(r.data)).catch((e) => toast(errorText(e), 'error'));
+    useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!data) return <Card title="Test payments"><p className="adm-muted">Loading…</p></Card>;
+    const page = data.pages.find((p) => String(p.id) === String(run.pageId));
+    const methods = page ? page.methods : [];
+    const method = run.method && methods.some((m) => m.key === run.method) ? run.method : (methods[0] && methods[0].key) || '';
+    const set = (k) => (e) => setRun({ ...run, [k]: e.target.value });
+    const fresh = (r) => { const { steps, summary, ok, order, message, ...rest } = r.data; setData(rest); return r.data; };
+
+    const simulate = () => {
+        setBusy(true); setErrors({}); setResult(null);
+        axios.post('/admin/api/landing/test-payments/run', { ...run, method })
+            .then((r) => { const d = fresh(r); setResult(d); toast(d.summary, d.ok ? 'success' : 'error'); })
+            .catch((e) => { setErrors((e.response && e.response.data && e.response.data.errors) || {}); toast(errorText(e), 'error'); })
+            .finally(() => setBusy(false));
+    };
+    const addBuyer = (e) => {
+        e.preventDefault();
+        setBusy(true);
+        axios.post('/admin/api/landing/test-payments/buyers', { ...buyer, on: true })
+            .then((r) => { fresh(r); toast(r.data.message); setBuyer({ email: '', name: '' }); })
+            .catch((x) => toast(errorText(x), 'error')).finally(() => setBusy(false));
+    };
+    const removeBuyer = async (b) => {
+        if (!(await confirm({ title: `Stop ${b.name} simulating payments?`, body: 'Their earlier test orders stay as they are.', confirmLabel: 'Remove test buyer' }))) return;
+        axios.post('/admin/api/landing/test-payments/buyers', { id: b.id, on: false }).then((r) => { fresh(r); toast(r.data.message); }).catch((x) => toast(errorText(x), 'error'));
+    };
+    const undo = async (o) => {
+        if (!(await confirm({ title: `Undo test order ${o.number}?`, body: o.status === 1 ? 'The order is marked refunded and the test buyer loses access to the course, so you can run the test again. Nothing is deleted.' : 'The order is closed as failed.', confirmLabel: 'Undo' }))) return;
+        axios.post(`/admin/api/landing/test-payments/orders/${o.id}/undo`).then((r) => { fresh(r); toast(r.data.message); }).catch((x) => toast(errorText(x), 'error'));
+    };
+    const gw = (k) => { const [label, tone] = GW_LABEL[data.gateways[k]] || GW_LABEL.none; return <Badge tone={tone}>{label}</Badge>; };
+
+    return (
+        <Card title="Test payments" subtitle="Try a landing page's checkout without real money. Test orders are marked as tests: they never count in revenue, analytics, payouts or coupon limits, and real buyers never see this."
+              actions={<span className="lpa-test__gw">Razorpay {gw('razorpay')} PayPal {gw('paypal')}</span>}>
+            {confirmNode}
+            {!data.enabled && <div className="adm-alert" role="status"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i><span>Test buyers are switched off on this server (PAYMENTS_TEST_BUYERS=false), so they can't use Simulate payment on the page. The simulator below still works.</span></div>}
+            <div className="lpa-test" data-testid="lp-test-payments">
+                <section className="lpa-test__col" aria-labelledby="lpa-sim-h">
+                    <h3 id="lpa-sim-h">1. Simulate a payment</h3>
+                    <p className="adm-muted adm-small">Runs the whole checkout on the server: price, payment option, order, seat, then the outcome you pick, through the same code as a real payment.</p>
+                    <Field label="Landing page" name="sim-page" error={errors.pageId} required>
+                        <select id="f-sim-page" className="adm-input" value={run.pageId} onChange={(e) => setRun({ ...run, pageId: e.target.value, method: '' })} data-testid="lp-test-page">
+                            <option value="">Choose a page…</option>
+                            {data.pages.map((p) => <option key={p.id} value={p.id}>{p.name} · {STATUS[p.status] ? STATUS[p.status].label : p.status} · {p.total}</option>)}
+                        </select>
+                    </Field>
+                    <Field label="Test buyer" name="sim-buyer" error={errors.buyerId} required hint={data.buyers.length ? null : 'Add a test buyer on the right first.'}>
+                        <select id="f-sim-buyer" className="adm-input" value={run.buyerId} onChange={set('buyerId')} data-testid="lp-test-buyer">
+                            <option value="">Choose a test buyer…</option>
+                            {data.buyers.map((b) => <option key={b.id} value={b.id}>{b.name} · {b.email || b.phone}</option>)}
+                        </select>
+                    </Field>
+                    {page && !page.free && (
+                        <Field label="Payment option" name="sim-method" hint={methods.length ? 'The options this page offers buyers right now.' : null} error={!methods.length ? 'This page offers no way to pay. Check its payment settings.' : errors.method}>
+                            <select id="f-sim-method" className="adm-input" value={method} onChange={set('method')} disabled={!methods.length} data-testid="lp-test-method">
+                                {methods.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
+                            </select>
+                        </Field>
+                    )}
+                    <Field label="Coupon" name="sim-coupon" optional hint="Checked like at checkout. Test orders don't use up a coupon.">
+                        <input id="f-sim-coupon" className="adm-input adm-mono" value={run.coupon} onChange={(e) => setRun({ ...run, coupon: e.target.value.toUpperCase().replace(/\s/g, '') })} maxLength={40} />
+                    </Field>
+                    <Field label="Outcome" name="sim-outcome" error={errors.outcome}>
+                        <Segments value={run.outcome} onChange={(v) => setRun({ ...run, outcome: v })} label="Outcome" options={[
+                            { value: 'success', label: 'Paid' }, { value: 'failed', label: 'Declined' }, { value: 'pending', label: 'Bank still confirming' }]} />
+                    </Field>
+                    <Button variant="dark" icon="fa-flask" busy={busy} onClick={simulate} data-testid="lp-test-run">Run test payment</Button>
+                    {result && (
+                        <div className={cx('lpa-test__result', result.ok ? 'is-ok' : 'is-bad')} role="status" data-testid="lp-test-result">
+                            <p className="lpa-test__sum"><b>{result.summary}</b>{result.order && <> · Order {result.order.number}</>}</p>
+                            <ol className="lpa-test__steps">
+                                {result.steps.map((st, i) => (
+                                    <li key={i} className={st.ok ? 'is-ok' : 'is-bad'}>
+                                        <i className={`fa ${st.ok ? 'fa-check-circle' : 'fa-times-circle'}`} aria-hidden="true"></i>
+                                        <span><b>{st.label}</b> {st.detail}</span>
+                                    </li>
+                                ))}
+                            </ol>
+                        </div>
+                    )}
+                </section>
+                <section className="lpa-test__col" aria-labelledby="lpa-buyers-h">
+                    <h3 id="lpa-buyers-h">2. Test buyers</h3>
+                    <p className="adm-muted adm-small">Accounts that may simulate payments. Signed in on a landing page, they also see <b>Simulate payment</b> in the checkout, to click through it like a buyer.</p>
+                    <ul className="lpa-test__buyers">
+                        {data.buyers.map((b) => (
+                            <li key={b.id}><span><b>{b.name}</b><small>{b.email || b.phone} · {plural(b.test_orders, 'test order', 'test orders')}</small></span>
+                                <Button size="sm" icon="fa-times" onClick={() => removeBuyer(b)} aria-label={`Remove ${b.name}`}>Remove</Button></li>
+                        ))}
+                        {!data.buyers.length && <li className="adm-muted">No test buyers yet.</li>}
+                    </ul>
+                    <form onSubmit={addBuyer} className="lpa-test__add">
+                        <Field label="Add a test buyer" name="tb-email" hint="An existing account's e-mail, or a new address: a passwordless test account is created (it signs in on a landing page with an e-mail code).">
+                            <input id="f-tb-email" type="email" className="adm-input" placeholder="tester@example.com" value={buyer.email} onChange={(e) => setBuyer({ ...buyer, email: e.target.value })} required data-testid="lp-test-buyer-email" />
+                        </Field>
+                        <Field label="Name for a new account" name="tb-name" optional>
+                            <input id="f-tb-name" className="adm-input" value={buyer.name} onChange={(e) => setBuyer({ ...buyer, name: e.target.value })} maxLength={120} />
+                        </Field>
+                        <Button type="submit" icon="fa-user-plus" busy={busy} data-testid="lp-test-buyer-add">Add test buyer</Button>
+                    </form>
+                </section>
+            </div>
+            <h3 className="lpa-test__h">Recent test orders</h3>
+            <DataTable rows={data.recent} columns={[
+                { key: 'number', label: 'Order', render: (r) => <span className="adm-mono">{r.number}</span> },
+                { key: 'page', label: 'Page', render: (r) => <a href={`/landing/${r.slug}`} target="_blank" rel="noopener">{r.page}</a> },
+                { key: 'buyer', label: 'Test buyer', render: (r) => <>{r.buyer}<br /><small className="adm-muted">{r.email}</small></> },
+                { key: 'price', label: 'Amount', render: (r) => money(r.price, r.currency === 'usd' ? 'USD' : 'INR') },
+                { key: 'method', label: 'Method', render: (r) => r.method || '—' },
+                { key: 'status', label: 'Status', render: (r) => { const [l, t] = TEST_STATUS[r.status] || ['?', 'grey']; return <Badge tone={t}>{l}</Badge>; } },
+                { key: 'created_at', label: 'When', render: (r) => fmtDate(r.created_at, true) },
+                { key: 'undo', label: '', render: (r) => (r.status === 3 || r.status === 2 ? null : <Button size="sm" icon="fa-undo" onClick={() => undo(r)} data-testid={`lp-test-undo-${r.id}`}>Undo</Button>) },
+            ]} empty={<EmptyState icon="fa-flask" title="No test orders yet">Run a test payment above.</EmptyState>} />
+        </Card>
+    );
+}
+
 function Payments({ caps, toast }) {
     const [data, setData] = useState(null);
     const load = () => axios.get('/admin/api/landing/payments').then((r) => setData(r.data)).catch((e) => toast(errorText(e), 'error'));
@@ -328,6 +459,7 @@ function Payments({ caps, toast }) {
     if (!data) return <Card><p className="adm-muted">Loading…</p></Card>;
     return (
         <div className="adm-stack" data-testid="lp-payments">
+            <TestPayments toast={toast} />
             <Card title="Payment settings of every page" subtitle="Each page either follows the global defaults below or has its own settings. Open a page to change it." flush>
                 <DataTable rows={data.pages} columns={[
                     { key: 'name', label: 'Page', render: (r) => <a href={`/admin/landing/pages/${r.id}/payments`}>{r.name}</a> },
@@ -710,7 +842,7 @@ export default function LandingIndex() {
         overview: 'Every artist course landing page in one place: create, design, price, take payments, publish and measure.',
         pages: 'Search, filter and manage every landing page.',
         templates: 'Starting points for new pages, and the sections pages are built from.',
-        payments: 'Which payment providers and methods each page offers, and the global defaults.',
+        payments: 'Test payments, which payment providers and methods each page offers, and the global defaults.',
         coupons: 'Codes for pages, courses and campaigns.',
         orders: 'Orders placed through landing pages, with payment details and refunds.',
         analytics: 'Funnel, payment methods, providers and devices.',

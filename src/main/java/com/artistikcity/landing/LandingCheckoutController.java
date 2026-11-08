@@ -10,7 +10,7 @@ import com.artistikcity.support.Input;
 import com.artistikcity.support.Json;
 import com.artistikcity.support.Row;
 import com.artistikcity.web.CheckoutController;
-import com.artistikcity.web.PurchaseIntent;
+import com.artistikcity.web.QuickSignInController;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Checkout for a landing page: /course/{slug}/enroll. Prices, coupons and the payment options are worked out here from
+ * Checkout for a landing page. It runs inside the landing page itself (a dialog opened by static/js/landing.js:
+ * quick sign-in, details, payment, result), so the visitor never leaves the page; /landing/{slug}/enroll and
+ * /enroll/done only send the browser back to the page with the dialog open. GET /landing/checkout/{pageId}/state gives
+ * the dialog everything it shows, for guests too. Prices, coupons and the payment options are worked out here from
  * the page's settings; the browser only says which option was picked. Payment verification reuses the course checkout
  * (/checkout/razorpay/verify, /checkout/test-pay, /checkout/paypal/return, the webhook and the reconciler), which check
  * the gateway's answer against the amount fixed on the order here. Every POST here is outside /api, so the global CSRF
@@ -55,10 +58,12 @@ public class LandingCheckoutController {
     private final SeatService seats;
     private final TestPayments testPayments;
     private final CheckoutController courseCheckout;
+    private final QuickSignInController quickSignIn;
 
     public LandingCheckoutController(Db db, Json json, Auth auth, Inertia inertia, LandingPages pages, LandingCommerce commerce, LandingPayments payments,
                                      LandingAnalytics analytics, LandingView view, CommissionPayments gateways, SeatService seats, TestPayments testPayments,
-                                     CheckoutController courseCheckout) {
+                                     CheckoutController courseCheckout, QuickSignInController quickSignIn) {
+        this.quickSignIn = quickSignIn;
         this.db = db;
         this.json = json;
         this.auth = auth;
@@ -89,14 +94,21 @@ public class LandingCheckoutController {
         return publicView.render(request, page);
     }
 
+    /** The checkout opens on the landing page itself: the page with its checkout dialog open (utm_* and notices kept). */
     @GetMapping("/landing/{slug}/enroll")
     public ResponseEntity<String> page(HttpServletRequest request, @PathVariable("slug") String slug) {
-        return render(request, slug, null);
+        Row page = pages.published(slug);
+        if (page == null) return redirect("/courses?type=all");
+        if (page.get("course_id") == null) return redirect(LandingPages.publicPath(page));     // an information page sells nothing
+        return redirect(LandingPages.publicPath(page) + query(request, null) + "#enroll");
     }
 
+    /** Where payments come back to (PayPal, the course checkout's success/failure links): the page, showing the result. */
     @GetMapping("/landing/{slug}/enroll/done")
     public ResponseEntity<String> done(HttpServletRequest request, @PathVariable("slug") String slug, @RequestParam(value = "order_id", required = false) Long orderId) {
-        return render(request, slug, orderId);
+        Row page = pages.published(slug);
+        if (page == null) return redirect("/courses?type=all");
+        return redirect(LandingPages.publicPath(page) + query(request, orderId) + "#enroll");
     }
 
     /** Checkout links of the previous release (/course/{slug}/enroll): sent on to the landing page's checkout, or to the course. */
@@ -109,66 +121,72 @@ public class LandingCheckoutController {
         return redirect("/course/" + slug);
     }
 
-    private ResponseEntity<String> render(HttpServletRequest request, String slug, Long doneOrder) {
-        Row page = pages.published(slug);
-        if (page == null || page.get("course_id") == null) {
-            if (page != null) return redirect(LandingPages.publicPath(page));     // an information page sells nothing
-            return redirect("/courses?type=all");
+    /** utm_*, payment notices and the paid order (as ?order=) carried over to the page. */
+    private static String query(HttpServletRequest request, Long orderId) {
+        List<String> parts = new ArrayList<>();
+        for (String k : List.of("utm_source", "utm_medium", "utm_campaign", "payment", "duplicate", "soldout")) {
+            String v = request.getParameter(k);
+            if (v != null && !v.isBlank() && v.length() < 120) parts.add(k + "=" + java.net.URLEncoder.encode(v, java.nio.charset.StandardCharsets.UTF_8));
         }
+        if (orderId != null) parts.add("order=" + orderId);
+        return parts.isEmpty() ? "" : "?" + String.join("&", parts);
+    }
+
+    /**
+     * Everything the checkout dialog shows: the course, the price, the payment options, the quick sign-in methods, and
+     * for a signed-in visitor their details, whether they are already enrolled, and (with ?order=) that order's result.
+     */
+    @GetMapping("/landing/checkout/{pageId}/state")
+    public ResponseEntity<String> state(HttpServletRequest request, @PathVariable("pageId") long pageId, @RequestParam(value = "order", required = false) Long orderId) {
+        Row page = livePage(pageId);
+        if (page == null) return error(HttpStatus.GONE, "This page is no longer available.");
         Row user = auth.user(request);
-        if (user == null) {
-            String back = LandingPages.enrollPath(slug) + (request.getQueryString() == null ? "" : "?" + request.getQueryString());
-            return redirect(PurchaseIntent.signIn(back));
-        }
-        long uid = user.lng("id");
         long courseId = page.lng("course_id");
         Map<String, Object> props = new LinkedHashMap<>();
-        props.put("page", Map.of("id", page.get("id"), "slug", slug, "name", page.str("name")));
+        props.put("page", Map.of("id", page.get("id"), "slug", page.str("slug"), "name", page.str("name")));
         Map<String, Object> course = view.course(courseId);
         Row artist = db.first("select name from admins where id = ?", course.get("adminId"));
-        course.put("artist", artist == null ? null : artist.str("name"));
-        course.put("thumb", course.get("image") == null ? null : LandingImages.sized((String) course.get("image"), 320));
-        props.put("course", course);
+        Map<String, Object> c = new LinkedHashMap<>();
+        for (String k : List.of("title", "kind", "starts", "duration")) c.put(k, course.get(k));
+        c.put("artist", artist == null ? null : artist.str("name"));
+        c.put("thumb", course.get("image") == null ? null : LandingImages.sized((String) course.get("image"), 320));
+        props.put("course", c);
         LandingPricing.Quote q = commerce.quote(page);
         props.put("quote", view.price(q));
-        LandingPayments.Plan plan = payments.forPage(page.lng("id"));
+        LandingPayments.Plan plan = payments.forPage(pageId);
         List<Map<String, Object>> choices = new ArrayList<>();
-        for (LandingPayments.Choice c : payments.choices(plan, q.totalUsd() != null)) {
+        for (LandingPayments.Choice ch : payments.choices(plan, q.totalUsd() != null)) {
             Map<String, Object> m = new LinkedHashMap<>();
-            m.put("key", c.key());
-            m.put("label", c.label());
-            m.put("hint", c.hint());
-            m.put("currency", c.currency());
-            m.put("logos", c.logos());
-            m.put("amount", "USD".equals(c.currency()) ? LandingView.usd(q.totalUsd()) : LandingView.inr(q.total()));
+            m.put("key", ch.key());
+            m.put("label", ch.label());
+            m.put("hint", ch.hint());
+            m.put("currency", ch.currency());
+            m.put("logos", ch.logos());
+            m.put("amount", "USD".equals(ch.currency()) ? LandingView.usd(q.totalUsd()) : LandingView.inr(q.total()));
             choices.add(m);
         }
         props.put("choices", choices);
-        props.put("checkout", commerce.checkoutView(page.lng("id")));
-        props.put("simulate", !q.free() && testPayments.offerSimulation(request));
+        props.put("checkout", commerce.checkoutView(pageId));
         props.put("testMode", gateways.testMode() && !gateways.razorpayConfigured());
-        props.put("user", Map.of("name", user.str("name", ""), "email", user.str("email", ""), "phone", user.str("phone", "")));
-        Row address = db.first("select address, city, state, zipcode, country from user_addresses where user_id = ? and status = 1 order by `primary` desc, id desc limit 1", uid);
-        props.put("address", address);
-        Row paid = db.first("select id from orders where user_id = ? and course_id = ? and payment_status = 1 order by id desc limit 1", uid, courseId);
-        props.put("enrolled", paid == null ? null : Map.of("orderId", paid.get("id"), "classroom", "/user/course/" + paid.get("id")));
-        props.put("notice", request.getParameter("payment"));
-        if (doneOrder != null) {
-            Row o = db.first("select id, order_number, payment_status, gateway_ref, price, price_type, payment_method from orders where id = ? and user_id = ? and landing_page_id = ?",
-                    doneOrder, uid, page.get("id"));
-            props.put("result", o == null ? null : result(o, request));
-        } else {
-            analytics.record(page.lng("id"), "CHECKOUT", visitor(request), null, null, null, LandingPublic.utm(request), LandingAnalytics.device(request.getHeader("User-Agent")));
+        props.put("signIn", user == null ? quickSignIn.options(request) : null);
+        props.put("user", user == null ? null : QuickSignInController.summary(user));
+        props.put("simulate", user != null && !q.free() && testPayments.offerSimulation(request));
+        if (user != null) {
+            long uid = user.lng("id");
+            props.put("address", db.first("select address, city, state, zipcode, country from user_addresses where user_id = ? and status = 1 order by `primary` desc, id desc limit 1", uid));
+            Row paid = db.first("select id from orders where user_id = ? and course_id = ? and payment_status = 1 order by id desc limit 1", uid, courseId);
+            props.put("enrolled", paid == null ? null : Map.of("orderId", paid.get("id"), "classroom", "/user/course/" + paid.get("id")));
+            if (orderId != null) {
+                Row o = db.first("select id, order_number, payment_status, gateway_ref, price, price_type, payment_method from orders where id = ? and user_id = ? and landing_page_id = ?",
+                        orderId, uid, pageId);
+                props.put("result", o == null ? null : result(o, request));
+            }
         }
-        ResponseEntity<String> r = inertia.render(request, "Landing/Checkout", props);
-        if (visitor(request) == null) {
-            return ResponseEntity.status(r.getStatusCode()).headers(h -> {
-                h.putAll(r.getHeaders());
-                h.add("Set-Cookie", org.springframework.http.ResponseCookie.from(LandingPublic.VISITOR, java.util.UUID.randomUUID().toString()).path("/").httpOnly(true)
-                        .sameSite("Lax").secure(request.isSecure()).maxAge(java.time.Duration.ofDays(365)).build().toString());
-            }).body(r.getBody());
+        if (orderId == null && !LandingPublic.isBot(request) && auth.admin(request) == null) {
+            String v = visitor(request);
+            if (v != null) analytics.record(pageId, "CHECKOUT", v, null, null, null, LandingPublic.utm(request), LandingAnalytics.device(request.getHeader("User-Agent")));
         }
-        return r;
+        return ResponseEntity.ok().header("Cache-Control", "no-store").contentType(MediaType.APPLICATION_JSON).body(json.encode(props));
     }
 
     private Map<String, Object> result(Row o, HttpServletRequest request) {
@@ -238,6 +256,12 @@ public class LandingCheckoutController {
         long courseId = page.lng("course_id");
         if (db.count("select count(*) from orders where user_id = ? and course_id = ? and payment_status = 1", uid, courseId) > 0) {
             return json(HttpStatus.CONFLICT, Map.of("message", "You're already enrolled in this course.", "enrolled", true));
+        }
+        // a passwordless account placing its first order (the quick sign-in names a new account after its e-mail address)
+        // takes the name typed here, so receipts and the certificate carry the real name
+        if (!name.equals(user.str("name")) && !Boolean.TRUE.equals(user.get("has_password"))
+                && db.count("select count(*) from orders where user_id = ?", uid) == 0) {
+            db.update("update users set name = ? where id = ?", name, uid);
         }
         String coupon = (boolean) cfg.get("showCoupon") ? LandingCoupons.normalizeCode(in.get("coupon")) : "";
         LandingCommerce.Priced priced = commerce.quote(page, coupon, uid);
