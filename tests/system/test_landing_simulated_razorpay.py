@@ -5,7 +5,8 @@ on a fresh database (schema.sql + seed.sql), then   python3 tests/system/test_la
 Covers: without keys nobody can pay; Admin › Payments & checkout › Test payments › "Simulate Razorpay" makes Razorpay's
 methods available; a new page named like an existing one gets its own address; it can be published; a test buyer pays in
 the simulated Razorpay window (success and failure) and the order is a test order; everybody else is told payment opens
-soon and can't pay or simulate; the admin simulator; switching it off closes it again; permissions and audit.
+soon and can't pay or simulate; the admin simulator; switching it off closes it again; permissions and audit;
+sign-in at checkout without any setup (e-mail and password), the admin's sign-in switches and what each method needs.
 """
 import os, re, subprocess, urllib.parse
 import requests
@@ -22,6 +23,7 @@ def xsrf(s): return urllib.parse.unquote(s.cookies.get('XSRF-TOKEN', ''))
 H = lambda s: {'X-XSRF-TOKEN': xsrf(s), 'Accept': 'application/json'}
 def post(s, path, body=None): return s.post(B + path, json=body or {}, headers=H(s))
 def get(s, path): return s.get(B + path, headers={'Accept': 'application/json'})
+def put(s, path, body=None): return s.put(B + path, json=body or {}, headers=H(s))
 def student(email):
     s = requests.Session(); s.get(B + '/login')
     r = s.post(B + '/login', json={'email': email, 'password': 'password'}, headers=H(s))
@@ -99,6 +101,26 @@ check('admin simulator: paid on the new page', r.status_code == 200 and r.json()
 r = post(adm, '/admin/api/landing/test-payments/simulate-razorpay', {'on': False})
 check('switched off: nobody can pay again', r.json()['razorpaySimulated'] is False and get(diya, f'/landing/checkout/{P}/state').json()['choices'] == [])
 check('switched off: the simulated window is closed', post(diya, f'/landing/checkout/{P}/simulate', {'orderId': o1, 'outcome': 'success'}).status_code == 403)
+
+# sign-in at checkout on a server without a mail server, SMS provider or Google client id
+g = requests.Session(); g.get(B + '/landing/watercolour-landscapes-for-beginners')
+o = get(g, '/landing/checkout/1/state').json()['signIn']
+check('no setup: e-mail and password is offered, the code methods are not', o['password'] is True and o['email'] is False and o['phone'] is False and o['google'] is None, o)
+check('teacher can\'t read the sign-in settings', get(teacher, '/admin/api/landing/signin').status_code == 403)
+v = get(adm, '/admin/api/landing/signin').json()
+check('admin: what each method needs', v['readiness']['google']['ready'] is False and 'Configuration Panel' in v['readiness']['google']['detail']
+      and v['readiness']['email']['ready'] is False and 'MAIL_HOST' in v['readiness']['email']['detail'] and v['readiness']['password']['ready'] is True
+      and v['offered']['password'] is True and v['offered']['email'] is False, v)
+check('every method can\'t be switched off', put(adm, '/admin/api/landing/signin', {'google': False, 'email': False, 'phone': False, 'passkey': False, 'password': False}).status_code == 422)
+r = put(adm, '/admin/api/landing/signin', {'passkey': False})
+check('passkey switched off: no longer offered, audited', r.status_code == 200 and get(g, '/landing/checkout/1/state').json()['signIn']['passkey'] is False
+      and sql("select count(*) from admin_audit where details = 'Sign-in at checkout'") == '1', r.text)
+r = put(adm, '/admin/api/landing/signin', {'password': False, 'passkey': True})
+check('password switched off but nothing else works here: still offered so buyers can sign in', get(g, '/landing/checkout/1/state').json()['signIn']['password'] is True)
+put(adm, '/admin/api/landing/signin', {'password': True})
+r = g.post(B + '/register', json={'name': 'Riya Sen', 'email': 'riya.sen@example.com', 'password': 'Watercolour#2026', 'password_confirmation': 'Watercolour#2026'},
+           headers=H(g), allow_redirects=False)
+check('create an account with a password from the checkout', r.status_code in (200, 302, 409) and get(g, '/landing/checkout/1/state').json()['user']['email'] == 'riya.sen@example.com', r.status_code)
 
 print(f'\n{"ALL PASSED" if not fails else str(fails) + " FAILED"}')
 raise SystemExit(1 if fails else 0)

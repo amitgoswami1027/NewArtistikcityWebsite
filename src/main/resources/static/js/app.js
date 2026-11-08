@@ -31915,6 +31915,45 @@ function Templates({ catalog, caps }) {
     ] }) })
   ] });
 }
+const SIGNIN = [
+  { key: "google", label: "Google (one tap)", icon: "fa-google" },
+  { key: "email", label: "E-mail code (6 digits)", icon: "fa-envelope-o" },
+  { key: "phone", label: "Mobile number code (SMS)", icon: "fa-mobile" },
+  { key: "passkey", label: "Passkey", icon: "fa-key" },
+  { key: "password", label: "E-mail and password", icon: "fa-lock" }
+];
+function SignInSettings({ toast }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const load = () => import_axios.default.get("/admin/api/landing/signin").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  (0, import_react.useEffect)(() => {
+    load();
+  }, []);
+  if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Sign-in at checkout", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
+  const save = (key, on) => import_axios.default.put("/admin/api/landing/signin", { [key]: on }).then((r) => {
+    setData(r.data);
+    toast(r.data.message);
+  }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Sign-in at checkout", subtitle: "How buyers sign in inside a landing page's checkout, without leaving the page. A method that this server can't run yet is not shown to buyers, even when it is switched on.", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-signin", "data-testid": "lp-signin", children: SIGNIN.map((m) => {
+      const r = data.readiness[m.key] || {};
+      const shown = !!data.offered[m.key];
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { "data-method": m.key, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${m.icon}`, "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-signin__text", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: m.label }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: r.detail })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: shown ? "green" : r.ready ? "grey" : "amber", children: shown ? "Shown to buyers" : r.ready ? "Switched off" : "Needs setup" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: `signin-${m.key}`, checked: !!data.switches[m.key], label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "sr-only", children: m.label }), onChange: (on) => save(m.key, on) })
+      ] }, m.key);
+    }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+      "Google, SMS and the mail server are set up once for the whole site in ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/admin/setup", children: "System parameters \u203A Configuration Panel" }),
+      " (the mail server in the server settings). E-mail and password always works, so buyers can always sign in."
+    ] })
+  ] });
+}
 const TEST_STATUS = { 0: ["Waiting", "amber"], 1: ["Paid (test)", "green"], 2: ["Failed", "red"], 3: ["Undone", "grey"], 4: ["Refund due", "amber"] };
 const GW_LABEL = { live: ["Live keys", "red"], test: ["Test keys", "green"], sandbox: ["Sandbox", "green"], unknown: ["Keys set", "blue"], simulated: ["Simulated", "amber"], none: ["Not connected", "grey"] };
 function TestPayments({ toast }) {
@@ -32116,6 +32155,7 @@ function Payments({ caps, toast }) {
   if (!data) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) });
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "lp-payments", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TestPayments, { toast }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SignInSettings, { toast }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Payment settings of every page", subtitle: "Each page either follows the global defaults below or has its own settings. Open a page to change it.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.pages, columns: [
       { key: "name", label: "Page", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `/admin/landing/pages/${r.id}/payments`, children: r.name }) },
       { key: "status", label: "Status", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: import_parts.STATUS[r.status].tone, children: import_parts.STATUS[r.status].label }) },

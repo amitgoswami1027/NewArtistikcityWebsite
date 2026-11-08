@@ -11,6 +11,8 @@ import com.artistikcity.support.Input;
 import com.artistikcity.support.Json;
 import com.artistikcity.support.Row;
 import com.artistikcity.web.CheckoutController;
+import com.artistikcity.web.QuickSignInController;
+import org.springframework.web.bind.annotation.PutMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,9 +56,12 @@ public class LandingTestPayments {
     private final CheckoutController courseCheckout;
     private final CommissionPayments gateways;
     private final AccountService accounts;
+    private final QuickSignInController signIn;
 
     public LandingTestPayments(AdminKit kit, Db db, Json json, Audit audit, TestPayments testPayments, LandingCommerce commerce, LandingPayments payments,
-                               SeatService seats, CheckoutController courseCheckout, CommissionPayments gateways, AccountService accounts) {
+                               SeatService seats, CheckoutController courseCheckout, CommissionPayments gateways, AccountService accounts,
+                               QuickSignInController signIn) {
+        this.signIn = signIn;
         this.kit = kit;
         this.db = db;
         this.json = json;
@@ -107,6 +112,42 @@ public class LandingTestPayments {
                 + " o.coupon_code as coupon, o.created_at, u.name as buyer, u.email, p.name as page, p.slug"
                 + " from orders o join users u on u.id = o.user_id join landing_pages p on p.id = o.landing_page_id"
                 + " where o.is_test = 1 order by o.id desc limit 15"));
+        return m;
+    }
+
+    // ------------------------------------------------------------------ sign-in at checkout
+
+    /** Payments & checkout › Sign-in at checkout: each method's switch and whether this server can run it. */
+    @GetMapping("/admin/api/landing/signin")
+    public ResponseEntity<String> signInSettings(HttpServletRequest request) {
+        Row admin = kit.admin(request);
+        if (!kit.can(admin, "landing.payments")) return kit.forbidden();
+        return kit.ok(signInView(request));
+    }
+
+    @PutMapping("/admin/api/landing/signin")
+    public ResponseEntity<String> saveSignIn(HttpServletRequest request) {
+        Row admin = kit.admin(request);
+        if (!kit.can(admin, "landing.payments")) return kit.forbidden();
+        Input in = Input.of(request, json);
+        Map<String, Boolean> before = signIn.switches();
+        Map<String, Boolean> on = new LinkedHashMap<>();
+        for (String k : QuickSignInController.METHODS) on.put(k, in.get(k) == null ? before.get(k) : in.bool(k));
+        if (on.values().stream().noneMatch(Boolean::booleanValue)) return kit.invalid(Map.of("password", "Keep at least one way to sign in."));
+        signIn.saveSwitches(on);
+        audit.change(admin, "landing_settings", 0, "update", "Sign-in at checkout", before, on);
+        Map<String, Object> body = signInView(request);
+        body.put("message", "Saved. The checkout on every landing page uses these now.");
+        return kit.ok(body);
+    }
+
+    private Map<String, Object> signInView(HttpServletRequest request) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("switches", signIn.switches());
+        m.put("readiness", signIn.readiness(request));
+        m.put("offered", signIn.options(request));
+        m.put("offered", new LinkedHashMap<>((Map<String, Object>) m.get("offered")));
+        ((Map<String, Object>) m.get("offered")).computeIfPresent("google", (k, v) -> true);
         return m;
     }
 

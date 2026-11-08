@@ -9,6 +9,7 @@ import com.artistikcity.auth.RateLimiter;
 import com.artistikcity.auth.Tokens;
 import com.artistikcity.auth.sms.SmsSender;
 import com.artistikcity.http.Auth;
+import com.artistikcity.support.Db;
 import com.artistikcity.support.Input;
 import com.artistikcity.support.Json;
 import com.artistikcity.support.Row;
@@ -57,9 +58,11 @@ public class QuickSignInController {
     private final RateLimiter limiter;
     private final AuthEvents events;
     private final Environment env;
+    private final Db db;
 
     public QuickSignInController(Auth auth, Json json, AccountService accounts, EmailCodeService emailCodes, OtpService otp, SmsSender sms,
-                                 JwtVerifier jwt, RateLimiter limiter, AuthEvents events, Environment env) {
+                                 JwtVerifier jwt, RateLimiter limiter, AuthEvents events, Environment env, Db db) {
+        this.db = db;
         this.auth = auth;
         this.json = json;
         this.accounts = accounts;
@@ -72,11 +75,52 @@ public class QuickSignInController {
         this.env = env;
     }
 
-    /** Which quick sign-in methods work on this server right now (a method that can't reach people is not offered). */
+    public static final List<String> METHODS = List.of("google", "email", "phone", "passkey", "password");
+
+    /**
+     * The landing checkout's sign-in switches (Admin › Landing Page Management › Payments & checkout › Sign-in at checkout):
+     * settings tag landing_pages, key signin, JSON {method: true|false}; every method is on unless switched off.
+     */
+    public Map<String, Boolean> switches() {
+        Map<String, Boolean> m = new LinkedHashMap<>();
+        Row r = db.first("select meta_value from settings where meta_tag = 'landing_pages' and meta_key = 'signin' order by id desc limit 1");
+        Map<String, Object> saved = r == null ? null : json.decodeMap(r.str("meta_value"));
+        for (String k : METHODS) m.put(k, saved == null || !Boolean.FALSE.equals(saved.get(k)));
+        return m;
+    }
+
+    public void saveSwitches(Map<String, Boolean> on) {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        String v = json.encode(on);
+        if (db.update("update settings set meta_value = ?, updated_at = ? where meta_tag = 'landing_pages' and meta_key = 'signin'", v, now) == 0) {
+            db.insert("settings", Row.of("meta_tag", "landing_pages", "meta_key", "signin", "meta_value", v, "created_at", now, "updated_at", now));
+        }
+    }
+
+    /** What each method needs on this server: {ready, detail} (shown in the admin; never a secret). */
+    public Map<String, Object> readiness(HttpServletRequest request) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        boolean google = !env.getProperty("social.google.client-id", "").isBlank();
+        m.put("google", Map.of("ready", google, "detail", google
+                ? "Uses the Google client ID from the Configuration Panel. Add your site's address (e.g. https://www.artistikcity.com) under Authorized JavaScript origins of that client in Google Cloud Console."
+                : "Add the Google client ID (and secret) in System parameters › Configuration Panel › Google sign-in."));
+        boolean mail = emailCodes.available(request);
+        m.put("email", Map.of("ready", mail, "detail", mail ? "Codes are sent by the site's mail server."
+                : "Needs a mail server: set MAIL_HOST (for example Amazon SES) in the server settings, then deploy again."));
+        boolean phone = !sms.isDevelopment() || otp.devCodesVisible(request);
+        m.put("phone", Map.of("ready", phone, "detail", phone ? "Codes are sent by the SMS provider chosen in the Configuration Panel."
+                : "Choose an SMS provider (Twilio, Amazon SNS or Infobip) in System parameters › Configuration Panel › SMS."));
+        m.put("passkey", Map.of("ready", true, "detail", "For buyers who saved a passkey in My account › Login & security; their browser decides."));
+        m.put("password", Map.of("ready", true, "detail", "E-mail and password: works with no setup. New buyers create an account with a password."));
+        return m;
+    }
+
+    /** Which quick sign-in methods work on this server right now and are switched on (a method that can't reach people is not offered). */
     public Map<String, Object> options(HttpServletRequest request) {
         Map<String, Object> m = new LinkedHashMap<>();
+        Map<String, Boolean> on = switches();
         String clientId = env.getProperty("social.google.client-id", "").trim();
-        if (!clientId.isEmpty()) {
+        if (!clientId.isEmpty() && on.get("google")) {
             HttpSession s = request.getSession(true);
             Object n = s.getAttribute(GIS_NONCE);
             String nonce = n instanceof String x ? x : Tokens.random(24);
@@ -85,9 +129,12 @@ public class QuickSignInController {
         } else {
             m.put("google", null);
         }
-        m.put("email", emailCodes.available(request));
-        m.put("phone", !sms.isDevelopment() || otp.devCodesVisible(request));
-        m.put("passkey", true);       // the browser decides whether it can
+        m.put("email", on.get("email") && emailCodes.available(request));
+        m.put("phone", on.get("phone") && (!sms.isDevelopment() || otp.devCodesVisible(request)));
+        m.put("passkey", on.get("passkey"));       // the browser decides whether it can
+        // e-mail + password (the site's own /login and /register): needs no setup; on when switched on, or when nothing else could work
+        boolean anyCode = Boolean.TRUE.equals(m.get("email")) || Boolean.TRUE.equals(m.get("phone")) || m.get("google") != null;
+        m.put("password", on.get("password") || !anyCode);
         m.put("country", env.getProperty("app.auth.default-country-code", "91"));
         return m;
     }

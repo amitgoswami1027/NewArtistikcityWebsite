@@ -293,7 +293,9 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   Services one-tap / button -> `POST /auth/google/credential`, a six-digit e-mail code `POST /auth/email-code/send|verify`
   (`auth/EmailCodeService`, table `auth_email_codes`), SMS code `/auth/otp/*` with WebOTP, passkey), then details + payment
   (Razorpay's window opens on top of the page), then the result; `QuickSignInController.options` only offers methods that can
-  reach people (mail server / SMS provider / Google client id). `/landing/{slug}/enroll` and `/enroll/done?order_id=` only redirect
+  reach people (mail server / SMS provider / Google client id) and are switched on in Payments & checkout › **Sign-in at checkout**
+  (settings `landing_pages`/`signin`, `GET|PUT /admin/api/landing/signin`); e-mail + password (`/login`, `/register` from the dialog)
+  needs no setup and is always offered when nothing else can run. `/landing/{slug}/enroll` and `/enroll/done?order_id=` only redirect
   to the page (`#enroll`, `?order=`; the old React `Pages/Landing/Checkout` is no longer used; old `/course/{slug}/enroll` links
   redirect) + JSON `GET /landing/checkout/{pageId}/state[?order=]` (guests too), `/landing/checkout/{pageId}/quote|order|pay|failed`.
   A passwordless account's first order sets its name. **Test payments** (Payments & checkout tab, `LandingTestPayments`,

@@ -321,6 +321,47 @@ function Templates({ catalog, caps }) {
 
 /* ---------------------------------------------------------------------------------------------- payments */
 
+
+/* Sign-in at checkout: which ways in the landing checkout offers, and what each needs on this server. */
+const SIGNIN = [
+    { key: 'google', label: 'Google (one tap)', icon: 'fa-google' },
+    { key: 'email', label: 'E-mail code (6 digits)', icon: 'fa-envelope-o' },
+    { key: 'phone', label: 'Mobile number code (SMS)', icon: 'fa-mobile' },
+    { key: 'passkey', label: 'Passkey', icon: 'fa-key' },
+    { key: 'password', label: 'E-mail and password', icon: 'fa-lock' },
+];
+function SignInSettings({ toast }) {
+    const [data, setData] = useState(null);
+    const load = () => axios.get('/admin/api/landing/signin').then((r) => setData(r.data)).catch((e) => toast(errorText(e), 'error'));
+    useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!data) return <Card title="Sign-in at checkout"><p className="adm-muted">Loading…</p></Card>;
+    const save = (key, on) => axios.put('/admin/api/landing/signin', { [key]: on })
+        .then((r) => { setData(r.data); toast(r.data.message); })
+        .catch((e) => toast(errorText(e), 'error'));
+    return (
+        <Card title="Sign-in at checkout" subtitle="How buyers sign in inside a landing page's checkout, without leaving the page. A method that this server can't run yet is not shown to buyers, even when it is switched on.">
+            <ul className="lpa-signin" data-testid="lp-signin">
+                {SIGNIN.map((m) => {
+                    const r = data.readiness[m.key] || {};
+                    const shown = !!data.offered[m.key];
+                    return (
+                        <li key={m.key} data-method={m.key}>
+                            <i className={`fa ${m.icon}`} aria-hidden="true"></i>
+                            <div className="lpa-signin__text">
+                                <b>{m.label}</b>
+                                <small>{r.detail}</small>
+                            </div>
+                            <Badge tone={shown ? 'green' : r.ready ? 'grey' : 'amber'}>{shown ? 'Shown to buyers' : r.ready ? 'Switched off' : 'Needs setup'}</Badge>
+                            <Toggle name={`signin-${m.key}`} checked={!!data.switches[m.key]} label={<span className="sr-only">{m.label}</span>} onChange={(on) => save(m.key, on)} />
+                        </li>
+                    );
+                })}
+            </ul>
+            <p className="adm-muted adm-small">Google, SMS and the mail server are set up once for the whole site in <a href="/admin/setup">System parameters › Configuration Panel</a> (the mail server in the server settings). E-mail and password always works, so buyers can always sign in.</p>
+        </Card>
+    );
+}
+
 /* Test payments: test buyers, an end-to-end simulator and the recent test orders (LandingTestPayments). */
 const TEST_STATUS = { 0: ['Waiting', 'amber'], 1: ['Paid (test)', 'green'], 2: ['Failed', 'red'], 3: ['Undone', 'grey'], 4: ['Refund due', 'amber'] };
 const GW_LABEL = { live: ['Live keys', 'red'], test: ['Test keys', 'green'], sandbox: ['Sandbox', 'green'], unknown: ['Keys set', 'blue'], simulated: ['Simulated', 'amber'], none: ['Not connected', 'grey'] };
@@ -467,6 +508,7 @@ function Payments({ caps, toast }) {
     return (
         <div className="adm-stack" data-testid="lp-payments">
             <TestPayments toast={toast} />
+            <SignInSettings toast={toast} />
             <Card title="Payment settings of every page" subtitle="Each page either follows the global defaults below or has its own settings. Open a page to change it." flush>
                 <DataTable rows={data.pages} columns={[
                     { key: 'name', label: 'Page', render: (r) => <a href={`/admin/landing/pages/${r.id}/payments`}>{r.name}</a> },

@@ -72,7 +72,8 @@ test.describe('Public landing page', () => {
         await page.locator('.lp-top__end [data-signin]').click();
         await expect(page.getByTestId('lp-checkout')).toBeVisible();
         await expect(page.locator('#lp-co-h')).toHaveText('Sign in');
-        await expect(page.getByTestId('lp-co-switch')).toBeVisible();          // e-mail or mobile number
+        await expect(page.getByTestId('lp-co-switch-phone')).toBeVisible();    // e-mail code, mobile number or password
+        await expect(page.getByTestId('lp-co-switch-password')).toBeVisible();
     });
 
     test('@mobile phone layout: artwork first, fits the screen, sticky enrol bar', async ({ page, isMobile }) => {

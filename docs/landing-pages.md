@@ -110,7 +110,14 @@ Every button that links to the page's `/enroll` and the header *Log in* (`data-s
    * **Phone code**: the existing `/auth/otp/send|verify|complete` (SMS; Android Chrome fills the code in by itself
      through WebOTP, the message ends with `@host #code`). Offered when an SMS provider is set.
    * **Passkey**: the existing `/auth/passkey/options|verify`, when the browser supports it.
-   * *Other ways to sign in* (password, Facebook) still go to `/login`, which returns to the page.
+   * **E-mail and password**: log in, or create an account with a password, right in the dialog (the site's own `/login`
+     and `/register`). Needs no setup, so it is always offered when nothing else can work on the server.
+   * *Other ways to sign in* (Facebook) still go to `/login`, which returns to the page.
+
+   **Admin › Landing Page Management › Payments & checkout › Sign-in at checkout** lists the five methods with a switch
+   each and what each needs on this server (*Shown to buyers* / *Needs setup* with where to set it up / *Switched off*).
+   Settings tag `landing_pages`, key `signin`; `GET|PUT /admin/api/landing/signin`. At least one method stays on, and
+   e-mail and password is shown anyway when no other method can run.
 2. **Details and payment**: `GET /landing/checkout/{id}/state` gives the course, price, the page's payment options and
    checkout fields; then the usual `order` → `pay`. Razorpay opens its own window on top of the page; PayPal approves on
    PayPal's page and comes back to `/landing/{slug}/enroll/done`, which reopens the page at the result.

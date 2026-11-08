@@ -634,3 +634,4 @@ body.lp-co-open{overflow:hidden}
 .lp-rzs .lp-btn--ghost{background:#fff;color:#B42318;border-color:#E4C3BF}
 .lp-rzs__ok{--b:#13804B!important}
 .lp-rzs__foot{margin:0;padding:10px 16px;border-top:1px solid #E6E9EE;font-size:12px;color:#55606C;display:flex;gap:6px;align-items:center;justify-content:center}
+.lp-co a.lp-co__link{font-size:14px;font-weight:700}

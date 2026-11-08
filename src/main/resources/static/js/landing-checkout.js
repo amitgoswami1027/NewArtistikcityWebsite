@@ -172,7 +172,10 @@
     var o = state.signIn || {};
     var kids = [];
     if (!signinOnly) kids.push(summary(true));
-    kids.push(el('p', { class: 'lp-co__lead', text: signinOnly ? 'Sign in with one tap or a code. No password needed.' : 'First, tell us who is enrolling. It takes a few seconds, no password needed.' }));
+    var pwOnly = o.password && !o.google && !o.email && !o.phone;
+    kids.push(el('p', { class: 'lp-co__lead', text: pwOnly
+      ? (signinOnly ? 'Log in, or create your account in a few seconds.' : 'First, tell us who is enrolling: log in, or create your account in a few seconds.')
+      : (signinOnly ? 'Sign in with one tap or a code. No password needed.' : 'First, tell us who is enrolling. It takes a few seconds, no password needed.') }));
     if (message || signin.msg) kids.push(note((message || signin.msg).tone, (message || signin.msg).text));
     signin.msg = null;
 
@@ -184,6 +187,7 @@
     var codeChannels = [];
     if (o.email) codeChannels.push('email');
     if (o.phone) codeChannels.push('phone');
+    if (o.password) codeChannels.push('password');
     if (codeChannels.length && codeChannels.indexOf(signin.mode) < 0) signin.mode = codeChannels[0];
 
     if (signin.sent) {
@@ -192,12 +196,12 @@
       kids.push(profileForm());
     } else if (codeChannels.length) {
       if (o.google) kids.push(el('p', { class: 'lp-co__or' }, [el('span', { text: 'or' })]));
-      kids.push(startForm(codeChannels));
+      kids.push(signin.mode === 'password' ? passwordForm(codeChannels) : startForm(codeChannels));
     }
     if (o.passkey && window.PublicKeyCredential && navigator.credentials && !signin.sent && !signin.profile) {
       kids.push(el('button', { type: 'button', class: 'lp-co__link', onclick: passkey, 'data-testid': 'lp-co-passkey' }, [icon('i-lock'), ' Sign in with a passkey']));
     }
-    if (!o.google && !codeChannels.length) {
+    if (!o.google && !codeChannels.length && !o.passkey) {
       kids.push(note('info', 'Quick sign-in isn\'t set up on this server yet.'));
     }
     kids.push(el('p', { class: 'lp-co__fine' }, [
@@ -236,12 +240,67 @@
         isEmail ? 'We\'ll e-mail you a 6-digit code.' : 'We\'ll text you a 6-digit code.'),
       btn
     ]);
-    if (channels.length > 1) {
-      f.appendChild(el('button', { type: 'button', class: 'lp-co__link', 'data-testid': 'lp-co-switch', onclick: function () {
-        signin.mode = isEmail ? 'phone' : 'email';
+    switchLinks(f, channels);
+    return f;
+  }
+
+  var MODE_LINK = { email: 'Use an e-mail code instead', phone: 'Use my mobile number instead', password: 'Use a password instead' };
+  function switchLinks(f, channels) {
+    channels.filter(function (c) { return c !== signin.mode; }).forEach(function (c) {
+      f.appendChild(el('button', { type: 'button', class: 'lp-co__link', 'data-testid': 'lp-co-switch-' + c, onclick: function () {
+        signin.mode = c;
         stepSignin();
-      } }, [isEmail ? 'Use my mobile number instead' : 'Use my e-mail instead']));
-    }
+      } }, [MODE_LINK[c]]));
+    });
+  }
+
+  // e-mail and password: the site's own /login and /register, answered here (no setup needed on the server)
+  function authForm(url, data) {
+    return fetch(url, { method: 'POST', credentials: 'same-origin', redirect: 'manual',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token() },
+      body: JSON.stringify(data) }).then(function (r) {
+      if (r.type === 'opaqueredirect' || r.ok || r.status === 409) return {};
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        var err = new Error((j && j.message) || (r.status === 419 ? 'Your session expired. Please refresh the page and try again.' : 'Something went wrong. Please try again.'));
+        var fe = {}, es = (j && j.errors) || {};
+        for (var k in es) fe[k] = Array.isArray(es[k]) ? es[k][0] : es[k];
+        err.fields = fe;
+        throw err;
+      });
+    });
+  }
+
+  function passwordForm(channels) {
+    var up = !!signin.signup;
+    var err = signin.err || {};
+    signin.err = null;
+    var name = el('input', { type: 'text', autocomplete: 'name', required: true, value: signin.name, 'data-testid': 'lp-co-pname' });
+    var email = el('input', { type: 'email', autocomplete: 'email', inputmode: 'email', required: true, placeholder: 'you@example.com', value: signin.email, 'data-testid': 'lp-co-pemail' });
+    var pass = el('input', { type: 'password', autocomplete: up ? 'new-password' : 'current-password', required: true, minlength: up ? 8 : null, 'data-testid': 'lp-co-password' });
+    var btn = el('button', { type: 'submit', class: 'lp-btn lp-btn--block', 'data-testid': 'lp-co-login' }, [up ? 'Create account & continue' : 'Log in & continue']);
+    var f = el('form', { class: 'lp-co__form', novalidate: true, onsubmit: function (e) {
+      e.preventDefault();
+      signin.email = email.value.trim();
+      if (up) signin.name = name.value.trim();
+      busy(btn, true, up ? 'Creating your account…' : 'Logging in…');
+      var req = up
+        ? authForm('/register', { name: signin.name, email: signin.email, password: pass.value, password_confirmation: pass.value, remember: true })
+        : authForm('/login', { email: signin.email, password: pass.value, remember: true });
+      req.then(function () { signedIn({}); }).catch(function (e2) {
+        signin.err = e2.fields;
+        var msg = (e2.fields && (e2.fields.email || e2.fields.password || e2.fields.name)) || e2.message;
+        stepSignin({ tone: 'error', text: String(msg).replace(/,? or (sign in with an e-mail link|use "Email me a sign-in link")/i, '') });
+      });
+    } }, [
+      up ? field('lp-co-pwname', 'Your name', name, err.name) : null,
+      field('lp-co-pwemail', 'E-mail', email, err.email),
+      field('lp-co-pwpass', up ? 'Choose a password' : 'Password', pass, err.password, up ? 'At least 8 characters.' : null),
+      btn,
+      el('button', { type: 'button', class: 'lp-co__link', 'data-testid': 'lp-co-toggle-signup', onclick: function () { signin.signup = !up; stepSignin(); } },
+        [up ? 'Already have an account? Log in' : 'New here? Create an account']),
+      up ? null : el('a', { class: 'lp-co__link', href: '/forgot-password', target: '_blank', rel: 'noopener', text: 'Forgot your password?' })
+    ]);
+    switchLinks(f, channels);
     return f;
   }
 
