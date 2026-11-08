@@ -13,6 +13,7 @@ The site is an online art school with live courses, workshops, a student studio,
 > - **Long prompts** were sent as attachments, so their full text survives. They are reproduced word for word in the collapsible *Full prompt* blocks.
 > - **Short prompts typed into the chat** before 7 November were not kept word for word (the chat history was condensed as the session grew). They are marked **Reconstructed**: the request is described from what was delivered (the git commit, its files and the backup folder made before the change). Nothing in those descriptions is invented beyond what the code shows.
 > - **Logs and error screenshots** you pasted are shown as short excerpts. AWS account numbers and IP addresses are masked, because this repository is public.
+> - **Reusable prompts**: after each prompt there is a project-agnostic version with `{{…}}` placeholders, for building the same kind of feature in another project (see [How to reuse these prompts](#how-to-reuse-these-prompts-in-another-project)).
 > - **Screenshots** were taken on 8 November 2026 from the current code: the dev profile on a fresh database (`schema.sql` + `seed.sql` + every migration + the optional demo pack), at 1366×860 for desktop and 390×844 for phone. They therefore show each feature as it stands today, including later improvements.
 
 ## Contents
@@ -47,11 +48,55 @@ The site is an online art school with live courses, workshops, a student studio,
 
 ---
 
+## How to reuse these prompts in another project
+
+Every section below has a **Reusable prompt** block: the same request rewritten without ArtistikCity details, so it works for any web project.
+
+1. Open Claude Code in the other project's folder.
+2. Paste the **context block** below once, at the start of the session, and fill in the `{{…}}` placeholders.
+3. Paste the reusable prompt you need, again filling in its placeholders. Delete any lines that don't apply.
+
+The prompts assume the project has a `CLAUDE.md`. Prompt 1 creates one if it doesn't.
+
+**Context block (paste first):**
+
+```text
+You are a senior full-stack engineer working on {{PROJECT_NAME}}, {{ONE_LINE_DESCRIPTION}}.
+Stack: {{BACKEND e.g. Java 17 Spring Boot / Node Express / Laravel}}, {{DATABASE e.g. MySQL 8}}, {{FRONTEND e.g. React + Inertia}},
+hosted on {{HOSTING e.g. AWS EC2 + RDS + S3}}.
+
+Working rules:
+- Read CLAUDE.md first and follow its conventions exactly; update it when you add routes, tables or settings.
+- Look at the existing code before designing anything: reuse what is there, never build a second version of an existing feature.
+- Schema changes: update the full schema file AND add a dated, re-runnable migration for databases that already hold data.
+- Never delete or reset data, never touch the live database, never put secrets in code or logs.
+- Validate on the server; the browser never decides prices, permissions or totals.
+- Every page must work on a phone (390 px) as well as desktop.
+- Ask me before assuming anything that is expensive to undo; otherwise make the sensible choice and say which one you made.
+- Finish with tests (unit + an end-to-end check of the main flow), look at screenshots of new screens yourself, and give me a
+  short report: what changed, files, migrations, how to run it, what you could not verify.
+```
+
+---
+
 ## 1. Set the project up for Claude Code
 
 **When:** 23 Oct 2026, 15:57 · **Type:** Reconstructed · **Commit:** `f24cb4e` *claude code conversion*
 
 **Prompt (reconstructed):** prepare the converted Java/MySQL project so Claude can work on it: explain the stack, commands and conventions, and add shortcuts for the routine jobs.
+
+**Reusable prompt (for other projects):**
+
+```text
+Set this repository up so you can work on it efficiently in future sessions.
+1. Read the code and write CLAUDE.md: what the product is, the stack, every command (run, build, test, migrate, deploy),
+   the folder layout, conventions (naming, SQL style, how pages are rendered, auth guards, CSRF) and known gotchas.
+   Keep it factual and short enough to read in two minutes.
+2. Add project slash commands in .claude/commands/ for the routine jobs: rebuild the front end, make a schema change the
+   house way (schema file + dated migration + seed), start the app locally and smoke-test the main pages.
+3. Add .claude/settings.json with the permissions those commands need.
+Do not change application code in this step.
+```
 
 **What it produced**
 - `CLAUDE.md`, the project guide Claude reads at the start of every session. It covers the stack, every command, the layout, conventions and gotchas (MySQL quoting, `Db`/`Row`, Inertia rendering, CSRF, routes). It has been kept up to date after every later prompt.
@@ -65,6 +110,24 @@ The site is an online art school with live courses, workshops, a student studio,
 **When:** 23 Oct 2026, 18:46 · **Type:** Reconstructed · **Commit:** `5b6147a` *Oauth Implementation -Claude code* (93 files)
 
 **Prompt (reconstructed):** implement modern student sign-in (Google / Facebook, phone OTP, e-mail magic links, passwords and passkeys) with one account per person, and move the local setup from SQL Server to MySQL.
+
+**Reusable prompt (for other projects):**
+
+```text
+Implement modern sign-in for {{USER_TYPE e.g. students}} with ONE account per person and several ways in:
+Google and {{OTHER_PROVIDER}} (OpenID Connect, verify ID tokens against the provider's JWKS), phone number + one-time code
+(SMS provider pluggable: {{SMS_PROVIDERS}}), e-mail magic link, password (bcrypt, compatible with {{EXISTING_HASH_FORMAT}}),
+and passkeys (WebAuthn).
+Rules:
+- Users are unique by e-mail and by verified phone (normalise to E.164). Link a provider to an existing account only when
+  the e-mail is verified on both sides; keep provider identities in their own table.
+- Server-side sessions in the database with a refresh token (HttpOnly cookies), "remember me", sign out everywhere.
+- Rate-limit codes and log-in attempts per IP and per account; one-time codes expire and are single use.
+- Changing a sign-in method needs a log-in younger than 30 minutes (answer 403 {reauth}).
+- JSON auth endpoints return {message, errors, retryAfter, reauth}.
+Deliver: migration, services, API, the log-in/join UI, account security page, unit tests for tokens, password policy,
+JWT/JWKS and WebAuthn.
+```
 
 **What it produced**
 - Package `auth/`:
@@ -90,6 +153,19 @@ The site is an online art school with live courses, workshops, a student studio,
 
 **Prompt (reconstructed):** rebuild the student area. The studio, the course player and the account pages each get their own layout; add a wish list, a proper course checkout and "Your orders".
 
+**Reusable prompt (for other projects):**
+
+```text
+Rebuild the signed-in {{USER_TYPE}} area as three clear spaces, each with its own layout:
+1. "My {{WORKSPACE e.g. studio}}": a home with the user's journey/progress ({{JOURNEY_STEPS}}) and tabs for their main objects.
+2. A focused learning/consumption view for one {{ITEM e.g. course}}: overview, resume where I left off, a sidebar outline,
+   previous / next across sections, mark complete. Every URL checks the user really owns a paid order for it.
+3. "My account": profile, Your orders (every order type in one list), wish list (heart button on cards), addresses,
+   log-in & security, notifications, help. Counts in the header avatar menu.
+Also replace the old checkout pages with one modern checkout for {{ITEM}} (order summary, payment choice, result page).
+Redirect every old URL to its new home. Migrations for wish list and checkout; tests for access rules.
+```
+
 **What it produced**
 - **Account pages:** *My account* layout (`Components/Account/AccountLayout`, `nav.js`), *Your orders* (`Pages/Account/Orders`) and *Wish list* (`wishlist_items`, `SaveButton` heart button, `/user/wishlist`).
 - **Course player:** focused *My course* view (`CourseLearningController`, `CourseShell`) with the overview `/user/course/{order}`, resume, and a learning view with a syllabus sidebar, previous / next and "mark complete".
@@ -106,6 +182,21 @@ The site is an online art school with live courses, workshops, a student studio,
 **When:** 24 Oct 2026, 10:03 · **Type:** Reconstructed · **Commit:** `17c0c52` *Changes make to the admin persona* (125 files)
 
 **Prompt (reconstructed):** replace the old server-rendered admin with one modern React console that shows each staff role (admin, teacher, moderator) only what it may use.
+
+**Reusable prompt (for other projects):**
+
+```text
+Replace the old admin screens with ONE modern admin console (single React shell) for these personas: {{PERSONAS e.g.
+super admin, teacher, moderator}}.
+- Layout: grouped, collapsible sidebar filtered by the persona's capabilities, breadcrumbs, account menu top right.
+- A small UI kit (Card, Button, Badge, DataTable with server-side sort/filter/paging, SearchBox, Drawer, Confirm) and a form
+  kit (useForm with inline rules + server 422 errors, sections, rich text, file drop, sticky save bar).
+- Server: every list is a whitelisted grid query (q, sort, dir, page, per + named filters) returning {rows, meta};
+  every action is a JSON API that checks the capability on the server; {{OWNER_SCOPE e.g. teachers only see their own
+  courses}}; rich text through an allow-list HTML cleaner; uploads checked for type and size; important changes audited.
+- Screens: {{SCREENS e.g. dashboard, courses + curriculum editor, orders, people, blog, FAQ, newsletter, settings}}.
+Retire the old controllers/templates only after the new screens cover them; keep their URLs redirecting.
+```
 
 **What it produced**
 - **One shell for every admin page:** `Components/Admin/AdminLayout`, with a grouped, collapsible sidebar filtered by the persona's capabilities, breadcrumbs and an account menu.
@@ -129,6 +220,23 @@ The site is an online art school with live courses, workshops, a student studio,
 
 **Prompt (reconstructed):** make the application deployable on AWS (CloudFront, EC2 with Docker, RDS MySQL, S3 for files) with a GitHub Actions deploy.
 
+**Reusable prompt (for other projects):**
+
+```text
+Make {{PROJECT_NAME}} deployable on AWS: CloudFront in front of EC2 (Docker), RDS {{DATABASE}}, S3 for uploaded files,
+deployed by GitHub Actions with OIDC (no long-lived keys).
+1. Storage abstraction with a local driver and an S3 driver (same public URLs either way; private files never public;
+   presigned links for downloads). Credentials from env or the instance role (IMDSv2).
+2. Behind CloudFront: trust the viewer IP / https headers only from CloudFront, reject requests without a secret origin
+   header, add /healthz.
+3. Infrastructure as code (CloudFormation or Terraform): VPC, instance + role, RDS, bucket, distribution, certificate,
+   the GitHub deploy role.
+4. Deploy script on the server: pull image, run pending migrations (load the schema on an empty DB), switch, health
+   check, rollback. Migrations must stay compatible with the previous release.
+5. docs/AWS-DEPLOY.md: first-time setup step by step, day-to-day deploy, troubleshooting table.
+Unit-test the request signing against the provider's published examples.
+```
+
 **What it produced**
 - **File storage in S3:** `support/s3/S3Client` uses plain `java.net.http` and **SigV4** signing (no AWS SDK). It takes credentials from the environment or from the EC2 role through IMDSv2, and `Storage` keeps the same `/storage/...` URLs.
 - **Behind CloudFront:** `http/CloudFrontFilter` takes the real visitor IP and https from CloudFront headers and rejects requests without `X-Origin-Verify`. `GET /healthz` is the health check.
@@ -145,6 +253,16 @@ The site is an online art school with live courses, workshops, a student studio,
 **When:** 25 Oct 2026, 11:49 · **Type:** Reconstructed · **Commit:** `bdceabe` *aws cloud architecture documentation*
 
 **Prompt (reconstructed):** document the AWS architecture with diagrams.
+
+**Reusable prompt (for other projects):**
+
+```text
+Document the cloud architecture of {{PROJECT_NAME}} for a new engineer and for a non-technical owner.
+Write docs/architecture.md with: one overview diagram (generated from code so it can be regenerated, e.g. a script that
+writes SVG using official AWS icons), a request-flow diagram, a file-upload flow, the CI/CD pipeline (Mermaid), a table of
+every resource with its purpose and monthly cost driver, security boundaries (what is public, what is private, where
+secrets live) and the recovery story (backups, rollback). Export the diagrams as PNG next to their sources.
+```
 
 **What it produced**
 - `docs/awsarchitecture.md`.
@@ -180,6 +298,15 @@ PS C:\Storage\AmitGoswami\NewArtistikcity\NewArtistikcityWebsite> aws cloudforma
 ```
 
 The key events were *"The following resource(s) failed to create: [AppInstance]. Rollback requested by user."* and *"failed to delete: [Database]"*.
+
+**Reusable prompt (for other projects):**
+
+```text
+My infrastructure deploy failed. Here is the full command output and the stack events: {{PASTE OUTPUT}}.
+Find the first real failure (not the cascade of rollbacks), explain the cause in plain words, fix the template or script,
+and tell me exactly how to recover: which resources to delete or retain, the command to retry, and how to read the
+server's boot log if it happens again. Add the symptom and fix to the troubleshooting table in the deploy docs.
+```
 
 **What it produced:** Claude traced the failure to the server's start-up script (the `AppInstance` resource) and walked through the recovery. The AWS-DEPLOY troubleshooting table carries what was learned, for example *"Stack stuck on `AppInstance`: the server's set-up script failed: EC2 → instance → Monitor → Get system log, or `/var/log/cloud-init-output.log` via Session Manager"*.
 
@@ -251,6 +378,21 @@ Please provide the implementation step-by-step:
 ````
 
 </details>
+
+**Reusable prompt (for other projects):**
+
+```text
+Build a multi-step purchase flow for {{PRODUCT e.g. artworks}} on the existing product pages.
+Formats: {{FORMATS e.g. one-of-a-kind original, numbered canvas print, poster, digital download}}, each with its own sizes,
+finishes and price from ONE server-side price list (the browser only mirrors it for display).
+Steps: 1. choose format/size on the product page  2. preview (product large, optional room view)  3. checkout (contact,
+delivery, payment accordion with a sticky summary)  4. confirmation. Keep the choice in a server-side draft.
+Also: a persistent cart (per user, API + client store + header drawer), "talk to the seller" enquiry with e-mails,
+digital downloads served from private storage through expiring tokens.
+Rules: a one-of-a-kind item is held for 15 minutes while in checkout; finalising a sale is idempotent; lines that can't be
+supplied become REFUND_REQUIRED instead of failing silently; payments are marked paid only after a verified gateway
+response. Write docs/{{feature}}.md and end-to-end tests for the full purchase.
+```
 
 **What it produced** (package `shop/`, write-up in `docs/marketplace-shop.md`)
 - **Every listing can be sold four ways:** the original, a numbered canvas edition, a poster and a digital download (`paintings.shop_formats`). `ShopPricing` is the one source of prices, from the global list `shop_price_options`.
@@ -341,6 +483,21 @@ Please provide the necessary Java backend file updates, updated JavaScript/CSS c
 
 </details>
 
+**Reusable prompt (for other projects):**
+
+```text
+Three fixes, in order:
+1. Generated PDFs ({{DOCS e.g. portfolio reports, certificates}}): render in memory, fix layout bugs (no blank first page,
+   cover is page 1), apply the brand palette {{COLOURS}}, store them privately in S3 with one database row each, and give
+   the owner a short-lived (10 min) presigned download link. Never link to private keys any other way.
+2. {{PAGE}} preview: the product is the hero (large, no heavy shadows, real proportions with dimension lines); context
+   images are secondary and one click away; perfect on phones.
+3. Uploaded {{ASSETS}} images: move to S3 through the storage layer (dated folders, random names, type/size checks) and
+   make the grid consistent and responsive.
+Also give me safe admin scripts to wipe and restore site data: confirmation word, full backup first, uploads moved not
+deleted.
+```
+
 **What it produced**
 - **Module 1, PDFs:**
   - Portfolio reports and course certificates are rendered in memory with OpenHTMLtoPDF.
@@ -369,6 +526,15 @@ C:\Storage\AmitGoswami\NewArtistikcity\NewArtistikcityWebsite>aws cloudtrail loo
 {"eventVersion":"1.11","userIdentity":{"type":"WebIdentityUser","principalId":"arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com:sts.amazonaws.com:repo:amitgoswami1027@13011167/NewArtistikcityWebsite@1390148564:ref:refs/heads/main","userName":"repo:amitgoswami1027@13011167/NewArtistikcityWebsite@1390148564:ref:refs/heads/main","identityProvider":"arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com"},"eventTime":"2026-11-05T07:35:39Z","eventSource":"sts.amazonaws.com","eventName":"AssumeRoleWithWebIdentity","awsRegion":"ap-south-1","sourceIPAddress":"<ip>","userAgent":"aws-sdk-js/3.859.0 ua/2.1 os/linux#7.0.0-1017-azure lang/js md/n …
 ```
 
+**Reusable prompt (for other projects):**
+
+```text
+My GitHub Actions deploy can't assume the AWS role. CloudTrail shows: {{PASTE AssumeRoleWithWebIdentity EVENT}}.
+Compare the token's subject claim with the role's trust policy, explain the mismatch, and fix the trust policy in the
+infrastructure template so it accepts the exact subject GitHub sends (keep it limited to this repo and branch /
+environment). Give me the one command to update the stack and how to re-run the workflow.
+```
+
 **What it produced:** GitHub now sends the newer subject format `repo:<owner>@<owner id>/<repo>@<repo id>:ref:refs/heads/main`, which the role's trust policy didn't accept. Claude added both forms to the `GitHubDeployRole` trust policy (new parameters `GitHubOwnerId` / `GitHubRepoId`):
 
 ```yaml
@@ -385,6 +551,17 @@ token.actions.githubusercontent.com:sub:
 **When:** 5 Nov 2026, 14:34 – 15:09 · **Type:** Reconstructed · **Commits:** `d1a8873` *sitewide password lock implemented*, `c6fd43b` *'trim'*
 
 **Prompt (reconstructed):** put the whole site behind a password while it is being tested; and give me a safe way to cut the live AWS database down to a small starter set.
+
+**Reusable prompt (for other projects):**
+
+```text
+1. Put the whole site behind a temporary password while we test: a server-side filter (no page flash), signed HttpOnly
+   cookie for 30 days, noindex headers and robots.txt disallow, rate-limited wrong tries. Always open: /healthz, payment
+   webhooks, static files and the admin area. Configurable by an environment variable.
+2. Give me a safe way to trim the LIVE database to a small starter set ({{KEEP e.g. 2 users, 2 products}}): snapshot first,
+   private tunnel, a SQL script with editable keep-lists that deletes dependants correctly, show the counts before and
+   after, require typing a confirmation word.
+```
 
 **What it produced**
 - **`http/PreviewLockFilter`:** when `SITE_PREVIEW_PASSWORD` is set, every page needs the password.
@@ -406,6 +583,15 @@ token.actions.githubusercontent.com:sub:
 **When:** 5 Nov 2026, 15:52 · **Type:** Reconstructed · **Commit:** `605d835` *adding the age group*
 
 **Prompt (reconstructed):** let admins manage the age groups and use them in the course filters and menus.
+
+**Reusable prompt (for other projects):**
+
+```text
+Turn {{FIELD e.g. age groups}} from hard-coded values into a managed list: an admin screen to add, rename, reorder and
+delete entries; a migration that creates the table from the values already in use; renaming updates every record that
+uses it; an entry in use can't be deleted (explain why). Feed the list to the public filters and navigation menus through
+one cached site setting, invalidated on save.
+```
 
 **What it produced**
 - Table `age_groups` (`2026-11-05_age_groups.sql`), edited in Admin > Catalog > Age groups.
@@ -477,6 +663,22 @@ Do not summarize, shorten the code snippets, or use structural text placeholders
 
 </details>
 
+**Reusable prompt (for other projects):**
+
+```text
+Act as a principal QA engineer and solutions architect. Audit {{PROJECT_NAME}} end to end for production readiness:
+1. Transaction flows ({{FLOWS e.g. checkout, enrolment, refunds}}): races (two buyers, last seat), double payments,
+   webhook vs redirect ordering, expired sessions mid-checkout, reconciliation of payments still pending.
+2. Role-based access: every admin API refuses other roles server-side; log every refusal; sign out a session after
+   repeated refusals.
+3. Admin gaps: which controls staff need and don't have (capacity, waitlists, refunds queue, payouts ledger,
+   moderation, notices to customers).
+4. UX: filters, empty states, error pages with a reference code, accessibility (focus, contrast).
+Output: a report doc (flaws ranked by severity, admin controls matrix, UX blueprint), then implement the fixes in
+priority order with tests: concurrency integration tests against a real database, unit tests, front-end tests and
+end-to-end tests. Add an append-only, hash-chained audit log with a viewer that shows before/after diffs.
+```
+
 **What it produced**
 - **The audit doc:** critical flaws, admin missing-controls matrix, UX blueprint and test scripts, plus an interactive prototype of the new course filters, the tag manager and the audit viewer.
 - **Transaction safety:**
@@ -526,6 +728,13 @@ C:\Storage\AmitGoswami\NewArtistikcity\NewArtistikcityWebsite\tests\frontend>npm
     Ignored nodes: comments, script, style
 ```
 
+**Reusable prompt (for other projects):**
+
+```text
+These tests fail after the last change: {{PASTE TEST OUTPUT}}. Decide for each failure whether the code or the test is
+wrong (the UI may have changed on purpose). Fix the right one, run the whole suite, and tell me which it was and why.
+```
+
 **What it produced:** the two failing specs in `Courses.filters.test.js` still looked for the Format filter inside the "More filters" drawer. The course-filter restructure had moved Format onto the page as buttons. The specs were updated to the new layout.
 
 ---
@@ -535,6 +744,16 @@ C:\Storage\AmitGoswami\NewArtistikcity\NewArtistikcityWebsite\tests\frontend>npm
 **When:** 6 Nov 2026, 09:26 · **Type:** Reconstructed · **Commit:** `549f6c0` *Courses menu changes, prview paininting code change*
 
 **Prompt (reconstructed):** simplify the Courses menu, improve the painting preview, and require an account before buying.
+
+**Reusable prompt (for other projects):**
+
+```text
+1. Simplify the {{MENU}} menu: one link to the full catalogue, with the main facet ({{FACET}}) shown as buttons with counts.
+2. Buying needs an account: every Buy / Enrol button and checkout sends a guest to log-in with a return address and an
+   intent ("Log in to finish buying {{ITEM}}"); JSON endpoints answer 401 {code: SIGN_IN, redirect}; the guest's choice
+   survives the log-in. Don't hold scarce stock for guests; take the hold after sign-in.
+3. Make the product preview images manageable by admins (upload, order, hide).
+```
 
 **What it produced**
 - **Courses menu:** the header "Courses" became one link to `/courses?type=all`; Format shows as buttons (All formats / Live courses / Workshops with counts) above the Age pills.
@@ -629,6 +848,23 @@ Please output the complete, non-placeholdered implementations across all affecte
 
 </details>
 
+**Reusable prompt (for other projects):**
+
+```text
+Add a "System parameters" area to the admin console (super admin only):
+1. Configuration panel for third-party settings ({{SERVICES e.g. payments, SMS, Google sign-in}}): values saved in the
+   database override the config file at runtime without a restart; only allow-listed keys with format checks; secrets
+   AES-GCM encrypted, sent to the browser only as a mask, and sending the mask back keeps them; "test" buttons;
+   every change audited (never the secret).
+2. SEO & layout controls: site title/description, contact, social links, home hero, header menu, cookie banner, with a
+   live desktop/mobile preview. The public site reads them through one helper whose defaults are today's texts, so
+   empty settings change nothing.
+3. A blog/CMS ("{{BLOG_NAME}}"): editor, workflow draft → review → scheduled → published → archived, scheduled
+   publishing job, categories/tags, a public journal (featured post, topics, search) and post pages (reading time,
+   author, related posts, share links). Drafts 404 for visitors; admins can preview.
+Tests: every new admin API returns 401/403 for non-admins; secrets are masked; validation errors come back as 422.
+```
+
 **What it produced**
 
 The prompt's Node / Express paths were mapped onto the real Java + React structure.
@@ -655,6 +891,15 @@ The prompt's Node / Express paths were mapped onto the real Java + React structu
 
 **Prompt (reconstructed):** show the whole student journey on /how-it-works, including the new seventh step, selling your art.
 
+**Reusable prompt (for other projects):**
+
+```text
+Redesign the public "How it works" page around the user journey: {{STEPS}}. A process tracker under the hero that sticks
+below the header once reached and highlights the current step while scrolling; a zigzag timeline of steps with an
+illustration, what happens, and what the user gets. Any numbers in the copy (fees, percentages, days) must come from the
+real configuration, never hard-coded. Mobile first; end-to-end test that every step and link is present.
+```
+
 **What it produced**
 - `/how-it-works` shows seven steps: the six of the studio journey plus **Sell your art**.
 - A process tracker sits under the hero and sticks below the header, with a zigzag timeline.
@@ -670,6 +915,19 @@ The prompt's Node / Express paths were mapped onto the real Java + React structu
 **When:** 6 Nov 2026, 19:30 · **Type:** Reconstructed · **Commit:** `16f60c7` *update the work flow for the mystudio*
 
 **Prompt (reconstructed):** let certified students sell their approved work as originals from My studio, with staff review and payouts.
+
+**Reusable prompt (for other projects):**
+
+```text
+Let {{SELLER_TYPE e.g. certified students}} sell their {{ITEMS}} on the marketplace from their own area:
+- Who may sell is decided on the server ({{ELIGIBILITY}}); show a clear reason when they can't.
+- Listing: photos, price within rules, description. Submit → staff review queue → approve / reject / request changes
+  (with notes). Editing a live listing sends it back to review; withdrawing makes it a draft.
+- Payout details (UPI / bank / PayPal or {{METHODS}}): encrypted at rest, shown masked, changing them needs a recent
+  log-in; finance staff can read them and every look is audited.
+- The sale ledger pays the seller's share after {{DAYS}} days, minus commission from configuration.
+Migration, API with CSRF checks, the seller screens, staff screens, unit + system + end-to-end tests.
+```
 
 **What it produced**
 - **Who can sell:** a student certified in a course can list that course's *approved* submissions (`/dashboard/sell`).
@@ -691,6 +949,14 @@ The prompt's Node / Express paths were mapped onto the real Java + React structu
 **When:** 6 Nov 2026, 20:06 – 20:26 · **Type:** Reconstructed · **Commits:** `4f2ccf3`, `df125c4`
 
 **Prompt (reconstructed):** separate artist originals from student paintings in the marketplace; refresh the commission page banner.
+
+**Reusable prompt (for other projects):**
+
+```text
+Split the {{CATALOGUE}} into two collections, {{COLLECTION_A}} (default) and {{COLLECTION_B}}, with a toggle mirrored in
+the address bar (?source=…) so links and Back work; label every card and detail page with its collection; redirect old
+URLs. Then refresh the {{PAGE}} hero banner to match the brand. Add an end-to-end test for the toggle.
+```
 
 **What it produced**
 - **Marketplace:** `/marketplace` shows artist originals by default, and a toggle switches to student paintings (`?source=student`; `/student-shop` redirects there). Cards and the artwork page say "Artist original" or "Student painting". Playwright `marketplace-collections.spec.js`.
@@ -761,6 +1027,21 @@ Provide a comprehensive summary report once completed, containing:
 ````
 
 </details>
+
+**Reusable prompt (for other projects):**
+
+```text
+Act as a QA engineer and senior full-stack developer. Make {{PROJECT_NAME}} production-ready:
+1. Demo data: rewrite the seed so every entity has 4-5 varied rows covering every status and edge case (fixed ids the
+   tests can rely on). Clearing real data must be a separate script that backs everything up first.
+2. Admin-controlled site password: switch on/off and set the password in admin (bcrypt, min 8 chars, confirm), a
+   server-side wall with no app flash, JSON 401 for APIs, rate-limited, changing the password signs everyone out,
+   admins and webhooks always pass, audited.
+3. End-to-end regression of every role ({{ROLES}}) on desktop and phone; whenever something fails, stop, fix the root
+   cause, add a test, continue. Broken paths fail with friendly pages, never a raw 500.
+Deliver a report: data reset log, the new screens, every broken workflow found and how it was fixed, and a sign-off
+listing what was run.
+```
 
 **What it produced**
 - **Fresh demo data:** `database/seed.sql` was rewritten with 4–5 varied rows per entity and fixed ids:
@@ -979,6 +1260,24 @@ The rules I couldn't confirm from you are written into the prompt as specific nu
 ````
 
 </details>
+
+**Reusable prompt (for other projects):**
+
+```text
+Finish the shopping experience. First check what already exists (cart API, drawer) and complete it rather than
+building a second one.
+1. Cart: "Add to cart" next to "Buy now" on every buyable item; header count + drawer; a /cart page with quantity,
+   save for later, coupon and totals; guest cart merges on sign-in; prices always recalculated on the server; limits.
+   "Buy now" checks out that one line only.
+2. Custom sizes for prints: any size within admin-set limits; price interpolated from the preset sizes and rounded.
+3. Make an offer (one-of-a-kind items only): minimum % of price, counter-offers with a round limit, expiry timers,
+   accept = hold the item for the buyer until a pay-by time, one live offer per buyer and item, rate limits, every step
+   e-mailed and listed for buyer, seller and admin, a sweep job for expiries. Use a serializable transaction when
+   accepting.
+4. The size/frame step: three parts with Back/Next (size → frame → see it on your wall), state in the URL hash, an
+   accessible image carousel.
+Show me a short plan first. Ask before assuming offer rules or whether a cart line reserves stock.
+```
 
 **What it produced**
 - **Cart:**
@@ -2413,6 +2712,24 @@ That is the architecture I would choose for Artistikcity.
 
 Claude asked three questions before building. Your answers: **core first**, **Razorpay + PayPal live**, and "**landing page replaces it**". The last answer was later reversed (§23).
 
+**Reusable prompt (for other projects):**
+
+```text
+Build a Landing Page Management module. Everything about landing pages is managed inside ONE admin section:
+pages, templates and sections, design, pricing and offers, per-page payment settings (which gateways and methods this
+page allows, on top of the global ones), checkout fields, coupons, SEO and tracking, orders and refunds from these pages,
+analytics, media, defaults and team permissions.
+Rules:
+- Each landing page has its own generated, unique address (/landing/{slug}) shown with a copy button; it never replaces
+  an existing site page.
+- Content is versioned JSON: publish creates a version, rollback re-publishes one; validate and clean everything server-side.
+- One price calculation shared by the page, checkout and gateway; the browser never sends a price; re-price at payment.
+- A page can't be published if no connected gateway could take payment.
+- Analytics without personal data (hashed visitor id).
+- Granular capabilities (content, publish, pricing, payments, orders, refunds) grantable per person.
+Ask me first: what to build first, which gateways are live, and whether a landing page may replace an existing page.
+```
+
 **What it produced** (package `landing/`, write-up `docs/landing-pages.md`)
 - **Admin section:**
   - one *Landing Page Management* group with Overview, All landing pages, Templates & sections, Payments & checkout, Coupons & promotions, Orders & refunds, Analytics, Media, Defaults and Team access;
@@ -3676,6 +3993,17 @@ Build it to production-quality standards.
 
 </details>
 
+**Reusable prompt (for other projects):**
+
+```text
+Use the Landing Page Management module (don't hand-code pages) to create, populate, preview and publish {{N}} landing pages:
+{{PAGES e.g. "How it works" (information page), "{{COURSE}}" (course sales page), "Commission" (information page)}}.
+For each: goal and audience, section plan, copy written for conversion, real images from the site, SEO, mobile check.
+Hard rules: do not create or reset databases or delete records; never invent testimonials, credentials, prices, ratings
+or delivery promises; if real data is missing, leave the section out and tell me; don't claim a page is published unless
+publishing succeeded. Make creation repeatable (runs once per database) and test it. Report each page's address.
+```
+
 **What it produced**
 - **Information pages:** a second kind of landing page (`kind = 'SITE'`, migration `2026-11-09_landing_site_pages.sql`). It has no price, payments or checkout; course-only sections are refused and the main button needs a link.
 - **The three pages**, created *through the module* (`LandingShowcase`, runs once per database):
@@ -3701,6 +4029,15 @@ Build it to production-quality standards.
 **When:** 8 Nov 2026, 00:02 · **Type:** Chat (verbatim) · **Commit:** `9c6b5b3` *landing page gen and restructure* (36 files)
 
 > dont use https://www.artistikcity.com/how-it-works , https://www.artistikcity.com/course/watercolour-landscapes-for-beginners and https://www.artistikcity.com/commission/step-1 for launching the landging pages... revert these places for the previous functionality . what landing page URL to be generated dynamically and displayed int he landing page management and fix anythins that is not working... currrently i am getting error...Something went wrong / Something went wrong on our side. Please try again in a moment; if it keeps happening, contact us and quote reference QRCZ0J9.
+
+**Reusable prompt (for other projects):**
+
+```text
+Don't use the existing pages {{URLS}} for landing pages: restore their previous behaviour exactly. Give every landing
+page its own address generated from its name (unique slug, editable) and show the full link with a copy button in the
+admin list and editor. Redirect any links that changed. Also find and fix this error: {{ERROR MESSAGE + REFERENCE}}.
+If the log has no entry for the reference, harden the likely causes and tell me which you couldn't prove.
+```
 
 **What it produced**
 - **Own address:** every landing page now lives at **`/landing/{slug}`**, with checkout at `/landing/{slug}/enroll`.
@@ -3745,6 +4082,18 @@ The log it returned:
 - The landing tables were created later by the migrations on RDS and got the server default (`utf8mb4_unicode_ci`).
 - MySQL refuses to compare or UNION text across the two. Locally every table had the same collation, which is why it worked there.
 
+**Reusable prompt (for other projects):**
+
+```text
+{{PAGE URL}} returns 500 on the deployed site but works locally. The error reference is {{REF}}.
+1. Give me one-line commands (for {{SHELL e.g. PowerShell}}) to pull the exact log lines for that request from
+   {{LOGGING_SERVICE e.g. CloudWatch log group /app}}.
+2. From the stack trace, find the root cause, and explain why it differs from my local setup.
+3. Fix it with a re-runnable migration that changes nothing where everything is already correct, reproduce the server's
+   condition locally to prove the fix, and make the page explain missing database updates instead of a 500.
+4. Tell me how the deploy applies it and how to apply it by hand.
+```
+
 **What it produced**
 - **The fix:** migration `2026-11-10_landing_collation.sql`.
   - It converts the `landing_*` tables to the collation of `orders` and sets that as the database default.
@@ -3762,6 +4111,15 @@ The log it returned:
 **When:** 8 Nov 2026, 08:47 · **Type:** Chat (verbatim)
 
 > collect all the prompts used so far in this project and create the myprompts.md file with perfect documents and screen shots and outputs from those prompts in details.
+
+**Reusable prompt (for other projects):**
+
+```text
+Collect every prompt used in this project and create docs/myprompts.md: for each one the date, the prompt (verbatim
+where the text exists, clearly marked as reconstructed otherwise), what it produced (features, files, migrations, tests,
+reports) and screenshots of the result taken from the current code on a fresh demo database (desktop and phone).
+Mask account numbers, IPs and anything secret. Add a reusable, project-agnostic version of each prompt.
+```
 
 **What it produced:** this file, plus 50+ screenshots and PDF renders in `docs/myprompts/`. They were captured from a fresh run of the current code.
 
