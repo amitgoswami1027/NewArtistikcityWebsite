@@ -7751,7 +7751,6 @@ function SiteFooter() {
     import_axios.default.get(`${import_Constants.API_URL}/get_mediums`).then((r) => setMediums(Array.isArray(r.data) ? r.data : [])).catch(() => {
     });
   }, []);
-  const year = (/* @__PURE__ */ new Date()).getFullYear();
   return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("footer", { className: "dm-footer", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-footer__grid", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-footer__brand", children: [
@@ -7800,11 +7799,7 @@ function SiteFooter() {
       ] })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "dm-footer__bottom", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-        "\xA9 ",
-        year,
-        " ArtistikCity. All rights reserved."
-      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "\xA9 2021 ArtistikCity. All rights reserved." }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("terms.conditions"), children: "Terms of use" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: route("privacy.policy"), children: "Privacy policy" }),
@@ -10094,7 +10089,7 @@ function Marketplace() {
       ] })
     ] }),
     tab === "messages" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.Messages, { threads, setThreads, initial: openThread, toast }),
-    tab === "prices" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.Prices, { prices, setPrices, can: shopCan, toast, customSize: shop.customSize }),
+    tab === "prices" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.Prices, { prices, setPrices, can: shopCan, toast, customSize: shop.customSize, testPayments: shop.testPayments }),
     tab === "offers" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ac", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.OffersAdmin, { toast, OfferCard: import_OfferCard.default }) }),
     tab === "coupons" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_ShopSections.Coupons, { coupons, setCoupons, listings: shopListings, can: shopCan, toast }),
     printsFor && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
@@ -18379,6 +18374,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var Faq_exports = {};
 __export(Faq_exports, {
+  FaqManager: () => FaqManager,
   default: () => Faq
 });
 module.exports = __toCommonJS(Faq_exports);
@@ -18391,11 +18387,18 @@ var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
 var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
 function Faq() {
   const { faqs: initial = [] } = (0, import_inertia_react.usePage)().props;
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "FAQ", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AdminLayout.PageHeader, { title: "FAQ", subtitle: "Questions and answers on the public FAQ page, in this order." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FaqManager, { initial, toast }),
+    toastNode
+  ] });
+}
+function FaqManager({ initial = [], toast }) {
   const [faqs, setFaqs] = (0, import_react.useState)(initial);
   const [q, setQ] = (0, import_react.useState)("");
   const [editing, setEditing] = (0, import_react.useState)(null);
   const [busy, setBusy] = (0, import_react.useState)(null);
-  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
   const [dialog, confirm] = (0, import_kit.useConfirm)();
   const categories = (0, import_react.useMemo)(() => Array.from(new Set(faqs.map((f) => f.category).filter(Boolean))), [faqs]);
   const shown = faqs.filter((f) => !q || `${f.question} ${f.category || ""} ${f.answer || ""}`.toLowerCase().includes(q.toLowerCase()));
@@ -18410,19 +18413,8 @@ function Faq() {
       toast(r.data.message);
     }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "FAQ", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-      import_AdminLayout.PageHeader,
-      {
-        title: "FAQ",
-        subtitle: "Questions and answers on the public FAQ page, in this order.",
-        actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-external-link", href: "/faq", target: "_blank", rel: "noopener noreferrer", children: "View page" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEditing({}), children: "Add question" })
-        ] })
-      }
-    ),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Toolbar, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: q, onSearch: setQ, placeholder: "Search questions", delay: 150 }) }),
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "faq-manager", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Toolbar, { end: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEditing({}), "data-testid": "faq-add", children: "Add question" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.SearchBox, { value: q, onSearch: setQ, placeholder: "Search questions", delay: 150 }) }),
     shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-question-circle-o", title: q ? "No questions match" : "No questions yet", action: !q && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-plus", onClick: () => setEditing({}), children: "Add the first question" }), children: "Answer what students ask most: payments, class times, materials, certificates." }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", { className: "adm-faq", children: shown.map((f) => {
       const i = faqs.findIndex((x) => x.id === f.id);
       return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "adm-faq__item", children: [
@@ -18457,8 +18449,7 @@ function Faq() {
         }
       }
     ),
-    dialog,
-    toastNode
+    dialog
   ] });
 }
 function FaqDrawer({ item, categories, onClose, onSaved, toast }) {
@@ -21681,7 +21672,7 @@ function CheckoutBody() {
   const [busy, setBusy] = (0, import_react.useState)(false);
   const [notice, setNotice] = (0, import_react.useState)(payment === "failed" ? { type: "error", text: "Your PayPal payment did not complete. No money was taken. You can try again." } : payment === "cancelled" ? { type: "info", text: "You cancelled the PayPal payment. Your order is still here: you can try again." } : null);
   const [testOrder, setTestOrder] = (0, import_react.useState)(null);
-  const [simulate, setSimulate] = (0, import_react.useState)(false);
+  const [simulate, setSimulate] = (0, import_react.useState)(!!gateways.simulate && !gateways.razorpay && !gateways.testMode);
   const [sumOpen, setSumOpen] = (0, import_react.useState)(false);
   const set = (k, v) => {
     setF((x) => __spreadProps(__spreadValues({}, x), { [k]: v }));
@@ -21923,13 +21914,13 @@ function CheckoutBody() {
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-flask", "aria-hidden": "true" }),
               " Simulate this payment"
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Your account is a test buyer: no money is charged and the order is marked TEST in the admin." })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Test payment: no money is charged and the order is marked TEST in the admin (kept out of revenue)." })
           ] })
         ] }),
         unavailable && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "pz-note is-error", children: "This payment option isn't available right now. Please try the other one or contact us." }),
         testOrder ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "pz-testpay", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: simulate ? "Test buyer:" : "Test mode:" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: simulate ? "Test payment:" : "Test mode:" }),
             " ",
             simulate ? "nothing is charged" : "no payment gateway is configured",
             ", so you can simulate the payment for order ",
@@ -23781,7 +23772,39 @@ function CustomSizes({ initial, can, toast }) {
     can.prices && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", busy, disabled: !dirty, onClick: save, children: "Save custom sizes" })
   ] }) });
 }
-function Prices({ prices, setPrices, can, toast, customSize }) {
+const SIM_MODES = [
+  { value: "test_buyers", label: "Test buyers only", hint: 'Accounts ticked "Test buyer" in People.' },
+  { value: "staff", label: "Test buyers + staff", hint: "Also anyone whose browser is signed in to this admin." },
+  { value: "everyone", label: "Every signed-in buyer", hint: "For trying the site before launch: real buyers could also skip paying, so switch it back before going live." }
+];
+function ShopTestPayments({ initial, can, toast }) {
+  const [mode, setMode] = (0, import_react.useState)(initial && initial.mode || "staff");
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const enabled = !initial || initial.enabled !== false;
+  const choose = (m) => {
+    if (m === mode || !can.prices) return;
+    setBusy(true);
+    import_axios.default.put("/admin/console/api/shop/test-payments", { mode: m }).then((r) => {
+      setMode(r.data.testPayments.mode);
+      toast(r.data.message);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error")).finally(() => setBusy(false));
+  };
+  const cur = SIM_MODES.find((o) => o.value === mode) || SIM_MODES[1];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    import_kit.Card,
+    {
+      title: "Test payments at the shop checkout",
+      subtitle: "Shows a \u201CSimulate payment\u201D option at /purchase/checkout. Nothing is charged; the order completes like a real one (artwork marked sold, e-mails sent) but is stored as a test order, kept out of revenue, the ledger and payouts.",
+      actions: mode === "everyone" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "red", children: "Everyone" }) : null,
+      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "shop-test-payments", children: [
+        !enabled && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Test buyers are switched off on this server (PAYMENTS_TEST_BUYERS=false), so nobody sees the option." }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { "aria-busy": busy, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.ChoiceChips, { name: "simulate_payments", multiple: false, value: mode, onChange: choose, options: SIM_MODES.map((o) => ({ value: o.value, label: o.label })) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", "data-testid": "shop-test-payments-hint", children: cur.hint })
+      ] })
+    }
+  );
+}
+function Prices({ prices, setPrices, can, toast, customSize, testPayments }) {
   const [rows, setRows] = (0, import_react.useState)(prices);
   const [errors, setErrors] = (0, import_react.useState)({});
   const [busy, setBusy] = (0, import_react.useState)(false);
@@ -23802,6 +23825,7 @@ function Prices({ prices, setPrices, can, toast, customSize }) {
   const kinds = Object.keys(KIND);
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomSizes, { initial: customSize, can, toast }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShopTestPayments, { initial: testPayments, can, toast }),
     kinds.map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: KIND[k], flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-table__scroll", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "Name" }),
@@ -27782,6 +27806,22 @@ var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
 var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
 var import_siteContent = __webpack_require__("./resources/js/Components/Site/siteContent.js");
 var import_CookieBanner = __webpack_require__("./resources/js/Components/Site/CookieBanner.js");
+var import_SitePagesTabs = __webpack_require__("./resources/js/Components/Admin/SitePagesTabs.js");
+const TABS = [
+  ["layout", "Layout & SEO", "fa-sliders"],
+  ["vision", "Our vision", "fa-eye"],
+  ["instructor", "Instructor", "fa-user"],
+  ["support", "Customer support", "fa-life-ring"],
+  ["faq", "FAQ", "fa-question-circle-o"]
+];
+const tabFromHash = () => {
+  try {
+    const h = window.location.hash.replace("#", "");
+    return TABS.some(([id]) => id === h) ? h : "layout";
+  } catch (e) {
+    return "layout";
+  }
+};
 const SECTIONS = [
   ["landing", "Landing hero", "fa-home"],
   ["menu", "Menu", "fa-bars"],
@@ -28066,7 +28106,23 @@ function Simulator({ v, menu, device, focus, onDevice }) {
   ] });
 }
 function SiteSettings() {
-  const { values = {}, defaults = {} } = (0, import_inertia_react.usePage)().props;
+  const { values = {}, defaults = {}, pages = { values: {}, defaults: {} }, faqs = [], staff = [] } = (0, import_inertia_react.usePage)().props;
+  const [tab, setTabState] = (0, import_react.useState)(tabFromHash);
+  const [seen, setSeen] = (0, import_react.useState)(() => ({ [tabFromHash()]: true }));
+  const setTab = (id) => {
+    setTabState(id);
+    setSeen((x) => __spreadProps(__spreadValues({}, x), { [id]: true }));
+    try {
+      window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}${id === "layout" ? "" : `#${id}`}`);
+    } catch (e) {
+    }
+  };
+  (0, import_react.useEffect)(() => {
+    const on = () => setTab(tabFromHash());
+    window.addEventListener("hashchange", on);
+    return () => window.removeEventListener("hashchange", on);
+  }, []);
+  const pageProps = (id) => ({ saved: pages.values[id] || {}, defaults: (pages.defaults || {})[id] || {}, toast });
   const start = (0, import_react.useRef)(initialState(values));
   const [saved, setSaved] = (0, import_react.useState)(start.current);
   const [v, setV] = (0, import_react.useState)(start.current.v);
@@ -28145,130 +28201,155 @@ function SiteSettings() {
       {
         eyebrow: "System parameters",
         title: "SEO & Layout Controls",
-        subtitle: "The public landing page, header menu, search snippet, cookie banner and social links. The preview on the right follows your typing; the site changes when you save.",
+        subtitle: "The public landing page, header menu, search snippet, cookie banner, social links and the Our vision, Instructor, Customer support and FAQ pages.",
         actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", icon: "fa-external-link", href: "/", target: "_blank", rel: "noopener noreferrer", children: "Open the site" })
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "ss-jump", "aria-label": "Sections", children: SECTIONS.map(([id, label, icon]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `#sec-${id}`, className: (0, import_kit.cx)(focus === id && "is-on"), onClick: (e) => {
-      e.preventDefault();
-      setFocus(id);
-      const el = document.getElementById(`sec-${id}`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
-      " ",
-      label,
-      sectionErrors(id) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "red", children: sectionErrors(id) })
-    ] }, id)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-split", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "ss-form", onSubmit: (e) => {
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-tabs", role: "tablist", "aria-label": "Site settings", "data-testid": "ss-tabs", children: TABS.map(([id, label, icon]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "button",
+      {
+        type: "button",
+        role: "tab",
+        id: `tab-${id}`,
+        "aria-selected": tab === id,
+        "aria-controls": `panel-${id}`,
+        className: (0, import_kit.cx)(tab === id && "is-on"),
+        onClick: () => setTab(id),
+        "data-testid": `ss-tab-${id}`,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+          " ",
+          label
+        ]
+      },
+      id
+    )) }),
+    seen.vision && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { role: "tabpanel", id: "panel-vision", "aria-labelledby": "tab-vision", hidden: tab !== "vision", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SitePagesTabs.VisionTab, __spreadValues({}, pageProps("vision"))) }),
+    seen.instructor && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { role: "tabpanel", id: "panel-instructor", "aria-labelledby": "tab-instructor", hidden: tab !== "instructor", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SitePagesTabs.InstructorTab, __spreadProps(__spreadValues({}, pageProps("instructor")), { staff })) }),
+    seen.support && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { role: "tabpanel", id: "panel-support", "aria-labelledby": "tab-support", hidden: tab !== "support", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SitePagesTabs.SupportTab, __spreadValues({}, pageProps("support"))) }),
+    seen.faq && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { role: "tabpanel", id: "panel-faq", "aria-labelledby": "tab-faq", hidden: tab !== "faq", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SitePagesTabs.FaqTab, __spreadProps(__spreadValues({}, pageProps("faq")), { faqs })) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { role: "tabpanel", id: "panel-layout", "aria-labelledby": "tab-layout", hidden: tab !== "layout", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "ss-jump", "aria-label": "Sections", children: SECTIONS.map(([id, label, icon]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `#sec-${id}`, className: (0, import_kit.cx)(focus === id && "is-on"), onClick: (e) => {
         e.preventDefault();
-        save();
-      }, noValidate: true, children: [
-        section("landing", "Landing hero", "The first thing visitors read on the home page.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-          input("landing.hero_heading", "Heading", { max: 120, optional: false, hint: "Short and specific: what someone gets here." }),
-          input("landing.hero_emphasis", "Emphasised words", { max: 80, hint: "Shown after the heading in brand colour. Leave empty for none." }),
-          input("landing.hero_subtext", "Subtext", { rows: 3, max: 300 }),
-          input("landing.search_placeholder", "Search box hint", { max: 255 }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
-            input("landing.cta_label", "Button label", { max: 40, placeholder: "Browse courses", hint: "Optional extra button under the search." }),
-            input("landing.cta_link", "Button link", { placeholder: "/courses?type=all", hint: "A page on this site, or https://\u2026" })
-          ] })
-        ] })),
-        section("menu", "Menu builder", "The links in the site header, in order. Hidden links stay here for later.", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MenuBuilder, { items: menu, onChange: (m) => {
-          setMenu(m);
-          setErrors((e) => __spreadProps(__spreadValues({}, e), { "nav.menu": null }));
-        }, error: errors["nav.menu"], onFocus: () => setFocus("menu") })),
-        section("seo", "Search & sharing", "The default title and description search engines and social networks show. Stories and courses can override them.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-          input("seo.site_title", "Site title", { hint: `Best under 60 characters (${(v["seo.site_title"] || "").length} now).`, optional: false, placeholder: defaults.site_title }),
-          input("seo.meta_description", "Meta description", { rows: 3, max: 500, hint: `Best between 120 and 160 characters (${(v["seo.meta_description"] || "").length} now).`, placeholder: defaults.meta_description }),
-          input("seo.meta_keywords", "Keywords", { hint: "Comma separated. Most search engines ignore these." }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Share image", name: "seo.og_image", hint: "Shown when the site is shared on WhatsApp, Facebook or LinkedIn. 1200 \xD7 630 px works best.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            import_form.DropZone,
-            {
-              name: "seo.og_image",
-              value: og,
-              onChange: setOg,
-              error: errors["seo.og_image"],
-              existing: v["seo.og_image"] ? [{ id: "og", url: v["seo.og_image"], name: "Current share image" }] : [],
-              onRemoveExisting: () => set("seo.og_image", "")
-            }
-          ) })
-        ] })),
-        section("cookie", "Cookie & privacy banner", "A bar at the bottom of every public page until the visitor chooses. Their choice is remembered for a year.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            import_form.Toggle,
-            {
-              name: "cookie.enabled",
-              checked: v["cookie.enabled"] === "1",
-              onChange: (x) => {
-                set("cookie.enabled", x ? "1" : "0");
-                setFocus("cookie");
-              },
-              label: v["cookie.enabled"] === "1" ? "Banner on" : "Banner off",
-              description: "Switch on if you use analytics or marketing cookies."
-            }
-          ),
-          input("cookie.message", "Banner text", { rows: 3, max: 500, optional: v["cookie.enabled"] !== "1" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
-            input("cookie.accept_label", "Accept button", { max: 40 }),
-            input("cookie.decline_label", "Decline button", { max: 40, hint: "Empty = no decline button." }),
-            input("cookie.policy_link", "Policy link", { placeholder: "/privacy-policy" })
-          ] })
-        ] })),
-        section("social", "Social links matrix", "Footer icons. A network shows when it has a link and \u201CShow\u201D is ticked.", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ss-matrixwrap", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { className: "ss-matrix", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Network" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Link" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Show" })
-          ] }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: import_siteContent.SOCIAL_NETWORKS.map(([k, label, icon]) => {
-            const key = `social.${k}`;
-            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("th", { scope: "row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
-                " ",
-                label
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                  "input",
-                  {
-                    id: `f-${key}`,
-                    className: "adm-input",
-                    value: v[key] || "",
-                    placeholder: "https://\u2026",
-                    "aria-label": `${label} link`,
-                    onChange: (e) => set(key, e.target.value.trim()),
-                    "aria-invalid": errors[key] ? "true" : void 0
-                  }
-                ),
-                errors[key] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-field__error", children: errors[key] })
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", "aria-label": `Show ${label}`, disabled: !v[key], checked: !!v[key] && !hidden.includes(k), onChange: (e) => toggleHidden(k, e.target.checked) }) })
-            ] }, k);
-          }) })
-        ] }) })),
-        section("contact", "Contact details & homepage points", "Contact details show on the contact page and in the footer; leave a field empty to hide it.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
-            input("contact.email", "E-mail", { type: "email", placeholder: "hello@artistikcity.com" }),
-            input("contact.phone", "Phone / WhatsApp", { placeholder: "+91 98765 43210" })
-          ] }),
-          input("contact.address", "Office address", { rows: 3, max: 500 }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
-            input("home.course_text_1", "Course point 1", { max: 60 }),
-            input("home.course_text_2", "Course point 2", { max: 60 }),
-            input("home.course_text_3", "Course point 3", { max: 60 })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
-            input("home.workshop_text_1", "Workshop point 1", { max: 60 }),
-            input("home.workshop_text_2", "Workshop point 2", { max: 60 }),
-            input("home.workshop_text_3", "Workshop point 3", { max: 60 })
-          ] })
-        ] })),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SaveBar, { dirty, busy, onSave: save, children: dirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", onClick: discard, children: "Discard changes" }) })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "ss-preview", "aria-label": "Live preview", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Simulator, { v, menu, device, focus, onDevice: setDevice }) })
+        setFocus(id);
+        const el = document.getElementById(`sec-${id}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+        " ",
+        label,
+        sectionErrors(id) > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "red", children: sectionErrors(id) })
+      ] }, id)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-split", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "ss-form", onSubmit: (e) => {
+          e.preventDefault();
+          save();
+        }, noValidate: true, children: [
+          section("landing", "Landing hero", "The first thing visitors read on the home page.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            input("landing.hero_heading", "Heading", { max: 120, optional: false, hint: "Short and specific: what someone gets here." }),
+            input("landing.hero_emphasis", "Emphasised words", { max: 80, hint: "Shown after the heading in brand colour. Leave empty for none." }),
+            input("landing.hero_subtext", "Subtext", { rows: 3, max: 300 }),
+            input("landing.search_placeholder", "Search box hint", { max: 255 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+              input("landing.cta_label", "Button label", { max: 40, placeholder: "Browse courses", hint: "Optional extra button under the search." }),
+              input("landing.cta_link", "Button link", { placeholder: "/courses?type=all", hint: "A page on this site, or https://\u2026" })
+            ] })
+          ] })),
+          section("menu", "Menu builder", "The links in the site header, in order. Hidden links stay here for later.", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MenuBuilder, { items: menu, onChange: (m) => {
+            setMenu(m);
+            setErrors((e) => __spreadProps(__spreadValues({}, e), { "nav.menu": null }));
+          }, error: errors["nav.menu"], onFocus: () => setFocus("menu") })),
+          section("seo", "Search & sharing", "The default title and description search engines and social networks show. Stories and courses can override them.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            input("seo.site_title", "Site title", { hint: `Best under 60 characters (${(v["seo.site_title"] || "").length} now).`, optional: false, placeholder: defaults.site_title }),
+            input("seo.meta_description", "Meta description", { rows: 3, max: 500, hint: `Best between 120 and 160 characters (${(v["seo.meta_description"] || "").length} now).`, placeholder: defaults.meta_description }),
+            input("seo.meta_keywords", "Keywords", { hint: "Comma separated. Most search engines ignore these." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Share image", name: "seo.og_image", hint: "Shown when the site is shared on WhatsApp, Facebook or LinkedIn. 1200 \xD7 630 px works best.", optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              import_form.DropZone,
+              {
+                name: "seo.og_image",
+                value: og,
+                onChange: setOg,
+                error: errors["seo.og_image"],
+                existing: v["seo.og_image"] ? [{ id: "og", url: v["seo.og_image"], name: "Current share image" }] : [],
+                onRemoveExisting: () => set("seo.og_image", "")
+              }
+            ) })
+          ] })),
+          section("cookie", "Cookie & privacy banner", "A bar at the bottom of every public page until the visitor chooses. Their choice is remembered for a year.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              import_form.Toggle,
+              {
+                name: "cookie.enabled",
+                checked: v["cookie.enabled"] === "1",
+                onChange: (x) => {
+                  set("cookie.enabled", x ? "1" : "0");
+                  setFocus("cookie");
+                },
+                label: v["cookie.enabled"] === "1" ? "Banner on" : "Banner off",
+                description: "Switch on if you use analytics or marketing cookies."
+              }
+            ),
+            input("cookie.message", "Banner text", { rows: 3, max: 500, optional: v["cookie.enabled"] !== "1" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+              input("cookie.accept_label", "Accept button", { max: 40 }),
+              input("cookie.decline_label", "Decline button", { max: 40, hint: "Empty = no decline button." }),
+              input("cookie.policy_link", "Policy link", { placeholder: "/privacy-policy" })
+            ] })
+          ] })),
+          section("social", "Social links matrix", "Footer icons. A network shows when it has a link and \u201CShow\u201D is ticked.", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ss-matrixwrap", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { className: "ss-matrix", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Network" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Link" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "col", children: "Show" })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: import_siteContent.SOCIAL_NETWORKS.map(([k, label, icon]) => {
+              const key = `social.${k}`;
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("th", { scope: "row", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+                  " ",
+                  label
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                    "input",
+                    {
+                      id: `f-${key}`,
+                      className: "adm-input",
+                      value: v[key] || "",
+                      placeholder: "https://\u2026",
+                      "aria-label": `${label} link`,
+                      onChange: (e) => set(key, e.target.value.trim()),
+                      "aria-invalid": errors[key] ? "true" : void 0
+                    }
+                  ),
+                  errors[key] && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-field__error", children: errors[key] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "checkbox", "aria-label": `Show ${label}`, disabled: !v[key], checked: !!v[key] && !hidden.includes(k), onChange: (e) => toggleHidden(k, e.target.checked) }) })
+              ] }, k);
+            }) })
+          ] }) })),
+          section("contact", "Contact details & homepage points", "Contact details show on the contact page and in the footer; leave a field empty to hide it.", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+              input("contact.email", "E-mail", { type: "email", placeholder: "hello@artistikcity.com" }),
+              input("contact.phone", "Phone / WhatsApp", { placeholder: "+91 98765 43210" })
+            ] }),
+            input("contact.address", "Office address", { rows: 3, max: 500 }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+              input("home.course_text_1", "Course point 1", { max: 60 }),
+              input("home.course_text_2", "Course point 2", { max: 60 }),
+              input("home.course_text_3", "Course point 3", { max: 60 })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row3, { children: [
+              input("home.workshop_text_1", "Workshop point 1", { max: 60 }),
+              input("home.workshop_text_2", "Workshop point 2", { max: 60 }),
+              input("home.workshop_text_3", "Workshop point 3", { max: 60 })
+            ] })
+          ] })),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.SaveBar, { dirty, busy, onSave: save, children: dirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", onClick: discard, children: "Discard changes" }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", { className: "ss-preview", "aria-label": "Live preview", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Simulator, { v, menu, device, focus, onDevice: setDevice }) })
+      ] })
     ] }),
     toastNode
   ] });
@@ -35097,6 +35178,871 @@ function Security({ admin }) {
       data.canManage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StaffPolicy, { data: withSelf, setData, toast })
     ] }),
     toastNode
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Site/InfoParts.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var InfoParts_exports = {};
+__export(InfoParts_exports, {
+  ContactBand: () => ContactBand,
+  FaqItem: () => FaqItem,
+  InfoHero: () => InfoHero,
+  RichBody: () => RichBody,
+  SmartLink: () => SmartLink
+});
+module.exports = __toCommonJS(InfoParts_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_siteContent = __webpack_require__("./resources/js/Components/Site/siteContent.js");
+function InfoHero({ eyebrow, title, intro, crumb, children }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { className: "ip-hero", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", { className: "ip-crumbs", "aria-label": "Breadcrumb", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/", children: "Home" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-right", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-current": "page", children: crumb || title })
+    ] }),
+    eyebrow && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ip-eyebrow", children: eyebrow }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { className: "ip-title", children: title }),
+    intro && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ip-intro", children: intro }),
+    children
+  ] }) });
+}
+function SmartLink(_a) {
+  var _b = _a, { href, className, children } = _b, rest = __objRest(_b, ["href", "className", "children"]);
+  const ext = (0, import_siteContent.isExternal)(href);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", __spreadProps(__spreadValues(__spreadValues({ href, className }, ext ? { target: "_blank", rel: "noopener noreferrer" } : {}), rest), { children }));
+}
+function RichBody({ html, className = "" }) {
+  if (!html) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `ip-rich ${className}`, dangerouslySetInnerHTML: { __html: html } });
+}
+function ContactBand({ contact, title = "Still need help?", text = "Send us a message and we will get back to you." }) {
+  const c = contact || {};
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "ip-contact", "data-testid": "info-contact", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: title }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: text })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip-contact__ways", children: [
+      c.email && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `mailto:${c.email}`, className: "ip-contact__way", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-envelope-o", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "E-mail" }),
+          c.email
+        ] })
+      ] }),
+      c.phone && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: `tel:${c.phoneLink || c.phone}`, className: "ip-contact__way", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-phone", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Phone" }),
+          c.phone
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/contact", className: "ip-btn ip-btn--brand", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paper-plane-o", "aria-hidden": "true" }),
+        " Contact us"
+      ] })
+    ] })
+  ] });
+}
+function FaqItem({ q, open = false }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { className: "ip-faq", open, id: `faq-${q.id}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: q.question }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-plus", "aria-hidden": "true" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ip-rich ip-faq__a", dangerouslySetInnerHTML: { __html: q.answer } })
+  ] });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Info/Vision.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Vision_exports = {};
+__export(Vision_exports, {
+  default: () => Vision
+});
+module.exports = __toCommonJS(Vision_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_InfoParts = __webpack_require__("./resources/js/Components/Site/InfoParts.js");
+function Vision() {
+  const { page = {} } = (0, import_inertia_react.usePage)().props;
+  const highlights = page.highlights || [];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: page.heading, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip", "data-testid": "info-vision", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.InfoHero, { eyebrow: "About ArtistikCity", title: page.heading, intro: page.intro, crumb: "Our vision", children: page.cta_label && page.cta_link && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ip-hero__cta", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_InfoParts.SmartLink, { href: page.cta_link, className: "ip-btn ip-btn--brand ip-btn--lg", children: [
+      page.cta_label,
+      " ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-arrow-right", "aria-hidden": "true" })
+    ] }) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide ip-body", children: [
+      highlights.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "ip-cards ip-cards--3", "data-testid": "vision-highlights", children: highlights.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "ip-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ip-card__icon", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${h.icon || "fa-star-o"}`, "aria-hidden": "true" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: h.title }),
+        h.text && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: h.text }),
+        h.href && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_InfoParts.SmartLink, { href: h.href, className: "ip-card__link", children: [
+          h.label || "Learn more",
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-right", "aria-hidden": "true" })
+        ] })
+      ] }, i)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.RichBody, { html: page.body, className: "ip-rich--narrow" }),
+      page.cta_label && page.cta_link && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip-endcta", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.SmartLink, { href: page.cta_link, className: "ip-btn ip-btn--brand ip-btn--lg", children: page.cta_label }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/how-it-works", className: "ip-btn", children: "How it works" })
+      ] })
+    ] })
+  ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Info/Instructor.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Instructor_exports = {};
+__export(Instructor_exports, {
+  default: () => Instructor
+});
+module.exports = __toCommonJS(Instructor_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_InfoParts = __webpack_require__("./resources/js/Components/Site/InfoParts.js");
+const LINKS = [
+  ["website", "Website", "fa-globe"],
+  ["facebook", "Facebook", "fa-facebook"],
+  ["instagram", "Instagram", "fa-instagram"],
+  ["youtube", "YouTube", "fa-youtube-play"],
+  ["linkedin", "LinkedIn", "fa-linkedin"]
+];
+function Instructor() {
+  const { page = {}, people = [] } = (0, import_inertia_react.usePage)().props;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: page.heading, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip", "data-testid": "info-instructor", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.InfoHero, { eyebrow: "Our teachers", title: page.heading, intro: page.intro, crumb: "Instructor" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide ip-body", children: [
+      people.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ip-empty", children: [
+        "Instructor profiles will appear here soon. Meanwhile, ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/courses?type=all", children: "browse the courses" }),
+        "."
+      ] }),
+      people.map((p) => {
+        const links = LINKS.filter(([k]) => p.links && p.links[k]);
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "ip-person", "data-testid": `instructor-${p.id}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ip-person__photo", children: p.photo ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: p.photo, alt: p.name, loading: "lazy" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "aria-hidden": "true", children: (p.name || "?").slice(0, 1) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip-person__text", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { children: p.name }),
+            (p.title || p.designation) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "ip-person__role", children: [p.title, p.designation].filter(Boolean).join(" \xB7 ") }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.RichBody, { html: p.bio }),
+            links.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ip-social", "data-testid": "instructor-links", children: links.map(([k, label, icon]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: p.links[k], target: "_blank", rel: "noopener noreferrer", "aria-label": `${p.name} on ${label}`, title: label, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }) }, k)) })
+          ] }),
+          p.courses && p.courses.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip-person__courses", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [
+              "Courses by ",
+              String(p.name || "").split(" ")[0]
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "ip-minicourses", children: p.courses.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: c.href, children: [
+              c.photo ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", { src: c.photo, alt: "", loading: "lazy" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ip-minicourses__ph", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-paint-brush" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: c.title }),
+                c.subtitle && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: c.subtitle })
+              ] })
+            ] }) }, c.href)) })
+          ] })
+        ] }, p.id);
+      })
+    ] })
+  ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Info/Support.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Support_exports = {};
+__export(Support_exports, {
+  default: () => Support
+});
+module.exports = __toCommonJS(Support_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_InfoParts = __webpack_require__("./resources/js/Components/Site/InfoParts.js");
+function Support() {
+  const { page = {}, faqs, contact } = (0, import_inertia_react.usePage)().props;
+  const topics = page.topics || [];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: page.heading, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip", "data-testid": "info-support", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_InfoParts.InfoHero, { eyebrow: "Help centre", title: page.heading, intro: page.intro, crumb: "Customer support", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "ip-search", action: "/faq", method: "get", role: "search", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search", "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", name: "q", placeholder: "Search the FAQ", "aria-label": "Search the FAQ" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", className: "ip-btn ip-btn--brand", children: "Search" })
+      ] }),
+      page.hours && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ip-hours", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-clock-o", "aria-hidden": "true" }),
+        " ",
+        page.hours
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ac-wide ip-body", children: [
+      topics.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { "aria-labelledby": "ip-topics", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "ip-topics", className: "ip-h2", children: "How can we help?" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "ip-cards ip-cards--3", "data-testid": "support-topics", children: topics.map((t, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { className: "ip-card ip-card--link", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "ip-card__icon", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${t.icon || "fa-life-ring"}`, "aria-hidden": "true" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: t.title }),
+          t.text && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: t.text }),
+          t.href && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_InfoParts.SmartLink, { href: t.href, className: "ip-card__link", children: [
+            t.label || "Open",
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-right", "aria-hidden": "true" })
+          ] })
+        ] }, i)) })
+      ] }),
+      faqs && faqs.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { "aria-labelledby": "ip-top-faq", className: "ip-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip-section__head", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { id: "ip-top-faq", className: "ip-h2", children: "Common questions" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { href: "/faq", className: "ip-card__link", children: [
+            "All questions ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-angle-right", "aria-hidden": "true" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ip-faqs", children: faqs.map((q) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.FaqItem, { q }, q.id)) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.RichBody, { html: page.body, className: "ip-rich--narrow ip-section" }),
+      page.show_contact === "1" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.ContactBand, { contact })
+    ] })
+  ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Info/Faq.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Faq_exports = {};
+__export(Faq_exports, {
+  default: () => Faq
+});
+module.exports = __toCommonJS(Faq_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_inertia_react = __webpack_require__("../../febuild/node_modules/@inertiajs/inertia-react/dist/index.js");
+var import_SiteLayout = __toESM(__webpack_require__("./resources/js/Components/Site/SiteLayout.js"));
+var import_InfoParts = __webpack_require__("./resources/js/Components/Site/InfoParts.js");
+const plain = (html) => String(html || "").replace(/<[^>]+>/g, " ");
+const slug = (s) => String(s || "general").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function Faq() {
+  const { page = {}, groups = [], contact } = (0, import_inertia_react.usePage)().props;
+  const [q, setQ] = (0, import_react.useState)(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("q") || "";
+    } catch (e) {
+      return "";
+    }
+  });
+  (0, import_react.useEffect)(() => {
+    try {
+      const u = new URL(window.location.href);
+      if (q) u.searchParams.set("q", q);
+      else u.searchParams.delete("q");
+      window.history.replaceState(window.history.state, "", u.pathname + u.search + u.hash);
+    } catch (e) {
+    }
+  }, [q]);
+  const shown = (0, import_react.useMemo)(() => {
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) return groups;
+    return groups.map((g) => __spreadProps(__spreadValues({}, g), { items: g.items.filter((it) => {
+      const hay = `${it.question} ${plain(it.answer)} ${g.category || ""}`.toLowerCase();
+      return words.every((w) => hay.includes(w));
+    }) })).filter((g) => g.items.length);
+  }, [q, groups]);
+  const count = shown.reduce((n, g) => n + g.items.length, 0);
+  const named = groups.filter((g) => g.category);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_SiteLayout.default, { title: page.heading, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip", "data-testid": "info-faq", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.InfoHero, { eyebrow: "Help centre", title: page.heading, intro: page.intro, crumb: "FAQ", children: page.show_search === "1" && groups.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ip-search", role: "search", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-search", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "search", value: q, onChange: (e) => setQ(e.target.value), placeholder: "Search questions", "aria-label": "Search questions", "data-testid": "faq-search" })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `ac-wide ip-body ip-faqpage ${named.length > 1 && !q ? "has-nav" : ""}`, children: [
+      named.length > 1 && !q && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", { className: "ip-faqnav", "aria-label": "Topics", children: named.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => {
+        const el = document.getElementById(`cat-${slug(g.category)}`);
+        if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: "smooth" });
+      }, children: g.category }, g.category)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        groups.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ip-empty", children: [
+          "Questions and answers will appear here soon. Meanwhile, ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/contact", children: "contact us" }),
+          " with any question."
+        ] }),
+        groups.length > 0 && count === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "ip-empty", "data-testid": "faq-none", children: [
+          "No question matches \u201C",
+          q,
+          "\u201D. ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", className: "ip-linkbtn", onClick: () => setQ(""), children: "Show all questions" }),
+          " or ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/contact", children: "ask us directly" }),
+          "."
+        ] }),
+        shown.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { id: `cat-${slug(g.category)}`, className: "ip-faqgroup", children: [
+          g.category && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { className: "ip-h2", children: g.category }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ip-faqs", children: g.items.map((it) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.FaqItem, { q: it, open: !!q && count <= 3 }, it.id)) })
+        ] }, g.category || "_"))
+      ] }),
+      page.show_contact === "1" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_InfoParts.ContactBand, { contact, title: "Didn't find your answer?" })
+    ] })
+  ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Components/Admin/SitePagesTabs.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var SitePagesTabs_exports = {};
+__export(SitePagesTabs_exports, {
+  FaqTab: () => FaqTab,
+  InstructorTab: () => InstructorTab,
+  SupportTab: () => SupportTab,
+  VisionTab: () => VisionTab
+});
+module.exports = __toCommonJS(SitePagesTabs_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __webpack_require__("./resources/js/Components/Admin/AdminLayout.js");
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+var import_Faq = __webpack_require__("./resources/js/Pages/Admin/Faq.js");
+const LINK_RE = /^(\/(?!\/)[^\s<>"']*|https:\/\/[^\s<>"']+)$/i;
+const ICONS = [
+  "fa-graduation-cap",
+  "fa-play-circle",
+  "fa-shopping-bag",
+  "fa-certificate",
+  "fa-shield",
+  "fa-picture-o",
+  "fa-paint-brush",
+  "fa-video-camera",
+  "fa-credit-card",
+  "fa-truck",
+  "fa-user",
+  "fa-question-circle",
+  "fa-life-ring",
+  "fa-calendar",
+  "fa-star-o",
+  "fa-heart-o",
+  "fa-users",
+  "fa-envelope-o"
+];
+const parseList = (s) => {
+  try {
+    const x = JSON.parse(s || "[]");
+    return Array.isArray(x) ? x : [];
+  } catch (e) {
+    return [];
+  }
+};
+function usePageForm(page, saved0, defaults, toast) {
+  const [saved, setSaved] = (0, import_react.useState)(saved0 || {});
+  const [v, setV] = (0, import_react.useState)(saved0 || {});
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const dirty = JSON.stringify(v) !== JSON.stringify(saved);
+  (0, import_form.useUnsavedGuard)(dirty);
+  const set = (k, x) => {
+    setV((p) => __spreadProps(__spreadValues({}, p), { [k]: x }));
+    setErrors((e) => __spreadProps(__spreadValues({}, e), { [k]: null }));
+  };
+  const save = () => {
+    setBusy(true);
+    import_axios.default.post(`/admin/api/setup/site-pages/${page}`, v).then((r) => {
+      setSaved(r.data.saved);
+      setV(r.data.saved);
+      setErrors({});
+      toast(r.data.message);
+    }).catch((e) => {
+      if (e.response && e.response.status === 422) {
+        const errs = e.response.data.errors || {};
+        setErrors(errs);
+        toast(Object.values(errs)[0] || e.response.data.message, "error");
+        const el = document.getElementById(`f-${page}-${Object.keys(errs)[0]}`);
+        if (el) {
+          el.focus();
+          el.scrollIntoView({ block: "center" });
+        }
+      } else toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(false));
+  };
+  const value = (k) => v[k] == null ? "" : v[k];
+  const eff = (k) => value(k) !== "" ? value(k) : defaults[k] || "";
+  const text = (k, label, { rows, max = 120, hint } = {}) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label, name: `${page}-${k}`, hint: hint || (defaults[k] ? "Empty = the default shown in grey." : void 0), error: errors[k], max, counter: value(k).length, optional: true, children: rows ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { id: `f-${page}-${k}`, className: "adm-input", rows, maxLength: max, value: value(k), placeholder: defaults[k] || "", onChange: (e) => set(k, e.target.value), "aria-invalid": errors[k] ? "true" : void 0 }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: `f-${page}-${k}`, className: "adm-input", maxLength: max, value: value(k), placeholder: defaults[k] || "", onChange: (e) => set(k, e.target.value), "aria-invalid": errors[k] ? "true" : void 0 }) });
+  const flag = (k, label, description) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Toggle, { name: `${page}-${k}`, checked: eff(k) === "1", onChange: (x) => set(k, x ? "1" : "0"), label, description });
+  const rich = (k, label, hint) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Field, { label, name: `${page}-${k}`, hint, error: errors[k], optional: true, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.RichText, { name: `${page}-${k}`, value: value(k) || "", onChange: (x) => set(k, x), minHeight: 220, error: errors[k] }),
+    !value(k) && defaults[k] && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", style: { marginTop: 8 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted adm-small", children: "Empty: the page shows the default text." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-pencil", onClick: () => set(k, defaults[k]), children: "Start from the default" })
+    ] })
+  ] });
+  const seo = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Search & sharing", subtitle: "Title and description for Google and when the page is shared.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+    text("seo_title", "Page title", { max: 120 }),
+    text("seo_description", "Description", { rows: 2, max: 300 })
+  ] }) });
+  const bar = (href) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.SaveBar, { dirty, busy, onSave: save, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", variant: "ghost", icon: "fa-external-link", href, target: "_blank", rel: "noopener noreferrer", children: "View page" }),
+    dirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", onClick: () => {
+      setV(saved);
+      setErrors({});
+    }, children: "Discard changes" })
+  ] });
+  return { v, set, value, eff, errors, text, flag, rich, seo, bar, dirty };
+}
+function CardsEditor({ page, k, label, hint, f, defaults, max, withLink = true }) {
+  const saved = f.value(k);
+  const usingDefault = saved === "";
+  const list = parseList(usingDefault ? defaults[k] : saved);
+  const write = (next) => f.set(k, JSON.stringify(next));
+  const update = (i, patch) => write(list.map((c, j) => j === i ? __spreadValues(__spreadValues({}, c), patch) : c));
+  const move = (i, to) => {
+    if (to < 0 || to >= list.length) return;
+    const n = list.slice();
+    const [x] = n.splice(i, 1);
+    n.splice(to, 0, x);
+    write(n);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label, name: `${page}-${k}`, hint, error: f.errors[k], optional: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-cards", id: `f-${page}-${k}`, tabIndex: -1, "data-testid": `cards-${page}-${k}`, children: [
+    usingDefault && list.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Default" }),
+      " Edit any field to make these your own."
+    ] }),
+    list.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-cards__item", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-cards__row", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "adm-input ss-cards__icon", "aria-label": `Icon of item ${i + 1}`, value: c.icon || "", onChange: (e) => update(i, { icon: e.target.value }), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "No icon" }),
+          ICONS.map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: x, children: x.replace("fa-", "").replace(/-/g, " ") }, x))
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${c.icon || "fa-square-o"} ss-cards__glyph`, "aria-hidden": "true" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", "aria-label": `Title of item ${i + 1}`, placeholder: "Title", maxLength: 80, value: c.title || "", onChange: (e) => update(i, { title: e.target.value }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-up", disabled: i === 0, onClick: () => move(i, i - 1), "aria-label": "Move up", title: "Move up" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-down", disabled: i === list.length - 1, onClick: () => move(i, i + 1), "aria-label": "Move down", title: "Move down" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => write(list.filter((_, j) => j !== i)), "aria-label": `Remove item ${i + 1}`, title: "Remove" })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { className: "adm-input", rows: 2, "aria-label": `Text of item ${i + 1}`, placeholder: "One or two sentences", maxLength: 300, value: c.text || "", onChange: (e) => update(i, { text: e.target.value }) }),
+      withLink && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: "adm-input", "aria-label": `Button label of item ${i + 1}`, placeholder: "Link label (e.g. Your orders)", maxLength: 40, value: c.label || "", onChange: (e) => update(i, { label: e.target.value }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { className: `adm-input ${c.href && !LINK_RE.test(c.href) ? "is-invalid" : ""}`, "aria-label": `Link of item ${i + 1}`, placeholder: "/user/orders or https://\u2026", maxLength: 300, value: c.href || "", onChange: (e) => update(i, { href: e.target.value.trim() }) })
+      ] })
+    ] }, i)),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", disabled: list.length >= max, onClick: () => write([...list, { icon: "", title: "", text: "", label: "", href: "" }]), children: "Add item" }),
+      !usingDefault && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-undo", onClick: () => f.set(k, ""), children: "Back to the default" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "adm-muted adm-small", children: [
+        list.length,
+        " / ",
+        max
+      ] })
+    ] })
+  ] }) });
+}
+function VisionTab({ saved, defaults, toast }) {
+  const f = usePageForm("vision", saved, defaults, toast);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "tab-vision", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Our vision", subtitle: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      "The page at ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/artistikcity-vision", target: "_blank", rel: "noopener noreferrer", children: "/artistikcity-vision" }),
+      " (footer \u203A Our vision)."
+    ] }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+      f.text("heading", "Heading"),
+      f.text("intro", "Introduction", { rows: 3, max: 400 }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_form.Row2, { children: [
+        f.text("cta_label", "Button label", { max: 40 }),
+        f.text("cta_link", "Button link", { max: 300, hint: "A page on this site such as /courses?type=all, or https://\u2026" })
+      ] })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Highlights", subtitle: "Up to six short cards under the heading.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardsEditor, { page: "vision", k: "highlights", label: "Cards", f, defaults, max: 6 }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Story", children: f.rich("body", "Text", "Headings, paragraphs, lists and links. Write only what is true today.") }),
+    f.seo(),
+    f.bar("/artistikcity-vision")
+  ] });
+}
+function SupportTab({ saved, defaults, toast }) {
+  const f = usePageForm("support", saved, defaults, toast);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "tab-support", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Customer support", subtitle: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      "The help centre at ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/customer-support", target: "_blank", rel: "noopener noreferrer", children: "/customer-support" }),
+      ". Contact details come from Layout & SEO \u203A Contact."
+    ] }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+      f.text("heading", "Heading"),
+      f.text("intro", "Introduction", { rows: 2, max: 400 }),
+      f.text("hours", "Support hours", { max: 200, hint: 'Optional, e.g. "Monday to Saturday, 10am to 6pm IST". Only write hours you keep.' })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Help topics", subtitle: "Cards that link to the right place on the site. Every link is checked when you save.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardsEditor, { page: "support", k: "topics", label: "Topics", f, defaults, max: 9 }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "On the page", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+      f.flag("show_faq", "Show common questions", "The first questions of the FAQ tab, with a link to all of them."),
+      f.eff("show_faq") === "1" && f.text("faq_count", "How many questions", { max: 2, hint: "1 to 20." }),
+      f.flag("show_contact", "Show the contact band", "E-mail, phone and a Contact us button."),
+      f.rich("body", "Extra text (optional)", "Shown under the questions, e.g. refund or delivery notes that are already your policy.")
+    ] }) }),
+    f.seo(),
+    f.bar("/customer-support")
+  ] });
+}
+function FaqTab({ saved, defaults, faqs, toast }) {
+  const f = usePageForm("faq", saved, defaults, toast);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "tab-faq", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Questions", subtitle: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      "Shown on ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/faq", target: "_blank", rel: "noopener noreferrer", children: "/faq" }),
+      " grouped by category, in this order; hidden ones stay here. Changes save at once."
+    ] }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Faq.FaqManager, { initial: faqs, toast }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "FAQ page", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+      f.text("heading", "Heading"),
+      f.text("intro", "Introduction", { rows: 2, max: 400 }),
+      f.flag("show_search", "Search box", "Visitors can filter the questions as they type."),
+      f.flag("show_contact", "Contact band at the end", `"Didn't find your answer?" with your contact details.`)
+    ] }) }),
+    f.seo(),
+    f.bar("/faq")
+  ] });
+}
+const PERSON_LINKS = [["website", "Website", "fa-globe"], ["facebook", "Facebook", "fa-facebook"], ["instagram", "Instagram", "fa-instagram"], ["youtube", "YouTube", "fa-youtube-play"], ["linkedin", "LinkedIn", "fa-linkedin"]];
+function InstructorTab({ saved, defaults, staff = [], toast }) {
+  const f = usePageForm("instructor", saved, defaults, toast);
+  const usingDefault = f.value("people") === "";
+  const people = parseList(usingDefault ? defaults.people : f.value("people")).map((p) => {
+    if (p.id) return p;
+    const s = staff.find((x) => x.slug && x.slug === p.slug);
+    return __spreadProps(__spreadValues({}, p), { id: s ? s.id : "" });
+  });
+  const write = (next) => f.set("people", JSON.stringify(next.map((_a) => {
+    var _b = _a, { slug } = _b, rest = __objRest(_b, ["slug"]);
+    return rest;
+  })));
+  const update = (i, patch) => write(people.map((p, j) => j === i ? __spreadValues(__spreadValues({}, p), patch) : p));
+  const move = (i, to) => {
+    if (to < 0 || to >= people.length) return;
+    const n = people.slice();
+    const [x] = n.splice(i, 1);
+    n.splice(to, 0, x);
+    write(n);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "tab-instructor", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Instructor page", subtitle: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      "The page at ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "/instructor", target: "_blank", rel: "noopener noreferrer", children: "/instructor" }),
+      ". Name, photo, title and biography come from each person's profile in Admin \u203A People."
+    ] }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", children: [
+      f.text("heading", "Heading"),
+      f.text("intro", "Introduction", { rows: 2, max: 400 }),
+      f.flag("show_courses", "Show their live courses", "Up to six published courses of each person.")
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "People on the page", subtitle: "In this order. Social icons appear only for links you fill in (https://\u2026).", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", id: "f-instructor-people", tabIndex: -1, "data-testid": "instructor-people", children: [
+      f.errors.people && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-field__error", role: "alert", children: f.errors.people }),
+      usingDefault && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted adm-small", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { children: "Default" }),
+        " Edit anything to make this list your own."
+      ] }),
+      people.map((p, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-cards__item", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "ss-cards__row", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { className: "adm-input", "aria-label": `Person ${i + 1}`, value: p.id || "", onChange: (e) => update(i, { id: e.target.value ? Number(e.target.value) : "" }), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Choose a staff member\u2026" }),
+            staff.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", { value: s.id, children: [
+              s.name,
+              s.profile_title ? ` \xB7 ${s.profile_title}` : ""
+            ] }, s.id))
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-rowactions", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-up", disabled: i === 0, onClick: () => move(i, i - 1), "aria-label": "Move up", title: "Move up" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-arrow-down", disabled: i === people.length - 1, onClick: () => move(i, i + 1), "aria-label": "Move down", title: "Move down" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-trash-o", onClick: () => write(people.filter((_, j) => j !== i)), "aria-label": `Remove person ${i + 1}`, title: "Remove" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "ss-people__links", children: PERSON_LINKS.map(([k, label, icon]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { className: "ss-people__link", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: `fa ${icon}`, "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              className: `adm-input ${p[k] && !/^https:\/\/\S+$/i.test(p[k]) ? "is-invalid" : ""}`,
+              "aria-label": `${label} link`,
+              placeholder: `${label}: https://\u2026`,
+              maxLength: 300,
+              value: p[k] || "",
+              onChange: (e) => update(i, { [k]: e.target.value.trim() })
+            }
+          )
+        ] }, k)) })
+      ] }, i)),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-inline", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-plus", disabled: people.length >= 8, onClick: () => write([...people, { id: "", website: "", facebook: "", instagram: "", youtube: "", linkedin: "" }]), children: "Add person" }),
+        !usingDefault && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", variant: "ghost", icon: "fa-undo", onClick: () => f.set("people", ""), children: "Back to the default" })
+      ] })
+    ] }) }),
+    f.seo(),
+    f.bar("/instructor")
   ] });
 }
 
@@ -120136,6 +121082,14 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Info/Faq": "./resources/js/Pages/Info/Faq.js",
+	"./Info/Faq.js": "./resources/js/Pages/Info/Faq.js",
+	"./Info/Support": "./resources/js/Pages/Info/Support.js",
+	"./Info/Support.js": "./resources/js/Pages/Info/Support.js",
+	"./Info/Instructor": "./resources/js/Pages/Info/Instructor.js",
+	"./Info/Instructor.js": "./resources/js/Pages/Info/Instructor.js",
+	"./Info/Vision": "./resources/js/Pages/Info/Vision.js",
+	"./Info/Vision.js": "./resources/js/Pages/Info/Vision.js",
 	"./Admin/Account/Security": "./resources/js/Pages/Admin/Account/Security.js",
 	"./Admin/Account/Security.js": "./resources/js/Pages/Admin/Account/Security.js",
 	"./Landing/Checkout": "./resources/js/Pages/Landing/Checkout.js",

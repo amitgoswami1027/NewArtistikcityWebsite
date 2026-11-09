@@ -66,31 +66,7 @@ public class PagesController {
         return inertia.render(request, "HowItWorks", Map.of("sell", sell));
     }
 
-    @GetMapping("/customer-support")
-    public ResponseEntity<String> customerSupport(HttpServletRequest request) {
-        return views.page(request, "pages/customer-support", Map.of());
-    }
-
-    /** FAQ from Admin > FAQ, grouped by category in the admin's order. */
-    @GetMapping("/faq")
-    public ResponseEntity<String> faq(HttpServletRequest request) {
-        java.util.Map<String, java.util.List<Row>> byCategory = new java.util.LinkedHashMap<>();
-        try {
-            for (Row f : db.select("select question, answer, category from faqs where status = 1 order by sort_order, id")) {
-                byCategory.computeIfAbsent(f.str("category", ""), k -> new java.util.ArrayList<>()).add(f);
-            }
-        } catch (com.artistikcity.support.Db.DbException e) {
-            // table missing until the migration runs: show the empty state
-        }
-        java.util.List<Map<String, Object>> groups = new java.util.ArrayList<>();
-        byCategory.forEach((cat, items) -> {
-            Map<String, Object> g = new java.util.LinkedHashMap<>();
-            g.put("category", cat.isBlank() ? null : cat);
-            g.put("items", items);
-            groups.add(g);
-        });
-        return views.page(request, "pages/faq", Map.of("groups", groups));
-    }
+    // /customer-support, /faq, /artistikcity-vision and /instructor: web/InfoPagesController (content from Admin > SEO & Layout Controls)
 
     /** Contact details and social links come from Admin > Site settings; empty values are hidden. */
     @GetMapping("/contact")
@@ -143,8 +119,4 @@ public class PagesController {
         return views.page(request, "pages/terms-conditions", Map.of());
     }
 
-    @GetMapping("/artistikcity-vision")
-    public ResponseEntity<String> artistikcityVision(HttpServletRequest request) {
-        return views.page(request, "pages/artistikcity-vision", Map.of());
-    }
 }

@@ -5,14 +5,25 @@ import AdminLayout, { PageHeader, useToast, errorText } from '@/Components/Admin
 import { Button, Badge, Card, SearchBox, Toolbar, EmptyState, Drawer, useConfirm } from '@/Components/Admin/kit';
 import { useForm, Field, TextField, Toggle, RichText } from '@/Components/Admin/form';
 
-/** FAQ shown on /faq: questions grouped by category, ordered by hand. */
+/** FAQ shown on /faq: questions grouped by category, ordered by hand. /admin/faq redirects to SEO & Layout Controls › FAQ. */
 export default function Faq() {
     const { faqs: initial = [] } = usePage().props;
+    const [toastNode, toast] = useToast();
+    return (
+        <AdminLayout title="FAQ">
+            <PageHeader title="FAQ" subtitle="Questions and answers on the public FAQ page, in this order." />
+            <FaqManager initial={initial} toast={toast} />
+            {toastNode}
+        </AdminLayout>
+    );
+}
+
+/** The question list with add / edit / reorder / delete (also the FAQ tab of SEO & Layout Controls). */
+export function FaqManager({ initial = [], toast }) {
     const [faqs, setFaqs] = useState(initial);
     const [q, setQ] = useState('');
     const [editing, setEditing] = useState(null);
     const [busy, setBusy] = useState(null);
-    const [toastNode, toast] = useToast();
     const [dialog, confirm] = useConfirm();
     const categories = useMemo(() => Array.from(new Set(faqs.map((f) => f.category).filter(Boolean))), [faqs]);
     const shown = faqs.filter((f) => !q || `${f.question} ${f.category || ''} ${f.answer || ''}`.toLowerCase().includes(q.toLowerCase()));
@@ -27,13 +38,10 @@ export default function Faq() {
     };
 
     return (
-        <AdminLayout title="FAQ">
-            <PageHeader title="FAQ" subtitle="Questions and answers on the public FAQ page, in this order."
-                actions={<>
-                    <Button as="a" icon="fa-external-link" href="/faq" target="_blank" rel="noopener noreferrer">View page</Button>
-                    <Button variant="brand" icon="fa-plus" onClick={() => setEditing({})}>Add question</Button>
-                </>} />
-            <Toolbar><SearchBox value={q} onSearch={setQ} placeholder="Search questions" delay={150} /></Toolbar>
+        <div data-testid="faq-manager">
+            <Toolbar end={<Button variant="brand" icon="fa-plus" onClick={() => setEditing({})} data-testid="faq-add">Add question</Button>}>
+                <SearchBox value={q} onSearch={setQ} placeholder="Search questions" delay={150} />
+            </Toolbar>
             {shown.length === 0 ? (
                 <Card><EmptyState icon="fa-question-circle-o" title={q ? 'No questions match' : 'No questions yet'} action={!q && <Button variant="brand" icon="fa-plus" onClick={() => setEditing({})}>Add the first question</Button>}>
                     Answer what students ask most: payments, class times, materials, certificates.
@@ -63,8 +71,8 @@ export default function Faq() {
             )}
             {editing && <FaqDrawer item={editing.id ? editing : null} categories={categories} onClose={() => setEditing(null)} toast={toast}
                 onSaved={(r) => { setFaqs(r.data.faqs); toast(r.data.message); setEditing(null); }} />}
-            {dialog}{toastNode}
-        </AdminLayout>
+            {dialog}
+        </div>
     );
 }
 

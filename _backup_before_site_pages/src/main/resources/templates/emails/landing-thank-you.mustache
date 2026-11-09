@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>You're enrolled in {{course}} · Receipt {{orderNumber}}</title>
+    <style type="text/css">
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
+        @media screen and (max-width: 480px) { .pad { padding: 24px 20px !important; } .h1 { font-size: 26px !important; line-height: 32px !important; } }
+    </style>
+</head>
+<body style="margin:0;padding:0;background-color:#f3eef0;" bgcolor="#f3eef0">
+<!-- preview text -->
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Your payment is complete and your seat is booked. Your receipt and a one-click link to your course are inside.</div>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+        <td align="center" style="padding:24px 12px;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;background:#ffffff;border-radius:14px;overflow:hidden;">
+                <!-- logo -->
+                <tr>
+                    <td align="center" style="padding:28px 24px 22px;border-bottom:1px solid #f0e6ea;">
+                        <a href="{{baseUrl}}/" target="_blank"><img src="{{baseUrl}}/assets/images/logo.png" width="220" height="54" alt="ArtistikCity" style="display:block;border:0;width:220px;max-width:100%;height:auto;" /></a>
+                    </td>
+                </tr>
+                <!-- congratulations -->
+                <tr>
+                    <td class="pad" align="center" style="padding:34px 40px 8px;font-family:'Open Sans',Helvetica,Arial,sans-serif;color:#2C3E50;">
+                        <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9C0D48;">Payment complete · Receipt enclosed</p>
+                        <h1 class="h1" style="margin:0 0 14px;font-size:30px;line-height:38px;font-weight:800;color:#2C3E50;">Congratulations, {{first}}!</h1>
+                        <p style="margin:0;font-size:16px;line-height:26px;color:#4A5866;">Thank you for taking <b style="color:#2C3E50;">{{course}}</b>{{#artist}} with {{artist}}{{/artist}}. Your payment is complete and your seat is booked. We can't wait to see what you paint.</p>
+                    </td>
+                </tr>
+                <!-- receipt -->
+                <tr>
+                    <td class="pad" style="padding:26px 40px 6px;">
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #ECF0F1;border-radius:12px;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;color:#34495E;">
+                            <tr>
+                                <td colspan="2" style="padding:16px 18px 10px;background:#F8F9FA;border-radius:12px 12px 0 0;">
+                                    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tr>
+                                        <td style="font-size:16px;font-weight:800;color:#2C3E50;font-family:'Open Sans',Helvetica,Arial,sans-serif;">Receipt</td>
+                                        <td align="right" style="font-size:13px;color:#4A5866;font-family:'Open Sans',Helvetica,Arial,sans-serif;">No. {{orderNumber}}</td>
+                                    </tr></table>
+                                </td>
+                            </tr>
+                            <tr><td style="padding:12px 18px 4px;color:#4A5866;">Date paid</td><td align="right" style="padding:12px 18px 4px;">{{paidOn}}</td></tr>
+                            <tr><td style="padding:4px 18px;color:#4A5866;vertical-align:top;">Billed to</td><td align="right" style="padding:4px 18px;">{{billedTo}}<br><span style="color:#4A5866;">{{billedEmail}}</span>{{#billedAddress}}<br><span style="color:#4A5866;">{{billedAddress}}</span>{{/billedAddress}}</td></tr>
+                            <tr><td colspan="2" style="padding:10px 18px 0;"><div style="border-top:1px solid #ECF0F1;"></div></td></tr>
+                            <tr><td style="padding:10px 18px 4px;font-weight:700;color:#2C3E50;vertical-align:top;">{{course}}<br><span style="font-weight:400;color:#4A5866;">{{kind}}{{#duration}} · {{duration}}{{/duration}}{{#starts}} · starts {{starts}}{{/starts}}{{#artist}} · with {{artist}}{{/artist}}</span></td>
+                                <td align="right" style="padding:10px 18px 4px;vertical-align:top;">{{#listPrice}}{{listPrice}}{{/listPrice}}{{^listPrice}}{{amount}}{{/listPrice}}</td></tr>
+                            {{#offer}}<tr><td style="padding:4px 18px;color:#17643A;">Offer price saving</td><td align="right" style="padding:4px 18px;color:#17643A;">−{{offer}}</td></tr>{{/offer}}
+                            {{#discount}}<tr><td style="padding:4px 18px;color:#17643A;">Coupon discount{{#coupon}} ({{coupon}}){{/coupon}}</td><td align="right" style="padding:4px 18px;color:#17643A;">−{{discount}}</td></tr>{{/discount}}
+                            {{#tax}}<tr><td style="padding:4px 18px;color:#4A5866;">{{taxLabel}}</td><td align="right" style="padding:4px 18px;">{{#taxIncluded}}({{tax}}){{/taxIncluded}}{{^taxIncluded}}{{tax}}{{/taxIncluded}}</td></tr>{{/tax}}
+                            <tr><td style="padding:12px 18px;border-top:1px solid #ECF0F1;font-weight:800;color:#2C3E50;">Total paid</td><td align="right" style="padding:12px 18px;border-top:1px solid #ECF0F1;font-weight:800;font-size:17px;color:#2C3E50;">{{amount}}</td></tr>
+                            <tr><td style="padding:0 18px 4px;color:#4A5866;">Paid with</td><td align="right" style="padding:0 18px 4px;">{{paidWith}}</td></tr>
+                            {{#paymentRef}}<tr><td style="padding:0 18px 14px;color:#4A5866;">Payment reference</td><td align="right" style="padding:0 18px 14px;font-family:Consolas,Menlo,monospace;font-size:12px;">{{paymentRef}}</td></tr>{{/paymentRef}}
+                            {{^paymentRef}}<tr><td colspan="2" style="padding:0 0 10px;"></td></tr>{{/paymentRef}}
+                        </table>
+                        {{#test}}<p style="margin:10px 0 0;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:12px;color:#8a6d00;">Test order: the payment was simulated and no money was taken.</p>{{/test}}
+                    </td>
+                </tr>
+                <!-- button -->
+                <tr>
+                    <td align="center" style="padding:28px 40px 10px;">
+                        <table role="presentation" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td align="center" bgcolor="#9C0D48" style="border-radius:999px;">
+                                    <a href="{{courseUrl}}" target="_blank" style="display:inline-block;padding:15px 34px;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:17px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">Go to my course</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pad" align="center" style="padding:6px 40px 26px;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#4A5866;">
+                        {{#autoLogin}}The button signs you in to ArtistikCity and opens your course: no password needed. It works once, for the next 3 days.
+                        Afterwards, <a href="{{loginUrl}}" target="_blank" style="color:#9C0D48;">log in</a> with {{#phone}}your mobile number ({{phone}}) or {{/phone}}your e-mail and a one-time code.{{/autoLogin}}
+                        {{^autoLogin}}Log in with {{#phone}}your mobile number ({{phone}}) or {{/phone}}your e-mail ({{email}}) and the one-time code we send you. No password needed.{{/autoLogin}}
+                    </td>
+                </tr>
+                <!-- next steps -->
+                <tr>
+                    <td class="pad" style="padding:0 40px 30px;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#34495E;">
+                        <p style="margin:0 0 8px;font-weight:700;color:#2C3E50;">What happens next</p>
+                        <p style="margin:0 0 6px;">1. Open your course from the button above, or from <a href="{{studioUrl}}" target="_blank" style="color:#9C0D48;">My studio</a>.</p>
+                        <p style="margin:0 0 6px;">2. Your course page has the lessons and everything else you need to get started.</p>
+                        <p style="margin:0;">3. Questions? Write to us from our <a href="{{baseUrl}}/contact" target="_blank" style="color:#9C0D48;">contact page</a>.</p>
+                    </td>
+                </tr>
+                <!-- footer -->
+                <tr>
+                    <td align="center" style="padding:22px 24px;background:#2C3E50;font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#ECF0F1;">
+                        <img src="{{baseUrl}}/assets/images/footerlogo.png" width="150" height="37" alt="ArtistikCity" style="display:block;margin:0 auto 10px;border:0;width:150px;height:auto;" />
+                        This is your receipt for a course on ArtistikCity. Keep it for your records. © {{year}} ArtistikCity.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

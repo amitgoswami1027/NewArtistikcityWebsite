@@ -44,8 +44,7 @@
         <nav class="dm-links dm-links--account" aria-label="Account">
             {{#auth.check}}
                 <a href="/dashboard">My studio</a>
-                <a href="javascript:void(0)" class="dm-btn dm-btn--line" onclick="document.getElementById('logout-form').submit();">Log out</a>
-                <form id="logout-form" action="/logout" method="POST" style="display: none;"><input type="hidden" name="_token" value="{{csrf}}"></form>
+                <form action="/logout" method="POST" style="display:inline;margin:0"><input type="hidden" name="_token" value="{{csrf}}"><button type="submit" class="dm-btn dm-btn--line" style="font:inherit;cursor:pointer">Log out</button></form>
             {{/auth.check}}
             {{#auth.guest}}
                 <a href="/login">Log in</a>
@@ -226,7 +225,7 @@
             </ul></div>
         </div>
         <div class="dm-footer__bottom">
-            <span>&copy; {{year}} ArtistikCity. All rights reserved.</span>
+            <span>&copy; 2021 ArtistikCity. All rights reserved.</span>
             <nav><a href="/terms-conditions">Terms of use</a><a href="/privacy-policy">Privacy policy</a><a href="/contact">Contact</a></nav>
         </div>
     </div>

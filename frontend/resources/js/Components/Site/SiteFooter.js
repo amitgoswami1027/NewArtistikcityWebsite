@@ -14,7 +14,6 @@ export default function SiteFooter() {
     useEffect(() => {
         axios.get(`${API_URL}/get_mediums`).then((r) => setMediums(Array.isArray(r.data) ? r.data : [])).catch(() => {});
     }, []);
-    const year = new Date().getFullYear();
 
     return (
         <footer className="dm-footer">
@@ -65,7 +64,7 @@ export default function SiteFooter() {
                     </div>
                 </div>
                 <div className="dm-footer__bottom">
-                    <span>&copy; {year} ArtistikCity. All rights reserved.</span>
+                    <span>&copy; 2021 ArtistikCity. All rights reserved.</span>
                     <nav>
                         <a href={route('terms.conditions')}>Terms of use</a>
                         <a href={route('privacy.policy')}>Privacy policy</a>

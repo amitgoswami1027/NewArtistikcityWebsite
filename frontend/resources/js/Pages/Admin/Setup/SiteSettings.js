@@ -6,11 +6,24 @@ import { Button, Badge, cx } from '@/Components/Admin/kit';
 import { Field, DropZone, SaveBar, Row2, Row3, Toggle, useUnsavedGuard } from '@/Components/Admin/form';
 import { landingOf, menuOf, cookieOf, DEFAULT_MENU, SOCIAL_NETWORKS } from '@/Components/Site/siteContent';
 import { CookieBar } from '@/Components/Site/CookieBanner';
+import { VisionTab, InstructorTab, SupportTab, FaqTab } from '@/Components/Admin/SitePagesTabs';
 
 /*
  * SEO & Layout Controls (/admin/setup/site-settings): the form on the left, a live preview of the public site on the
  * right (desktop / mobile). Saves through POST /admin/api/setup/site-settings; the site uses the values at once.
  */
+
+/** Page tabs, kept in the address hash (#vision, #faq …; /admin/faq lands on #faq). */
+const TABS = [
+    ['layout', 'Layout & SEO', 'fa-sliders'],
+    ['vision', 'Our vision', 'fa-eye'],
+    ['instructor', 'Instructor', 'fa-user'],
+    ['support', 'Customer support', 'fa-life-ring'],
+    ['faq', 'FAQ', 'fa-question-circle-o'],
+];
+const tabFromHash = () => {
+    try { const h = window.location.hash.replace('#', ''); return TABS.some(([id]) => id === h) ? h : 'layout'; } catch (e) { return 'layout'; }
+};
 
 const SECTIONS = [
     ['landing', 'Landing hero', 'fa-home'],
@@ -232,7 +245,19 @@ function Simulator({ v, menu, device, focus, onDevice }) {
 /* ------------------------------------------------------------------- page */
 
 export default function SiteSettings() {
-    const { values = {}, defaults = {} } = usePage().props;
+    const { values = {}, defaults = {}, pages = { values: {}, defaults: {} }, faqs = [], staff = [] } = usePage().props;
+    const [tab, setTabState] = useState(tabFromHash);
+    const [seen, setSeen] = useState(() => ({ [tabFromHash()]: true }));
+    const setTab = (id) => {
+        setTabState(id); setSeen((x) => ({ ...x, [id]: true }));
+        try { window.history.replaceState(window.history.state, '', `${window.location.pathname}${window.location.search}${id === 'layout' ? '' : `#${id}`}`); } catch (e) { /* ignore */ }
+    };
+    useEffect(() => {
+        const on = () => setTab(tabFromHash());
+        window.addEventListener('hashchange', on);
+        return () => window.removeEventListener('hashchange', on);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const pageProps = (id) => ({ saved: pages.values[id] || {}, defaults: (pages.defaults || {})[id] || {}, toast });
     const start = useRef(initialState(values));
     const [saved, setSaved] = useState(start.current);
     const [v, setV] = useState(start.current.v);
@@ -295,9 +320,24 @@ export default function SiteSettings() {
     return (
         <AdminLayout title="SEO & Layout Controls" wide crumbs={[{ label: 'System parameters' }, { label: 'SEO & Layout Controls' }]}>
             <PageHeader eyebrow="System parameters" title="SEO & Layout Controls"
-                subtitle="The public landing page, header menu, search snippet, cookie banner and social links. The preview on the right follows your typing; the site changes when you save."
+                subtitle="The public landing page, header menu, search snippet, cookie banner, social links and the Our vision, Instructor, Customer support and FAQ pages."
                 actions={<Button as="a" icon="fa-external-link" href="/" target="_blank" rel="noopener noreferrer">Open the site</Button>} />
 
+            <div className="adm-tabs" role="tablist" aria-label="Site settings" data-testid="ss-tabs">
+                {TABS.map(([id, label, icon]) => (
+                    <button key={id} type="button" role="tab" id={`tab-${id}`} aria-selected={tab === id} aria-controls={`panel-${id}`} className={cx(tab === id && 'is-on')}
+                            onClick={() => setTab(id)} data-testid={`ss-tab-${id}`}>
+                        <i className={`fa ${icon}`} aria-hidden="true"></i> {label}
+                    </button>
+                ))}
+            </div>
+
+            {seen.vision && <div role="tabpanel" id="panel-vision" aria-labelledby="tab-vision" hidden={tab !== 'vision'}><VisionTab {...pageProps('vision')} /></div>}
+            {seen.instructor && <div role="tabpanel" id="panel-instructor" aria-labelledby="tab-instructor" hidden={tab !== 'instructor'}><InstructorTab {...pageProps('instructor')} staff={staff} /></div>}
+            {seen.support && <div role="tabpanel" id="panel-support" aria-labelledby="tab-support" hidden={tab !== 'support'}><SupportTab {...pageProps('support')} /></div>}
+            {seen.faq && <div role="tabpanel" id="panel-faq" aria-labelledby="tab-faq" hidden={tab !== 'faq'}><FaqTab {...pageProps('faq')} faqs={faqs} /></div>}
+
+            <div role="tabpanel" id="panel-layout" aria-labelledby="tab-layout" hidden={tab !== 'layout'}>
             <nav className="ss-jump" aria-label="Sections">
                 {SECTIONS.map(([id, label, icon]) => (
                     <a key={id} href={`#sec-${id}`} className={cx(focus === id && 'is-on')} onClick={(e) => { e.preventDefault(); setFocus(id); const el = document.getElementById(`sec-${id}`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
@@ -398,6 +438,7 @@ export default function SiteSettings() {
                 <aside className="ss-preview" aria-label="Live preview">
                     <Simulator v={v} menu={menu} device={device} focus={focus} onDevice={setDevice} />
                 </aside>
+            </div>
             </div>
             {toastNode}
         </AdminLayout>

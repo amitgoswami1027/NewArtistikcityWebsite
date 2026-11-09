@@ -63,4 +63,36 @@ public class TestPayments {
     public boolean offerSimulation(HttpServletRequest request) {
         return isTestBuyer(request);
     }
+
+    // ------------------------------------------------------------------ marketplace shop checkout (/purchase/checkout)
+
+    /** Who may simulate at the shop checkout (settings tag {@code shop}, key {@code simulate_payments}). */
+    public static final String SHOP_TEST_BUYERS = "test_buyers", SHOP_STAFF = "staff", SHOP_EVERYONE = "everyone";
+
+    public String shopSimulationMode() {
+        Row r = db.first("select meta_value from settings where meta_tag = 'shop' and meta_key = 'simulate_payments' order by id desc limit 1");
+        String v = r == null ? null : r.str("meta_value");
+        return SHOP_TEST_BUYERS.equals(v) || SHOP_EVERYONE.equals(v) ? v : SHOP_STAFF;
+    }
+
+    public void saveShopSimulationMode(String mode) {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        if (db.update("update settings set meta_value = ?, updated_at = ? where meta_tag = 'shop' and meta_key = 'simulate_payments'", mode, now) == 0) {
+            db.insert("settings", Row.of("meta_tag", "shop", "meta_key", "simulate_payments", "meta_value", mode, "created_at", now, "updated_at", now));
+        }
+    }
+
+    /**
+     * The "Simulate payment" option at /purchase/checkout (Admin > Sales > Marketplace > Prices › Test payments):
+     * test buyers always; with mode {@code staff} (default) also a buyer whose browser is signed in to the admin too;
+     * with {@code everyone} every signed-in buyer. Simulated orders are always stored with {@code is_test = 1}.
+     */
+    public boolean offerShopSimulation(HttpServletRequest request) {
+        if (!testBuyersEnabled()) return false;
+        if (isTestBuyer(request)) return true;
+        if (auth.userId(request) == null) return false;
+        String mode = shopSimulationMode();
+        if (SHOP_EVERYONE.equals(mode)) return true;
+        return SHOP_STAFF.equals(mode) && auth.admin(request) != null;
+    }
 }

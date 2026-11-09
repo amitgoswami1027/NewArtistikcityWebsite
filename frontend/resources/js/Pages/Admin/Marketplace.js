@@ -313,7 +313,7 @@ export default function Marketplace() {
             )}
 
             {tab === 'messages' && <Messages threads={threads} setThreads={setThreads} initial={openThread} toast={toast} />}
-            {tab === 'prices' && <Prices prices={prices} setPrices={setPrices} can={shopCan} toast={toast} customSize={shop.customSize} />}
+            {tab === 'prices' && <Prices prices={prices} setPrices={setPrices} can={shopCan} toast={toast} customSize={shop.customSize} testPayments={shop.testPayments} />}
             {tab === 'offers' && <div className="ac"><OffersAdmin toast={toast} OfferCard={OfferCard} /></div>}
             {tab === 'coupons' && <Coupons coupons={coupons} setCoupons={setCoupons} listings={shopListings} can={shopCan} toast={toast} />}
             {printsFor && <ListingDrawer l={printsFor} toast={toast} onClose={() => setPrintsFor(null)}

@@ -114,7 +114,8 @@ function CheckoutBody() {
     const [notice, setNotice] = useState(payment === 'failed' ? { type: 'error', text: 'Your PayPal payment did not complete. No money was taken. You can try again.' }
         : payment === 'cancelled' ? { type: 'info', text: 'You cancelled the PayPal payment. Your order is still here: you can try again.' } : null);
     const [testOrder, setTestOrder] = useState(null);
-    const [simulate, setSimulate] = useState(false);
+    // no live gateway yet: start with the simulation ticked for those allowed to use it
+    const [simulate, setSimulate] = useState(!!gateways.simulate && !gateways.razorpay && !gateways.testMode);
     const [sumOpen, setSumOpen] = useState(false);
     const set = (k, v) => { setF((x) => ({ ...x, [k]: v })); if (serverErrors[k]) setServerErrors((e) => ({ ...e, [k]: null })); };
     const err = (k) => serverErrors[k] || (touched[k] ? check(k, f, ctx) : null);
@@ -298,13 +299,13 @@ function CheckoutBody() {
                         <label className={`pz-simulate ${simulate ? 'is-on' : ''}`} data-testid="simulate">
                             <input type="checkbox" checked={simulate} onChange={(e) => setSimulate(e.target.checked)} />
                             <span><b><i className="fa fa-flask" aria-hidden="true"></i> Simulate this payment</b>
-                                <small>Your account is a test buyer: no money is charged and the order is marked TEST in the admin.</small></span>
+                                <small>Test payment: no money is charged and the order is marked TEST in the admin (kept out of revenue).</small></span>
                         </label>
                     )}
                     {unavailable && <p className="pz-note is-error">This payment option isn't available right now. Please try the other one or contact us.</p>}
                     {testOrder ? (
                         <div className="pz-testpay">
-                            <p><b>{simulate ? 'Test buyer:' : 'Test mode:'}</b> {simulate ? 'nothing is charged' : 'no payment gateway is configured'}, so you can simulate the payment for order <code>{testOrder.orderId}</code>.</p>
+                            <p><b>{simulate ? 'Test payment:' : 'Test mode:'}</b> {simulate ? 'nothing is charged' : 'no payment gateway is configured'}, so you can simulate the payment for order <code>{testOrder.orderId}</code>.</p>
                             <button type="button" className="pz-btn pz-btn--brand pz-btn--block" onClick={() => { setBusy(true); confirm({ orderId: testOrder.orderId, provider: 'test' }); }} disabled={busy}>
                                 {busy && <i className="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i>} Simulate successful payment
                             </button>

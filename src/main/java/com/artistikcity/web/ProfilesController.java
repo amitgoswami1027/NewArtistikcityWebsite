@@ -66,9 +66,4 @@ public class ProfilesController {
         return inertia.render(request, "Teacher", props);
     }
 
-    @GetMapping("/instructor")
-    public ResponseEntity<String> instructor(HttpServletRequest request) {
-        Row i = db.first("select * from admins where slug = ?", WelcomeController.INSTRUCTOR_SLUG);
-        return inertia.render(request, "Instructor", Map.of("instructor", i == null ? new Row() : i.without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email", "mfa_secret", "mfa_last_step", "mfa_changed_at", "mfa_enabled_at", "extra_capabilities")));
-    }
 }

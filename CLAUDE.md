@@ -43,7 +43,7 @@ AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc), the configuration panel's encryption and allow-list
 (`config/panel/ConfigPanelTest`), SNS SMS requests (`auth/sms/SnsSmsSenderTest`) and the Studio Stories / site layout checks
 (`admin/StudioAndLayoutTest`), admin MFA (`security/mfa/TotpTest`: RFC 6238 vectors, QR structure), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
-`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing_quick_checkout.py` covers the in-page checkout, quick sign-in and admin test payments; `tests/system/test_landing.py` covers Landing Page Management end to end (`test_landing_showcase.py`: own addresses, information pages and the three showcase pages) (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
+`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_site_pages.py` covers the page tabs of SEO & Layout Controls, the four information pages and shop test payments (dev or production profile); `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing_quick_checkout.py` covers the in-page checkout, quick sign-in and admin test payments; `tests/system/test_landing.py` covers Landing Page Management end to end (`test_landing_showcase.py`: own addresses, information pages and the three showcase pages) (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
 new admin API, secret masking, validation and commit of panel values, site settings and the Studio Stories workflow. Browser tests for the purchase flow live in `tests/e2e`.
 The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
 the rest get 409 or REFUND_REQUIRED) and `seats/SeatRaceIT` (20 students, 5 seats: exactly 5 get one) run only with
@@ -202,6 +202,17 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   (`nav.menu`, JSON list of {label, href, visible, accent}) and cookie banner reach React as the shared prop `site`. The public site reads
   them only through `Components/Site/siteContent.js` (defaults = the original texts/menu, so empty settings change nothing): `Welcome` hero,
   `SiteHeader` menu, `SiteFooter` icons, `CookieBanner` (cookie `ac_consent` = all | essential). Links must be a site path or https (`ContentAdminController.siteLink`).
+  The page has **tabs** (address hash `#vision|instructor|support|faq`, default Layout & SEO; `/admin/faq` redirects to `#faq`;
+  `Components/Admin/SitePagesTabs`): **Our vision** (`/artistikcity-vision`), **Instructor** (`/instructor`), **Customer support**
+  (`/customer-support`) and **FAQ** (`/faq`: the question manager `FaqManager` from `Pages/Admin/Faq` + page texts). Their content is
+  `admin/SitePages` (settings tags `page_vision|page_instructor|page_support|page_faq`, private: not in `site`; empty = the factual
+  defaults in `SitePages.DEFAULTS`; kinds text / html (HtmlCleaner) / link / flag / number / cards JSON {icon,title,text,label,href} /
+  people JSON {id, website, facebook, instagram, youtube, linkedin} (https only)), saved per page by `POST /admin/api/setup/site-pages/{page}`
+  (capability `settings`, 422 per field, audited). The public pages are React on `SiteLayout` (`web/InfoPagesController`, pages
+  `Info/Vision|Instructor|Support|Faq`, parts `Components/Site/InfoParts`, `.ip-*` in `ac-theme.css`; aliases `/vision`, `/instructors`,
+  `/help`, `/faqs`); the instructor's name, photo, title and bio come from the admin profile. The old mustache templates
+  `pages/artistikcity-vision|customer-support|faq` and `Pages/Instructor.js` are no longer used. The footer copyright reads
+  "© 2021 ArtistikCity" everywhere (`SiteFooter`, page templates, landing pages, thank-you e-mail).
 - **Course videos are separate:** `courses.intro_video_url` is the trailer on the public course page; `course_module_lessons.video_url`
   is each lesson's own video in the learning view (no fallback to another video). Both hold a link or `/storage/uploads/courses/<id>/videos/<file>`,
   uploaded through `POST /admin/api/courses/{id}/videos` (streamed to disk, 500 MB). The old `course_videos` table is no longer used.
@@ -348,7 +359,7 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   is an empty stub). Views: `StudioStoriesController.countView` (one per visitor session; admins and bots not counted) -> `posts.views` +
   daily `post_views`; `read_minutes` = words / 200. `/api/studio-stories` (home page strip) gives published stories, topped up from the
   Studio Vaishali Arts WordPress blog (`service/StudioStoriesService`), which the journal also shows lazily as "More from Studio Vaishali Arts"
-  (`/api/studio-stories/studio-blog`). The old `Pages/Posts.js` / `PostDetails.js` are no longer used. `/faq` reads the `faqs` table.
+  (`/api/studio-stories/studio-blog`). The old `Pages/Posts.js` / `PostDetails.js` are no longer used. `/faq` reads the `faqs` table (managed in SEO & Layout Controls › FAQ).
   Order `payment_status`: 0 pending, 1 paid, 2 failed, 3 refunded; course access needs 1.
 - Wish list: table `wishlist_items` (type `course` or `painting`), `POST /wishlist {type, id, saved}`, page `/user/wishlist`
   (`Pages/Students/Wishlist.js`), and the heart button `Components/Wishlist/SaveButton.js`.
@@ -358,7 +369,11 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   enables simulated payments when no keys are set. On the live site only **test buyers** may simulate (`payments/TestPayments`):
   a super admin ticks "Test buyer" on an account in Admin > People (`users.test_buyer`, audited); its checkouts offer "Simulate payment"
   and the orders get `is_test = 1` (courses, marketplace, shop, commissions), which revenue figures, the ledger and the reconciler skip.
-  `PAYMENTS_TEST_BUYERS=false` switches the feature off.
+  `PAYMENTS_TEST_BUYERS=false` switches the feature off. The shop checkout `/purchase/checkout` has its own wider switch
+  (`TestPayments.offerShopSimulation`, settings `shop`/`simulate_payments`, Admin > Sales > Marketplace > Prices › Test payments,
+  `PUT /admin/console/api/shop/test-payments`, `marketplace.edit`, audited): `test_buyers`, `staff` (default: also a buyer whose browser
+  is signed in to the admin) or `everyone` (every signed-in buyer, for trying the site before launch). The option is ticked from the
+  start when no gateway has keys; simulated shop orders are always `is_test = 1`.
 - **Buying needs an account.** "Enroll", "Buy now", the checkouts and their payment APIs send a guest to `/login?return_to=…&intent=buy`
   (`web/PurchaseIntent`: the log-in / join page names what they are buying); JSON endpoints answer 401 `{code: SIGN_IN, redirect}`.
   A guest choosing an original is not given a hold; it is taken after sign-in (`PurchaseController.holdAfterSignIn`).
@@ -415,7 +430,9 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   Filter lists can be nested (`parent_id`) and archived (`archived_at`) in Admin > Catalog; the editor's genres use `TagPicker`.
 - Public pages: `SiteLayout` wraps content in an error boundary, opens a sign-in sheet on any 401 (`SignInSheet`), shows
   skeletons for slow visits and an Undo toast (`showUndo`). Brand colour for text/buttons is #9C0D48 and muted text #4A5866
-  (WCAG AAA); a global `:focus-visible` ring is defined at the end of `ac-theme.css`.
+  (WCAG AAA); a global `:focus-visible` ring is defined at the end of `ac-theme.css`. Pre-built Tailwind resets (`.tw button { background-color:
+  transparent }`) beat single-class button rules: give such buttons a two-class selector (see `.pf .pf__btn--primary`, the brand-coloured
+  "Create portfolio PDF" on `/dashboard/certificates`).
 - Reference only: `docs/sqlserver-ddl.sql` (SQL Server version of courses / taxonomy / audit log), `frontend/resources/js/types/catalog.d.ts`,
   `docs/prototype/` (one-file React + Tailwind prototype of the filters, tag manager and audit viewer).
 - `logs/`, `target/`, `.tools/` and `frontend/node_modules/` are local-only and git-ignored.

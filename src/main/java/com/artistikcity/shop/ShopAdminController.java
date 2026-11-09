@@ -108,7 +108,31 @@ public class ShopAdminController {
         ShopPricing.Custom c = repo.customSize();
         p.put("customSize", Map.of("enabled", c.enabled(), "min", c.min().intValue(), "max", c.max().intValue()));
         p.put("offersOpen", offerService.staffOpen());
+        p.put("testPayments", Map.of("mode", testPayments.shopSimulationMode(), "enabled", testPayments.testBuyersEnabled()));
         return p;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.payments.TestPayments testPayments;
+
+    /** JSON {mode: test_buyers | staff | everyone}: who sees "Simulate payment" at /purchase/checkout. */
+    @PutMapping("/admin/console/api/shop/test-payments")
+    public ResponseEntity<String> testPaymentsMode(HttpServletRequest request) throws IOException {
+        Row admin = auth.admin(request);
+        if (!Personas.can(admin, "marketplace.edit")) return error(HttpStatus.FORBIDDEN, "Only a super admin can change test payments.");
+        Object m = body(request).get("mode");
+        String mode = m == null ? "" : String.valueOf(m);
+        if (!List.of(com.artistikcity.payments.TestPayments.SHOP_TEST_BUYERS, com.artistikcity.payments.TestPayments.SHOP_STAFF,
+                com.artistikcity.payments.TestPayments.SHOP_EVERYONE).contains(mode)) return invalid(Map.of("mode", "Choose who may simulate payments."));
+        String before = testPayments.shopSimulationMode();
+        testPayments.saveShopSimulationMode(mode);
+        audit.change(admin, "shop_prices", 0, "test payments", "Shop checkout simulated payments: " + mode, Map.of("mode", before), Map.of("mode", mode));
+        String msg = switch (mode) {
+            case "everyone" -> "Every signed-in buyer can now simulate payments at the shop checkout. Those orders are marked as tests.";
+            case "staff" -> "Test buyers and staff signed in to the admin can simulate payments at the shop checkout.";
+            default -> "Only test buyers can simulate payments at the shop checkout.";
+        };
+        return ok(Map.of("testPayments", Map.of("mode", mode, "enabled", testPayments.testBuyersEnabled()), "message", msg));
     }
 
     @org.springframework.beans.factory.annotation.Autowired

@@ -240,7 +240,7 @@ public class PurchaseController {
         Row user = auth.user(request);
         props.put("customer", user == null ? null : Map.of("name", user.str("name", ""), "email", user.str("email", ""), "phone", user.str("phone", "")));
         props.put("gateways", Map.of("razorpay", payments.razorpayConfigured(), "paypal", payments.paypalConfigured(), "testMode", payments.testMode(),
-                "simulate", testPayments.offerSimulation(request)));
+                "simulate", testPayments.offerShopSimulation(request)));
         props.put("inrPerUsd", inrPerUsd());
         props.put("payment", payment);
         props.put("serverNow", System.currentTimeMillis());
@@ -409,7 +409,7 @@ public class PurchaseController {
         boolean razorpay = "RAZORPAY".equals(gateway);
         // a test-buyer account (Admin > People) may simulate the payment on the live site
         boolean simulate = Boolean.TRUE.equals(b.get("simulate"));
-        if (simulate && !testPayments.offerSimulation(request)) return error(HttpStatus.FORBIDDEN, "Simulated payments are only for test accounts.");
+        if (simulate && !testPayments.offerShopSimulation(request)) return error(HttpStatus.FORBIDDEN, "Simulated payments are only for test accounts.");
         boolean live = !simulate && (razorpay ? payments.razorpayConfigured() : payments.paypalConfigured());
         if (!live && !simulate && !payments.testMode()) {
             return error(HttpStatus.SERVICE_UNAVAILABLE, (razorpay ? "UPI and card" : "PayPal") + " payments are unavailable right now. Please try the other option or contact us.");
@@ -469,7 +469,7 @@ public class PurchaseController {
         String provider = String.valueOf(b.get("provider"));
         String txn;
         if ("test".equals(provider)) {
-            if (!"TEST".equals(o.get("gateway")) || !(payments.testMode() || testPayments.isTestBuyer(request))) return error(HttpStatus.FORBIDDEN, "Test payments are disabled.");
+            if (!"TEST".equals(o.get("gateway")) || !(payments.testMode() || testPayments.offerShopSimulation(request))) return error(HttpStatus.FORBIDDEN, "Test payments are disabled.");
             txn = "TEST-" + System.currentTimeMillis();
         } else if ("razorpay".equals(provider)) {
             String rzpOrder = String.valueOf(b.get("razorpay_order_id"));

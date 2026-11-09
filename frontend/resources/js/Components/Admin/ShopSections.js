@@ -240,7 +240,39 @@ function CustomSizes({ initial, can, toast }) {
     );
 }
 
-export function Prices({ prices, setPrices, can, toast, customSize }) {
+/** Who sees "Simulate payment" at /purchase/checkout (TestPayments.offerShopSimulation). Simulated orders are test orders. */
+const SIM_MODES = [
+    { value: 'test_buyers', label: 'Test buyers only', hint: 'Accounts ticked "Test buyer" in People.' },
+    { value: 'staff', label: 'Test buyers + staff', hint: 'Also anyone whose browser is signed in to this admin.' },
+    { value: 'everyone', label: 'Every signed-in buyer', hint: 'For trying the site before launch: real buyers could also skip paying, so switch it back before going live.' },
+];
+
+function ShopTestPayments({ initial, can, toast }) {
+    const [mode, setMode] = useState((initial && initial.mode) || 'staff');
+    const [busy, setBusy] = useState(false);
+    const enabled = !initial || initial.enabled !== false;
+    const choose = (m) => {
+        if (m === mode || !can.prices) return;
+        setBusy(true);
+        axios.put('/admin/console/api/shop/test-payments', { mode: m })
+            .then((r) => { setMode(r.data.testPayments.mode); toast(r.data.message); })
+            .catch((e) => toast(errorText(e), 'error'))
+            .finally(() => setBusy(false));
+    };
+    const cur = SIM_MODES.find((o) => o.value === mode) || SIM_MODES[1];
+    return (
+        <Card title="Test payments at the shop checkout" subtitle="Shows a “Simulate payment” option at /purchase/checkout. Nothing is charged; the order completes like a real one (artwork marked sold, e-mails sent) but is stored as a test order, kept out of revenue, the ledger and payouts."
+              actions={mode === 'everyone' ? <Badge tone="red">Everyone</Badge> : null}>
+            <div className="adm-stack" data-testid="shop-test-payments">
+                {!enabled && <p className="adm-muted">Test buyers are switched off on this server (PAYMENTS_TEST_BUYERS=false), so nobody sees the option.</p>}
+                <div aria-busy={busy}><ChoiceChips name="simulate_payments" multiple={false} value={mode} onChange={choose} options={SIM_MODES.map((o) => ({ value: o.value, label: o.label }))} /></div>
+                <p className="adm-muted" data-testid="shop-test-payments-hint">{cur.hint}</p>
+            </div>
+        </Card>
+    );
+}
+
+export function Prices({ prices, setPrices, can, toast, customSize, testPayments }) {
     const [rows, setRows] = useState(prices);
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
@@ -257,6 +289,7 @@ export function Prices({ prices, setPrices, can, toast, customSize }) {
     return (
         <div className="adm-stack">
             <CustomSizes initial={customSize} can={can} toast={toast} />
+            <ShopTestPayments initial={testPayments} can={can} toast={toast} />
             {kinds.map((k) => (
                 <Card key={k} title={KIND[k]} flush>
                     <div className="adm-table"><div className="adm-table__scroll"><table>

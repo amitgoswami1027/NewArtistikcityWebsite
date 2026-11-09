@@ -165,9 +165,10 @@ public class ContentAdminController {
         return db.select("select * from faqs order by sort_order, id");
     }
 
+    /** The FAQ is a tab of SEO & Layout Controls now. */
     @GetMapping({"/admin/faq", "/admin/faq/", "/admin/faqs"})
     public ResponseEntity<String> faqPage(HttpServletRequest request) {
-        return kit.page(request, "settings", "Admin/Faq", () -> Map.of("faqs", faqs()));
+        return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND).header("Location", "/admin/setup/site-settings#faq").build();
     }
 
     @PostMapping("/admin/api/faqs")
@@ -259,8 +260,41 @@ public class ContentAdminController {
                 }
                 values.put(e.getKey(), group);
             }
-            return Map.of("values", values, "defaults", Map.of("site_title", SiteSettings.DEFAULT_TITLE, "meta_description", SiteSettings.DEFAULT_DESCRIPTION));
+            Map<String, Object> props = new LinkedHashMap<>();
+            props.put("values", values);
+            props.put("defaults", Map.of("site_title", SiteSettings.DEFAULT_TITLE, "meta_description", SiteSettings.DEFAULT_DESCRIPTION));
+            // tabs Our vision / Instructor / Customer support / FAQ
+            props.put("pages", sitePages.adminProps());
+            props.put("faqs", faqs());
+            props.put("staff", db.select("select id, name, slug, profile_title from admins order by name"));
+            return props;
         });
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private SitePages sitePages;
+
+    /** JSON {field: value, ...} for one of the pages vision | instructor | support | faq (SitePages). */
+    @PostMapping("/admin/api/setup/site-pages/{page}")
+    public ResponseEntity<String> saveSitePage(HttpServletRequest request, @PathVariable("page") String page) {
+        Row admin = kit.admin(request);
+        if (!kit.can(admin, "settings")) return kit.forbidden();
+        if (!SitePages.PAGES.contains(page)) throw new NotFoundException();
+        Map<String, Object> d;
+        try {
+            d = json.decodeMap(new String(request.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
+        } catch (java.io.IOException | RuntimeException e) {
+            d = null;
+        }
+        if (d == null) return kit.invalid(Map.of("form", "Nothing to save."));
+        Map<String, Object> before = settingsSnapshot(List.of("page_" + page));
+        Map<String, String> errors = sitePages.save(page, d);
+        if (!errors.isEmpty()) return kit.invalid(errors);
+        audit.change(admin, "settings", 0, "updated", "page_" + page, before, settingsSnapshot(List.of("page_" + page)));
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("saved", sitePages.saved(page));
+        out.put("message", "Saved. The page shows it straight away.");
+        return kit.ok(out);
     }
 
     @PostMapping({"/admin/api/settings", "/admin/settings/update", "/admin/api/setup/site-settings"})
