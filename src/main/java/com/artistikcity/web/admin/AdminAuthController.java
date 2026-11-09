@@ -62,15 +62,31 @@ public class AdminAuthController {
             throw ValidationException.withMessage("email", "Too many attempts. Please try again in "
                     + Math.max(byIp.retryAfterSeconds(), pair.retryAfterSeconds()) + " seconds.");
         }
-        if (!auth.attemptAdmin(request, in.get("email"), in.get("password"))) {
+        Long id = auth.verifyAdminPassword(in.get("email"), in.get("password"));
+        if (id == null) {
             limiter.hit("admin:login:pair:" + email + "|" + ip, 5, 900);
             events.admin(request, null, "admin_login_failed", false, email);
             throw ValidationException.withMessage("email", "These credentials do not match our records.");
         }
         limiter.reset("admin:login:pair:" + email + "|" + ip);
-        events.admin(request, auth.admin(request), "admin_login", true, null);
+        // second step (Admin › Account security): an authenticator code, unless this browser is trusted; staff without
+        // MFA set it up now when a super admin made it compulsory
+        if (mfa.enabled(id) && !mfa.trusted(request, id)) {
+            return mfaSteps.start(request, id, false);
+        }
+        if (!mfa.enabled(id) && mfa.required()) {
+            return mfaSteps.start(request, id, true);
+        }
+        auth.loginAdmin(request, id);
+        events.admin(request, auth.admin(request), "admin_login", true, mfa.enabled(id) ? "trusted browser (two-step verification skipped)" : null);
         return redirect.route(request, "admin.dashboard");
     }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.artistikcity.security.mfa.AdminMfa mfa;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private AdminMfaController mfaSteps;
 
     @PostMapping("/admin/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {

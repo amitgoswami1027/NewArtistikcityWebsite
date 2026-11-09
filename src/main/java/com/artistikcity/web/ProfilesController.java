@@ -28,7 +28,7 @@ public class ProfilesController {
 
     @GetMapping("/student/{slug}")
     public ResponseEntity<String> student(HttpServletRequest request, @PathVariable("slug") String slug) {
-        Row student = NotFoundException.orFail(db.first("select * from users where slug = ?", slug)).without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email");
+        Row student = NotFoundException.orFail(db.first("select * from users where slug = ?", slug)).without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email", "mfa_secret", "mfa_last_step", "mfa_changed_at", "mfa_enabled_at", "extra_capabilities");
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("student", student);
         props.put("enrolledCourses", db.select(
@@ -54,7 +54,7 @@ public class ProfilesController {
 
     @GetMapping("/teacher/{slug}")
     public ResponseEntity<String> teacher(HttpServletRequest request, @PathVariable("slug") String slug) {
-        Row teacher = NotFoundException.orFail(db.first("select * from admins where slug = ?", slug)).without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email");
+        Row teacher = NotFoundException.orFail(db.first("select * from admins where slug = ?", slug)).without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email", "mfa_secret", "mfa_last_step", "mfa_changed_at", "mfa_enabled_at", "extra_capabilities");
         Map<String, Object> props = new LinkedHashMap<>();
         props.put("teacher", teacher);
         props.put("teachingCources", db.select("select c.*,"
@@ -69,6 +69,6 @@ public class ProfilesController {
     @GetMapping("/instructor")
     public ResponseEntity<String> instructor(HttpServletRequest request) {
         Row i = db.first("select * from admins where slug = ?", WelcomeController.INSTRUCTOR_SLUG);
-        return inertia.render(request, "Instructor", Map.of("instructor", i == null ? new Row() : i.without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email")));
+        return inertia.render(request, "Instructor", Map.of("instructor", i == null ? new Row() : i.without("password_hash", "password", "remember_token", "webauthn_user_handle", "phone_number", "email", "mfa_secret", "mfa_last_step", "mfa_changed_at", "mfa_enabled_at", "extra_capabilities")));
     }
 }

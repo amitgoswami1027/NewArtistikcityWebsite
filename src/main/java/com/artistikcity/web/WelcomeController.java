@@ -93,7 +93,7 @@ public class WelcomeController {
         if (i == null) {
             i = db.first("select * from admins order by case when admin_type = 'teacher' then 0 else 1 end, id limit 1");
         }
-        return i == null ? new Row() : i.without("password", "remember_token");
+        return i == null ? new Row() : i.without("password", "remember_token", "mfa_secret", "mfa_last_step", "mfa_changed_at", "mfa_enabled_at", "extra_capabilities");
     }
 
     /** helpers.php getHomeCourseWorkshopText(). */

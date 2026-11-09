@@ -42,7 +42,7 @@ rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/Vi
 AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing incl. custom sizes (`shop/ShopPricingTest`), landing page pricing and config (`landing/LandingPricingTest`, `landing/LandingSiteConfigTest`) and
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc), the configuration panel's encryption and allow-list
 (`config/panel/ConfigPanelTest`), SNS SMS requests (`auth/sms/SnsSmsSenderTest`) and the Studio Stories / site layout checks
-(`admin/StudioAndLayoutTest`), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
+(`admin/StudioAndLayoutTest`), admin MFA (`security/mfa/TotpTest`: RFC 6238 vectors, QR structure), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
 `tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing_quick_checkout.py` covers the in-page checkout, quick sign-in and admin test payments; `tests/system/test_landing.py` covers Landing Page Management end to end (`test_landing_showcase.py`: own addresses, information pages and the three showcase pages) (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
 new admin API, secret masking, validation and commit of panel values, site settings and the Studio Stories workflow. Browser tests for the purchase flow live in `tests/e2e`.
 The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
@@ -379,6 +379,18 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   Stripe keys are stored only (not wired to the checkout). API: `GET/POST /admin/api/setup/config`, `POST /admin/api/setup/sms-test`.
 - The admin sidebar group **System Parameters** (`AdminLayout` NAV, `collapsible: true`) holds Configuration Panel, Room Preview Setup,
   SEO & Layout Controls and the Security log; it opens by itself on its pages and remembers its state (`ac.admin.groups`).
+- **Admin two-step verification (MFA)** (`security/mfa/`: `Totp` RFC 6238, `QrCode` (own SVG encoder, no library), `AdminMfa`;
+  `web/admin/AdminMfaController`; migration `2026-11-13_admin_mfa.sql`): authenticator app + 10 single-use recovery codes
+  (SHA-256 only). The TOTP secret is encrypted with `PanelConfig.secretBox()` (no key = MFA not offered); `admins.mfa_last_step`
+  makes each code single-use. Sign-in: a correct password only creates a *pending* sign-in in the HttpSession (10 min, 5 wrong
+  codes, then back to the password); `/admin/login/verify` (code / `?recovery=1`, "trust this browser" = HttpOnly cookie
+  `ac_mfa_trust` HMAC'd with `mfa_changed_at`, 30 days) or, when required and not set up, `/admin/login/setup` (QR + key, then
+  recovery codes once); `auth.loginAdmin` runs only after that (`Auth.verifyAdminPassword` checks the password without a session).
+  Account menu › Two-step verification = `/admin/account/security` (page `Admin/Account/Security`): set up, new recovery codes /
+  turn off (need a current code), forget trusted browsers; super admins (`setup`) require it for all staff (settings `system`
+  `admin_mfa_required`; only once their own MFA is on) and reset a colleague (`POST /admin/api/setup/mfa/{id}/reset`). Public
+  pages strip `mfa_*` from admin rows. Tests: `security/mfa/TotpTest` (RFC vectors), `tests/system/test_admin_mfa.py` (dev, decodes
+  the QR with OpenCV), `tests/e2e/specs/admin-mfa.spec.js`.
 - **Security log** (`security/AuditLog`, Admin > Setup > Security log, capability `security`): every `Audit.log` also writes the
   append-only, hash-chained `audit_logs` (actor, action type CREATE/UPDATE/DELETE/AUTH/EXPORT/DENIED, resource, IP + CloudFront
   country/city). Use `audit.change(admin, entity, id, action, details, before, after)` with `audit.snapshot(table, id)` for

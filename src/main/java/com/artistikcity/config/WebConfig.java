@@ -50,7 +50,7 @@ public class WebConfig implements WebMvcConfigurer {
         // AdminMiddleware
         registry.addInterceptor(guards.admin())
                 .addPathPatterns("/admin/**")
-                .excludePathPatterns("/admin/login", "/admin/password/**");
+                .excludePathPatterns("/admin/login", "/admin/login/**", "/admin/password/**");
     }
 
     @Override

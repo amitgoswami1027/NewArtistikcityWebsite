@@ -191,7 +191,7 @@ public class Auth {
             logoutAdmin(request);
             return null;
         }
-        Row safe = a.without("password", "remember_token");
+        Row safe = a.without("password", "remember_token", "mfa_secret", "mfa_last_step");
         request.setAttribute(ADMIN_CACHE, safe);
         return safe;
     }
@@ -202,19 +202,30 @@ public class Auth {
     }
 
     public boolean attemptAdmin(HttpServletRequest request, String email, String password) {
-        if (email == null || password == null) {
+        Long id = verifyAdminPassword(email, password);
+        if (id == null) {
             return false;
+        }
+        loginAdmin(request, id);
+        return true;
+    }
+
+    /** The admin's id when the password is right (same timing either way), without signing in; null otherwise. */
+    public Long verifyAdminPassword(String email, String password) {
+        if (email == null || password == null) {
+            return null;
         }
         Row a = db.first("select id, password from admins where email = ?", email.trim());
         boolean ok = check(password, a == null ? dummyHash : a.str("password"));
-        if (a == null || !ok) {
-            return false;
-        }
+        return a == null || !ok ? null : a.lng("id");
+    }
+
+    /** Starts the admin session (new session id). Only after every sign-in step passed (password, and MFA when on). */
+    public void loginAdmin(HttpServletRequest request, long adminId) {
         request.getSession(true);
         request.changeSessionId();
-        request.getSession().setAttribute(ADMIN_KEY, a.lng("id"));
+        request.getSession().setAttribute(ADMIN_KEY, adminId);
         request.removeAttribute(ADMIN_CACHE);
-        return true;
     }
 
     public void logoutAdmin(HttpServletRequest request) {

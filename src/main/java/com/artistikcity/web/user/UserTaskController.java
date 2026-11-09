@@ -66,7 +66,7 @@ public class UserTaskController {
         if (teacher == null) {
             teacher = db.first("select a.* from admins a join courses c on c.admin_id = a.id where c.id = ?", task.get("course_id"));
         }
-        teacher = teacher == null ? new Row() : teacher.without("password", "remember_token");
+        teacher = teacher == null ? new Row() : teacher.without("password", "remember_token", "mfa_secret", "mfa_last_step", "mfa_changed_at", "mfa_enabled_at", "extra_capabilities");
         task.put("teacher", teacher);
         task.put("taskTeacherAvatar", Str.avatar(teacher.str("name")));
         task.put("taskTeacherPhoto", teacher.get("profile_photo"));

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>Set up two-step verification · ArtistikCity admin</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+    <link href="/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/css/ac-theme.css">
+</head>
+<body style="margin:0">
+<main class="ac adm-login">
+    <div class="adm-login__card">
+        <a href="/" class="adm-login__logo"><img src="/assets/images/logo.png" alt="ArtistikCity"></a>
+        <span class="adm-login__tag">Admin</span>
+        <h1>Set up two-step verification</h1>
+        <p class="adm-login__lede">{{#required}}Two-step verification is required for every ArtistikCity staff account. {{/required}}It takes a minute and keeps the admin safe even if your password leaks.</p>
+        {{#error}}<div class="adm-login__error" role="alert"><i class="fa fa-exclamation-circle" aria-hidden="true"></i><div><p>{{error}}</p></div></div>{{/error}}
+        {{#notice}}<div class="adm-mfa__note" role="status"><i class="fa fa-info-circle" aria-hidden="true"></i><div><p>{{notice}}</p></div></div>{{/notice}}
+        <ol class="adm-mfa__steps">
+            <li>Install an authenticator app on your phone: Google Authenticator, Microsoft Authenticator, Authy or 1Password.</li>
+            <li>In the app, add an account and scan this QR code:
+                <div class="adm-mfa__qr" data-testid="mfa-qr">{{{qr}}}</div>
+                <details class="adm-mfa__manual"><summary>Can't scan it? Enter this key instead</summary>
+                    <code data-testid="mfa-secret">{{secretGrouped}}</code><small>Account: {{email}} · time-based · 6 digits</small></details>
+            </li>
+            <li>Enter the 6-digit code the app shows:</li>
+        </ol>
+        <form method="POST" action="/admin/login/setup" novalidate>
+            <input type="hidden" name="_token" value="{{csrf}}">
+            <label for="code" class="sr-only">Authentication code</label>
+            <input id="code" type="text" name="code" inputmode="numeric" pattern="[0-9 ]*" maxlength="7" autocomplete="one-time-code" class="adm-mfa__code" placeholder="123 456" required data-testid="mfa-code">
+            <button type="submit" class="adm-login__submit" data-testid="mfa-submit">Turn on and sign in</button>
+        </form>
+        <p class="adm-login__help"><a href="/admin/login/cancel">Cancel</a></p>
+    </div>
+</main>
+</body>
+</html>

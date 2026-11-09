@@ -111,6 +111,7 @@ DROP TABLE IF EXISTS auth_otps;
 DROP TABLE IF EXISTS auth_refresh_tokens;
 DROP TABLE IF EXISTS auth_sessions;
 DROP TABLE IF EXISTS linked_accounts;
+DROP TABLE IF EXISTS admin_mfa_recovery_codes;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS users;
 SET FOREIGN_KEY_CHECKS = 1;
@@ -307,9 +308,23 @@ CREATE TABLE admins (
     profile_description LONGTEXT NULL,
     remember_token      VARCHAR(100) NULL,
     extra_capabilities  VARCHAR(500) NULL,       -- landing.* capabilities granted on top of the persona (People & roles)
+    mfa_secret          VARCHAR(255) NULL,       -- two-step verification: TOTP secret, encrypted by the app (2026-11-13_admin_mfa.sql)
+    mfa_enabled_at      DATETIME NULL,
+    mfa_last_step       BIGINT NULL,             -- last accepted 30-second step: a code works once
+    mfa_changed_at      DATETIME NULL,           -- signs the "trusted browser" cookies
     created_at          DATETIME NULL,
     updated_at          DATETIME NULL,
     CONSTRAINT admins_email_unique UNIQUE (email)
+);
+
+CREATE TABLE admin_mfa_recovery_codes (
+    id          BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    admin_id    BIGINT NOT NULL,
+    code_hash   CHAR(64) NOT NULL,
+    used_at     DATETIME NULL,
+    created_at  DATETIME NOT NULL,
+    INDEX admin_mfa_recovery_admin_index (admin_id, used_at),
+    CONSTRAINT admin_mfa_recovery_admin_foreign FOREIGN KEY (admin_id) REFERENCES admins (id) ON DELETE CASCADE
 );
 
 -- ---------------------------------------------------------------------

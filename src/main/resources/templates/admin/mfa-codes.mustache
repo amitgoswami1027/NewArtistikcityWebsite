@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>Your recovery codes · ArtistikCity admin</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+    <link href="/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/css/ac-theme.css">
+</head>
+<body style="margin:0">
+<main class="ac adm-login">
+    <div class="adm-login__card">
+        <a href="/" class="adm-login__logo"><img src="/assets/images/logo.png" alt="ArtistikCity"></a>
+        <span class="adm-login__tag">Admin</span>
+        <h1>Save your recovery codes</h1>
+        <p class="adm-login__lede">Two-step verification is on. If you lose your phone, each of these codes lets you sign in once. Keep them somewhere safe, like a password manager. <b>They won't be shown again.</b></p>
+        <ul class="adm-mfa__codes" data-testid="mfa-recovery-codes">{{#codes}}<li><code>{{.}}</code></li>{{/codes}}</ul>
+        <button type="button" class="adm-mfa__copy" onclick="var t=[].map.call(document.querySelectorAll('.adm-mfa__codes code'),function(c){return c.textContent}).join('\n');navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){this.textContent='Copied'}.bind(this));"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy codes</button>
+        <a href="{{next}}" class="adm-login__submit adm-mfa__continue" data-testid="mfa-continue">I've saved them, continue</a>
+    </div>
+</main>
+</body>
+</html>

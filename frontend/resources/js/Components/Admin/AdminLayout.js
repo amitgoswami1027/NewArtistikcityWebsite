@@ -168,6 +168,7 @@ function AccountMenu({ admin, token }) {
                     <div className="adm-menu__head"><b>{admin.name}</b><span>{admin.email}</span></div>
                     <a role="menuitem" href="/admin/profile"><i className="fa fa-user" aria-hidden="true"></i>Your profile</a>
                     <a role="menuitem" href="/admin/change-password"><i className="fa fa-lock" aria-hidden="true"></i>Change password</a>
+                    <a role="menuitem" href="/admin/account/security"><i className="fa fa-shield" aria-hidden="true"></i>Two-step verification</a>
                     <a role="menuitem" href="/" target="_blank" rel="noopener noreferrer"><i className="fa fa-external-link" aria-hidden="true"></i>View website</a>
                     <form method="post" action="/admin/logout" className="adm-menu__logout">
                         <input type="hidden" name="_token" value={token} />

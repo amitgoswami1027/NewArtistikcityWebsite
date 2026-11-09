@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>Two-step verification · ArtistikCity admin</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+    <link href="/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/css/ac-theme.css">
+</head>
+<body style="margin:0">
+<main class="ac adm-login">
+    <div class="adm-login__card">
+        <a href="/" class="adm-login__logo"><img src="/assets/images/logo.png" alt="ArtistikCity"></a>
+        <span class="adm-login__tag">Admin</span>
+        <h1>Two-step verification</h1>
+        {{^recovery}}<p class="adm-login__lede">Open your authenticator app and enter the 6-digit code for <b>ArtistikCity</b> ({{email}}).</p>{{/recovery}}
+        {{#recovery}}<p class="adm-login__lede">Enter one of the recovery codes you saved when you set up two-step verification. Each works once.</p>{{/recovery}}
+        {{#error}}<div class="adm-login__error" role="alert"><i class="fa fa-exclamation-circle" aria-hidden="true"></i><div><p>{{error}}</p></div></div>{{/error}}
+        {{#notice}}<div class="adm-mfa__note" role="status"><i class="fa fa-info-circle" aria-hidden="true"></i><div><p>{{notice}}</p></div></div>{{/notice}}
+        <form method="POST" action="/admin/login/verify" novalidate>
+            <input type="hidden" name="_token" value="{{csrf}}">
+            {{^recovery}}
+            <label for="code">Authentication code</label>
+            <input id="code" type="text" name="code" inputmode="numeric" pattern="[0-9 ]*" maxlength="7" autocomplete="one-time-code" class="adm-mfa__code" placeholder="123 456" required autofocus data-testid="mfa-code">
+            {{/recovery}}
+            {{#recovery}}
+            <input type="hidden" name="recovery" value="1">
+            <label for="code">Recovery code</label>
+            <input id="code" type="text" name="code" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="abcde-fghjk" required autofocus data-testid="mfa-code">
+            {{/recovery}}
+            <label class="adm-mfa__trust"><input type="checkbox" name="trust" value="1" data-testid="mfa-trust"> Trust this browser for {{trustDays}} days</label>
+            <button type="submit" class="adm-login__submit" data-testid="mfa-submit">Verify and sign in</button>
+        </form>
+        <p class="adm-login__help">
+            {{^recovery}}No access to your app? <a href="/admin/login/verify?recovery=1">Use a recovery code</a>.{{/recovery}}
+            {{#recovery}}<a href="/admin/login/verify">Use the authenticator app instead</a>.{{/recovery}}
+            Lost both? Ask a super admin to reset your two-step verification.<br>
+            <a href="/admin/login/cancel">Cancel and sign in as someone else</a>
+        </p>
+    </div>
+</main>
+</body>
+</html>

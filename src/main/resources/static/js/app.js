@@ -3082,6 +3082,10 @@ function AccountMenu({ admin, token }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-lock", "aria-hidden": "true" }),
         "Change password"
       ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { role: "menuitem", href: "/admin/account/security", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-shield", "aria-hidden": "true" }),
+        "Two-step verification"
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", { role: "menuitem", href: "/", target: "_blank", rel: "noopener noreferrer", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-external-link", "aria-hidden": "true" }),
         "View website"
@@ -34806,6 +34810,294 @@ function Checkout() {
       ] })
     ] })
   ] }) });
+}
+
+
+/***/ }),
+
+/***/ "./resources/js/Pages/Admin/Account/Security.js":
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var Security_exports = {};
+__export(Security_exports, {
+  default: () => Security
+});
+module.exports = __toCommonJS(Security_exports);
+var import_jsx_runtime = __webpack_require__("../../febuild/node_modules/react/jsx-runtime.js");
+var import_react = __toESM(__webpack_require__("../../febuild/node_modules/react/index.js"));
+var import_axios = __toESM(__webpack_require__("../../febuild/node_modules/axios/index.js"));
+var import_AdminLayout = __toESM(__webpack_require__("./resources/js/Components/Admin/AdminLayout.js"));
+var import_kit = __webpack_require__("./resources/js/Components/Admin/kit.js");
+var import_form = __webpack_require__("./resources/js/Components/Admin/form.js");
+function CodeInput({ value, onChange, id = "f-mfa-code", label = "Code from your authenticator app (or a recovery code)", error, testid = "mfa-code" }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label, name: "mfa-code", error, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    "input",
+    {
+      id,
+      className: "adm-input adm-mono",
+      inputMode: "text",
+      autoComplete: "one-time-code",
+      maxLength: 20,
+      value,
+      onChange: (e) => onChange(e.target.value),
+      placeholder: "123456",
+      "data-testid": testid,
+      style: { maxWidth: 220, letterSpacing: ".15em" }
+    }
+  ) });
+}
+function RecoveryCodes({ codes, onDone }) {
+  const copy = () => {
+    try {
+      navigator.clipboard.writeText(codes.join("\n"));
+    } catch (e) {
+    }
+  };
+  const download = () => {
+    const blob = new Blob([`ArtistikCity admin recovery codes
+Each code works once.
+
+${codes.join("\n")}
+`], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "artistikcity-recovery-codes.txt";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-mfa-codes", "data-testid": "mfa-recovery-codes", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-alert", role: "status", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-triangle", "aria-hidden": "true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+        "Save these recovery codes now, for example in your password manager. Each one signs you in once if you lose your phone. ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "They won't be shown again." })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "adm-mfa-codes__list", children: codes.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: c }) }, c)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-actions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-clipboard", onClick: copy, children: "Copy" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-download", onClick: download, children: "Download .txt" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", icon: "fa-check", onClick: onDone, "data-testid": "mfa-codes-done", children: "I've saved them" })
+    ] })
+  ] });
+}
+function MyMfa({ data, setData, toast }) {
+  const [setup, setSetup] = (0, import_react.useState)(null);
+  const [code, setCode] = (0, import_react.useState)("");
+  const [error, setError] = (0, import_react.useState)(null);
+  const [busy, setBusy] = (0, import_react.useState)(false);
+  const [codes, setCodes] = (0, import_react.useState)(null);
+  const [mode, setMode] = (0, import_react.useState)(null);
+  const [confirmNode, confirm] = (0, import_kit.useConfirm)();
+  const fail = (e) => {
+    setError(e.response && e.response.data && e.response.data.errors && e.response.data.errors.code || null);
+    toast((0, import_AdminLayout.errorText)(e), "error");
+  };
+  const start = () => {
+    setBusy(true);
+    setError(null);
+    import_axios.default.post("/admin/api/account/mfa/setup").then((r) => {
+      setSetup(r.data);
+      setCode("");
+    }).catch(fail).finally(() => setBusy(false));
+  };
+  const enable = (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    import_axios.default.post("/admin/api/account/mfa/enable", { code }).then((r) => {
+      setCodes(r.data.recoveryCodes);
+      setSetup(null);
+      setData(r.data);
+      toast(r.data.message);
+    }).catch(fail).finally(() => setBusy(false));
+  };
+  const act = (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    const url = mode === "disable" ? "/admin/api/account/mfa/disable" : "/admin/api/account/mfa/recovery-codes";
+    import_axios.default.post(url, { code }).then((r) => {
+      setData(r.data);
+      toast(r.data.message);
+      if (r.data.recoveryCodes) setCodes(r.data.recoveryCodes);
+      setMode(null);
+      setCode("");
+    }).catch(fail).finally(() => setBusy(false));
+  };
+  const forget = async () => {
+    if (!await confirm({ title: "Forget trusted browsers?", body: "Every browser, including this one, will ask for a code at the next sign-in.", confirmLabel: "Forget them" })) return;
+    import_axios.default.post("/admin/api/account/mfa/forget-browsers").then((r) => {
+      setData(r.data);
+      toast(r.data.message);
+    }).catch(fail);
+  };
+  if (codes) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Two-step verification", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RecoveryCodes, { codes, onDone: () => setCodes(null) }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Card,
+    {
+      title: "Two-step verification",
+      subtitle: "After your password, the admin asks for a 6-digit code from an authenticator app on your phone (Google Authenticator, Microsoft Authenticator, Authy, 1Password\u2026). Someone who learns your password still can't get in.",
+      actions: data.enabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: "On" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: data.required ? "red" : "amber", children: data.required ? "Off \xB7 required" : "Off" }),
+      children: [
+        confirmNode,
+        !data.available && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-alert", role: "status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "fa fa-exclamation-triangle", "aria-hidden": "true" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: data.schema ? "This server has no encryption key yet (CONFIG_ENCRYPTION_KEY or OTP_SECRET), so the authenticator secret can't be stored safely." : "Needs the database update 2026-11-13_admin_mfa.sql." })
+        ] }),
+        data.enabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "mfa-on", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted", children: [
+            "On since ",
+            (0, import_kit.fmtDate)(data.enabledAt, true),
+            ". Recovery codes left: ",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { "data-testid": "mfa-left", children: data.recoveryLeft }),
+            data.trusted ? " \xB7 this browser is trusted for 30 days" : "",
+            "."
+          ] }),
+          !mode && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-actions", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-refresh", onClick: () => {
+              setMode("codes");
+              setCode("");
+              setError(null);
+            }, "data-testid": "mfa-new-codes", children: "New recovery codes" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-desktop", onClick: forget, "data-testid": "mfa-forget", children: "Forget trusted browsers" }),
+            !data.required && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-power-off", onClick: () => {
+              setMode("disable");
+              setCode("");
+              setError(null);
+            }, "data-testid": "mfa-disable", children: "Turn off" })
+          ] }),
+          mode && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: act, className: "adm-stack", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: mode === "disable" ? "To turn two-step verification off, confirm with a current code." : "New codes replace the old ones. Confirm with a current code." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CodeInput, { value: code, onChange: setCode, error }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-actions", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { type: "submit", variant: mode === "disable" ? "danger" : "dark", busy, "data-testid": "mfa-confirm", children: mode === "disable" ? "Turn off" : "Make new codes" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => setMode(null), children: "Cancel" })
+            ] })
+          ] })
+        ] }) : setup ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: enable, className: "adm-mfa-setup", "data-testid": "mfa-setup", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ol", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Install an authenticator app on your phone." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+              "Add an account and scan this QR code:",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-mfa-setup__qr", "data-testid": "mfa-qr", dangerouslySetInnerHTML: { __html: setup.qr } }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "Can't scan it? Enter this key" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { className: "adm-mono", "data-testid": "mfa-secret", children: setup.secretGrouped })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Enter the 6-digit code the app shows:" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CodeInput, { value: code, onChange: setCode, label: "6-digit code", error }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-actions", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { type: "submit", variant: "dark", icon: "fa-shield", busy, "data-testid": "mfa-enable", children: "Turn on" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { onClick: () => setSetup(null), children: "Cancel" })
+          ] })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "dark", icon: "fa-shield", onClick: start, busy, disabled: !data.available, "data-testid": "mfa-start", children: "Set up two-step verification" })
+      ]
+    }
+  );
+}
+function StaffPolicy({ data, setData, toast }) {
+  const [confirmNode, confirm] = (0, import_kit.useConfirm)();
+  const policy = (on2) => import_axios.default.put("/admin/api/setup/mfa-policy", { required: on2 }).then((r) => {
+    setData(r.data);
+    toast(r.data.message);
+  }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  const reset = async (s) => {
+    if (!await confirm({ title: `Reset two-step verification for ${s.name}?`, body: "Use this when they lost their phone and recovery codes. Their authenticator and recovery codes stop working; they set it up again at the next sign-in when it is required.", confirmLabel: "Reset" })) return;
+    import_axios.default.post(`/admin/api/setup/mfa/${s.id}/reset`).then((r) => {
+      setData(r.data);
+      toast(r.data.message);
+    }).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  };
+  const on = (data.staff || []).filter((s) => s.enabled_at).length;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Card, { title: "Staff policy", subtitle: "Super admins only. Every change is in the security log.", flush: true, children: [
+    confirmNode,
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "adm-pad", "data-testid": "mfa-policy", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      import_form.Toggle,
+      {
+        name: "mfa-required",
+        checked: !!data.required,
+        onChange: policy,
+        label: "Require two-step verification for all staff",
+        description: `Staff without it set it up right after their password at their next sign-in. ${on} of ${(data.staff || []).length} accounts have it on.${data.enabled ? "" : " Turn it on for your own account first."}`
+      }
+    ) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.staff || [], columns: [
+      { key: "name", label: "Staff member", render: (r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        r.name,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { className: "adm-muted", children: r.email })
+      ] }) },
+      { key: "enabled_at", label: "Two-step verification", render: (r) => r.enabled_at ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_kit.Badge, { tone: "green", children: [
+        "On since ",
+        (0, import_kit.fmtDate)(r.enabled_at)
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "grey", children: "Off" }) },
+      { key: "reset", label: "", render: (r) => r.enabled_at && r.id !== data.selfId ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-undo", onClick: () => reset(r), "data-testid": `mfa-reset-${r.id}`, children: "Reset" }) : null }
+    ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-users", title: "No staff accounts" }) })
+  ] });
+}
+function Security({ admin }) {
+  const [data, setData] = (0, import_react.useState)(null);
+  const [toastNode, toast] = (0, import_AdminLayout.useToast)();
+  (0, import_react.useEffect)(() => {
+    import_axios.default.get("/admin/api/account/mfa").then((r) => setData(r.data)).catch((e) => toast((0, import_AdminLayout.errorText)(e), "error"));
+  }, []);
+  const withSelf = data && __spreadProps(__spreadValues({}, data), { selfId: admin && admin.id });
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_AdminLayout.default, { title: "Account security", crumbs: [{ label: "Your account" }, { label: "Security" }], children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_AdminLayout.PageHeader, { eyebrow: "Your account", title: "Account security", subtitle: "Two-step verification for signing in to the admin." }),
+    !data ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Loading\u2026" }) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "account-security", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MyMfa, { data: withSelf, setData, toast }),
+      data.canManage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StaffPolicy, { data: withSelf, setData, toast })
+    ] }),
+    toastNode
+  ] });
 }
 
 
@@ -119844,6 +120136,8 @@ function y(){return(y=Object.assign||function(e){for(var t=1;t<arguments.length;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
+	"./Admin/Account/Security": "./resources/js/Pages/Admin/Account/Security.js",
+	"./Admin/Account/Security.js": "./resources/js/Pages/Admin/Account/Security.js",
 	"./Landing/Checkout": "./resources/js/Pages/Landing/Checkout.js",
 	"./Landing/Checkout.js": "./resources/js/Pages/Landing/Checkout.js",
 	"./Admin/Landing/Editor": "./resources/js/Pages/Admin/Landing/Editor.js",

@@ -110,7 +110,7 @@ public class CourseService {
         Map<Long, Row> categories = byId(db.select("select * from categories"));
         Map<Long, Row> teachers = new HashMap<>();
         for (Row a : db.select("select * from admins")) {
-            teachers.put(a.lng("id"), a.without("password", "remember_token"));
+            teachers.put(a.lng("id"), a.without("password", "remember_token", "mfa_secret", "mfa_last_step", "mfa_changed_at", "mfa_enabled_at", "extra_capabilities"));
         }
         List<Object> ids = new ArrayList<>();
         for (Row c : courses) {
