@@ -459,7 +459,8 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   (`ec2-deploy.sh --go-live-status`), final snapshot `pre-go-live-<id>`, request env to `s3://bucket/private/go-live/<id>.env` (SSE,
   server deletes it), `ec2-deploy.sh --go-live <key>` (DB reset in the mysql image, uploads archived to `private/archive/pre-go-live-<id>/`,
   sample files, restart), old snapshots / retained / automated backups cleared, `/healthz`. Idempotent per REQUEST_ID (settings
-  `system`/`go_live_request`). IAM: the `GoLive*` statements of the GitHub role in `infra/artistikcity.yml` (stack update needed once).
+  `system`/`go_live_request`; the file step is recorded as `system`/`go_live_files`, so a re-run resumes after a failed file step;
+  S3 moves use `--copy-props metadata-directive` because the server role can't read object tags). IAM: the `GoLive*` statements of the GitHub role in `infra/artistikcity.yml` (stack update needed once).
 - Reference only: `docs/sqlserver-ddl.sql` (SQL Server version of courses / taxonomy / audit log), `frontend/resources/js/types/catalog.d.ts`,
   `docs/prototype/` (one-file React + Tailwind prototype of the filters, tag manager and audit viewer).
 - `logs/`, `target/`, `.tools/` and `frontend/node_modules/` are local-only and git-ignored.

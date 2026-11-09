@@ -82,10 +82,13 @@ ssm_run() {   # $1 = command, $2 = timeout seconds
 
 # ---------------------------------------------------------------- 2. already done?
 out="$(ssm_run "/opt/artistikcity/ec2-deploy.sh --go-live-status $REQUEST_ID" 300)" || die "could not ask the server whether $REQUEST_ID was already carried out"
-if echo "$out" | grep -qx "GO_LIVE_DONE=$REQUEST_ID"; then
+if echo "$out" | grep -qx "GO_LIVE_DONE=$REQUEST_ID" && echo "$out" | grep -qx "GO_LIVE_FILES=$REQUEST_ID"; then
   log "go-live request $REQUEST_ID was already carried out: nothing to do"
   { echo "### Go-live reset $REQUEST_ID: already done"; echo ""; echo "Nothing changed. You can delete \`$REQUEST_FILE\` from the repository."; } >> "$SUMMARY"
   exit 0
+fi
+if echo "$out" | grep -qx "GO_LIVE_DONE=$REQUEST_ID"; then
+  log "the database of $REQUEST_ID was reset by an earlier run; this run finishes the remaining steps (the existing snapshot stays the undo point)"
 fi
 
 # ---------------------------------------------------------------- 3. the final snapshot

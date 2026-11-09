@@ -4,6 +4,8 @@
 #  official mysql:8.4 image like db-migrate.sh; also by the CI test job against its own MySQL).
 #
 #    MODE=status   prints GO_LIVE_DONE=<request id> when a reset has already been made (settings system/go_live_request)
+#                  and GO_LIVE_FILES=<request id> once the server finished the file step for it (system/go_live_files)
+#    MODE=files-done  records that the file step of REQUEST_ID is finished (so a re-run after a failed file step resumes there)
 #    MODE=reset    the reset, unless REQUEST_ID is already recorded (then it prints ALREADY_DONE and changes nothing):
 #                  go-live-before.sql, schema.sql, every migration marked applied, golive-seed.sql, go-live-after.sql,
 #                  then records REQUEST_ID. One SQL run: it stops at the first error (the final snapshot is the undo).
@@ -24,16 +26,26 @@ case "$DB_NAME" in *[!A-Za-z0-9_]*) echo "DB_NAME may only contain letters, digi
 mysql_base=(mysql --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USER" --ssl-mode="$DB_SSL_MODE" --default-character-set=utf8mb4 --connect-timeout=15)
 q() { "${mysql_base[@]}" --batch --skip-column-names "$DB_NAME" -e "$1"; }
 
-done_id() {
-  q "SELECT meta_value FROM settings WHERE meta_tag = 'system' AND meta_key = 'go_live_request' ORDER BY id DESC LIMIT 1" 2>/dev/null || true
+marker() {   # $1 = go_live_request | go_live_files
+  q "SELECT meta_value FROM settings WHERE meta_tag = 'system' AND meta_key = '$1' ORDER BY id DESC LIMIT 1" 2>/dev/null || true
 }
+done_id() { marker go_live_request; }
 
 if [ "$MODE" = status ]; then
-  d="$(done_id)"
-  if [ -n "$d" ]; then echo "GO_LIVE_DONE=$d"; else echo "GO_LIVE_DONE="; fi
+  echo "GO_LIVE_DONE=$(done_id)"
+  echo "GO_LIVE_FILES=$(marker go_live_files)"
   exit 0
 fi
-[ "$MODE" = reset ] || { echo "MODE must be status or reset" >&2; exit 2; }
+if [ "$MODE" = files-done ]; then
+  [[ "${REQUEST_ID:-}" =~ ^[A-Za-z0-9._-]{1,40}$ ]] || { echo "REQUEST_ID is missing or invalid" >&2; exit 2; }
+  [ "$(done_id)" = "$REQUEST_ID" ] || { echo "the database reset of $REQUEST_ID is not recorded" >&2; exit 2; }
+  q "DELETE FROM settings WHERE meta_tag = 'system' AND meta_key = 'go_live_files';
+     INSERT INTO settings (meta_tag, meta_key, meta_value, created_at, updated_at) VALUES ('system', 'go_live_files', '$REQUEST_ID', NOW(), NOW());"
+  [ "$(marker go_live_files)" = "$REQUEST_ID" ] || { echo "could not record the file step" >&2; exit 2; }
+  echo "GO_LIVE_FILES_OK=$REQUEST_ID"
+  exit 0
+fi
+[ "$MODE" = reset ] || { echo "MODE must be status, reset or files-done" >&2; exit 2; }
 
 : "${REQUEST_ID:?}" "${ADMIN_EMAIL:?}" "${ADMIN_NAME:?}" "${ADMIN_HASH:?}" "${STUDENT_EMAIL:?}" "${STUDENT_HASH:?}"
 fail() { echo "ERROR: $*" >&2; exit 2; }

@@ -82,6 +82,9 @@ does the rest after the normal deploy. No password ever goes into Git or GitHub:
      `private/archive/pre-go-live-<id>/`, uploads the sample course files and restarts the app -> CloudFront refreshed ->
      the other manual snapshots and retained backups deleted -> automated backups cleared (retention 0 and back) ->
      `/healthz` checked. The run's summary page lists every step.
+   If a run stops after the database step (for example while moving files), push again with the **same** `REQUEST_ID`
+   (an empty commit is enough): the database is not reset again, the existing snapshot stays the undo point, and the run
+   continues with the files, the restart and the snapshot / backup cleanup (marker `system` / `go_live_files`).
 3. Delete `deploy/go-live.request` in the next commit (leaving it is harmless: the same id is never run twice).
 
 Flags in the request file: `ARCHIVE_UPLOADS`, `DELETE_OLD_SNAPSHOTS`, `CLEAR_AUTOMATED_BACKUPS` (default `true`) and

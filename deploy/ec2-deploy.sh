@@ -196,7 +196,7 @@ go_live_status() {   # $1 = request id
   echo "MODE=status" > "$env"
   out="$(golive_db "$work" "$env")" || { rm -rf "$work"; die "could not read the database"; }
   rm -rf "$work"
-  echo "$out" | grep '^GO_LIVE_DONE='
+  echo "$out" | grep '^GO_LIVE_\(DONE\|FILES\)='
 }
 
 go_live() {   # $1 = S3 key of the request (private/go-live/<id>.env)
@@ -215,18 +215,28 @@ go_live() {   # $1 = S3 key of the request (private/go-live/<id>.env)
     echo "$out" | grep -v '^\(|\|+\)' >&2; rm -rf "$work"; die "the database reset failed (the pre-go-live snapshot is the undo point)"
   fi
   echo "$out"
-  if echo "$out" | grep -q '^ALREADY_DONE'; then rm -rf "$work"; log "go-live $id was already made: nothing changed"; return 0; fi
+  if echo "$out" | grep -q '^ALREADY_DONE'; then
+    # the database was reset by an earlier run; finish the file step if that run stopped before it was recorded
+    echo "MODE=status" > "$work/status.env"
+    if golive_db "$work" "$work/status.env" 2>/dev/null | grep -qx "GO_LIVE_FILES=$id"; then
+      rm -rf "$work"; log "go-live $id was already made: nothing changed"; return 0
+    fi
+    log "go-live $id: the database was reset by an earlier run; finishing the file step"
+  fi
   log "go-live $id: 2/3 files"
   if [ "$archive" != "false" ]; then
-    aws s3 mv --region "$AWS_REGION" --recursive --only-show-errors "s3://$S3_BUCKET/storage/uploads/" "s3://$S3_BUCKET/private/archive/pre-go-live-$id/storage/uploads/"
+    # --copy-props metadata-directive: keep content type / cache headers but don't copy object tags (the server role may not read them)
+    aws s3 mv --region "$AWS_REGION" --recursive --only-show-errors --copy-props metadata-directive "s3://$S3_BUCKET/storage/uploads/" "s3://$S3_BUCKET/private/archive/pre-go-live-$id/storage/uploads/"
     for p in $(aws s3 ls --region "$AWS_REGION" "s3://$S3_BUCKET/private/" | awk '$1 == "PRE" {print $2}'); do
       case "$p" in archive/|go-live/) continue ;; esac
-      aws s3 mv --region "$AWS_REGION" --recursive --only-show-errors "s3://$S3_BUCKET/private/$p" "s3://$S3_BUCKET/private/archive/pre-go-live-$id/private/$p"
+      aws s3 mv --region "$AWS_REGION" --recursive --only-show-errors --copy-props metadata-directive "s3://$S3_BUCKET/private/$p" "s3://$S3_BUCKET/private/archive/pre-go-live-$id/private/$p"
     done
     log "old uploads moved to s3://$S3_BUCKET/private/archive/pre-go-live-$id/"
   fi
   aws s3 cp --region "$AWS_REGION" --recursive --only-show-errors --cache-control 'public, max-age=86400' \
     "$work/database/golive/files/uploads/" "s3://$S3_BUCKET/storage/uploads/"
+  printf 'MODE=files-done\nREQUEST_ID=%s\n' "$id" > "$work/files.env"
+  golive_db "$work" "$work/files.env" || { rm -rf "$work"; die "the files are in place but the step could not be recorded"; }
   rm -rf "$work"
   log "go-live $id: 3/3 restart (new data, empty caches)"
   docker restart "$NAME" >/dev/null
