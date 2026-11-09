@@ -38,6 +38,9 @@ public class LandingPublic {
     private final Auth auth;
     private final Json json;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private LandingAbTests abTests;
+
     public LandingPublic(LandingPages pages, LandingView view, LandingAnalytics analytics, Views views, Auth auth, Json json) {
         this.pages = pages;
         this.view = view;
@@ -57,9 +60,6 @@ public class LandingPublic {
             String url = request.getRequestURI() + (request.getQueryString() == null ? "" : "?" + request.getQueryString());
             return ResponseEntity.status(409).header("X-Inertia-Location", url).build();
         }
-        Map<String, Object> config = json.decodeMap(page.str("published_config"));
-        Map<String, Object> model = view.page(page, config == null ? Map.of() : config, false, Inertia.baseUrl(request));
-        String body = views.render("landing/page", withShared(request, model));
         HttpHeaders h = new HttpHeaders();
         String visitor = cookie(request, VISITOR);
         if (visitor == null || !visitor.matches("[a-f0-9-]{36}")) {
@@ -67,6 +67,16 @@ public class LandingPublic {
             h.add(HttpHeaders.SET_COOKIE, ResponseCookie.from(VISITOR, visitor).path("/").httpOnly(true).sameSite("Lax")
                     .secure(request.isSecure()).maxAge(Duration.ofDays(365)).build().toString());
         }
+        Map<String, Object> config = json.decodeMap(page.str("published_config"));
+        // A/B test: the variant this visitor is assigned to (sticky by the visitor cookie); ?ab=A|B lets staff look at either
+        LandingAbTests.Arm arm = abTests.arm(page.lng("id"), LandingAnalytics.visitorHash(visitor));
+        String force = request.getParameter("ab");
+        if (arm != null && force != null && auth.admin(request) != null && force.matches("[AB]")) arm = new LandingAbTests.Arm(arm.test(), force);
+        Map<String, Object> variant = abTests.variantConfig(arm);
+        if (variant != null) config = variant;
+        Map<String, Object> model = view.page(page, config == null ? Map.of() : config, false, Inertia.baseUrl(request));
+        String body = views.render("landing/page", withShared(request, model));
+        if (arm != null) h.add("X-AB-Variant", arm.variant());
         LandingAnalytics.Utm utm = LandingAnalytics.Utm.of(request.getParameter("utm_source"), request.getParameter("utm_medium"), request.getParameter("utm_campaign"));
         if (utm.source() != null || utm.medium() != null || utm.campaign() != null) {
             String v = URLEncoder.encode(nz(utm.source()) + "|" + nz(utm.medium()) + "|" + nz(utm.campaign()), StandardCharsets.UTF_8);

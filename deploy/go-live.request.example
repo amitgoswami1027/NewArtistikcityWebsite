@@ -1,0 +1,21 @@
+# =====================================================================
+#  Go-live request for the deploy pipeline (docs/GO-LIVE.md).
+#  Copy this file to deploy/go-live.request, set a NEW REQUEST_ID, commit and push to main. After the normal deploy the
+#  "go-live" job takes the final RDS snapshot and resets the LIVE site ONCE for this REQUEST_ID (a later push with the same
+#  id only reports "already done"). Delete deploy/go-live.request afterwards.
+#  Before pushing: the GitHub secrets GO_LIVE_ADMIN_HASH and GO_LIVE_STUDENT_HASH (HASH-PASSWORD.bat) and the updated
+#  CloudFormation stack (the deploy role's go-live permissions). A malformed file stops the pipeline before any build.
+# =====================================================================
+CONFIRM=RESET PRODUCTION
+REQUEST_ID=go-live-2026-11-10
+ADMIN_EMAIL=admin@artistikcity.com
+ADMIN_NAME=ArtistikCity
+STUDENT_EMAIL=student@artistikcity.com
+# true = move every uploaded file to private/archive/pre-go-live-<id>/ in the bucket (nothing is deleted)
+ARCHIVE_UPLOADS=true
+# true = delete every other manual RDS snapshot in the region (pre-go-live-* are kept) and retained backups
+DELETE_OLD_SNAPSHOTS=true
+# true = clear the database's automated backups (retention 0 and back: two short restarts)
+CLEAR_AUTOMATED_BACKUPS=true
+# true = keep the "Site under construction" password set in the admin
+KEEP_SITE_LOCK=false

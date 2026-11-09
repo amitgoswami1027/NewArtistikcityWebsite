@@ -31,6 +31,13 @@ public class LandingAnalytics {
 
     private final Db db;
 
+    private LandingAbTests abTests;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setAbTests(LandingAbTests abTests) {
+        this.abTests = abTests;
+    }
+
     public LandingAnalytics(Db db) {
         this.db = db;
     }
@@ -82,9 +89,15 @@ public class LandingAnalytics {
             return false;
         }
         Utm u = utm == null ? Utm.none() : utm;
-        db.insertReturningId("landing_events", Row.of("landing_page_id", pageId, "event", event, "visitor", visitor,
+        Row row = Row.of("landing_page_id", pageId, "event", event, "visitor", visitor,
                 "method", method == null ? null : LandingCoupons.cut(method, 30), "provider", provider == null ? null : LandingCoupons.cut(provider, 20),
-                "order_id", orderId, "utm_source", u.source(), "utm_medium", u.medium(), "utm_campaign", u.campaign(), "device", device, "created_at", now));
+                "order_id", orderId, "utm_source", u.source(), "utm_medium", u.medium(), "utm_campaign", u.campaign(), "device", device, "created_at", now);
+        LandingAbTests.Arm arm = abTests == null ? null : abTests.arm(pageId, visitor);
+        if (arm != null) {
+            row.put("ab_test_id", arm.testId());
+            row.put("ab_variant", arm.variant());
+        }
+        db.insertReturningId("landing_events", row);
         return true;
     }
 

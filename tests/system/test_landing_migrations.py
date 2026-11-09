@@ -59,7 +59,7 @@ try:
     listed = subprocess.run(['git', 'ls-tree', '--name-only', f'{BASE}', 'database/migrations/'], cwd=ROOT, capture_output=True, text=True, check=True).stdout
     base_migrations = set(os.path.basename(x) for x in listed.split() if x.endswith('.sql'))
 except Exception:
-    base_migrations = set(x for x in base_migrations if x < '2026-11-08')
+    base_migrations = set(x for x in base_migrations if x < os.environ.get('BASE_MIGRATIONS_BEFORE', '2026-11-08'))   # an older base: e.g. 2026-11-05
 newer = sorted(os.path.basename(x) for x in glob.glob(os.path.join(ROOT, 'database/migrations/*.sql')) if os.path.basename(x) not in base_migrations)
 print('migrations to apply:', ', '.join(newer))
 check('there are landing migrations to apply', any('landing' in m for m in newer), newer)

@@ -33,6 +33,13 @@ docker compose down -v && docker compose up -d            # wipe and reload demo
 WIPE-SITE-DATA.bat                                        # = setup-and-run.ps1 -WipeData; SQL: database/maintenance/wipe-site-data.sql
 RESTORE-SITE-DATA.bat                                     # = -RestoreData [-RestoreFrom backups\wipe-<date>]: undo a wipe (current data saved first)
 
+# Go-live (docs/GO-LIVE.md): LIVE AWS site -> 1 super admin, 1 student, 6 sample courses; configuration kept; final RDS snapshot
+# first, then older snapshots / backups deleted, S3 uploads archived. Passwords are typed (bcrypt via tools/HashPassword).
+GO-LIVE-RESET.bat -DryRun                                 # shows everything (incl. server settings still in test mode), changes nothing
+GO-LIVE-RESET.bat [-AdminEmail x -AdminName y]            # asks GO LIVE / DELETE;  -Local = rehearsal on this PC's database
+# or through the pipeline: commit deploy/go-live.request (from .example, new REQUEST_ID); secrets GO_LIVE_ADMIN_HASH / _STUDENT_HASH
+HASH-PASSWORD.bat [-Staff] -Email x                       # bcrypt hash for those secrets (password typed, never stored)
+
 # Rebuild the React bundle -> src/main/resources/static/js/app.js
 cd frontend && npm install && npm run dev                 # or: npm run prod / npm run watch
 ```
@@ -42,8 +49,8 @@ rich-text cleaner (`support/HtmlCleanerTest`), the video upload check (`admin/Vi
 AWS's published examples (`support/s3/SigV4Test`), the CloudFront filter (`http/CloudFrontFilterTest`), shop pricing incl. custom sizes (`shop/ShopPricingTest`), landing page pricing and config (`landing/LandingPricingTest`, `landing/LandingSiteConfigTest`) and
 the unified orders endpoint (`orders/UnifiedOrdersEndpointTest`, MockMvc), the configuration panel's encryption and allow-list
 (`config/panel/ConfigPanelTest`), SNS SMS requests (`auth/sms/SnsSmsSenderTest`) and the Studio Stories / site layout checks
-(`admin/StudioAndLayoutTest`), admin MFA (`security/mfa/TotpTest`: RFC 6238 vectors, QR structure), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
-`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_site_pages.py` covers the page tabs of SEO & Layout Controls, the four information pages and shop test payments (dev or production profile); `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing_quick_checkout.py` covers the in-page checkout, quick sign-in and admin test payments; `tests/system/test_landing.py` covers Landing Page Management end to end (`test_landing_showcase.py`: own addresses, information pages and the three showcase pages) (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
+(`admin/StudioAndLayoutTest`), admin MFA (`security/mfa/TotpTest`: RFC 6238 vectors, QR structure), landing A/B split and statistics (`landing/LandingAbTestsTest`), the studio stage (`lifecycle/StudioStageTest`) and payout details checks (`selling/SellingTest`): `mvn test`.
+`tests/system/test_selling.py` covers Sell your art end to end; `tests/system/test_landing_ab.py` covers landing A/B tests (dev); `tests/system/test_golive.py` checks a database right after GO-LIVE-RESET (production profile); `tests/system/test_site_pages.py` covers the page tabs of SEO & Layout Controls, the four information pages and shop test payments (dev or production profile); `tests/system/test_cart_offers.py` covers the cart, Buy now, custom sizes and offers; `tests/system/test_landing_quick_checkout.py` covers the in-page checkout, quick sign-in and admin test payments; `tests/system/test_landing.py` covers Landing Page Management end to end (`test_landing_showcase.py`: own addresses, information pages and the three showcase pages) (both dev profile, fresh DB). `tests/system/test_admin_setup.py` (dev profile, fresh DB) proves 401/403 for non-admins on every
 new admin API, secret masking, validation and commit of panel values, site settings and the Studio Stories workflow. Browser tests for the purchase flow live in `tests/e2e`.
 The database race tests `marketplace/MarketplaceConcurrencyIT` (many buyers reserve / pay for one original at once: one wins,
 the rest get 409 or REFUND_REQUIRED) and `seats/SeatRaceIT` (20 students, 5 seats: exactly 5 get one) run only with
@@ -319,7 +326,13 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   purchase is a normal course `orders` row with `landing_page_id`, coupon, amounts, `payment_method|provider`, UTM; completion,
   webhook and reconciler stay in `CheckoutController` (expected amount = the order's own price, `LandingHooks.onPaid` after every
   verified payment). Content config is versioned JSON (`draft_config` → publish = `landing_page_versions` row; rollback re-publishes;
-  `LandingConfig.normalize` validates/cleans everything); money settings are tables, live on save, one calculation for page,
+  `LandingConfig.normalize` validates/cleans everything).
+  **A/B tests** (`LandingAbTests`, `landing_ab_tests`, migration `2026-11-14_landing_ab_tests.sql`, editor › Preview & publish): live
+  version = A, the saved draft becomes version "A/B variant B", visitors split by `CRC32("testId:" + visitorHash) % 100 < split_b`
+  (sticky, header `X-AB-Variant`, staff `?ab=A|B`), events get `ab_test_id|ab_variant`, purchases credited via `armAt(order.created_at)`;
+  promote B = publish B as a new version (replaces the live page), keep A, or stop; publish/schedule/rollback 409 while running,
+  unpublish/archive stops it; `POST /admin/api/landing/pages/{id}/ab/start|end`.
+  Money settings are tables, live on save, one calculation for page,
   checkout and gateway (`LandingPricing.quote`; the browser never sends a price; pay re-prices with 409 `repriced`). Payment
   capability model: provider can (catalogue) × page allows (GLOBAL defaults or CUSTOM) × provider connected; checked on every pay;
   a page can't be published/scheduled when nobody could pay. Cashfree/PayU are listed but not integrated. Capabilities `landing`,
@@ -433,6 +446,20 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   (WCAG AAA); a global `:focus-visible` ring is defined at the end of `ac-theme.css`. Pre-built Tailwind resets (`.tw button { background-color:
   transparent }`) beat single-class button rules: give such buttons a two-class selector (see `.pf .pf__btn--primary`, the brand-coloured
   "Create portfolio PDF" on `/dashboard/certificates`).
+- **Go-live reset** (`GO-LIVE-RESET.ps1`, docs/GO-LIVE.md, `database/golive/`): `go-live-before.sql` copies `config_overrides` and
+  the cleaned `settings` (no site lock, simulated Razorpay / sign-in codes off, shop simulation = test buyers, no values pointing at
+  archived uploads, newest row per key) into `ac_keep_*`; then `schema.sql`, every migration marked applied, `golive-seed.sql`
+  (GENERATED by `build_golive.py`: edit that; files under `database/golive/files/uploads/` = storage paths) and `go-live-after.sql`.
+  Passwords are hashed by `tools/HashPassword` (stdin, `PasswordPolicy`, 12+ for staff) run from the jar with
+  `-Dloader.main=... org.springframework.boot.loader.launch.PropertiesLauncher`. The script needs Windows PowerShell 5.1 (no
+  `ProcessStartInfo.ArgumentList`). Failed sign-in forms without a Referer go back to their own page (`Redirects.previous`).
+  **Pipeline path:** a committed `deploy/go-live.request` (CONFIRM=RESET PRODUCTION, REQUEST_ID, ADMIN_*, STUDENT_EMAIL, flags) +
+  secrets `GO_LIVE_ADMIN_HASH`/`GO_LIVE_STUDENT_HASH` (bcrypt, `HASH-PASSWORD.bat`): deploy.yml's test job validates it (CHECK_ONLY) and
+  rehearses `deploy/go-live-db.sh` on the CI DB; the `go-live` job (after deploy) runs `deploy/go-live-pipeline.sh`: status via SSM
+  (`ec2-deploy.sh --go-live-status`), final snapshot `pre-go-live-<id>`, request env to `s3://bucket/private/go-live/<id>.env` (SSE,
+  server deletes it), `ec2-deploy.sh --go-live <key>` (DB reset in the mysql image, uploads archived to `private/archive/pre-go-live-<id>/`,
+  sample files, restart), old snapshots / retained / automated backups cleared, `/healthz`. Idempotent per REQUEST_ID (settings
+  `system`/`go_live_request`). IAM: the `GoLive*` statements of the GitHub role in `infra/artistikcity.yml` (stack update needed once).
 - Reference only: `docs/sqlserver-ddl.sql` (SQL Server version of courses / taxonomy / audit log), `frontend/resources/js/types/catalog.d.ts`,
   `docs/prototype/` (one-file React + Tailwind prototype of the filters, tag manager and audit viewer).
 - `logs/`, `target/`, `.tools/` and `frontend/node_modules/` are local-only and git-ignored.

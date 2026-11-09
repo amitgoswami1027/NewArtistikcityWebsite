@@ -641,6 +641,38 @@ Resources:
                 Effect: Allow
                 Action: cloudfront:CreateInvalidation
                 Resource: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+              # ---- one-time go-live reset (deploy/go-live-pipeline.sh, docs/GO-LIVE.md); only used when the commit
+              #      contains deploy/go-live.request
+              - Sid: GoLiveReadStack
+                Effect: Allow
+                Action: cloudformation:DescribeStacks
+                Resource: !Ref AWS::StackId
+              - Sid: GoLiveDescribeRds
+                Effect: Allow
+                Action: [rds:DescribeDBInstances, rds:DescribeDBSnapshots, rds:DescribeDBInstanceAutomatedBackups]
+                Resource: '*'
+              - Sid: GoLiveFinalSnapshot
+                Effect: Allow
+                Action: [rds:CreateDBSnapshot, rds:AddTagsToResource]
+                Resource:
+                  - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:${Database}'
+                  - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:snapshot:pre-go-live-*'
+              - Sid: GoLiveDeleteOldSnapshots
+                Effect: Allow
+                Action: rds:DeleteDBSnapshot
+                Resource: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:snapshot:*'
+              - Sid: GoLiveDeleteRetainedBackups
+                Effect: Allow
+                Action: rds:DeleteDBInstanceAutomatedBackup
+                Resource: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:auto-backup:*'
+              - Sid: GoLiveBackupRetention
+                Effect: Allow
+                Action: rds:ModifyDBInstance
+                Resource: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:${Database}'
+              - Sid: GoLiveHandOverRequest   # the request (bcrypt hashes) for the server; the server deletes it
+                Effect: Allow
+                Action: [s3:PutObject, s3:DeleteObject]
+                Resource: !Sub '${UploadsBucket.Arn}/private/go-live/*'
 
 Outputs:
   CloudFrontDomain:

@@ -43,6 +43,7 @@ already in `schema.sql`, and they remain available in git history.
 | `2026-11-10_landing_collation.sql` | Gives the landing tables the text collation of the rest of the database (the `orders` table's) and sets the database default to it. Fixes "Illegal mix of collations" (Error 500 on Admin › Landing Page Management) on databases loaded from a dump, e.g. AWS RDS imported from a PC. Does nothing where everything already matches. |
 | `2026-11-11_landing_quick_signin.sql` | Quick sign-in on landing pages: `auth_email_codes` (six-digit sign-in codes sent by e-mail, stored as an HMAC). |
 | `2026-11-13_admin_mfa.sql` | Two-step verification for staff: `admins.mfa_secret` (encrypted TOTP secret), `mfa_enabled_at`, `mfa_last_step`, `mfa_changed_at`, and `admin_mfa_recovery_codes` (hashes only). |
+| `2026-11-14_landing_ab_tests.sql` | Landing page A/B tests: `landing_ab_tests` (live version A against a variant B, traffic split, goal, winner) and `landing_events.ab_test_id`, `ab_variant`. |
 | `2026-11-12_landing_login_verify.sql` | Login & verification: `landing_checkout.verify_with` (how a page's buyers are verified when they pay; NULL = the default). |
 
 **Collations.** A database loaded from a dump keeps each table's own collation, while tables created later by a migration get

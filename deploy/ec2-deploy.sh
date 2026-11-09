@@ -5,6 +5,12 @@
 #    ec2-deploy.sh <image-uri>        deploy that image (e.g. 1234.dkr.ecr.ap-south-1.amazonaws.com/artistikcity:<git-sha>)
 #    ec2-deploy.sh --rollback         go back to the image that ran before the current one
 #    ec2-deploy.sh --status           show what is running
+#    ec2-deploy.sh --go-live-status <request-id>   GO_LIVE_DONE=<id> when that go-live reset was already made
+#    ec2-deploy.sh --go-live <s3-key>  the go-live reset (docs/GO-LIVE.md), started by the GitHub pipeline after it took the
+#                                      final RDS snapshot: reads the request (bcrypt hashes, no passwords) from
+#                                      s3://$S3_BUCKET/private/go-live/<id>.env and deletes it, rebuilds the database
+#                                      (deploy/go-live-db.sh), archives the uploads to private/archive/pre-go-live-<id>/,
+#                                      uploads the sample course files and restarts the site. Runs a request id once.
 #
 #  Steps: 1) settings file from Secrets Manager + SSM Parameter Store  2) pull the image  3) database migrations
 #  (stops here on error, the running site is untouched)  4) replace the container  5) health check on /healthz
@@ -161,6 +167,73 @@ prune_images() {   # keep the current and previous image of this repository, rem
   docker image prune -f >/dev/null 2>&1 || true
 }
 
+# ---------------------------------------------------------------- go-live reset
+golive_work() {   # database/ + deploy/ of the running image in a private folder; prints the folder
+  local image work cid
+  image="$(current_image)"; [ -n "$image" ] || die "no image is running (deploy first)"
+  work="$(mktemp -d "$BASE/golive.XXXXXX")"
+  cid="$(docker create "$image")"
+  docker cp "$cid:/app/database" "$work/database"
+  docker cp "$cid:/app/deploy" "$work/deploy"
+  docker rm "$cid" >/dev/null
+  chmod -R a+rX "$work/database" "$work/deploy"
+  echo "$work"
+}
+
+golive_db() {     # $1 = work folder, $2 = env file (MODE=..., request values); runs deploy/go-live-db.sh in the mysql image
+  local creds
+  creds="$(db_credentials)"
+  docker pull -q "$MYSQL_IMAGE" >/dev/null
+  docker run --rm --network host -v "$1:/work:ro" --env-file "$2" \
+    -e DB_HOST="$DB_HOST" -e DB_NAME="$DB_NAME" -e DB_USER="${creds%%$'\t'*}" -e MYSQL_PWD="${creds#*$'\t'}" -e DB_DIR=/work/database \
+    "$MYSQL_IMAGE" bash /work/deploy/go-live-db.sh
+}
+
+go_live_status() {   # $1 = request id
+  local work env out
+  [[ "${1:-}" =~ ^[A-Za-z0-9._-]{1,40}$ ]] || die "usage: $0 --go-live-status <request-id>"
+  work="$(golive_work)"; env="$work/status.env"
+  echo "MODE=status" > "$env"
+  out="$(golive_db "$work" "$env")" || { rm -rf "$work"; die "could not read the database"; }
+  rm -rf "$work"
+  echo "$out" | grep '^GO_LIVE_DONE='
+}
+
+go_live() {   # $1 = S3 key of the request (private/go-live/<id>.env)
+  local key="${1:-}" work req env out id archive p
+  [[ "$key" =~ ^private/go-live/[A-Za-z0-9._-]{1,40}\.env$ ]] || die "usage: $0 --go-live private/go-live/<request-id>.env"
+  work="$(golive_work)"; req="$work/request.env"; env="$work/reset.env"
+  ( umask 077; aws s3 cp --region "$AWS_REGION" --only-show-errors "s3://$S3_BUCKET/$key" "$req" ) || { rm -rf "$work"; die "request s3://$S3_BUCKET/$key not found"; }
+  aws s3 rm --region "$AWS_REGION" --only-show-errors "s3://$S3_BUCKET/$key" || true
+  # only the known keys, one per line, no line breaks inside values
+  ( umask 077; echo "MODE=reset"; grep -E '^(REQUEST_ID|ADMIN_EMAIL|ADMIN_NAME|ADMIN_HASH|STUDENT_EMAIL|STUDENT_HASH|KEEP_SITE_LOCK)=' "$req" ) > "$env"
+  id="$(grep '^REQUEST_ID=' "$env" | head -n 1 | cut -d= -f2-)"
+  [[ "$id" =~ ^[A-Za-z0-9._-]{1,40}$ ]] || { rm -rf "$work"; die "the request has no valid REQUEST_ID"; }
+  archive="$(grep '^ARCHIVE_UPLOADS=' "$req" | head -n 1 | cut -d= -f2-)"
+  log "go-live $id: 1/3 database"
+  if ! out="$(golive_db "$work" "$env" 2>&1)"; then
+    echo "$out" | grep -v '^\(|\|+\)' >&2; rm -rf "$work"; die "the database reset failed (the pre-go-live snapshot is the undo point)"
+  fi
+  echo "$out"
+  if echo "$out" | grep -q '^ALREADY_DONE'; then rm -rf "$work"; log "go-live $id was already made: nothing changed"; return 0; fi
+  log "go-live $id: 2/3 files"
+  if [ "$archive" != "false" ]; then
+    aws s3 mv --region "$AWS_REGION" --recursive --only-show-errors "s3://$S3_BUCKET/storage/uploads/" "s3://$S3_BUCKET/private/archive/pre-go-live-$id/storage/uploads/"
+    for p in $(aws s3 ls --region "$AWS_REGION" "s3://$S3_BUCKET/private/" | awk '$1 == "PRE" {print $2}'); do
+      case "$p" in archive/|go-live/) continue ;; esac
+      aws s3 mv --region "$AWS_REGION" --recursive --only-show-errors "s3://$S3_BUCKET/private/$p" "s3://$S3_BUCKET/private/archive/pre-go-live-$id/private/$p"
+    done
+    log "old uploads moved to s3://$S3_BUCKET/private/archive/pre-go-live-$id/"
+  fi
+  aws s3 cp --region "$AWS_REGION" --recursive --only-show-errors --cache-control 'public, max-age=86400' \
+    "$work/database/golive/files/uploads/" "s3://$S3_BUCKET/storage/uploads/"
+  rm -rf "$work"
+  log "go-live $id: 3/3 restart (new data, empty caches)"
+  docker restart "$NAME" >/dev/null
+  healthy || die "the site did not come back after the restart: check ec2-deploy.sh --status and the logs"
+  echo "GO_LIVE_RESET_OK=$id"
+}
+
 # ---------------------------------------------------------------- commands
 deploy() {   # $1 = image, $2 = "migrate" or "skip-migrations"
   local image="$1" previous
@@ -216,8 +289,12 @@ case "${1:-}" in
     sed -i '$ d' "$STATE/history"
     deploy "$prev" skip-migrations      # the image we leave becomes "previous", so a second --rollback undoes this one
     ;;
+  --go-live-status)
+    go_live_status "${2:-}" ;;
+  --go-live)
+    go_live "${2:-}" ;;
   ""|-*)
-    die "usage: $0 <image-uri> | --rollback | --status" ;;
+    die "usage: $0 <image-uri> | --rollback | --status | --go-live-status <id> | --go-live <s3-key>" ;;
   *)
     deploy "$1" "${MIGRATE:-migrate}" ;;
 esac

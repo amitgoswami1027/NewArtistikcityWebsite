@@ -326,6 +326,7 @@ public class LandingAdminController {
         m.put("config", pages.draft(page));
         m.put("hasUnpublishedChanges", hasUnpublished(page));
         m.put("versions", pages.versions(id));
+        m.put("ab", abTests.view(id));
         if (!site) {
             m.put("pricing", commerce.pricingView(id));
             m.put("quote", view.price(commerce.quote(page)));
@@ -437,6 +438,10 @@ public class LandingAdminController {
         if (!kit.can(admin, "landing.publish") || page == null || !mayEdit(admin, page)) return kit.forbidden();
         Input in = Input.of(request, json);
         String message;
+        if (("publish".equals(action) || "schedule".equals(action)) && abTests.running(id) != null) {
+            return kit.fail(HttpStatus.CONFLICT, "An A/B test is running on this page. End it first (promote the winner or keep the live version).");
+        }
+        if ("unpublish".equals(action) || "archive".equals(action)) abTests.stopFor(id);
         switch (action) {
             case "publish" -> {
                 if ("ARCHIVED".equals(page.str("status"))) return kit.fail(HttpStatus.CONFLICT, "Restore the page before publishing it.");
@@ -500,10 +505,66 @@ public class LandingAdminController {
         Row admin = kit.admin(request);
         Row page = pages.find(id);
         if (!kit.can(admin, "landing.publish") || page == null || !mayEdit(admin, page)) return kit.forbidden();
+        if (abTests.running(id) != null) return kit.fail(HttpStatus.CONFLICT, "An A/B test is running on this page. End it first.");
         Map<String, String> e = pages.rollback(id, vid, admin.lng("id"));
         if (!e.isEmpty()) return kit.invalid(e);
         audit.log(admin, "landing_page", id, "update", "Rolled back to version id " + vid);
         return kit.ok(Map.of("message", "That version is live again (published as a new version).", "data", editorData(admin, pages.find(id))));
+    }
+
+    // ----------------------------------------------------------------------------------------- A/B tests
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private LandingAbTests abTests;
+
+    /** JSON {name, split}: tests the saved draft (B) against the live version (A). */
+    @PostMapping("/admin/api/landing/pages/{id}/ab/start")
+    public ResponseEntity<String> abStart(HttpServletRequest request, @PathVariable("id") long id) {
+        Row admin = kit.admin(request);
+        Row page = pages.find(id);
+        if (!kit.can(admin, "landing.publish") || page == null || !mayEdit(admin, page)) return kit.forbidden();
+        Map<String, Object> in = Input.of(request, json).all();
+        int split;
+        try {
+            split = Integer.parseInt(String.valueOf(in.getOrDefault("split", "50")).trim());
+        } catch (NumberFormatException ex) {
+            split = -1;
+        }
+        String unpayable = unpayable(page);
+        if (unpayable != null) return kit.invalid(Map.of("payments", unpayable));
+        Map<String, String> e = abTests.start(page, LandingConfig.str(in.get("name")), split, admin.lng("id"), LandingConfig.normalize(pages.draft(page), LandingPages.isSite(page)));
+        if (!e.isEmpty()) return kit.invalid(e);
+        audit.log(admin, "landing_page", id, "update", "Started A/B test \"" + LandingConfig.str(in.get("name")) + "\" (" + split + " % to B)");
+        return kit.ok(Map.of("message", "A/B test started: " + (100 - split) + " % of visitors see the live page (A), " + split + " % see your draft (B).",
+                "data", editorData(admin, pages.find(id))));
+    }
+
+    /** JSON {winner: A | B | none}. B publishes the variant as the new live version. */
+    @PostMapping("/admin/api/landing/pages/{id}/ab/end")
+    public ResponseEntity<String> abEnd(HttpServletRequest request, @PathVariable("id") long id) {
+        Row admin = kit.admin(request);
+        Row page = pages.find(id);
+        if (!kit.can(admin, "landing.publish") || page == null || !mayEdit(admin, page)) return kit.forbidden();
+        String w = LandingConfig.str(Input.of(request, json).all().get("winner"));
+        if (!List.of("A", "B", "none").contains(w)) return kit.invalid(Map.of("winner", "Choose A, B or no winner."));
+        Row t = abTests.running(id);
+        if (t == null) return kit.fail(HttpStatus.CONFLICT, "No A/B test is running on this page.");
+        String message;
+        if ("B".equals(w)) {
+            Row v = db.first("select config, template_key from landing_page_versions where id = ?", t.get("variant_version_id"));
+            abTests.end(id, "B", admin.lng("id"));
+            LocalDateTime now = LocalDateTime.now();
+            db.updateById("landing_pages", id, Row.of("draft_config", v.str("config"), "template_key", v.str("template_key"), "draft_saved_at", now,
+                    "draft_saved_by", admin.lng("id"), "updated_at", now));
+            Map<String, String> e = pages.publish(id, admin.lng("id"), "A/B winner B: " + t.str("name"));
+            if (!e.isEmpty()) return kit.invalid(e);
+            message = "B is now the live page for everyone. The previous version stays in the version history.";
+        } else {
+            abTests.end(id, "A".equals(w) ? "A" : null, admin.lng("id"));
+            message = "A".equals(w) ? "Test ended. The live page (A) stays; everyone sees it again." : "Test ended without a winner. Everyone sees the live page.";
+        }
+        audit.log(admin, "landing_page", id, "update", "Ended A/B test \"" + t.str("name") + "\": winner " + w);
+        return kit.ok(Map.of("message", message, "data", editorData(admin, pages.find(id))));
     }
 
     // ----------------------------------------------------------------------------------------- money settings

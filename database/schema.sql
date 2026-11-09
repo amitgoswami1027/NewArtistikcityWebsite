@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS landing_payment_methods;
 DROP TABLE IF EXISTS landing_payment_providers;
 DROP TABLE IF EXISTS landing_payment_settings;
 DROP TABLE IF EXISTS landing_pricing;
+DROP TABLE IF EXISTS landing_ab_tests;
 DROP TABLE IF EXISTS landing_page_versions;
 DROP TABLE IF EXISTS landing_pages;
 DROP TABLE IF EXISTS painting_offer_events;
@@ -1891,9 +1892,32 @@ CREATE TABLE landing_events (
     utm_medium      VARCHAR(80)  NULL,
     utm_campaign    VARCHAR(120) NULL,
     device          VARCHAR(10)  NULL,
+    ab_test_id      BIGINT       NULL,
+    ab_variant      CHAR(1)      NULL,
     created_at      DATETIME     NOT NULL,
     INDEX landing_events_page_index (landing_page_id, event, created_at),
-    INDEX landing_events_time_index (created_at)
+    INDEX landing_events_time_index (created_at),
+    INDEX landing_events_ab_index (ab_test_id, ab_variant, event)
+);
+
+-- A/B tests: live version (A) against a variant (B); promoting the winner publishes it (LandingAbTests)
+CREATE TABLE landing_ab_tests (
+    id                 BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    landing_page_id    BIGINT       NOT NULL,
+    name               VARCHAR(120) NOT NULL,
+    status             VARCHAR(10)  NOT NULL,
+    goal               VARCHAR(12)  NOT NULL,
+    split_b            INT          NOT NULL,
+    control_version_id BIGINT       NOT NULL,
+    variant_version_id BIGINT       NOT NULL,
+    winner             CHAR(1)      NULL,
+    started_by         BIGINT       NULL,
+    started_at         DATETIME     NOT NULL,
+    ended_by           BIGINT       NULL,
+    ended_at           DATETIME     NULL,
+    created_at         DATETIME     NOT NULL,
+    INDEX landing_ab_tests_page_index (landing_page_id, status),
+    CONSTRAINT landing_ab_tests_page_foreign FOREIGN KEY (landing_page_id) REFERENCES landing_pages (id) ON DELETE CASCADE
 );
 
 CREATE TABLE landing_media (

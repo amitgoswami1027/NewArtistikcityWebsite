@@ -203,6 +203,28 @@ Admin › Landing Page Management › *Payments & checkout* › **Test payments*
 Simulated orders have `is_test = 1` and `payment_option = 'Simulated (test)'`: they stay out of revenue, analytics, the
 ledger, payouts and the reconciler, and they never use up a coupon. Every action is audited.
 
+### A/B tests (winner replaces the live page)
+
+Editor › *Preview & publish* › **A/B test** (`landing/LandingAbTests`, table `landing_ab_tests`, columns
+`landing_events.ab_test_id|ab_variant`, migration `2026-11-14_landing_ab_tests.sql`; capability `landing.publish`).
+
+* **Start**: on a published page, change the draft (sections, design, SEO), save it, give the test a name and choose how
+  many visitors see B (10-90 %). The live version is **A**; the saved draft is stored as a version row "A/B variant B: <name>"
+  and is **B**. Refused when the draft equals the live page, when nobody could pay, or when a test already runs.
+* **Split**: by the anonymous visitor cookie (`ac_lv`, hashed): CRC32("testId:hash") % 100 < split → B. A visitor always
+  sees the same version, needs no extra cookie, and a new test is an independent split. The response header
+  `X-AB-Variant` says which one was served; signed-in staff can look at either with `?ab=A` / `?ab=B` (visitors can't).
+* **Figures** (per variant): visitors, checkout opened, button clicks, purchases, conversion (purchases ÷ visitors; button
+  clicks for information pages), revenue (real orders only, like Analytics), the leader, the lift and a two-sided
+  confidence (two-proportion z-test; "collecting data" until both have 30 visitors, "safe to decide" from 95 %). A purchase
+  is credited to the variant the buyer saw when the order was made.
+* **End**: *Promote B* publishes B as a new version, so B **replaces** the live page for everyone (the old version stays in
+  the history for rollback); *Keep A* ends the test and leaves the live page (the draft keeps B's changes); *Stop without a
+  winner*. While a test runs, publish / schedule / rollback answer 409; unpublishing or archiving the page stops it.
+* APIs: `POST /admin/api/landing/pages/{id}/ab/start` `{name, split}`, `POST .../ab/end` `{winner: A|B|none}`; the editor data
+  carries `ab {ready, running, history, minSplit, maxSplit, minVisitors}`. Every start / end is in the audit log.
+* Tests: `landing/LandingAbTestsTest` (split, stickiness, statistics), `tests/system/test_landing_ab.py` (dev profile).
+
 ## 3. Payment capability model
 
 Three layers decide what a buyer sees; the server checks all of them on every pay request (`LandingPayments.choices`):
@@ -260,7 +282,7 @@ admin only, audited; stored in `admins.extra_capabilities`): ready-made roles **
 
 Admin (JSON, admin session + CSRF): `GET /admin/api/landing/overview`, `GET|POST /admin/api/landing/pages`,
 `GET|DELETE /admin/api/landing/pages/{id}`, `PUT .../{id}/basics|draft|template|pricing|payments|checkout`,
-`POST .../{id}/publish|schedule|unpublish|archive|restore|duplicate`, `POST .../{id}/versions/{vid}/restore`,
+`POST .../{id}/publish|schedule|unpublish|archive|restore|duplicate`, `POST .../{id}/versions/{vid}/restore`, `POST .../{id}/ab/start|end`,
 `GET /admin/api/landing/payments`, `PUT .../payments/defaults`, `POST .../payments/test`, `GET|POST /admin/api/landing/coupons`,
 `PUT|DELETE .../coupons/{id}`, `GET /admin/api/landing/orders[/{id}]`, `POST .../orders/{id}/refund`,
 `GET|POST /admin/api/landing/media`, `PUT|DELETE .../media/{id}`, `GET|PUT /admin/api/landing/settings`,
@@ -278,7 +300,7 @@ page with the checkout open: `#enroll`, `?order=`; old `/course/{slug}/enroll[/d
 ## 8. Setup and deployment
 
 1. Apply `database/migrations/2026-11-08_landing_pages.sql`, `2026-11-09_landing_site_pages.sql`, `2026-11-10_landing_collation.sql`
-   and `2026-11-11_landing_quick_signin.sql` (the launcher and
+   `2026-11-11_landing_quick_signin.sql`, `2026-11-12_landing_login_verify.sql` and `2026-11-14_landing_ab_tests.sql` (the launcher and
    `deploy/db-migrate.sh` do it; safe to run twice; compatible with the previous release). On the next start the three
    showcase pages are created and published (see above).
 2. Gateway keys: Admin › System parameters › Configuration Panel (`razorpay.key|secret|webhook-secret`, `paypal.*`). No new
@@ -297,8 +319,9 @@ page with the checkout open: `#enroll`, `?order=`; old `/course/{slug}/enroll[/d
 
 * Cashfree and PayU are catalogued but not integrated (no adapter yet), so they can't be switched on.
 * Instalments: EMI / no-cost EMI are offered through Razorpay's own EMI; there is no in-house instalment plan.
-* A/B testing, campaign-specific variants of one page and a visual drag-on-canvas builder are not in this release (pages are
-  built from the section library; campaign pages are separate pages with their own address).
+* One A/B test per page at a time, two variants (A = live, B = draft); no multi-variant tests. Campaign-specific variants of
+  one page and a visual drag-on-canvas builder are not in this release (pages are built from the section library; campaign
+  pages are separate pages with their own address).
 * Partial refunds: refunds are full refunds through the existing refunds queue.
 * Lighthouse could not be run in the build environment; the page was measured with equivalent checks (see the report). Run
   Lighthouse on staging before launch.

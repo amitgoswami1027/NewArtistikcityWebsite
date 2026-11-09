@@ -33,6 +33,9 @@ public class LandingHooks {
     @org.springframework.beans.factory.annotation.Autowired
     private LandingView view;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private LandingAbTests abTests;
+
     public LandingHooks(Db db, LandingCoupons coupons, CommissionPayments gateways, AuditLog auditLog) {
         this.db = db;
         this.coupons = coupons;
@@ -170,7 +173,7 @@ public class LandingHooks {
     }
 
     public void onPaid(long orderId) {
-        Row o = db.first("select id, landing_page_id, landing_visitor, payment_id, payment_option, payment_method, payment_provider, utm_source, utm_medium, utm_campaign, is_test"
+        Row o = db.first("select id, landing_page_id, landing_visitor, payment_id, payment_option, payment_method, payment_provider, utm_source, utm_medium, utm_campaign, is_test, created_at"
                 + " from orders where id = ? and landing_page_id is not null", orderId);
         if (o == null) {
             return;
@@ -206,9 +209,18 @@ public class LandingHooks {
         // simulated payments on a real server (test buyers, simulated Razorpay) stay out of the funnel, like they stay out of
         // revenue; a development server's own test payments still count, so its analytics screens have data
         if (visitor != null && visitor.length() == 32 && !"Simulated (test)".equals(o.str("payment_option"))) {
-            db.insertReturningId("landing_events", Row.of("landing_page_id", o.get("landing_page_id"), "event", "PURCHASE", "visitor", visitor, "method", chosen,
+            Row ev = Row.of("landing_page_id", o.get("landing_page_id"), "event", "PURCHASE", "visitor", visitor, "method", chosen,
                     "provider", o.get("payment_provider"), "order_id", orderId, "utm_source", o.get("utm_source"), "utm_medium", o.get("utm_medium"),
-                    "utm_campaign", o.get("utm_campaign"), "device", null, "created_at", LocalDateTime.now()));
+                    "utm_campaign", o.get("utm_campaign"), "device", null, "created_at", LocalDateTime.now());
+            // credit the A/B variant this buyer saw when the order was made (same assignment as the page)
+            Object made = o.get("created_at");
+            LandingAbTests.Arm arm = abTests.armAt(((Number) o.get("landing_page_id")).longValue(), visitor,
+                    made instanceof LocalDateTime t ? t : made instanceof java.sql.Timestamp ts ? ts.toLocalDateTime() : LocalDateTime.now());
+            if (arm != null) {
+                ev.put("ab_test_id", arm.testId());
+                ev.put("ab_variant", arm.variant());
+            }
+            db.insertReturningId("landing_events", ev);
         }
     }
 

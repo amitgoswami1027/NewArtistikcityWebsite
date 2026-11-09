@@ -600,6 +600,128 @@ function availableMethods(payments) {
     return ((payments && payments.methods) || []).filter((m) => m.live);
 }
 
+/* ------------------------------------------------------------------------------------------------ A/B test */
+
+const pct = (n) => `${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })} %`;
+
+function AbFigures({ test, site }) {
+    const st = test.stats || {};
+    const v = st.variants || { A: {}, B: {} };
+    const goal = test.goal === 'CTA' ? 'Button clicks' : 'Purchases';
+    const rows = [
+        ['Visitors', 'visitors'], ...(site ? [] : [['Opened checkout', 'checkouts']]), ['Button clicks', 'cta'],
+        ...(site ? [] : [['Purchases', 'purchases']]), [`Conversion (${goal.toLowerCase()} ÷ visitors)`, 'rate', pct],
+        ...(site ? [] : [['Revenue', 'revenue', inr]]),
+    ];
+    return (
+        <table className="adm-table lpa-ab__table" data-testid="ab-figures">
+            <thead><tr><th></th><th>A · live (v{test.control_no}){test.winner === 'A' && <> <Badge tone="green">Winner</Badge></>}</th><th>B · variant (v{test.variant_no}){test.winner === 'B' && <> <Badge tone="green">Winner</Badge></>}</th></tr></thead>
+            <tbody>
+                {rows.map(([label, k, f]) => (
+                    <tr key={k}><th scope="row">{label}</th>
+                        {['A', 'B'].map((x) => <td key={x} className={cx(k === 'rate' && st.leader === x && 'is-lead')} data-testid={`ab-${x}-${k}`}>{f ? f((v[x] || {})[k]) : Number((v[x] || {})[k] || 0).toLocaleString('en-IN')}</td>)}
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
+}
+
+function verdict(test, minVisitors) {
+    const st = test.stats || {};
+    if (!st.enough) return { tone: 'grey', text: `Collecting data: each version needs at least ${minVisitors} visitors before the figures mean much.` };
+    if (!st.leader) return { tone: 'grey', text: 'Both versions convert the same so far.' };
+    const lift = st.lift == null ? '' : ` (${st.lift > 0 ? '+' : ''}${st.lift} % for B)`;
+    if (st.confidence >= 95) return { tone: 'green', text: `${st.leader} converts better${lift}, with ${st.confidence} % confidence. Safe to decide.` };
+    return { tone: 'amber', text: `${st.leader} is ahead${lift}, but only ${st.confidence} % confident. Wait for 95 % if you can.` };
+}
+
+function AbTest({ data, caps, draftDirty, onSaved, toast }) {
+    const p = data.page;
+    const ab = data.ab || {};
+    const [name, setName] = useState('');
+    const [split, setSplit] = useState(50);
+    const [busy, setBusy] = useState(null);
+    const [errors, setErrors] = useState({});
+    const [dialog, confirm] = useConfirm();
+    const canPublish = has(caps, 'landing.publish');
+    if (!ab.ready) {
+        return <Card title="A/B test"><p className="adm-muted">Needs the database update 2026-11-14_landing_ab_tests.sql.</p></Card>;
+    }
+    const run = ab.running;
+    const post = (path, body, key) => {
+        setBusy(key); setErrors({});
+        return axios.post(`/admin/api/landing/pages/${p.id}/ab/${path}`, body)
+            .then((r) => { toast(r.data.message); onSaved(r.data.data); setName(''); })
+            .catch((e) => { setErrors((e.response && e.response.data && e.response.data.errors) || {}); toast(errorText(e), 'error'); })
+            .finally(() => setBusy(null));
+    };
+    const end = async (winner) => {
+        const text = winner === 'B'
+            ? { title: 'Make B the live page?', body: 'B is published as a new version and everyone sees it. The current live version stays in the history, so you can roll back.', confirmLabel: 'Promote B' }
+            : winner === 'A' ? { title: 'Keep the live page (A)?', body: 'The test ends and everyone sees A again. Your draft is unchanged.', confirmLabel: 'Keep A' }
+                : { title: 'Stop the test without a winner?', body: 'Everyone sees the live page (A) again.', confirmLabel: 'Stop test' };
+        if (!(await confirm(text))) return;
+        post('end', { winner }, winner);
+    };
+    const v = run && verdict(run, ab.minVisitors);
+    return (
+        <Card title="A/B test" subtitle="Try your saved draft (B) on part of the visitors while the rest see the live page (A). Each visitor always sees the same version. Promote the winner to replace the live page."
+              actions={run ? <Badge tone="blue">Running</Badge> : null} className="lpa-ab">
+            {dialog}
+            <div data-testid="ab-card">
+                {run ? (
+                    <div className="adm-stack" data-testid="ab-running">
+                        <p className="adm-muted"><b>{run.name}</b> · {100 - run.split_b} % see A, {run.split_b} % see B · started {fmtDate(run.started_at, true)}{run.started_by_name ? ` by ${run.started_by_name}` : ''}.
+                            {' '}<a href={`${p.publicUrl}?ab=A`} target="_blank" rel="noopener noreferrer">View A</a> · <a href={`${p.publicUrl}?ab=B`} target="_blank" rel="noopener noreferrer">View B</a></p>
+                        <AbFigures test={run} site={p.site} />
+                        <p className={cx('lpa-ab__verdict', `is-${v.tone}`)} data-testid="ab-verdict">{v.text}</p>
+                        {canPublish && (
+                            <div className="lpa-actions">
+                                <Button variant="brand" icon="fa-trophy" onClick={() => end('B')} busy={busy === 'B'} disabled={!!busy} data-testid="ab-promote-b">Promote B (replace live page)</Button>
+                                <Button icon="fa-check" onClick={() => end('A')} busy={busy === 'A'} disabled={!!busy} data-testid="ab-keep-a">Keep A</Button>
+                                <Button variant="ghost" onClick={() => end('none')} busy={busy === 'none'} disabled={!!busy} data-testid="ab-stop">Stop without a winner</Button>
+                            </div>
+                        )}
+                        <p className="adm-muted adm-small">While the test runs, publishing and rollbacks wait; unpublishing or archiving the page stops the test.</p>
+                    </div>
+                ) : p.status !== 'PUBLISHED' ? (
+                    <p className="adm-muted">Publish the page first: the live version is A.</p>
+                ) : !canPublish ? (
+                    <p className="adm-muted">Ask someone with publishing rights to start a test.</p>
+                ) : (
+                    <form className="adm-stack" onSubmit={(e) => { e.preventDefault(); post('start', { name, split }, 'start'); }} data-testid="ab-start-form">
+                        {draftDirty && <p className="lpa-note is-warn">Save the draft first: B is the saved draft.</p>}
+                        {!data.hasUnpublishedChanges && !draftDirty && <p className="lpa-note">The draft is the same as the live page. Change something in Sections, Design or SEO and save it to test it as B.</p>}
+                        <Field label="Test name" name="ab-name" error={errors.name} hint="What does B change? e.g. “Shorter hero, price first”.">
+                            <input id="f-ab-name" className="adm-input" maxLength={120} value={name} onChange={(e) => setName(e.target.value)} data-testid="ab-name" />
+                        </Field>
+                        <Field label={`Visitors who see B: ${split} %`} name="ab-split" error={errors.split} hint={`${100 - split} % keep seeing the live page.`}>
+                            <input id="f-ab-split" type="range" min={ab.minSplit} max={ab.maxSplit} step={5} value={split} onChange={(e) => setSplit(Number(e.target.value))} data-testid="ab-split" />
+                        </Field>
+                        {(errors.ab || errors.payments) && <p className="adm-danger" role="alert">{errors.ab || errors.payments}</p>}
+                        <div className="lpa-actions">
+                            <Button type="submit" variant="dark" icon="fa-random" busy={busy === 'start'} disabled={draftDirty || !!busy} data-testid="ab-start">Start A/B test</Button>
+                            <Button as="a" variant="ghost" icon="fa-eye" href={`/admin/landing/preview/${p.id}`} target="_blank" rel="noopener noreferrer">Preview B (the draft)</Button>
+                        </div>
+                    </form>
+                )}
+                {(ab.history || []).length > 0 && (
+                    <details className="lpa-ab__history">
+                        <summary>Earlier tests ({ab.history.length})</summary>
+                        {ab.history.map((t) => (
+                            <div key={t.id} className="lpa-ab__past">
+                                <p><b>{t.name}</b> · {fmtDate(t.started_at)} – {fmtDate(t.ended_at)} · {t.winner ? `winner ${t.winner}` : 'no winner'}{t.ended_by_name ? ` (${t.ended_by_name})` : ''}</p>
+                                <AbFigures test={t} site={p.site} />
+                            </div>
+                        ))}
+                    </details>
+                )}
+            </div>
+        </Card>
+    );
+}
+
 function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
     const p = data.page;
     const [note, setNote] = useState('');
@@ -620,6 +742,8 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
         { ok: data.course && data.course.title, text: data.course && data.course.title ? `Sells "${data.course.title}".` : 'The course is missing.' },
         { ok: !!(data.config.seo && (data.config.seo.description || (data.course && (data.course.subTitle || data.course.intro)))), text: 'Has a search description.', warn: true, step: 'seo' },
     ];
+    const abRunning = !!(data.ab && data.ab.running);
+    if (abRunning) checks.push({ ok: false, text: 'An A/B test is running: end it below (promote B or keep A) before publishing.' });
     const blocked = checks.some((c) => !c.ok && !c.warn);
     const act = async (action, body = {}) => {
         if (action === 'unpublish' && !(await confirm({ title: 'Unpublish this page?', body: `${data.page.publicUrl} stops working until you publish again.`, confirmLabel: 'Unpublish' }))) return;
@@ -697,6 +821,7 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
                     <a href={previewSrc} target="_blank" rel="noopener noreferrer" className="lpa-ext">Open the preview in a new tab <i className="fa fa-external-link" aria-hidden="true"></i></a>
                 </Card>
             </div>
+            <AbTest data={data} caps={caps} draftDirty={draftDirty} onSaved={onSaved} toast={toast} />
             <Card title="Version history" subtitle="Every publish is kept. Preview any version, or make it live again." flush>
                 <DataTable rows={data.versions || []} columns={[
                     { key: 'version_no', label: 'Version', render: (v) => <b>v{v.version_no}{String(v.id) === String(p.published_version_id) && p.status === 'PUBLISHED' ? <> <Badge tone="green">Live</Badge></> : null}</b> },
@@ -706,7 +831,7 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
                     { key: 'a', label: '', render: (v) => (
                         <span className="lpa-actions is-tight">
                             <Button as="a" size="sm" href={`/admin/landing/preview/${p.id}?version=${v.id}`} target="_blank" rel="noopener noreferrer" icon="fa-eye">Preview</Button>
-                            {canPublish && !(String(v.id) === String(p.published_version_id) && p.status === 'PUBLISHED') && <Button size="sm" icon="fa-undo" onClick={() => rollback(v)} data-testid="lp-rollback">Make live</Button>}
+                            {canPublish && !abRunning && !(String(v.id) === String(p.published_version_id) && p.status === 'PUBLISHED') && <Button size="sm" icon="fa-undo" onClick={() => rollback(v)} data-testid="lp-rollback">Make live</Button>}
                         </span>
                     ) },
                 ]} empty={<EmptyState icon="fa-history" title="Not published yet">The first publish creates version 1.</EmptyState>} />

@@ -33992,6 +33992,159 @@ function Seo({ cfg, setCfg, data, errors, canEdit }) {
 function availableMethods(payments) {
   return (payments && payments.methods || []).filter((m) => m.live);
 }
+const pct = (n) => `${Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })} %`;
+function AbFigures({ test, site }) {
+  const st = test.stats || {};
+  const v = st.variants || { A: {}, B: {} };
+  const goal = test.goal === "CTA" ? "Button clicks" : "Purchases";
+  const rows = [
+    ["Visitors", "visitors"],
+    ...site ? [] : [["Opened checkout", "checkouts"]],
+    ["Button clicks", "cta"],
+    ...site ? [] : [["Purchases", "purchases"]],
+    [`Conversion (${goal.toLowerCase()} \xF7 visitors)`, "rate", pct],
+    ...site ? [] : [["Revenue", "revenue", import_parts.inr]]
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { className: "adm-table lpa-ab__table", "data-testid": "ab-figures", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {}),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("th", { children: [
+        "A \xB7 live (v",
+        test.control_no,
+        ")",
+        test.winner === "A" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: "Winner" })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("th", { children: [
+        "B \xB7 variant (v",
+        test.variant_no,
+        ")",
+        test.winner === "B" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          " ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "green", children: "Winner" })
+        ] })
+      ] })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: rows.map(([label2, k, f]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { scope: "row", children: label2 }),
+      ["A", "B"].map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { className: (0, import_kit.cx)(k === "rate" && st.leader === x && "is-lead"), "data-testid": `ab-${x}-${k}`, children: f ? f((v[x] || {})[k]) : Number((v[x] || {})[k] || 0).toLocaleString("en-IN") }, x))
+    ] }, k)) })
+  ] });
+}
+function verdict(test, minVisitors) {
+  const st = test.stats || {};
+  if (!st.enough) return { tone: "grey", text: `Collecting data: each version needs at least ${minVisitors} visitors before the figures mean much.` };
+  if (!st.leader) return { tone: "grey", text: "Both versions convert the same so far." };
+  const lift = st.lift == null ? "" : ` (${st.lift > 0 ? "+" : ""}${st.lift} % for B)`;
+  if (st.confidence >= 95) return { tone: "green", text: `${st.leader} converts better${lift}, with ${st.confidence} % confidence. Safe to decide.` };
+  return { tone: "amber", text: `${st.leader} is ahead${lift}, but only ${st.confidence} % confident. Wait for 95 % if you can.` };
+}
+function AbTest({ data, caps, draftDirty, onSaved, toast }) {
+  const p = data.page;
+  const ab = data.ab || {};
+  const [name, setName] = (0, import_react.useState)("");
+  const [split, setSplit] = (0, import_react.useState)(50);
+  const [busy, setBusy] = (0, import_react.useState)(null);
+  const [errors, setErrors] = (0, import_react.useState)({});
+  const [dialog, confirm] = (0, import_kit.useConfirm)();
+  const canPublish = (0, import_parts.has)(caps, "landing.publish");
+  if (!ab.ready) {
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "A/B test", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Needs the database update 2026-11-14_landing_ab_tests.sql." }) });
+  }
+  const run = ab.running;
+  const post = (path, body, key) => {
+    setBusy(key);
+    setErrors({});
+    return import_axios.default.post(`/admin/api/landing/pages/${p.id}/ab/${path}`, body).then((r) => {
+      toast(r.data.message);
+      onSaved(r.data.data);
+      setName("");
+    }).catch((e) => {
+      setErrors(e.response && e.response.data && e.response.data.errors || {});
+      toast((0, import_AdminLayout.errorText)(e), "error");
+    }).finally(() => setBusy(null));
+  };
+  const end = async (winner) => {
+    const text = winner === "B" ? { title: "Make B the live page?", body: "B is published as a new version and everyone sees it. The current live version stays in the history, so you can roll back.", confirmLabel: "Promote B" } : winner === "A" ? { title: "Keep the live page (A)?", body: "The test ends and everyone sees A again. Your draft is unchanged.", confirmLabel: "Keep A" } : { title: "Stop the test without a winner?", body: "Everyone sees the live page (A) again.", confirmLabel: "Stop test" };
+    if (!await confirm(text)) return;
+    post("end", { winner }, winner);
+  };
+  const v = run && verdict(run, ab.minVisitors);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+    import_kit.Card,
+    {
+      title: "A/B test",
+      subtitle: "Try your saved draft (B) on part of the visitors while the rest see the live page (A). Each visitor always sees the same version. Promote the winner to replace the live page.",
+      actions: run ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Badge, { tone: "blue", children: "Running" }) : null,
+      className: "lpa-ab",
+      children: [
+        dialog,
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "ab-card", children: [
+          run ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adm-stack", "data-testid": "ab-running", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { className: "adm-muted", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: run.name }),
+              " \xB7 ",
+              100 - run.split_b,
+              " % see A, ",
+              run.split_b,
+              " % see B \xB7 started ",
+              (0, import_kit.fmtDate)(run.started_at, true),
+              run.started_by_name ? ` by ${run.started_by_name}` : "",
+              ".",
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `${p.publicUrl}?ab=A`, target: "_blank", rel: "noopener noreferrer", children: "View A" }),
+              " \xB7 ",
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: `${p.publicUrl}?ab=B`, target: "_blank", rel: "noopener noreferrer", children: "View B" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AbFigures, { test: run, site: p.site }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: (0, import_kit.cx)("lpa-ab__verdict", `is-${v.tone}`), "data-testid": "ab-verdict", children: v.text }),
+            canPublish && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-actions", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "brand", icon: "fa-trophy", onClick: () => end("B"), busy: busy === "B", disabled: !!busy, "data-testid": "ab-promote-b", children: "Promote B (replace live page)" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { icon: "fa-check", onClick: () => end("A"), busy: busy === "A", disabled: !!busy, "data-testid": "ab-keep-a", children: "Keep A" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { variant: "ghost", onClick: () => end("none"), busy: busy === "none", disabled: !!busy, "data-testid": "ab-stop", children: "Stop without a winner" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted adm-small", children: "While the test runs, publishing and rollbacks wait; unpublishing or archiving the page stops the test." })
+          ] }) : p.status !== "PUBLISHED" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Publish the page first: the live version is A." }) : !canPublish ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Ask someone with publishing rights to start a test." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { className: "adm-stack", onSubmit: (e) => {
+            e.preventDefault();
+            post("start", { name, split }, "start");
+          }, "data-testid": "ab-start-form", children: [
+            draftDirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "lpa-note is-warn", children: "Save the draft first: B is the saved draft." }),
+            !data.hasUnpublishedChanges && !draftDirty && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "lpa-note", children: "The draft is the same as the live page. Change something in Sections, Design or SEO and save it to test it as B." }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: "Test name", name: "ab-name", error: errors.name, hint: "What does B change? e.g. \u201CShorter hero, price first\u201D.", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-ab-name", className: "adm-input", maxLength: 120, value: name, onChange: (e) => setName(e.target.value), "data-testid": "ab-name" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_form.Field, { label: `Visitors who see B: ${split} %`, name: "ab-split", error: errors.split, hint: `${100 - split} % keep seeing the live page.`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { id: "f-ab-split", type: "range", min: ab.minSplit, max: ab.maxSplit, step: 5, value: split, onChange: (e) => setSplit(Number(e.target.value)), "data-testid": "ab-split" }) }),
+            (errors.ab || errors.payments) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-danger", role: "alert", children: errors.ab || errors.payments }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-actions", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { type: "submit", variant: "dark", icon: "fa-random", busy: busy === "start", disabled: draftDirty || !!busy, "data-testid": "ab-start", children: "Start A/B test" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", variant: "ghost", icon: "fa-eye", href: `/admin/landing/preview/${p.id}`, target: "_blank", rel: "noopener noreferrer", children: "Preview B (the draft)" })
+            ] })
+          ] }),
+          (ab.history || []).length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { className: "lpa-ab__history", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
+              "Earlier tests (",
+              ab.history.length,
+              ")"
+            ] }),
+            ab.history.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "lpa-ab__past", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: t.name }),
+                " \xB7 ",
+                (0, import_kit.fmtDate)(t.started_at),
+                " \u2013 ",
+                (0, import_kit.fmtDate)(t.ended_at),
+                " \xB7 ",
+                t.winner ? `winner ${t.winner}` : "no winner",
+                t.ended_by_name ? ` (${t.ended_by_name})` : ""
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AbFigures, { test: t, site: p.site })
+            ] }, t.id))
+          ] })
+        ] })
+      ]
+    }
+  );
+}
 function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
   const p = data.page;
   const [note, setNote] = (0, import_react.useState)("");
@@ -34012,6 +34165,8 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
     { ok: data.course && data.course.title, text: data.course && data.course.title ? `Sells "${data.course.title}".` : "The course is missing." },
     { ok: !!(data.config.seo && (data.config.seo.description || data.course && (data.course.subTitle || data.course.intro))), text: "Has a search description.", warn: true, step: "seo" }
   ];
+  const abRunning = !!(data.ab && data.ab.running);
+  if (abRunning) checks.push({ ok: false, text: "An A/B test is running: end it below (promote B or keep A) before publishing." });
   const blocked = checks.some((c) => !c.ok && !c.warn);
   const act = async (action, body = {}) => {
     if (action === "unpublish" && !await confirm({ title: "Unpublish this page?", body: `${data.page.publicUrl} stops working until you publish again.`, confirmLabel: "Unpublish" })) return;
@@ -34077,6 +34232,7 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
         ] })
       ] })
     ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AbTest, { data, caps, draftDirty, onSaved, toast }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Version history", subtitle: "Every publish is kept. Preview any version, or make it live again.", flush: true, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.DataTable, { rows: data.versions || [], columns: [
       { key: "version_no", label: "Version", render: (v) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("b", { children: [
         "v",
@@ -34091,7 +34247,7 @@ function Publish({ data, caps, draftDirty, saveDraft, onSaved, toast }) {
       { key: "note", label: "Note", render: (v) => v.note || /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "adm-muted", children: "\u2014" }) },
       { key: "a", label: "", render: (v) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { className: "lpa-actions is-tight", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { as: "a", size: "sm", href: `/admin/landing/preview/${p.id}?version=${v.id}`, target: "_blank", rel: "noopener noreferrer", icon: "fa-eye", children: "Preview" }),
-        canPublish && !(String(v.id) === String(p.published_version_id) && p.status === "PUBLISHED") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-undo", onClick: () => rollback(v), "data-testid": "lp-rollback", children: "Make live" })
+        canPublish && !abRunning && !(String(v.id) === String(p.published_version_id) && p.status === "PUBLISHED") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Button, { size: "sm", icon: "fa-undo", onClick: () => rollback(v), "data-testid": "lp-rollback", children: "Make live" })
       ] }) }
     ], empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.EmptyState, { icon: "fa-history", title: "Not published yet", children: "The first publish creates version 1." }) }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_kit.Card, { title: "Activity", subtitle: "Who changed what on this page (from the audit log).", children: (data.history || []).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "adm-muted", children: "Nothing yet." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { className: "lpa-activity", children: data.history.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [

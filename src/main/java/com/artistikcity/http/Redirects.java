@@ -38,10 +38,15 @@ public class Redirects {
         return to(request, previous(request));
     }
 
-    /** URL of the previous page (Referer), falling back to the home page. */
+    /** Forms posted to the address of their own page: without a Referer, go back to that page (not the home page). */
+    private static final java.util.Set<String> SELF_FORMS = java.util.Set.of("/admin/login", "/login", "/register", "/join", "/forgot-password");
+
+    /** URL of the previous page (Referer), falling back to the form's own page or the home page. */
     public static String previous(HttpServletRequest request) {
         String ref = request.getHeader("Referer");
-        return ref == null || ref.isBlank() ? "/" : ref;
+        if (ref != null && !ref.isBlank()) return ref;
+        String path = request.getRequestURI();
+        return path != null && SELF_FORMS.contains(path) ? path : "/";
     }
 
     /** Flash a value then redirect to a named route (->route(...)->with(key, value)). */
