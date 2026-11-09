@@ -7,6 +7,11 @@
 #            health check, automatic rollback to the previous image if the new one is not healthy. Then a public
 #            health check through CloudFront.
 #
+#    go-live only when the commit contains deploy/go-live.request (docs/GO-LIVE.md): the one-time go-live reset of
+#            production (final RDS snapshot first, then 1 super admin + 1 student + 6 sample courses, uploads archived,
+#            older snapshots / backups deleted). Each REQUEST_ID runs once; later pushes say "already done".
+#            Needs the secrets GO_LIVE_ADMIN_HASH and GO_LIVE_STUDENT_HASH (bcrypt, made with HASH-PASSWORD.bat).
+#
 #  Manual runs (Actions > Deploy to AWS > Run workflow):
 #    * rollback = true          go back to the version that ran before the current one (no build)
 #    * image_tag = <git sha>    deploy an image built earlier (e.g. a known good commit), no build
@@ -110,6 +115,37 @@ jobs:
             echo "$path -> $code"
             [ "$code" = 200 ] || { tail -n 100 app.log; exit 1; }
           done
+
+      - name: Go-live request - check it before anything is built (only when deploy/go-live.request is committed)
+        if: hashFiles('deploy/go-live.request') != ''
+        env:
+          CHECK_ONLY: 'true'
+          ADMIN_HASH: ${{ secrets.GO_LIVE_ADMIN_HASH }}
+          STUDENT_HASH: ${{ secrets.GO_LIVE_STUDENT_HASH }}
+        run: bash deploy/go-live-pipeline.sh
+
+      - name: Go-live reset - rehearsal on this test database (1 admin, 1 student, 6 courses; a second run changes nothing)
+        env:
+          DB_HOST: 127.0.0.1
+          DB_NAME: artistikcity
+          DB_USER: root
+          MYSQL_PWD: ci-root-password
+          DB_SSL_MODE: REQUIRED
+          REQUEST_ID: ci-rehearsal
+          ADMIN_EMAIL: admin@artistikcity.com
+          ADMIN_NAME: ArtistikCity
+          STUDENT_EMAIL: student@artistikcity.com
+          # a throw-away hash for this test only (not a real account anywhere)
+          ADMIN_HASH: $2y$12$hHwrjyfz/EamKp7w9uJH8uhsaYQQpzQknWz0eacebN8WyYwDrP/1C
+          STUDENT_HASH: $2y$12$hHwrjyfz/EamKp7w9uJH8uhsaYQQpzQknWz0eacebN8WyYwDrP/1C
+        run: |
+          MODE=reset bash deploy/go-live-db.sh | grep -v '^[|+]'
+          MODE=reset bash deploy/go-live-db.sh | tee second.txt
+          grep -q '^ALREADY_DONE' second.txt
+          q() { mysql -h 127.0.0.1 -u root --ssl-mode=REQUIRED -N -e "$1" artistikcity; }
+          [ "$(q 'select count(*) from admins')" = 1 ] && [ "$(q 'select count(*) from users')" = 1 ]
+          [ "$(q 'select count(*) from courses where status = 1')" = 6 ] && [ "$(q 'select count(*) from orders')" = 0 ]
+          echo "go-live rehearsal ok"
 
       - name: App log
         if: failure()
@@ -248,3 +284,38 @@ jobs:
             echo ""
             echo "To undo: Actions > Deploy to AWS > Run workflow > tick **rollback**."
           } >> "$GITHUB_STEP_SUMMARY"
+
+  go-live:
+    name: Go-live reset (only with deploy/go-live.request)
+    needs: deploy
+    if: needs.deploy.result == 'success' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment:
+      name: production
+      url: https://${{ vars.SITE_DOMAIN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Is there a go-live request?
+        id: req
+        run: |
+          if [ -f deploy/go-live.request ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; echo "No deploy/go-live.request: nothing to do."; fi
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: steps.req.outputs.present == 'true'
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Go-live reset (final snapshot, database, files, old snapshots and backups)
+        if: steps.req.outputs.present == 'true'
+        env:
+          INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          SITE_DOMAIN: ${{ vars.SITE_DOMAIN }}
+          DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+          STACK: ${{ vars.STACK_NAME || 'artistikcity' }}
+          ADMIN_HASH: ${{ secrets.GO_LIVE_ADMIN_HASH }}
+          STUDENT_HASH: ${{ secrets.GO_LIVE_STUDENT_HASH }}
+        run: bash deploy/go-live-pipeline.sh
