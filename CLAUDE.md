@@ -246,7 +246,10 @@ storage-private/ paid download files (git-ignored, never served directly; S3 key
   C. See it on your wall (summary; switches the picture to the first room), kept in the address hash (`#size|frame|wall`). The picture is a
   carousel (`ArtPreview`): arrows, swipe, arrow keys, "2 of 6", thumbnails, and a "person for scale" switch in rooms measured in inches. The artwork page's "On a wall" tab uses the same component. `RoomStage.js` / `rooms.js` are no longer used.
 - **AWS** (docs/AWS-DEPLOY.md): CloudFront → EC2 (Docker) + RDS + S3, `infra/*.yml` (CloudFormation), `.github/workflows/deploy.yml`,
-  `deploy/ec2-deploy.sh` (deploy/rollback/status, runs from inside the image) and `deploy/db-migrate.sh` (schema on an empty
+  `deploy/ec2-deploy.sh` (deploy/rollback/status, runs from inside the image; every deploy installs the systemd timer
+  `artistikcity-db-refresh` (2 min) = `--refresh-db-credentials`: the RDS-managed DB password rotates every 7 days and the container only
+  reads it at start, so the timer rewrites `DB_USERNAME/DB_PASSWORD` in `app.env` and restarts the same image when the secret changed;
+  deploy, go-live and refresh share the flock `state/lock`) and `deploy/db-migrate.sh` (schema on an empty
   DB, else pending migrations - same rules as the launcher). `http/CloudFrontFilter` (`TRUST_CLOUDFRONT`) takes the visitor IP and
   https from CloudFront headers and rejects requests without `X-Origin-Verify`. `GET /healthz` is the health check.
   `http/PreviewLockFilter` ("Site under construction" wall): on when `SITE_PREVIEW_PASSWORD` is set on the server **or** when an

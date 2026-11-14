@@ -5,6 +5,11 @@
 #    ec2-deploy.sh <image-uri>        deploy that image (e.g. 1234.dkr.ecr.ap-south-1.amazonaws.com/artistikcity:<git-sha>)
 #    ec2-deploy.sh --rollback         go back to the image that ran before the current one
 #    ec2-deploy.sh --status           show what is running
+#    ec2-deploy.sh --refresh-db-credentials
+#                                     run every 2 minutes by the systemd timer artistikcity-db-refresh (installed by every
+#                                     deploy): when RDS has rotated the database password (the RDS-managed secret rotates
+#                                     every 7 days), put the new one in app.env and restart the site with the same image.
+#                                     Does nothing when the password is unchanged or a deploy is running.
 #    ec2-deploy.sh --go-live-status <request-id>   GO_LIVE_DONE=<id> when that go-live reset was already made
 #    ec2-deploy.sh --go-live <s3-key>  the go-live reset (docs/GO-LIVE.md), started by the GitHub pipeline after it took the
 #                                      final RDS snapshot: reads the request (bcrypt hashes, no passwords) from
@@ -30,6 +35,7 @@ NAME=artistikcity
 HOST_PORT="${HOST_PORT:-80}"
 HEALTH_URL="http://127.0.0.1:${HOST_PORT}/healthz"
 HEALTH_TRIES="${HEALTH_TRIES:-60}"      # x 3 s
+SYSTEMD_DIR="${SYSTEMD_DIR:-/etc/systemd/system}"
 MYSQL_IMAGE="${MYSQL_IMAGE:-public.ecr.aws/docker/library/mysql:8.4}"   # Docker Hub mirror without pull limits
 
 log() { echo "[$(date -u +%H:%M:%S)] $*"; }
@@ -201,6 +207,7 @@ go_live_status() {   # $1 = request id
 
 go_live() {   # $1 = S3 key of the request (private/go-live/<id>.env)
   local key="${1:-}" work req env out id archive p
+  take_lock wait
   [[ "$key" =~ ^private/go-live/[A-Za-z0-9._-]{1,40}\.env$ ]] || die "usage: $0 --go-live private/go-live/<request-id>.env"
   work="$(golive_work)"; req="$work/request.env"; env="$work/reset.env"
   ( umask 077; aws s3 cp --region "$AWS_REGION" --only-show-errors "s3://$S3_BUCKET/$key" "$req" ) || { rm -rf "$work"; die "request s3://$S3_BUCKET/$key not found"; }
@@ -244,9 +251,80 @@ go_live() {   # $1 = S3 key of the request (private/go-live/<id>.env)
   echo "GO_LIVE_RESET_OK=$id"
 }
 
+# ---------------------------------------------------------------- database password rotation
+# One lock for deploy and refresh, so the timer never restarts the site in the middle of a deploy.
+take_lock() {   # $1 = "wait" (deploy) or "try" (timer: skip this round when busy)
+  exec 9>"$STATE/lock"
+  if [ "$1" = wait ]; then flock 9; else flock -n 9 || exit 0; fi
+}
+
+refresh_db_credentials() {
+  take_lock try
+  local image creds user pass
+  image="$(current_image)"
+  [ -n "$image" ] && [ -f "$BASE/app.env" ] || exit 0
+  creds="$(db_credentials 2>/dev/null)" || { log "could not read the database secret; trying again next round"; exit 0; }
+  user="${creds%%$'\t'*}"; pass="${creds#*$'\t'}"
+  [ -n "$user" ] && [ -n "$pass" ] || exit 0
+  # compare and rewrite in Python: the password may hold characters that sed and grep would treat specially
+  if NEW_USER="$user" NEW_PASS="$pass" python3 - "$BASE/app.env" <<'PY'
+import os, sys
+path = sys.argv[1]
+lines = open(path).read().splitlines()
+old = dict(l.split("=", 1) for l in lines if "=" in l)
+if old.get("DB_USERNAME") == os.environ["NEW_USER"] and old.get("DB_PASSWORD") == os.environ["NEW_PASS"]:
+    sys.exit(1)   # unchanged
+out = []
+for l in lines:
+    if l.startswith("DB_USERNAME="): l = "DB_USERNAME=" + os.environ["NEW_USER"]
+    elif l.startswith("DB_PASSWORD="): l = "DB_PASSWORD=" + os.environ["NEW_PASS"]
+    out.append(l)
+tmp = path + ".refresh"
+with open(tmp, "w") as f: f.write("\n".join(out) + "\n")
+os.chmod(tmp, 0o600)
+os.replace(tmp, path)
+PY
+  then
+    log "the database password was rotated: restarting the site with the new one ($image)"
+    start_container "$image"
+    if healthy; then log "OK - the site is back with the new database password"; else
+      log "WARNING: the site is not healthy after the password refresh; last log lines:"; docker logs --tail 40 "$NAME" 2>&1 || true; exit 1
+    fi
+  fi
+}
+
+install_refresh_timer() {   # idempotent; failures here never fail a deploy
+  command -v systemctl >/dev/null 2>&1 || return 0
+  local svc="$SYSTEMD_DIR/artistikcity-db-refresh.service" tim="$SYSTEMD_DIR/artistikcity-db-refresh.timer" changed=0 want
+  want="[Unit]
+Description=ArtistikCity: pick up a rotated database password
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=$BASE/ec2-deploy.sh --refresh-db-credentials
+"
+  if [ "$(cat "$svc" 2>/dev/null)" != "$(printf "%s" "$want")" ]; then printf '%s' "$want" > "$svc"; changed=1; fi
+  want="[Unit]
+Description=ArtistikCity: check the database password every 2 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+AccuracySec=15s
+
+[Install]
+WantedBy=timers.target
+"
+  if [ "$(cat "$tim" 2>/dev/null)" != "$(printf "%s" "$want")" ]; then printf '%s' "$want" > "$tim"; changed=1; fi
+  if [ "$changed" = 1 ]; then systemctl daemon-reload || true; fi
+  systemctl enable --now artistikcity-db-refresh.timer >/dev/null 2>&1 || log "WARNING: could not enable the database password timer"
+}
+
 # ---------------------------------------------------------------- commands
 deploy() {   # $1 = image, $2 = "migrate" or "skip-migrations"
   local image="$1" previous
+  take_lock wait
   previous="$(current_image)"
   log "deploying $image (now running: ${previous:-nothing})"
 
@@ -272,6 +350,7 @@ deploy() {   # $1 = image, $2 = "migrate" or "skip-migrations"
     if [ -n "$previous" ] && [ "$previous" != "$image" ]; then echo "$previous" >> "$STATE/history"; fi
     echo "$image" > "$STATE/current"
     prune_images
+    install_refresh_timer
     log "OK - $image is live"
     return 0
   fi
@@ -299,12 +378,14 @@ case "${1:-}" in
     sed -i '$ d' "$STATE/history"
     deploy "$prev" skip-migrations      # the image we leave becomes "previous", so a second --rollback undoes this one
     ;;
+  --refresh-db-credentials)
+    refresh_db_credentials ;;
   --go-live-status)
     go_live_status "${2:-}" ;;
   --go-live)
     go_live "${2:-}" ;;
   ""|-*)
-    die "usage: $0 <image-uri> | --rollback | --status | --go-live-status <id> | --go-live <s3-key>" ;;
+    die "usage: $0 <image-uri> | --rollback | --status | --refresh-db-credentials | --go-live-status <id> | --go-live <s3-key>" ;;
   *)
     deploy "$1" "${MIGRATE:-migrate}" ;;
 esac

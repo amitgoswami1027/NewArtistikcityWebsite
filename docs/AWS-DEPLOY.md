@@ -318,6 +318,7 @@ Or let the pipeline do it: update the stack once (step 3's command, no overrides
 | Database backups | automatic daily (7 days); manual snapshot in the RDS console before big changes |
 | Bigger server / database | change `InstanceType` / `DbInstanceClass` and re-run step 3 (the server is replaced; the next deploy brings the app back - re-run the last workflow) |
 | New secret value | `Set-AppSetting NAME value`, then re-run the last deploy |
+| Database password rotation | Automatic. RDS changes the database password every 7 days (Secrets Manager). A timer on the server (`artistikcity-db-refresh`, every 2 minutes, installed by each deploy) notices the new password and restarts the site with it: at most about 2 minutes of errors, nothing to do. Check it on the server with `systemctl list-timers artistikcity-db-refresh.timer` and `journalctl -u artistikcity-db-refresh -n 20`. |
 | Rotate the CloudFront secret | Secrets Manager → `artistikcity/origin-verify` → new value, re-run step 3 (updates CloudFront), then re-run the last deploy |
 
 ## Troubleshooting
@@ -325,6 +326,7 @@ Or let the pipeline do it: update the stack once (step 3's command, no overrides
 | Symptom | Likely cause / fix |
 |---|---|
 | Every page is **403** | The server's `ORIGIN_VERIFY_SECRET` differs from CloudFront's header (secret changed without redeploying). Re-run the last deploy. |
+| Pages hang, then error; `/healthz` says `"db":"DOWN"` while RDS is `available` | The server is using an old database password. Normally the refresh timer fixes this within 2 minutes; if the server was deployed before that timer existed (before 14 Nov 2026), re-run the last deploy once. |
 | **502 / 504** from CloudFront | The app isn't running or is still starting. Check the log; `--status` on the server. |
 | Images **403/404** | File not in the bucket under `storage/...` (step 7.4), or the bucket policy was changed. |
 | Error 500 with **"Illegal mix of collations"** in the log (e.g. on `/admin/landing`) | Tables imported from your PC use a different collation than tables created on RDS later. Deploy a release with `2026-11-10_landing_collation.sql` (it runs automatically) or apply it by hand (below). |
